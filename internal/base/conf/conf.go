@@ -9,6 +9,8 @@ type Config struct {
 	Http *Http `yaml:"http"`
 
 	Debug *Debug `yaml:"debug"`
+
+	Database *Database `yaml:"database"`
 }
 
 type Http struct {
@@ -18,6 +20,15 @@ type Http struct {
 
 type Debug struct {
 	Enabled bool `yaml:"enabled"`
+}
+
+type Database struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Name     string `yaml:"name"`
+	SslMode  string `yaml:"sslmode"`
 }
 
 func CreateConfigIfNotExists() {

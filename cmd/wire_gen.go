@@ -12,6 +12,7 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/logger"
+	"rag-new/internal/orm"
 	"rag-new/internal/router"
 	"rag-new/internal/server"
 )
@@ -24,10 +25,14 @@ func CreateApp() (*base.Application, error) {
 	api := router.NewApiRoute(userController)
 	loggerLogger := logger.NewZapLogger()
 	engine := server.NewHTTPServer(api, config, loggerLogger)
-	application := base.NewApplication(config, engine, loggerLogger)
+	xormEngine, err := orm.NewXORM(config)
+	if err != nil {
+		return nil, err
+	}
+	application := base.NewApplication(config, engine, loggerLogger, xormEngine)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, v1.ProviderApiControllerSet, logger.NewZapLogger, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

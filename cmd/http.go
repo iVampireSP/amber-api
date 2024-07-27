@@ -11,9 +11,7 @@ func init() {
 }
 
 var httpCmd = &cobra.Command{
-	Use:   "http",
-	Short: "http",
-	Long:  "http",
+	Use: "http",
 	Run: func(cmd *cobra.Command, args []string) {
 		conf.CreateConfigIfNotExists()
 		initHttpServer()

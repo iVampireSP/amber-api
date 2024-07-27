@@ -5,9 +5,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "rag",
-	Short: "rag",
-	Long:  "rag",
+	Use: "rag",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Help()
 		if err != nil {

@@ -36,7 +36,7 @@ func initHttpServer() {
 	}
 
 	var addr = app.Config.Http.Host + ":" + strconv.Itoa(app.Config.Http.Port)
-	app.Logger.Logger.Info("Listening and serving HTTP on", addr)
+	app.Logger.Logger.Info("Listening and serving HTTP on ", addr)
 
 	err = app.Gin.Run(addr)
 	if err != nil {

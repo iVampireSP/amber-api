@@ -7,15 +7,17 @@ import (
 )
 
 type Middleware struct {
-	GinLogger   *GinLoggerMiddleware
-	Auth        *AuthMiddleware
-	AuthService *auth.Service
+	GinLogger    *GinLoggerMiddleware
+	Auth         *AuthMiddleware
+	AuthService  *auth.Service
+	JSONResponse *JSONResponseMiddleware
 }
 
 func NewMiddleware(logger *logger.Logger, authService *auth.Service) *Middleware {
 	return &Middleware{
-		GinLogger: NewGinLoggerMiddleware(logger.Logger),
-		Auth:      NewAuthMiddleware(authService),
+		GinLogger:    NewGinLoggerMiddleware(logger.Logger),
+		Auth:         NewAuthMiddleware(authService),
+		JSONResponse: NewJSONResponseMiddleware(),
 	}
 }
 

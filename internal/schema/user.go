@@ -7,7 +7,7 @@ type UserTokenInfo struct {
 	Iss              string    `json:"iss"`
 	Iat              float64   `json:"iat"`
 	Exp              float64   `json:"exp"`
-	Sub              string    `json:"sub"`
+	Sub              UserId    `json:"sub"`
 	Scopes           []string  `json:"scopes"`
 	Id               int       `json:"id"`
 	Uuid             string    `json:"uuid"`
@@ -25,6 +25,8 @@ type User struct {
 	Token UserTokenInfo
 	Valid bool
 }
+
+type UserId int64
 
 type JWTTokenTypes string
 

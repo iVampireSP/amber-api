@@ -6,7 +6,7 @@ definitions:
       userEmail:
         type: string
       userId:
-        type: string
+        type: integer
       valid:
         type: boolean
     type: object
@@ -38,9 +38,7 @@ paths:
             - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
-                  type: array
+                  $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
               type: object
         "400":
           description: Bad Request
@@ -54,6 +52,35 @@ paths:
       summary: Greet
       tags:
       - ping
+  /api/v1/tools:
+    get:
+      consumes:
+      - application/json
+      description: List tools
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+              type: object
+      summary: List Tool
+      tags:
+      - tool
 securityDefinitions:
   ApiKeyAuth:
     in: header

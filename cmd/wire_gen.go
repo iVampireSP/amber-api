@@ -19,6 +19,7 @@ import (
 	"rag-new/internal/service"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/jwks"
+	"rag-new/internal/service/tool"
 )
 
 // Injectors from wire.go:
@@ -29,16 +30,18 @@ func CreateApp() (*base.Application, error) {
 	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
 	authService := auth.NewAuthService(config, jwksJWKS, loggerLogger)
 	userController := v1.NewUserController(authService)
-	api := router.NewApiRoute(userController)
-	swaggerRouter := router.NewSwaggerRoute()
-	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
-	engine := server.NewHTTPServer(api, swaggerRouter, config, middlewareMiddleware)
-	xormEngine, err := orm.NewXORM(config, loggerLogger)
+	engine, err := orm.NewXORM(config, loggerLogger)
 	if err != nil {
 		return nil, err
 	}
-	serviceService := service.NewService(jwksJWKS, authService, loggerLogger)
-	application := base.NewApplication(config, engine, loggerLogger, xormEngine, serviceService, middlewareMiddleware)
+	toolService := tool.NewService(engine)
+	toolController := v1.NewToolController(toolService, authService)
+	api := router.NewApiRoute(userController, toolController)
+	swaggerRouter := router.NewSwaggerRoute()
+	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
+	ginEngine := server.NewHTTPServer(api, swaggerRouter, config, middlewareMiddleware)
+	serviceService := service.NewService(jwksJWKS, authService, loggerLogger, toolService)
+	application := base.NewApplication(config, ginEngine, loggerLogger, engine, serviceService, middlewareMiddleware)
 	return application, nil
 }
 

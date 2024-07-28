@@ -9,6 +9,7 @@ import (
 	"rag-new/internal/schema"
 	"rag-new/internal/service/jwks"
 	"rag-new/pkg/consts"
+	"strconv"
 	"strings"
 )
 
@@ -54,10 +55,18 @@ func (a *Service) GinMiddlewareAuth(tokenType schema.JWTTokenTypes, c *gin.Conte
 		if err != nil {
 			return nil, consts.ErrNotValidToken
 		}
-		sub, err = token.Claims.GetSubject()
+
+		subStr, err := token.Claims.GetSubject()
 		if err != nil {
 			return nil, consts.ErrNotValidToken
 		}
+
+		subInt, err := strconv.Atoi(subStr)
+		if err != nil {
+			return nil, consts.ErrNotValidToken
+		}
+
+		sub = schema.UserId(subInt)
 
 		// 如果 token.Header 中没有 typ
 		if token.Header["typ"] == "" {
@@ -87,7 +96,7 @@ func (a *Service) GinUser(c *gin.Context) *schema.User {
 	return user.(*schema.User)
 }
 
-func (a *Service) GetUserId(ctx context.Context) string {
+func (a *Service) GetUserId(ctx context.Context) schema.UserId {
 	user := a.GetUser(ctx)
 
 	return user.Token.Sub

@@ -1,12 +1,15 @@
 package consts
 
-import "errors"
+import (
+	"errors"
+	"rag-new/internal/schema"
+)
 
 const (
 	AuthHeader = "Authorization"
 	AuthPrefix = "Bearer"
 
-	AnonymousUser = "anonymous"
+	AnonymousUser schema.UserId = 1
 
 	AuthMiddlewareKey = "auth.user"
 )

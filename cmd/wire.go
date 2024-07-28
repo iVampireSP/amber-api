@@ -9,6 +9,7 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/logger"
+	"rag-new/internal/middleware"
 	"rag-new/internal/orm"
 	"rag-new/internal/router"
 	"rag-new/internal/server"
@@ -19,6 +20,7 @@ var ProviderSet = wire.NewSet(
 	conf.ProviderConfig,
 	logger.NewZapLogger,
 	orm.NewXORM,
+	middleware.Provider,
 	services.Provider,
 	v1.ProviderApiControllerSet,
 	router.ProviderSetRouter,

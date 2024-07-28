@@ -3,7 +3,6 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"rag-new/internal/base/conf"
-	"rag-new/internal/logger"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 )
@@ -12,7 +11,7 @@ import (
 func NewHTTPServer(
 	apiRouter *router.Api,
 	config *conf.Config,
-	logger *logger.Logger,
+	middleware *middleware.Middleware,
 ) *gin.Engine {
 	if config.Debug.Enabled {
 		gin.SetMode(gin.DebugMode)
@@ -22,7 +21,7 @@ func NewHTTPServer(
 
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(middleware.GinLogger(logger.Logger.Desugar()))
+	r.Use(middleware.GinLogger.GinLogger())
 
 	r.GET("/healthz", func(ctx *gin.Context) { ctx.String(200, "OK") })
 

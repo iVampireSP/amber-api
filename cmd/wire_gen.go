@@ -12,6 +12,7 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/logger"
+	"rag-new/internal/middleware"
 	"rag-new/internal/orm"
 	"rag-new/internal/router"
 	"rag-new/internal/server"
@@ -27,7 +28,8 @@ func CreateApp() (*base.Application, error) {
 	userController := v1.NewUserController()
 	api := router.NewApiRoute(userController)
 	loggerLogger := logger.NewZapLogger()
-	engine := server.NewHTTPServer(api, config, loggerLogger)
+	middlewareMiddleware := middleware.NewMiddleware(loggerLogger)
+	engine := server.NewHTTPServer(api, config, middlewareMiddleware)
 	xormEngine, err := orm.NewXORM(config)
 	if err != nil {
 		return nil, err
@@ -35,10 +37,10 @@ func CreateApp() (*base.Application, error) {
 	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
 	service := auth.NewAuthService(config, jwksJWKS, loggerLogger)
 	servicesService := services.NewService(jwksJWKS, service, loggerLogger)
-	application := base.NewApplication(config, engine, loggerLogger, xormEngine, servicesService)
+	application := base.NewApplication(config, engine, loggerLogger, xormEngine, servicesService, middlewareMiddleware)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, services.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, middleware.Provider, services.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"encoding/json"
+	"github.com/bytedance/sonic"
 	"rag-new/internal/schema"
 )
 
@@ -37,9 +37,9 @@ type ToolData struct {
 }
 
 func (td *ToolData) FromDB(data []byte) error {
-	return json.Unmarshal(data, td)
+	return sonic.Unmarshal(data, &td)
 }
 
 func (td *ToolData) ToDB() ([]byte, error) {
-	return json.Marshal(td)
+	return sonic.Marshal(&td)
 }

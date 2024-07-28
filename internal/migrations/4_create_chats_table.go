@@ -7,23 +7,22 @@ import (
 
 func init() {
 	migrations = append(migrations, &migrate.Migration{
-		ID: "2",
+		ID: "4",
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
-CREATE TABLE "public"."assistants" (
+CREATE TABLE "public"."chats" (
   "id" bigserial PRIMARY KEY ,
   "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "description" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "user_id" bigint NOT NULL,
+  "assistant_id" int8 NOT NULL,
+  "user_id" int8 NOT NULL,
   "created_at" timestamp(0),
-  "updated_at" timestamp(0),
-  "prompt" text COLLATE "pg_catalog"."default" NOT NULL
+  "updated_at" timestamp(0)
 );
 
-CREATE INDEX "assistants_user_id_index" ON "public"."assistants" USING btree (
+CREATE INDEX "chats_assistant_id_user_id_index" ON "public"."chats" USING btree (
+  "assistant_id" "pg_catalog"."int8_ops" ASC NULLS LAST,
   "user_id" "pg_catalog"."int8_ops" ASC NULLS LAST
 );
-
 
 `
 
@@ -36,7 +35,7 @@ CREATE INDEX "assistants_user_id_index" ON "public"."assistants" USING btree (
 		},
 		Rollback: func(tx *xorm.Engine) error {
 			// drop table
-			_, err := tx.Exec("DROP TABLE IF EXISTS assistants;")
+			_, err := tx.Exec("DROP TABLE IF EXISTS chats;")
 			if err != nil {
 				return err
 			}

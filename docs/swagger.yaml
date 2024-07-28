@@ -1,4 +1,25 @@
 definitions:
+  rag-new_internal_entity.Tool:
+    properties:
+      api_key:
+        type: string
+      created_at:
+        type: string
+      data:
+        $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutput'
+      description:
+        type: string
+      discovery_url:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
   rag-new_internal_schema.CurrentUserResponse:
     properties:
       ip:
@@ -18,6 +39,65 @@ definitions:
       error:
         type: string
       message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  rag-new_internal_schema.ToolCreateRequest:
+    properties:
+      api_key:
+        maxLength: 255
+        type: string
+      description:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      url:
+        maxLength: 255
+        type: string
+    required:
+    - description
+    - name
+    - url
+    type: object
+  rag-new_internal_schema.ToolDiscoveryOutput:
+    properties:
+      callback_url:
+        type: string
+      description:
+        type: string
+      function:
+        items:
+          $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctions'
+        type: array
+      homepage_url:
+        type: string
+      name:
+        type: string
+      tool_id:
+        type: integer
+    type: object
+  rag-new_internal_schema.ToolDiscoveryOutputFunction:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      parameters: {}
+      required:
+        items:
+          type: string
+        type: array
+    type: object
+  rag-new_internal_schema.ToolDiscoveryOutputFunctions:
+    properties:
+      function:
+        items:
+          $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunction'
+        type: array
+      type:
         type: string
     type: object
 info:
@@ -79,6 +159,121 @@ paths:
                   $ref: '#/definitions/rag-new_internal_schema.EmptyData'
               type: object
       summary: List Tool
+      tags:
+      - tool
+    post:
+      consumes:
+      - application/json
+      description: Create tool
+      parameters:
+      - description: Tool
+        in: body
+        name: tool
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ToolCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.Tool'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+              type: object
+      summary: Create Tool
+      tags:
+      - tool
+  /api/v1/tools/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: DeleteTool tool
+      parameters:
+      - description: Tool ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+              type: object
+      summary: DeleteTool Tool
+      tags:
+      - tool
+    get:
+      consumes:
+      - application/json
+      description: Get tool
+      parameters:
+      - description: Tool ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.Tool'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+              type: object
+      summary: Get Tool
       tags:
       - tool
 securityDefinitions:

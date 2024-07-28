@@ -2,10 +2,13 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
+	_ "rag-new/internal/entity" // 需要保留这行，否则 swag go 解析有问题
 	"rag-new/internal/schema"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/tool"
 	"rag-new/pkg/consts"
+	"strconv"
 )
 
 type ToolController struct {
@@ -76,4 +79,84 @@ func (t *ToolController) CreateTool(c *gin.Context) {
 	}
 
 	schema.NewResponse(c).Data(&toolEntity).Send()
+}
+
+// GetTool godoc
+// @Summary      Get Tool
+// @Description  Get tool
+// @Tags         tool
+// @Accept       json
+// @Produce      json
+// @Param        id  path  string  true  "Tool ID"
+// @Success      200  {object}  schema.ResponseBody{data=entity.Tool}
+// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Failure      404  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Router       /api/v1/tools/{id} [get]
+func (t *ToolController) GetTool(c *gin.Context) {
+	toolId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	getTool, err := t.toolService.GetTool(c, int64(toolId))
+	if err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	if getTool.ID == consts.NoRecord {
+		schema.NewResponse(c).Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
+		return
+	}
+
+	if getTool.UserId != t.authService.GetUserId(c) {
+		schema.NewResponse(c).Error(consts.ErrToolNotYours).Send()
+		return
+	}
+
+	schema.NewResponse(c).Data(getTool).Send()
+}
+
+// DeleteTool godoc
+// @Summary      DeleteTool Tool
+// @Description  DeleteTool tool
+// @Tags         tool
+// @Accept       json
+// @Produce      json
+// @Param        id  path  string  true  "Tool ID"
+// @Success      200  {object}  nil
+// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Failure      404  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Router       /api/v1/tools/{id} [delete]
+func (t *ToolController) DeleteTool(c *gin.Context) {
+	toolId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	getTool, err := t.toolService.GetTool(c, int64(toolId))
+	if err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	if getTool.ID == consts.NoRecord {
+		schema.NewResponse(c).Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
+		return
+	}
+
+	if getTool.UserId != t.authService.GetUserId(c) {
+		schema.NewResponse(c).Error(consts.ErrToolNotYours).Send()
+		return
+	}
+
+	err = t.toolService.DeleteTool(c, int64(toolId))
+	if err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	schema.NewResponse(c).Status(http.StatusNoContent).Send()
 }

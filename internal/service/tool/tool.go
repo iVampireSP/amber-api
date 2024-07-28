@@ -2,11 +2,12 @@ package tool
 
 import (
 	"context"
-	"github.com/bytedance/sonic"
 	"io"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+
+	"github.com/bytedance/sonic"
 )
 
 func (s *Service) ListToolFromUserId(ctx context.Context, userId schema.UserId) ([]*entity.Tool, error) {
@@ -24,7 +25,7 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 	var toolData schema.ToolDiscoveryInput
 
 	// map to entity
-	toolEntity.UserID = userId
+	toolEntity.UserId = userId
 
 	toolEntity.Name = tool.Name
 	toolEntity.Description = tool.Description
@@ -70,10 +71,10 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 	return &toolEntity, err
 }
 
-//func (s *Service) DeleteTool(ctx context.Context, id schema.ToolId) error {
-//	_, err := s.x.Context(ctx).ID(id).Delete(&entity.Tool{})
-//	return err
-//}
+func (s *Service) DeleteTool(ctx context.Context, id int64) error {
+	_, err := s.x.Context(ctx).ID(id).Delete(&entity.Tool{})
+	return err
+}
 
 //func (s *Service) UpdateTool(ctx context.Context, id schema.ToolId, tool *schema.ToolUpdateRequest) error {
 //	_, err := s.x.Context(ctx).ID(id).AllCols().Update(tool)
@@ -82,7 +83,7 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 
 func (s *Service) GetTool(ctx context.Context, id int64) (*entity.Tool, error) {
 	var tool entity.Tool
-	_, err := s.x.Context(ctx).Get(&tool, id)
+	_, err := s.x.Context(ctx).Where("id = ?", id).Get(&tool)
 	return &tool, err
 }
 

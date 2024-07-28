@@ -11,7 +11,7 @@ type Tool struct {
 	DiscoveryUrl string                     `xorm:"varchar(255) notnull" json:"discovery_url"`
 	ApiKey       string                     `xorm:"varchar(255) notnull" json:"api_key"`
 	Data         schema.ToolDiscoveryOutput `xorm:"json" json:"data"`
-	UserID       schema.UserId              `xorm:"user_id int(11) notnull" json:"user_id"`
+	UserId       schema.UserId              `xorm:"user_id int(11) notnull" json:"user_id"`
 }
 
 func (t *Tool) TableName() string {

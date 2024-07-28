@@ -24,4 +24,6 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 	r.GET("/tools", a.Tool.List)
 	r.POST("/tools", a.Tool.CreateTool)
+	r.GET("/tools/:id", a.Tool.GetTool)
+	r.DELETE("/tools/:id", a.Tool.DeleteTool)
 }

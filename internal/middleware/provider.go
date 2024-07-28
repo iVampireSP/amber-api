@@ -14,7 +14,7 @@ type Middleware struct {
 
 func NewMiddleware(logger *logger.Logger, authService *auth.Service) *Middleware {
 	return &Middleware{
-		GinLogger: NewGinLoggerMiddleware(logger.Logger.Desugar()),
+		GinLogger: NewGinLoggerMiddleware(logger.Logger),
 		Auth:      NewAuthMiddleware(authService),
 	}
 }

@@ -3,7 +3,8 @@ package logger
 import "go.uber.org/zap"
 
 type Logger struct {
-	Logger *zap.SugaredLogger
+	Sugar  *zap.SugaredLogger
+	Logger *zap.Logger
 }
 
 func NewZapLogger() *Logger {
@@ -12,5 +13,5 @@ func NewZapLogger() *Logger {
 		panic(err)
 		return nil
 	}
-	return &Logger{Logger: logger.Sugar()}
+	return &Logger{Sugar: logger.Sugar(), Logger: logger}
 }

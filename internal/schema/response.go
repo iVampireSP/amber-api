@@ -9,7 +9,7 @@ type ResponseBody struct {
 	Message string `json:"message"`
 	Error   string `json:"error"`
 	Success bool   `json:"success"`
-	Data    any    `json:"data"`
+	Data    any    `json:"data,omitempty"`
 }
 
 type HttpResponse struct {
@@ -44,7 +44,13 @@ func (r *HttpResponse) Data(data any) *HttpResponse {
 
 func (r *HttpResponse) Error(err error) *HttpResponse {
 	if err != nil {
-		r.body.Error = err.Error()
+		var errMsg = err.Error()
+
+		if errMsg == "EOF" {
+			errMsg = "Request body is empty or missing some fields, make sure you have provided all the required fields"
+		}
+
+		r.body.Error = errMsg
 
 		if r.httpStatus == 0 {
 			r.httpStatus = http.StatusBadRequest

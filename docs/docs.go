@@ -53,6 +53,38 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "get string by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "创建 Assistant",
+                "parameters": [
+                    {
+                        "description": "Assistant",
+                        "name": "assistant",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.AssistantCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
                             "allOf": [
                                 {
                                     "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
@@ -61,11 +93,17 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.EmptyData"
+                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
                     }
                 }
@@ -106,19 +144,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.EmptyData"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
                     }
                 }
@@ -159,19 +185,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.EmptyData"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
                     }
                 }
@@ -211,7 +225,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            }
                                         }
                                     }
                                 }
@@ -221,19 +238,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.EmptyData"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
                     }
                 }
@@ -283,37 +288,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.EmptyData"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.EmptyData"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
                     }
                 }
@@ -346,37 +327,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.EmptyData"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.EmptyData"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
                     }
                 }
@@ -388,6 +345,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "id": {
@@ -439,6 +399,29 @@ const docTemplate = `{
                 }
             }
         },
+        "rag-new_internal_schema.AssistantCreateRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "rag-new_internal_schema.CurrentUserResponse": {
             "type": "object",
             "properties": {
@@ -455,9 +438,6 @@ const docTemplate = `{
                     "type": "boolean"
                 }
             }
-        },
-        "rag-new_internal_schema.EmptyData": {
-            "type": "object"
         },
         "rag-new_internal_schema.ResponseBody": {
             "type": "object",

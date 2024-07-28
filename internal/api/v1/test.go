@@ -22,17 +22,17 @@ func NewUserController(authService *auth.Service) *UserController {
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
-// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Failure      400  {object}  schema.ResponseBody
 // @Router       /api/v1/ping [get]
 func (u *UserController) Test(c *gin.Context) {
-	user := u.authService.GetUser(c)
+	//user := u.authService.GetUser(c)
 
-	var currentUserResponse = &schema.CurrentUserResponse{
-		IP:        c.ClientIP(),
-		Valid:     user.Valid,
-		UserEmail: user.Token.Email,
-		UserId:    user.Token.Sub,
-	}
+	//var currentUserResponse = &schema.CurrentUserResponse{
+	//	IP:        c.ClientIP(),
+	//	Valid:     user.Valid,
+	//	UserEmail: user.Token.Email,
+	//	UserId:    user.Token.Sub,
+	//}
 
-	schema.NewResponse(c).Status(http.StatusOK).Data(currentUserResponse).Send()
+	schema.NewResponse(c).Status(http.StatusOK).Data("hello").Send()
 }

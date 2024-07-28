@@ -31,10 +31,39 @@ func NewAssistantController(
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  schema.ResponseBody{data=[]entity.Assistant}
-// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants [get]
 func (u *AssistantController) List(c *gin.Context) {
 	assistants, err := u.assistantService.ListAssistantFromUserId(c, u.authService.GetUserId(c))
+	if err != nil {
+		schema.NewResponse(c).Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	schema.NewResponse(c).Status(http.StatusOK).Data(assistants).Send()
+}
+
+// CreateAssistant godoc
+// @Summary      创建 Assistant
+// @Description  get string by ID
+// @Tags         assistant
+// @Accept       json
+// @Produce      json
+// @Param        assistant  body  schema.AssistantCreateRequest  true  "Assistant"
+// @Success      200  {object}  schema.ResponseBody{data=entity.Assistant}
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Router       /api/v1/assistants [post]
+func (u *AssistantController) CreateAssistant(c *gin.Context) {
+	var createReq schema.AssistantCreateRequest
+
+	if err := c.ShouldBindJSON(&createReq); err != nil {
+		schema.NewResponse(c).Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	createReq.UserId = u.authService.GetUserId(c)
+
+	assistants, err := u.assistantService.CreateAssistant(c, &createReq)
 	if err != nil {
 		schema.NewResponse(c).Status(http.StatusInternalServerError).Error(err).Send()
 		return

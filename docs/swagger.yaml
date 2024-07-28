@@ -3,6 +3,8 @@ definitions:
     properties:
       created_at:
         type: string
+      description:
+        type: string
       id:
         type: integer
       name:
@@ -35,6 +37,22 @@ definitions:
       user_id:
         type: integer
     type: object
+  rag-new_internal_schema.AssistantCreateRequest:
+    properties:
+      description:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      prompt:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - description
+    - name
+    type: object
   rag-new_internal_schema.CurrentUserResponse:
     properties:
       ip:
@@ -45,8 +63,6 @@ definitions:
         type: integer
       valid:
         type: boolean
-    type: object
-  rag-new_internal_schema.EmptyData:
     type: object
   rag-new_internal_schema.ResponseBody:
     properties:
@@ -140,13 +156,38 @@ paths:
         "400":
           description: Bad Request
           schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 获取 Assistant 列表
+      tags:
+      - assistant
+    post:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Assistant
+        in: body
+        name: assistant
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.AssistantCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
             allOf:
             - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+                  $ref: '#/definitions/rag-new_internal_entity.Assistant'
               type: object
-      summary: 获取 Assistant 列表
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 创建 Assistant
       tags:
       - assistant
   /api/v1/ping:
@@ -169,12 +210,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
-              type: object
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
       summary: Greet
       tags:
       - ping
@@ -198,12 +234,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
-              type: object
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
       summary: List Tool
       tags:
       - tool
@@ -228,17 +259,14 @@ paths:
             - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Tool'
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.Tool'
+                  type: array
               type: object
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
-              type: object
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
       summary: Create Tool
       tags:
       - tool
@@ -261,21 +289,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
-              type: object
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
-              type: object
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
       summary: DeleteTool Tool
       tags:
       - tool
@@ -304,21 +322,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
-              type: object
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
-              type: object
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
       summary: Get Tool
       tags:
       - tool

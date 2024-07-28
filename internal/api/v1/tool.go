@@ -30,7 +30,7 @@ func NewToolController(toolService *tool.Service, authService *auth.Service) *To
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
-// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools [get]
 func (t *ToolController) List(c *gin.Context) {
 	tools, err := t.toolService.ListToolFromUserId(c, t.authService.GetUserId(c))
@@ -49,8 +49,8 @@ func (t *ToolController) List(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        tool  body  schema.ToolCreateRequest  true  "Tool"
-// @Success      200  {object}  schema.ResponseBody{data=entity.Tool}
-// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.Tool}
+// @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools [post]
 func (t *ToolController) CreateTool(c *gin.Context) {
 	// bind req
@@ -89,8 +89,8 @@ func (t *ToolController) CreateTool(c *gin.Context) {
 // @Produce      json
 // @Param        id  path  string  true  "Tool ID"
 // @Success      200  {object}  schema.ResponseBody{data=entity.Tool}
-// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
-// @Failure      404  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Failure      404  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools/{id} [get]
 func (t *ToolController) GetTool(c *gin.Context) {
 	toolId, err := strconv.Atoi(c.Param("id"))
@@ -126,8 +126,8 @@ func (t *ToolController) GetTool(c *gin.Context) {
 // @Produce      json
 // @Param        id  path  string  true  "Tool ID"
 // @Success      200  {object}  nil
-// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
-// @Failure      404  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Failure      404  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools/{id} [delete]
 func (t *ToolController) DeleteTool(c *gin.Context) {
 	toolId, err := strconv.Atoi(c.Param("id"))

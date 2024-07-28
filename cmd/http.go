@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"rag-new/internal/base/conf"
 	"strconv"
+	"sync"
 )
 
 // @securityDefinitions.apikey ApiKeyAuth
@@ -36,6 +37,25 @@ func initHttpServer() {
 		app.Config.Http.Port = 8000
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// 启动 http
+	go func() {
+		// refresh
+		app.Service.Jwks.SetupAuthRefresh()
+		var addr = app.Config.Http.Host + ":" + strconv.Itoa(app.Config.Http.Port)
+		app.Logger.Sugar.Info("Listening and serving HTTP on ", addr)
+
+		err := app.HttpServer.BizRouter().Run(app.Config.Http.Host + ":" + strconv.Itoa(app.Config.Http.Port))
+		if err != nil {
+			panic(err)
+			return
+		}
+
+		wg.Done()
+	}()
+
 	// 启动 metrics
 	if app.Config.Metrics.Enabled {
 		go func() {
@@ -44,19 +64,11 @@ func initHttpServer() {
 				panic(err)
 				return
 			}
+			wg.Done()
+
 		}()
 	}
 
-	// refresh
-	app.Service.Jwks.SetupAuthRefresh()
-
-	var addr = app.Config.Http.Host + ":" + strconv.Itoa(app.Config.Http.Port)
-	app.Logger.Sugar.Info("Listening and serving HTTP on ", addr)
-
-	err = app.HttpServer.BizRouter().Run()
-	if err != nil {
-		panic(err)
-		return
-	}
+	wg.Wait()
 
 }

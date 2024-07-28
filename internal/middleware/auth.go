@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"rag-new/internal/schema"
-	"rag-new/internal/services/auth"
+	"rag-new/internal/service/auth"
 	"rag-new/pkg/consts"
 )
 

@@ -8,12 +8,12 @@ import (
 	v1 "rag-new/internal/api/v1"
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
+	"rag-new/internal/base/server"
 	"rag-new/internal/logger"
 	"rag-new/internal/middleware"
 	"rag-new/internal/orm"
 	"rag-new/internal/router"
-	"rag-new/internal/server"
-	"rag-new/internal/services"
+	"rag-new/internal/service"
 )
 
 var ProviderSet = wire.NewSet(
@@ -21,7 +21,7 @@ var ProviderSet = wire.NewSet(
 	logger.NewZapLogger,
 	orm.NewXORM,
 	middleware.Provider,
-	services.Provider,
+	service.Provider,
 	v1.ProviderApiControllerSet,
 	router.ProviderSetRouter,
 	server.NewHTTPServer,

@@ -7,7 +7,7 @@ import (
 	"rag-new/internal/base/conf"
 	"rag-new/internal/logger"
 	"rag-new/internal/schema"
-	"rag-new/internal/services/jwks"
+	"rag-new/internal/service/jwks"
 	"rag-new/pkg/consts"
 	"strings"
 )

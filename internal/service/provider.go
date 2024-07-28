@@ -1,10 +1,10 @@
-package services
+package service
 
 import (
 	"github.com/google/wire"
 	"rag-new/internal/logger"
-	"rag-new/internal/services/auth"
-	"rag-new/internal/services/jwks"
+	"rag-new/internal/service/auth"
+	"rag-new/internal/service/jwks"
 )
 
 type Service struct {

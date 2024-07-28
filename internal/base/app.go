@@ -5,7 +5,7 @@ import (
 	"rag-new/internal/base/conf"
 	"rag-new/internal/logger"
 	"rag-new/internal/middleware"
-	"rag-new/internal/services"
+	"rag-new/internal/service"
 	"xorm.io/xorm"
 )
 
@@ -14,7 +14,7 @@ type Application struct {
 	Gin        *gin.Engine
 	Logger     *logger.Logger
 	X          *xorm.Engine
-	Service    *services.Service
+	Service    *service.Service
 	Middleware *middleware.Middleware
 }
 
@@ -23,7 +23,7 @@ func NewApplication(
 	gin *gin.Engine,
 	logger *logger.Logger,
 	x *xorm.Engine,
-	services *services.Service,
+	services *service.Service,
 	middleware *middleware.Middleware,
 ) *Application {
 	return &Application{

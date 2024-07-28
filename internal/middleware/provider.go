@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/google/wire"
 	"rag-new/internal/logger"
-	"rag-new/internal/services/auth"
+	"rag-new/internal/service/auth"
 )
 
 type Middleware struct {

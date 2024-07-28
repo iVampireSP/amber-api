@@ -1,0 +1,79 @@
+package v1
+
+import (
+	"github.com/gin-gonic/gin"
+	"rag-new/internal/schema"
+	"rag-new/internal/service/auth"
+	"rag-new/internal/service/tool"
+	"rag-new/pkg/consts"
+)
+
+type ToolController struct {
+	toolService *tool.Service
+	authService *auth.Service
+}
+
+func NewToolController(toolService *tool.Service, authService *auth.Service) *ToolController {
+	return &ToolController{
+		toolService,
+		authService,
+	}
+}
+
+// List godoc
+// @Summary      List Tool
+// @Description  List tools
+// @Tags         tool
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
+// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Router       /api/v1/tools [get]
+func (t *ToolController) List(c *gin.Context) {
+	tools, err := t.toolService.ListToolFromUserId(c, t.authService.GetUserId(c))
+	if err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	schema.NewResponse(c).Data(tools).Send()
+}
+
+// CreateTool godoc
+// @Summary      Create Tool
+// @Description  Create tool
+// @Tags         tool
+// @Accept       json
+// @Produce      json
+// @Param        tool  body  schema.ToolCreateRequest  true  "Tool"
+// @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
+// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Router       /api/v1/tools [post]
+func (t *ToolController) CreateTool(c *gin.Context) {
+	// bind req
+	var req schema.ToolCreateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	exists, err := t.toolService.CheckTool(c, req.Url, t.authService.GetUserId(c))
+	if err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	if exists {
+		schema.NewResponse(c).Error(consts.ErrToolAlreadyExists).Send()
+		return
+	}
+
+	// create
+	toolEntity, err := t.toolService.CreateTool(c, &req, t.authService.GetUserId(c))
+	if err != nil {
+		schema.NewResponse(c).Error(err).Send()
+		return
+	}
+
+	schema.NewResponse(c).Data(&toolEntity).Send()
+}

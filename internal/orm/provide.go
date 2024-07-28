@@ -3,7 +3,9 @@ package orm
 import (
 	"fmt"
 	_ "github.com/lib/pq"
+	"github.com/yxlimo/xormzap"
 	"rag-new/internal/base/conf"
+	"rag-new/internal/logger"
 	"xorm.io/xorm"
 )
 
@@ -14,6 +16,7 @@ import (
 
 func NewXORM(
 	config *conf.Config,
+	logger *logger.Logger,
 ) (*xorm.Engine, error) {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Database.Host, config.Database.Port, config.Database.User, config.Database.Password, config.Database.Name)
 
@@ -21,6 +24,8 @@ func NewXORM(
 	if err != nil {
 		panic(err)
 	}
+
+	engine.SetLogger(xormzap.Logger(logger.Logger))
 
 	engine.ShowSQL(config.Debug.Enabled)
 

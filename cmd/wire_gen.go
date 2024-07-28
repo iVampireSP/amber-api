@@ -32,7 +32,7 @@ func CreateApp() (*base.Application, error) {
 	service := auth.NewAuthService(config, jwksJWKS, loggerLogger)
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, service)
 	engine := server.NewHTTPServer(api, config, middlewareMiddleware)
-	xormEngine, err := orm.NewXORM(config)
+	xormEngine, err := orm.NewXORM(config, loggerLogger)
 	if err != nil {
 		return nil, err
 	}

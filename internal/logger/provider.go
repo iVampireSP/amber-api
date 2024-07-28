@@ -13,5 +13,13 @@ func NewZapLogger() *Logger {
 		panic(err)
 		return nil
 	}
+
+	//defer func(logger *zap.Logger) {
+	//	err := logger.Sync()
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//}(logger)
+
 	return &Logger{Sugar: logger.Sugar(), Logger: logger}
 }

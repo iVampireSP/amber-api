@@ -1,4 +1,19 @@
 definitions:
+  rag-new_internal_entity.Assistant:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      prompt:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
   rag-new_internal_entity.Tool:
     properties:
       api_key:
@@ -103,6 +118,37 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/assistants:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.Assistant'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+              type: object
+      summary: 获取 Assistant 列表
+      tags:
+      - assistant
   /api/v1/ping:
     get:
       consumes:

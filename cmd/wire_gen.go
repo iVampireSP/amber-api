@@ -17,6 +17,7 @@ import (
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
+	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/jwks"
 	"rag-new/internal/service/tool"
@@ -36,12 +37,14 @@ func CreateApp() (*base.Application, error) {
 	}
 	toolService := tool.NewService(engine)
 	toolController := v1.NewToolController(toolService, authService)
-	api := router.NewApiRoute(userController, toolController)
+	assistantService := assistant.NewService(engine)
+	assistantController := v1.NewAssistantController(authService, toolService, assistantService)
+	api := router.NewApiRoute(userController, toolController, assistantController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
-	ginEngine := server.NewHTTPServer(api, swaggerRouter, config, middlewareMiddleware)
-	serviceService := service.NewService(jwksJWKS, authService, loggerLogger, toolService)
-	application := base.NewApplication(config, ginEngine, loggerLogger, engine, serviceService, middlewareMiddleware)
+	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService)
+	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware)
 	return application, nil
 }
 

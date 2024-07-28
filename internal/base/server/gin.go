@@ -2,18 +2,33 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net/http"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 )
 
+func promHandler(handler http.Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		handler.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+type HttpServer struct {
+	Gin           *gin.Engine
+	apiRouter     *router.Api
+	swaggerRouter *router.SwaggerRouter
+	middleware    *middleware.Middleware
+}
+
 // NewHTTPServer new http server.
 func NewHTTPServer(
+	config *conf.Config,
 	apiRouter *router.Api,
 	swaggerRouter *router.SwaggerRouter,
-	config *conf.Config,
 	middleware *middleware.Middleware,
-) *gin.Engine {
+) *HttpServer {
 	if config.Debug.Enabled {
 		gin.SetMode(gin.DebugMode)
 	} else {
@@ -22,24 +37,44 @@ func NewHTTPServer(
 
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(middleware.GinLogger.GinLogger)
-	rootGroup := r.Group("")
 
-	rootGroup.GET("/healthz", func(ctx *gin.Context) { ctx.String(200, "OK") })
+	return &HttpServer{
+		Gin:           r,
+		apiRouter:     apiRouter,
+		swaggerRouter: swaggerRouter,
+		middleware:    middleware,
+	}
+}
+
+func (hs *HttpServer) BizRouter() *gin.Engine {
+	rootGroup := hs.Gin.Group("")
+	rootGroup.Use(hs.middleware.GinLogger.GinLogger)
 
 	// swagger
-	swaggerRouter.Register(rootGroup)
+	hs.swaggerRouter.Register(rootGroup)
 
 	apiV1 := rootGroup.Group("/api/v1")
 	{
-		apiV1.Use(middleware.JSONResponse.ContentTypeJSON)
-		apiV1.Use(middleware.Auth.RequireJWTIDToken)
-		apiRouter.InitApiRouter(apiV1)
+		apiV1.Use(hs.middleware.JSONResponse.ContentTypeJSON)
+		apiV1.Use(hs.middleware.Auth.RequireJWTIDToken)
+		hs.apiRouter.InitApiRouter(apiV1)
 	}
 
-	r.NoRoute(func(ctx *gin.Context) {
-		ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
-	})
+	//hs.Gin.NoRoute(func(ctx *gin.Context) {
+	//	ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+	//})
+
+	return hs.Gin
+}
+
+func (hs *HttpServer) MetricRouter() *gin.Engine {
+	r := gin.New()
+	r.Use(gin.Recovery())
+
+	metricGroup := r.Group("")
+	// prometheus
+	metricGroup.GET("/metrics", promHandler(promhttp.Handler()))
+	metricGroup.GET("/healthz", func(ctx *gin.Context) { ctx.String(200, "OK") })
 
 	return r
 }

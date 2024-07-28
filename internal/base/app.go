@@ -1,9 +1,9 @@
 package base
 
 import (
-	"github.com/gin-gonic/gin"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/server"
 	"rag-new/internal/middleware"
 	"rag-new/internal/service"
 	"xorm.io/xorm"
@@ -11,7 +11,7 @@ import (
 
 type Application struct {
 	Config     *conf.Config
-	Gin        *gin.Engine
+	HttpServer *server.HttpServer
 	Logger     *logger.Logger
 	X          *xorm.Engine
 	Service    *service.Service
@@ -20,7 +20,7 @@ type Application struct {
 
 func NewApplication(
 	config *conf.Config,
-	gin *gin.Engine,
+	httpServer *server.HttpServer,
 	logger *logger.Logger,
 	x *xorm.Engine,
 	services *service.Service,
@@ -28,7 +28,7 @@ func NewApplication(
 ) *Application {
 	return &Application{
 		Config:     config,
-		Gin:        gin,
+		HttpServer: httpServer,
 		Logger:     logger,
 		X:          x,
 		Service:    services,

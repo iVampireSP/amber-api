@@ -36,13 +36,24 @@ func initHttpServer() {
 		app.Config.Http.Port = 8000
 	}
 
+	// 启动 metrics
+	if app.Config.Metrics.Enabled {
+		go func() {
+			err := app.HttpServer.MetricRouter().Run(app.Config.Metrics.Host + ":" + strconv.Itoa(app.Config.Metrics.Port))
+			if err != nil {
+				panic(err)
+				return
+			}
+		}()
+	}
+
 	// refresh
 	app.Service.Jwks.SetupAuthRefresh()
 
 	var addr = app.Config.Http.Host + ":" + strconv.Itoa(app.Config.Http.Port)
 	app.Logger.Sugar.Info("Listening and serving HTTP on ", addr)
 
-	err = app.Gin.Run(addr)
+	err = app.HttpServer.BizRouter().Run()
 	if err != nil {
 		panic(err)
 		return

@@ -13,6 +13,8 @@ type Config struct {
 	Database *Database `yaml:"database"`
 
 	JWKS *JWKS `yaml:"jwks"`
+
+	Metrics *Metrics `yaml:"metrics"`
 }
 
 type Http struct {
@@ -35,6 +37,12 @@ type Database struct {
 
 type JWKS struct {
 	Url string `yaml:"url"`
+}
+
+type Metrics struct {
+	Enabled bool   `yaml:"enabled"`
+	Port    int    `yaml:"port"`
+	Host    string `yaml:"host"`
 }
 
 func CreateConfigIfNotExists() {

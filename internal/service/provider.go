@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/google/wire"
-	"rag-new/internal/logger"
+	"rag-new/internal/base/logger"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/jwks"
 )

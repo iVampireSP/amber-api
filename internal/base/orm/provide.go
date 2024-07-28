@@ -5,7 +5,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/yxlimo/xormzap"
 	"rag-new/internal/base/conf"
-	"rag-new/internal/logger"
+	"rag-new/internal/base/logger"
 	"xorm.io/xorm"
 )
 

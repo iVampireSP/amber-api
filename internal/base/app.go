@@ -3,7 +3,7 @@ package base
 import (
 	"github.com/gin-gonic/gin"
 	"rag-new/internal/base/conf"
-	"rag-new/internal/logger"
+	"rag-new/internal/base/logger"
 	"rag-new/internal/middleware"
 	"rag-new/internal/service"
 	"xorm.io/xorm"

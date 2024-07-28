@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"rag-new/internal/base/conf"
-	"rag-new/internal/logger"
+	"rag-new/internal/base/logger"
 	"rag-new/internal/schema"
 	"rag-new/internal/service/jwks"
 	"rag-new/pkg/consts"

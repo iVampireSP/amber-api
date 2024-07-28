@@ -2,7 +2,7 @@ package tool
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/bytedance/sonic"
 	"io"
 	"net/http"
 	"rag-new/internal/entity"
@@ -21,7 +21,7 @@ func (s *Service) ListToolFromUserId(ctx context.Context, userId schema.UserId) 
 
 func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest, userId schema.UserId) (*entity.Tool, error) {
 	var toolEntity entity.Tool
-	var toolData entity.ToolData
+	var toolData schema.ToolDiscoveryInput
 
 	// map to entity
 	toolEntity.UserID = userId
@@ -44,12 +44,19 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 		}
 	}(resp.Body)
 
-	err = json.NewDecoder(resp.Body).Decode(&toolData)
+	// convert to byte
+	var body []byte
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	toolEntity.Data = toolData
+	err = sonic.Unmarshal(body, &toolData)
+	if err != nil {
+		return nil, err
+	}
+
+	toolEntity.Data = *toolData.Output()
 
 	_, err = s.x.Context(ctx).Insert(&toolEntity)
 

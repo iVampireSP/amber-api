@@ -46,7 +46,7 @@ func (t *ToolController) List(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        tool  body  schema.ToolCreateRequest  true  "Tool"
-// @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
+// @Success      200  {object}  schema.ResponseBody{data=entity.Tool}
 // @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
 // @Router       /api/v1/tools [post]
 func (t *ToolController) CreateTool(c *gin.Context) {

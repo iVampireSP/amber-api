@@ -25,11 +25,11 @@ import (
 
 func CreateApp() (*base.Application, error) {
 	config := conf.ProviderConfig()
-	userController := v1.NewUserController()
-	api := router.NewApiRoute(userController)
 	loggerLogger := logger.NewZapLogger()
 	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
 	authService := auth.NewAuthService(config, jwksJWKS, loggerLogger)
+	userController := v1.NewUserController(authService)
+	api := router.NewApiRoute(userController)
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
 	engine := server.NewHTTPServer(api, config, middlewareMiddleware)
 	xormEngine, err := orm.NewXORM(config, loggerLogger)

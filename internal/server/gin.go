@@ -21,7 +21,8 @@ func NewHTTPServer(
 
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(middleware.GinLogger.GinLogger())
+	r.Use(middleware.GinLogger.GinLogger)
+	r.Use(middleware.Auth.RequireJWTIDToken)
 
 	r.GET("/healthz", func(ctx *gin.Context) { ctx.String(200, "OK") })
 

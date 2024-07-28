@@ -28,14 +28,14 @@ func CreateApp() (*base.Application, error) {
 	userController := v1.NewUserController()
 	api := router.NewApiRoute(userController)
 	loggerLogger := logger.NewZapLogger()
-	middlewareMiddleware := middleware.NewMiddleware(loggerLogger)
+	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
+	service := auth.NewAuthService(config, jwksJWKS, loggerLogger)
+	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, service)
 	engine := server.NewHTTPServer(api, config, middlewareMiddleware)
 	xormEngine, err := orm.NewXORM(config)
 	if err != nil {
 		return nil, err
 	}
-	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
-	service := auth.NewAuthService(config, jwksJWKS, loggerLogger)
 	servicesService := services.NewService(jwksJWKS, service, loggerLogger)
 	application := base.NewApplication(config, engine, loggerLogger, xormEngine, servicesService, middlewareMiddleware)
 	return application, nil

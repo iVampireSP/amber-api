@@ -12,3 +12,6 @@ database:
   password: root
   name: db_name
   sslmode: disable
+
+jwks:
+  url: ""

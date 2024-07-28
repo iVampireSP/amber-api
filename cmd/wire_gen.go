@@ -15,6 +15,9 @@ import (
 	"rag-new/internal/orm"
 	"rag-new/internal/router"
 	"rag-new/internal/server"
+	"rag-new/internal/services"
+	"rag-new/internal/services/auth"
+	"rag-new/internal/services/jwks"
 )
 
 // Injectors from wire.go:
@@ -29,10 +32,13 @@ func CreateApp() (*base.Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	application := base.NewApplication(config, engine, loggerLogger, xormEngine)
+	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
+	service := auth.NewAuthService(config, jwksJWKS, loggerLogger)
+	servicesService := services.NewService(jwksJWKS, service, loggerLogger)
+	application := base.NewApplication(config, engine, loggerLogger, xormEngine, servicesService)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, services.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

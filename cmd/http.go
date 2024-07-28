@@ -33,6 +33,9 @@ func initHttpServer() {
 		app.Config.Http.Port = 8000
 	}
 
+	// refresh
+	app.Service.Jwks.SetupAuthRefresh()
+
 	var addr = app.Config.Http.Host + ":" + strconv.Itoa(app.Config.Http.Port)
 	app.Logger.Logger.Info("Listening and serving HTTP on ", addr)
 

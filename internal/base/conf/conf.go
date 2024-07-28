@@ -11,6 +11,8 @@ type Config struct {
 	Debug *Debug `yaml:"debug"`
 
 	Database *Database `yaml:"database"`
+
+	JWKS *JWKS `yaml:"jwks"`
 }
 
 type Http struct {
@@ -29,6 +31,10 @@ type Database struct {
 	Password string `yaml:"password"`
 	Name     string `yaml:"name"`
 	SslMode  string `yaml:"sslmode"`
+}
+
+type JWKS struct {
+	Url string `yaml:"url"`
 }
 
 func CreateConfigIfNotExists() {

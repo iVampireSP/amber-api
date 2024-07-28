@@ -1,6 +1,59 @@
+definitions:
+  rag-new_internal_schema.CurrentUserResponse:
+    properties:
+      ip:
+        type: string
+      userEmail:
+        type: string
+      userId:
+        type: string
+      valid:
+        type: boolean
+    type: object
+  rag-new_internal_schema.EmptyData:
+    type: object
+  rag-new_internal_schema.ResponseBody:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /api/v1/ping:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.EmptyData'
+              type: object
+      summary: Greet
+      tags:
+      - ping
 securityDefinitions:
   ApiKeyAuth:
     in: header

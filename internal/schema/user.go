@@ -36,10 +36,3 @@ const (
 func (jwtTokenTypes JWTTokenTypes) String() string {
 	return string(jwtTokenTypes)
 }
-
-type CurrentUserResponse struct {
-	IP        string `json:"ip"`
-	Valid     bool   `json:"valid"`
-	UserEmail string `json:"userEmail"`
-	UserId    string `json:"userId"`
-}

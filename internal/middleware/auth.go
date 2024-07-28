@@ -23,7 +23,7 @@ func (a AuthMiddleware) RequireJWTIDToken(c *gin.Context) {
 
 	if err != nil {
 		c.Abort()
-		schema.ResponseError(c, http.StatusUnauthorized, err)
+		schema.NewResponse(c).Error(err).Status(http.StatusUnauthorized).Send()
 		return
 	}
 

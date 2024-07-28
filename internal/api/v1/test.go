@@ -2,6 +2,8 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
+	"rag-new/internal/schema"
 	"rag-new/internal/service/auth"
 )
 
@@ -13,9 +15,24 @@ func NewUserController(authService *auth.Service) *UserController {
 	return &UserController{authService}
 }
 
+// Test godoc
+// @Summary      Greet
+// @Description  get string by ID
+// @Tags         ping
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
+// @Failure      400  {object}  schema.ResponseBody{data=schema.EmptyData}
+// @Router       /api/v1/ping [get]
 func (u *UserController) Test(c *gin.Context) {
 	user := u.authService.GetUser(c)
-	c.JSON(200, gin.H{
-		"message": "pong, " + user.Token.Name + ", " + user.Token.Sub,
-	})
+
+	var currentUserResponse = &schema.CurrentUserResponse{
+		IP:        c.ClientIP(),
+		Valid:     user.Valid,
+		UserEmail: user.Token.Email,
+		UserId:    user.Token.Sub,
+	}
+
+	schema.NewResponse(c).Status(http.StatusOK).Data(currentUserResponse).Send()
 }

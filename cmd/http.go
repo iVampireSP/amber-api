@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func init() {
 	rootCmd.AddCommand(httpCmd)
 }

@@ -30,8 +30,9 @@ func CreateApp() (*base.Application, error) {
 	authService := auth.NewAuthService(config, jwksJWKS, loggerLogger)
 	userController := v1.NewUserController(authService)
 	api := router.NewApiRoute(userController)
+	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
-	engine := server.NewHTTPServer(api, config, middlewareMiddleware)
+	engine := server.NewHTTPServer(api, swaggerRouter, config, middlewareMiddleware)
 	xormEngine, err := orm.NewXORM(config, loggerLogger)
 	if err != nil {
 		return nil, err

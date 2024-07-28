@@ -10,6 +10,7 @@ import (
 // NewHTTPServer new http server.
 func NewHTTPServer(
 	apiRouter *router.Api,
+	swaggerRouter *router.SwaggerRouter,
 	config *conf.Config,
 	middleware *middleware.Middleware,
 ) *gin.Engine {
@@ -22,14 +23,23 @@ func NewHTTPServer(
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(middleware.GinLogger.GinLogger)
-	r.Use(middleware.Auth.RequireJWTIDToken)
-	r.Use(middleware.JSONResponse.ContentTypeJSON)
+	rootGroup := r.Group("")
 
-	r.GET("/healthz", func(ctx *gin.Context) { ctx.String(200, "OK") })
+	rootGroup.GET("/healthz", func(ctx *gin.Context) { ctx.String(200, "OK") })
 
-	// The route must be available without logging in
-	apiV1 := r.Group("/api/v1")
-	apiRouter.InitApiRouter(apiV1)
+	// swagger
+	swaggerRouter.Register(rootGroup)
+
+	apiV1 := rootGroup.Group("/api/v1")
+	{
+		apiV1.Use(middleware.JSONResponse.ContentTypeJSON)
+		apiV1.Use(middleware.Auth.RequireJWTIDToken)
+		apiRouter.InitApiRouter(apiV1)
+	}
+
+	r.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+	})
 
 	return r
 }

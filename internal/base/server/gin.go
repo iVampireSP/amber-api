@@ -7,6 +7,8 @@ import (
 	"rag-new/internal/base/conf"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
+	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
 )
 
 func promHandler(handler http.Handler) gin.HandlerFunc {
@@ -60,9 +62,9 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 		hs.apiRouter.InitApiRouter(apiV1)
 	}
 
-	//hs.Gin.NoRoute(func(ctx *gin.Context) {
-	//	ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
-	//})
+	hs.Gin.NoRoute(func(ctx *gin.Context) {
+		schema.NewResponse(ctx).Status(http.StatusNotFound).Error(consts.ErrPageNotFound).Send()
+	})
 
 	return hs.Gin
 }

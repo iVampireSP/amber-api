@@ -14,10 +14,10 @@ CREATE TABLE "public"."assistants" (
   "id" bigserial PRIMARY KEY ,
   "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
   "description" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
+  "prompt" text COLLATE "pg_catalog"."default" NOT NULL,
   "user_id" bigint NOT NULL,
   "created_at" timestamp(0),
-  "updated_at" timestamp(0),
-  "prompt" text COLLATE "pg_catalog"."default" NOT NULL
+  "updated_at" timestamp(0)
 );
 
 CREATE INDEX "assistants_user_id_index" ON "public"."assistants" USING btree (

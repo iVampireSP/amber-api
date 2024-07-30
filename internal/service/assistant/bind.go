@@ -45,7 +45,20 @@ func (s *Service) BindTool(ctx context.Context, assistantId int64, toolId int64)
 }
 
 func (s *Service) UnbindTool(ctx context.Context, assistantId int64, toolId int64) error {
-	_, err := s.x.Context(ctx).Where("assistant_id = ?", assistantId).Where("tool_id = ?", toolId).Delete(&entity.AssistantTool{})
+	var assistantTool = &entity.AssistantTool{}
+
+	// 检测是否被 bind（记录是否存在）
+	_, err := s.x.Context(ctx).Where("assistant_id = ?", assistantId).Where("tool_id = ?", toolId).Get(assistantTool)
+	if err != nil {
+		return err
+	}
+
+	if assistantTool.ID == consts.NoRecord {
+		return consts.ErrAssistantNotFound
+	}
+
+	_, err = s.x.Context(ctx).Where("assistant_id = ?", assistantId).Where("tool_id = ?", toolId).Delete(&entity.AssistantTool{})
+
 	return err
 }
 

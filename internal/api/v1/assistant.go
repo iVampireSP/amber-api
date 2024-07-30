@@ -169,3 +169,61 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 
 	response.Status(http.StatusOK).Data(&assistantTool).Send()
 }
+
+// UnbindTool godoc
+// @Summary      解绑 Tool
+// @Description  get string by ID
+// @Tags         assistant
+// @Accept       json
+// @Produce      json
+// @Param        id  path  int  true  "Assistant ID"
+// @Param        tool_id  path  int  true  "Tool ID"
+// @Success      200  {object}  schema.ResponseBody{data=entity.AssistantTool}
+// @Failure      500  {object}  schema.ResponseBody{}
+// @Router       /api/v1/assistants/{id}/tools/{tool_id} [delete]
+func (u *AssistantController) UnbindTool(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
+	assistantIdInt, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+
+	toolIdInt, err := strconv.Atoi(c.Param("tool_id"))
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+
+	assistantId := int64(assistantIdInt)
+	toolId := int64(toolIdInt)
+
+	assistantEntity, err := u.assistantService.GetAssistant(c, assistantId)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+		return
+	}
+
+	toolEntity, err := u.toolService.GetTool(c, toolId)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if toolEntity.ID == consts.NoRecord || toolEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
+		return
+	}
+
+	err = u.assistantService.UnbindTool(c, assistantId, toolId)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	response.Status(http.StatusOK).Send()
+}

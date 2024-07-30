@@ -36,4 +36,5 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 	r.GET("/assistants/:id/tools", a.Assistant.ListTool)
 	r.POST("/assistants/:id/tools/:tool_id", a.Assistant.BindTool)
+	r.DELETE("/assistants/:id/tools/:tool_id", a.Assistant.UnbindTool)
 }

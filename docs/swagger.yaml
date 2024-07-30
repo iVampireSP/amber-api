@@ -16,6 +16,19 @@ definitions:
       user_id:
         type: integer
     type: object
+  rag-new_internal_entity.AssistantTool:
+    properties:
+      assistant_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      tool_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
   rag-new_internal_entity.Tool:
     properties:
       api_key:
@@ -188,6 +201,105 @@ paths:
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
       summary: 创建 Assistant
+      tags:
+      - assistant
+  /api/v1/assistants/{id}/tools:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Assistant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.AssistantTool'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 获取 Assistant 所绑定的 Tool
+      tags:
+      - assistant
+  /api/v1/assistants/{id}/tools/{tool_id}:
+    delete:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Assistant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Tool ID
+        in: path
+        name: tool_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.AssistantTool'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 解绑 Tool
+      tags:
+      - assistant
+    post:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Assistant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Tool ID
+        in: path
+        name: tool_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.AssistantTool'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 绑定 Tool
       tags:
       - assistant
   /api/v1/ping:

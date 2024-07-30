@@ -120,8 +120,8 @@ func (t *ToolController) GetTool(c *gin.Context) {
 }
 
 // DeleteTool godoc
-// @Summary      DeleteTool Tool
-// @Description  DeleteTool tool
+// @Summary      DeleteTool
+// @Description  DeleteTool
 // @Tags         tool
 // @Accept       json
 // @Produce      json

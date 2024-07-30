@@ -132,7 +132,10 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                            }
                                         }
                                     }
                                 }
@@ -451,7 +454,7 @@
                 }
             },
             "delete": {
-                "description": "DeleteTool tool",
+                "description": "DeleteTool",
                 "consumes": [
                     "application/json"
                 ],
@@ -461,7 +464,7 @@
                 "tags": [
                     "tool"
                 ],
-                "summary": "DeleteTool Tool",
+                "summary": "DeleteTool",
                 "parameters": [
                     {
                         "type": "string",

@@ -81,7 +81,7 @@ func (u *AssistantController) CreateAssistant(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        id  path  int  true  "Assistant ID"
-// @Success      200  {object}  schema.ResponseBody{data=entity.AssistantTool}
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantTool}
 // @Failure      500  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants/{id}/tools [get]
 func (u *AssistantController) ListTool(c *gin.Context) {

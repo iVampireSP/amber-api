@@ -143,7 +143,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                            }
                                         }
                                     }
                                 }
@@ -462,7 +465,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "DeleteTool tool",
+                "description": "DeleteTool",
                 "consumes": [
                     "application/json"
                 ],
@@ -472,7 +475,7 @@ const docTemplate = `{
                 "tags": [
                     "tool"
                 ],
-                "summary": "DeleteTool Tool",
+                "summary": "DeleteTool",
                 "parameters": [
                     {
                         "type": "string",

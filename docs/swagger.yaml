@@ -224,7 +224,9 @@ paths:
             - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.AssistantTool'
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.AssistantTool'
+                  type: array
               type: object
         "500":
           description: Internal Server Error
@@ -386,7 +388,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: DeleteTool tool
+      description: DeleteTool
       parameters:
       - description: Tool ID
         in: path
@@ -406,7 +408,7 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-      summary: DeleteTool Tool
+      summary: DeleteTool
       tags:
       - tool
     get:

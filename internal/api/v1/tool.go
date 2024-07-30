@@ -34,13 +34,14 @@ func NewToolController(toolService *tool.Service, authService *auth.Service) *To
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools [get]
 func (t *ToolController) List(c *gin.Context) {
+	var response = schema.NewResponse(c)
 	tools, err := t.toolService.ListToolFromUserId(c, t.authService.GetUserId(c))
 	if err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
-	schema.NewResponse(c).Data(tools).Send()
+	response.Data(tools).Send()
 }
 
 // CreateTool godoc
@@ -54,32 +55,34 @@ func (t *ToolController) List(c *gin.Context) {
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools [post]
 func (t *ToolController) CreateTool(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
 	// bind req
 	var req schema.ToolCreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
 	exists, err := t.toolService.CheckTool(c, req.Url, t.authService.GetUserId(c))
 	if err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
 	if exists {
-		schema.NewResponse(c).Error(consts.ErrToolAlreadyExists).Send()
+		response.Error(consts.ErrToolAlreadyExists).Send()
 		return
 	}
 
 	// create
 	toolEntity, err := t.toolService.CreateTool(c, &req, t.authService.GetUserId(c))
 	if err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
-	schema.NewResponse(c).Data(&toolEntity).Send()
+	response.Data(&toolEntity).Send()
 }
 
 // GetTool godoc
@@ -94,29 +97,30 @@ func (t *ToolController) CreateTool(c *gin.Context) {
 // @Failure      404  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools/{id} [get]
 func (t *ToolController) GetTool(c *gin.Context) {
+	var response = schema.NewResponse(c)
 	toolId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
 	getTool, err := t.toolService.GetTool(c, int64(toolId))
 	if err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
 	if getTool.ID == consts.NoRecord {
-		schema.NewResponse(c).Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
+		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
 		return
 	}
 
 	if getTool.UserId != t.authService.GetUserId(c) {
-		schema.NewResponse(c).Error(consts.ErrToolNotYours).Send()
+		response.Error(consts.ErrToolNotYours).Send()
 		return
 	}
 
-	schema.NewResponse(c).Data(getTool).Send()
+	response.Data(getTool).Send()
 }
 
 // DeleteTool godoc
@@ -131,33 +135,34 @@ func (t *ToolController) GetTool(c *gin.Context) {
 // @Failure      404  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools/{id} [delete]
 func (t *ToolController) DeleteTool(c *gin.Context) {
+	var response = schema.NewResponse(c)
 	toolId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
 	getTool, err := t.toolService.GetTool(c, int64(toolId))
 	if err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
 	if getTool.ID == consts.NoRecord {
-		schema.NewResponse(c).Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
+		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
 		return
 	}
 
 	if getTool.UserId != t.authService.GetUserId(c) {
-		schema.NewResponse(c).Error(consts.ErrToolNotYours).Send()
+		response.Error(consts.ErrToolNotYours).Send()
 		return
 	}
 
 	err = t.toolService.DeleteTool(c, int64(toolId))
 	if err != nil {
-		schema.NewResponse(c).Error(err).Send()
+		response.Error(err).Send()
 		return
 	}
 
-	schema.NewResponse(c).Status(http.StatusNoContent).Send()
+	response.Status(http.StatusNoContent).Send()
 }

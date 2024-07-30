@@ -36,13 +36,14 @@ func NewAssistantController(
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants [get]
 func (u *AssistantController) List(c *gin.Context) {
+	var response = schema.NewResponse(c)
 	assistants, err := u.assistantService.ListAssistantFromUserId(c, u.authService.GetUserId(c))
 	if err != nil {
-		schema.NewResponse(c).Status(http.StatusInternalServerError).Error(err).Send()
+		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
 
-	schema.NewResponse(c).Status(http.StatusOK).Data(assistants).Send()
+	response.Status(http.StatusOK).Data(assistants).Send()
 }
 
 // CreateAssistant godoc
@@ -57,9 +58,10 @@ func (u *AssistantController) List(c *gin.Context) {
 // @Router       /api/v1/assistants [post]
 func (u *AssistantController) CreateAssistant(c *gin.Context) {
 	var createReq schema.AssistantCreateRequest
+	var response = schema.NewResponse(c)
 
 	if err := c.ShouldBindJSON(&createReq); err != nil {
-		schema.NewResponse(c).Status(http.StatusBadRequest).Error(err).Send()
+		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
 	}
 
@@ -67,11 +69,11 @@ func (u *AssistantController) CreateAssistant(c *gin.Context) {
 
 	assistants, err := u.assistantService.CreateAssistant(c, &createReq)
 	if err != nil {
-		schema.NewResponse(c).Status(http.StatusInternalServerError).Error(err).Send()
+		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
 
-	schema.NewResponse(c).Status(http.StatusOK).Data(assistants).Send()
+	response.Status(http.StatusOK).Data(assistants).Send()
 }
 
 // ListTool godoc

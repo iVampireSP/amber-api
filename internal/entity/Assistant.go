@@ -23,5 +23,5 @@ type AssistantTool struct {
 }
 
 func (at *AssistantTool) TableName() string {
-	return "assistants"
+	return "assistant_tools"
 }

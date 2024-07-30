@@ -1,13 +1,13 @@
 package assistant
 
-import "xorm.io/xorm"
+import (
+	"xorm.io/xorm"
+)
 
 type Service struct {
 	x *xorm.Engine
 }
 
 func NewService(x *xorm.Engine) *Service {
-	return &Service{
-		x: x,
-	}
+	return &Service{x}
 }

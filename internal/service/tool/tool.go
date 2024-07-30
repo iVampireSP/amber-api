@@ -91,3 +91,8 @@ func (s *Service) CheckTool(ctx context.Context, url string, userId schema.UserI
 	count, err := s.x.Context(ctx).Where("user_id = ?", userId).Where("discovery_url = ?", url).Count(&entity.Tool{})
 	return count > 0, err
 }
+
+func (s *Service) Exists(ctx context.Context, id int64) (bool, error) {
+	count, err := s.x.Context(ctx).Where("id = ?", id).Count(&entity.Tool{})
+	return count > 0, err
+}

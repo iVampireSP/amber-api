@@ -12,3 +12,13 @@ type AssistantUpdateRequest struct {
 	Description string `json:"description"`
 	Prompt      string `json:"prompt"`
 }
+
+type AssistantToolBindRequest struct {
+	ToolId      int64 `json:"tool_id" binding:"required"`
+	AssistantId int64 `json:"assistant_id" binding:"required"`
+}
+
+type AssistantToolUnbindRequest struct {
+	ToolId      int64 `json:"tool_id" binding:"required"`
+	AssistantId int64 `json:"assistant_id" binding:"required"`
+}

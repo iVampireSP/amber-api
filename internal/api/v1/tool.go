@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	_ "rag-new/internal/entity" // 需要保留这行，否则 swag go 解析有问题
 	"rag-new/internal/schema"
@@ -9,6 +8,8 @@ import (
 	"rag-new/internal/service/tool"
 	"rag-new/pkg/consts"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ToolController struct {

@@ -1,6 +1,8 @@
 package tool
 
-import "xorm.io/xorm"
+import (
+	"xorm.io/xorm"
+)
 
 type Service struct {
 	x *xorm.Engine

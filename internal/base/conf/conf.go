@@ -15,6 +15,8 @@ type Config struct {
 	JWKS *JWKS `yaml:"jwks"`
 
 	Metrics *Metrics `yaml:"metrics"`
+
+	OpenAI *OpenAI `yaml:"openai"`
 }
 
 type Http struct {
@@ -43,6 +45,11 @@ type Metrics struct {
 	Enabled bool   `yaml:"enabled"`
 	Port    int    `yaml:"port"`
 	Host    string `yaml:"host"`
+}
+
+type OpenAI struct {
+	ApiKey  string `yaml:"api_key" mapstructure:"api_key"`
+	BaseUrl string `yaml:"api_base" mapstructure:"base_url"`
 }
 
 func CreateConfigIfNotExists() {

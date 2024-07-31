@@ -2,16 +2,17 @@ package conf
 
 import (
 	"github.com/spf13/viper"
-	"log"
+	"rag-new/internal/base/logger"
 )
 
-func ProviderConfig() *Config {
+func ProviderConfig(logger *logger.Logger) *Config {
+	CreateConfigIfNotExists()
 	c := &Config{}
 	v := viper.New()
 	v.SetConfigType("yaml")
 	v.SetConfigFile("config.yaml")
 	if err := v.ReadInConfig(); err != nil {
-		log.Fatalf("Fatal error config file: %s \n", err)
+		logger.Sugar.Fatal(err)
 	}
 	if err := v.Unmarshal(c); err != nil {
 		panic(err)

@@ -27,8 +27,8 @@ import (
 // Injectors from wire.go:
 
 func CreateApp() (*base.Application, error) {
-	config := conf.ProviderConfig()
 	loggerLogger := logger.NewZapLogger()
+	config := conf.ProviderConfig(loggerLogger)
 	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
 	authService := auth.NewAuthService(config, jwksJWKS, loggerLogger)
 	userController := v1.NewUserController(authService)

@@ -20,3 +20,11 @@ metrics:
   enabled: true
   port: 8081
   host: 0.0.0.0
+
+dashscope:
+  api_key: ""
+  api_base: "https://dashscope.aliyuncs.com"
+
+openai:
+  api_key: ""
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"

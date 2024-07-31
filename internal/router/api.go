@@ -9,15 +9,17 @@ type Api struct {
 	User      *v1.UserController
 	Tool      *v1.ToolController
 	Assistant *v1.AssistantController
+	Chat      *v1.ChatController
 }
 
 func NewApiRoute(
 	User *v1.UserController,
 	Tool *v1.ToolController,
 	Assistant *v1.AssistantController,
+	Chat *v1.ChatController,
 ) *Api {
 	return &Api{
-		User, Tool, Assistant,
+		User, Tool, Assistant, Chat,
 	}
 }
 
@@ -37,4 +39,8 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.GET("/assistants/:id/tools", a.Assistant.ListTool)
 	r.POST("/assistants/:id/tools/:tool_id", a.Assistant.BindTool)
 	r.DELETE("/assistants/:id/tools/:tool_id", a.Assistant.UnbindTool)
+
+	r.GET("/chats", a.Chat.List)
+	r.POST("/chats", a.Chat.Create)
+	r.DELETE("/chats/:id", a.Chat.Delete)
 }

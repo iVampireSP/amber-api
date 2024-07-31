@@ -5,6 +5,7 @@ import (
 	"rag-new/internal/base/logger"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
+	"rag-new/internal/service/chat"
 	"rag-new/internal/service/jwks"
 	"rag-new/internal/service/tool"
 )
@@ -15,6 +16,7 @@ type Service struct {
 	Auth      *auth.Service
 	Tool      *tool.Service
 	Assistant *assistant.Service
+	Chat      *chat.Service
 }
 
 var Provider = wire.NewSet(
@@ -22,6 +24,7 @@ var Provider = wire.NewSet(
 	auth.NewAuthService,
 	tool.NewService,
 	assistant.NewService,
+	chat.NewService,
 	NewService,
 )
 
@@ -31,8 +34,9 @@ func NewService(
 	auth *auth.Service,
 	tool *tool.Service,
 	assistant *assistant.Service,
+	chat *chat.Service,
 ) *Service {
 	return &Service{
-		logger, jwks, auth, tool, assistant,
+		logger, jwks, auth, tool, assistant, chat,
 	}
 }

@@ -19,6 +19,7 @@ import (
 	"rag-new/internal/service"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
+	"rag-new/internal/service/chat"
 	"rag-new/internal/service/jwks"
 	"rag-new/internal/service/tool"
 )
@@ -39,11 +40,13 @@ func CreateApp() (*base.Application, error) {
 	toolController := v1.NewToolController(toolService, authService)
 	assistantService := assistant.NewService(engine)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService)
-	api := router.NewApiRoute(userController, toolController, assistantController)
+	chatService := chat.NewService(engine, assistantService)
+	chatController := v1.NewChatController(authService, chatService)
+	api := router.NewApiRoute(userController, toolController, assistantController, chatController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService)
 	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware)
 	return application, nil
 }

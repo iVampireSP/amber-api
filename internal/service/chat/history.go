@@ -43,3 +43,9 @@ func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*ent
 	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Limit(1).OrderBy("created_at desc").Get(&chatMessage)
 	return &chatMessage, err
 }
+
+// UpdateMessageContent update message content
+func (s *Service) UpdateMessageContent(ctx context.Context, chatMessage *entity.ChatMessage) error {
+	_, err := s.x.Context(ctx).ID(chatMessage.ID).Cols("content").Update(chatMessage)
+	return err
+}

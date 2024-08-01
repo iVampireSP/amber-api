@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"rag-new/internal/base"
+	"rag-new/internal/entity"
+	"rag-new/internal/service/llm"
 
 	"github.com/bytedance/sonic"
 	"github.com/spf13/cobra"
@@ -26,17 +28,18 @@ var llmCmd = &cobra.Command{
 			return
 		}
 
-		llm, err := openai.New(
-			openai.WithToken(app.Config.OpenAI.ApiKey),
-			openai.WithBaseURL(app.Config.OpenAI.BaseUrl),
-			//openai.WithModel("qwen-turbo"),
-			openai.WithModel("qwen-turbo"),
-		)
+		historyCallLLM(app)
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		callLLM(llm)
+		//llm, err := openai.New(
+		//	openai.WithToken(app.Config.OpenAI.ApiKey),
+		//	openai.WithBaseURL(app.Config.OpenAI.BaseUrl),
+		//	openai.WithModel(app.Config.OpenAI.Model),
+		//)
+
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//callLLM(llm)
 
 		//TestCall(app)
 
@@ -54,6 +57,44 @@ type FunctionChunk struct {
 }
 
 type FunctionCallArgs map[string]interface{}
+
+func historyCallLLM(app *base.Application) {
+	// fake history
+	histories := []*entity.ChatHistory{
+		{
+			Role:    entity.RoleHuman,
+			Content: "北京天气如何",
+		},
+	}
+
+	var responseChan = make(chan *llm.AssistantResponse)
+
+	go func() {
+		fmt.Print(">> ")
+
+		for {
+			select {
+			case msg := <-responseChan:
+				//fmt.Println("接收到", msg.Content)
+				fmt.Print(msg.Content)
+
+				if msg.State == llm.StateDone {
+					fmt.Println("")
+					break
+				}
+			}
+		}
+
+	}()
+
+	err := app.Service.LLM.StreamChat(responseChan, histories)
+	if err != nil {
+		return
+	}
+
+	//
+
+}
 
 func callLLM(llm *openai.LLM) {
 

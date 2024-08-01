@@ -15,14 +15,26 @@ func (a *Base) TableName() string {
 	return "chats"
 }
 
+type ChatRole string
+
+var (
+	RoleAssistant ChatRole = "assistant"
+	RoleHuman     ChatRole = "user"
+	RoleSystem    ChatRole = "system"
+)
+
+func (c ChatRole) String() string {
+	return string(c)
+}
+
 type ChatHistory struct {
 	Base         `xorm:"extends"`
-	ChatId       int64  `xorm:"varchar(255) notnull" json:"assistant_id"`
-	Content      string `xorm:"varchar(255) notnull" json:"content"`
-	Role         string `xorm:"varchar(255) notnull" json:"role"`
-	InputTokens  int    `xorm:"varchar(255) notnull" json:"input_tokens"`
-	OutputTokens int    `xorm:"varchar(255) notnull" json:"output_tokens"`
-	TotalTokens  int    `xorm:"varchar(255) notnull" json:"total_tokens"`
+	ChatId       int64    `xorm:"varchar(255) notnull" json:"assistant_id"`
+	Content      string   `xorm:"varchar(255) notnull" json:"content"`
+	Role         ChatRole `xorm:"varchar(255) notnull" json:"role"`
+	InputTokens  int      `xorm:"varchar(255) notnull" json:"input_tokens"`
+	OutputTokens int      `xorm:"varchar(255) notnull" json:"output_tokens"`
+	TotalTokens  int      `xorm:"varchar(255) notnull" json:"total_tokens"`
 }
 
 func (at *ChatHistory) TableName() string {

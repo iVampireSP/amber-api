@@ -50,6 +50,7 @@ type Metrics struct {
 type OpenAI struct {
 	ApiKey  string `yaml:"api_key" mapstructure:"api_key"`
 	BaseUrl string `yaml:"api_base" mapstructure:"base_url"`
+	Model   string `yaml:"model" mapstructure:"model"`
 }
 
 func CreateConfigIfNotExists() {

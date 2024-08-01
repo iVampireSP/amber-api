@@ -21,6 +21,7 @@ import (
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/jwks"
+	"rag-new/internal/service/llm"
 	"rag-new/internal/service/tool"
 )
 
@@ -46,7 +47,8 @@ func CreateApp() (*base.Application, error) {
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService)
+	llmService := llm.NewLLM(config)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService)
 	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware)
 	return application, nil
 }

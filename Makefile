@@ -1,6 +1,7 @@
 .PHONY: install-deps generate
 
 install-deps:
+	go install github.com/google/wire/cmd/wire@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
 
 generate:

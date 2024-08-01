@@ -284,7 +284,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ping"
+                    "chat"
                 ],
                 "summary": "获取所有 Chat",
                 "responses": {
@@ -299,7 +299,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.CurrentUserResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                            }
                                         }
                                     }
                                 }
@@ -323,7 +326,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ping"
+                    "chat"
                 ],
                 "summary": "Create Chat",
                 "responses": {
@@ -338,7 +341,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.CurrentUserResponse"
+                                            "$ref": "#/definitions/rag-new_internal_entity.Chat"
                                         }
                                     }
                                 }
@@ -350,9 +353,17 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
                     }
                 }
-            },
+            }
+        },
+        "/api/v1/chats/{id}": {
             "delete": {
                 "description": "get string by ID",
                 "consumes": [
@@ -362,9 +373,50 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ping"
+                    "chat"
                 ],
                 "summary": "Delete Chat",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/chats/{id}/messages": {
+            "get": {
+                "description": "get string by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_message"
+                ],
+                "summary": "查看聊天记录",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -377,7 +429,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.CurrentUserResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.ChatMessage"
+                                            }
                                         }
                                     }
                                 }
@@ -386,6 +441,87 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "get string by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_message"
+                ],
+                "summary": "添加聊天记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Chat ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Message",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageAddRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
                         }
@@ -671,6 +807,61 @@ const docTemplate = `{
                 }
             }
         },
+        "rag-new_internal_entity.Chat": {
+            "type": "object",
+            "properties": {
+                "assistant_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "rag-new_internal_entity.ChatMessage": {
+            "type": "object",
+            "properties": {
+                "assistant_id": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "input_tokens": {
+                    "type": "integer"
+                },
+                "output_tokens": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "total_tokens": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "rag-new_internal_entity.Tool": {
             "type": "object",
             "properties": {
@@ -723,6 +914,26 @@ const docTemplate = `{
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "rag-new_internal_schema.ChatMessageAddRequest": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "rag-new_internal_schema.ChatMessageResponse": {
+            "type": "object",
+            "properties": {
+                "stream_id": {
+                    "type": "string"
                 }
             }
         },

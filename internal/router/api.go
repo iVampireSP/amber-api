@@ -43,4 +43,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.GET("/chats", a.Chat.List)
 	r.POST("/chats", a.Chat.Create)
 	r.DELETE("/chats/:id", a.Chat.Delete)
+
+	r.GET("/chats/:id/messages", a.Chat.ListChatMessage)
+	r.POST("/chats/:id/messages", a.Chat.AddChatMessage)
 }

@@ -13,6 +13,7 @@ import (
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
 	"rag-new/internal/base/orm"
+	"rag-new/internal/base/redis"
 	"rag-new/internal/base/server"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
@@ -42,17 +43,18 @@ func CreateApp() (*base.Application, error) {
 	assistantService := assistant.NewService(engine)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService)
 	chatService := chat.NewService(engine, assistantService)
-	chatController := v1.NewChatController(authService, chatService)
+	client := redis.NewRedis(config)
+	chatController := v1.NewChatController(authService, chatService, client)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	llmService := llm.NewLLM(config)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService)
-	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware)
+	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, middleware.Provider, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, redis.NewRedis, middleware.Provider, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

@@ -60,7 +60,7 @@ type FunctionCallArgs map[string]interface{}
 
 func historyCallLLM(app *base.Application) {
 	// fake history
-	histories := []*entity.ChatHistory{
+	histories := []*entity.ChatMessage{
 		{
 			Role:    entity.RoleHuman,
 			Content: "北京天气如何",
@@ -80,6 +80,9 @@ func historyCallLLM(app *base.Application) {
 
 				if msg.State == llm.StateDone {
 					fmt.Println("")
+					// 关闭 chan
+					close(responseChan)
+
 					break
 				}
 			}

@@ -29,6 +29,42 @@ definitions:
       updated_at:
         type: string
     type: object
+  rag-new_internal_entity.Chat:
+    properties:
+      assistant_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  rag-new_internal_entity.ChatMessage:
+    properties:
+      assistant_id:
+        type: integer
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      input_tokens:
+        type: integer
+      output_tokens:
+        type: integer
+      role:
+        type: string
+      total_tokens:
+        type: integer
+      updated_at:
+        type: string
+    type: object
   rag-new_internal_entity.Tool:
     properties:
       api_key:
@@ -65,6 +101,19 @@ definitions:
     required:
     - description
     - name
+    type: object
+  rag-new_internal_schema.ChatMessageAddRequest:
+    properties:
+      message:
+        maxLength: 255
+        type: string
+    required:
+    - message
+    type: object
+  rag-new_internal_schema.ChatMessageResponse:
+    properties:
+      stream_id:
+        type: string
     type: object
   rag-new_internal_schema.CurrentUserResponse:
     properties:
@@ -305,29 +354,6 @@ paths:
       tags:
       - assistant
   /api/v1/chats:
-    delete:
-      consumes:
-      - application/json
-      description: get string by ID
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-      summary: Delete Chat
-      tags:
-      - ping
     get:
       consumes:
       - application/json
@@ -342,7 +368,9 @@ paths:
             - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.Chat'
+                  type: array
               type: object
         "400":
           description: Bad Request
@@ -350,7 +378,7 @@ paths:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
       summary: 获取所有 Chat
       tags:
-      - ping
+      - chat
     post:
       consumes:
       - application/json
@@ -365,15 +393,123 @@ paths:
             - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
+                  $ref: '#/definitions/rag-new_internal_entity.Chat'
               type: object
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
       summary: Create Chat
       tags:
-      - ping
+      - chat
+  /api/v1/chats/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: get string by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: Delete Chat
+      tags:
+      - chat
+  /api/v1/chats/{id}/messages:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.ChatMessage'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 查看聊天记录
+      tags:
+      - chat_message
+    post:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Chat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Message
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ChatMessageAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 添加聊天记录
+      tags:
+      - chat_message
   /api/v1/ping:
     get:
       consumes:

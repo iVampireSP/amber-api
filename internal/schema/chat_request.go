@@ -6,10 +6,10 @@ type ChatCreateRequest struct {
 	UserId      UserId `json:"user_id" binding:"-"`
 }
 
-type ChatHistoryAddRequest struct {
+type ChatMessageAddRequest struct {
 	Message string `json:"message" binding:"required" validate:"max=255"`
 }
 
-type ChatHistoryResponse struct {
+type ChatMessageResponse struct {
 	StreamId string `json:"stream_id"`
 }

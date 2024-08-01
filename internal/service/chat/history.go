@@ -1,0 +1,45 @@
+package chat
+
+import (
+	"context"
+	"rag-new/internal/entity"
+	"rag-new/internal/schema"
+)
+
+func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
+	var ChatMessage []*entity.ChatMessage
+	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Find(&ChatMessage)
+	return ChatMessage, err
+}
+
+func (s *Service) CreateChatMessage(ctx context.Context, ChatMessage *entity.ChatMessage) error {
+	_, err := s.x.Context(ctx).Insert(ChatMessage)
+	return err
+}
+
+func (s *Service) DeleteChatMessage(ctx context.Context, ChatMessage *entity.ChatMessage) error {
+	_, err := s.x.Context(ctx).ID(ChatMessage.ID).Delete(ChatMessage)
+	return err
+}
+
+func (s *Service) DeleteChatMessageByChatId(ctx context.Context, chatId int64) error {
+	_, err := s.x.Context(ctx).Where("chat_id = ?", chatId).Delete(&entity.ChatMessage{})
+	return err
+}
+
+func (s *Service) DeleteChatMessageByAssistantId(ctx context.Context, assistantId int64) error {
+	_, err := s.x.Context(ctx).Where("assistant_id = ?", assistantId).Delete(&entity.ChatMessage{})
+	return err
+}
+
+func (s *Service) DeleteChatMessageByUserId(ctx context.Context, userId schema.UserId) error {
+	_, err := s.x.Context(ctx).Where("user_id = ?", userId).Delete(&entity.ChatMessage{})
+	return err
+}
+
+// GetLatestMessage get latest chat message
+func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*entity.ChatMessage, error) {
+	var chatMessage entity.ChatMessage
+	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Limit(1).OrderBy("created_at desc").Get(&chatMessage)
+	return &chatMessage, err
+}

@@ -1,6 +1,7 @@
 package base
 
 import (
+	"github.com/redis/go-redis/v9"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
 	"rag-new/internal/base/server"
@@ -16,6 +17,7 @@ type Application struct {
 	X          *xorm.Engine
 	Service    *service.Service
 	Middleware *middleware.Middleware
+	Redis      *redis.Client
 }
 
 func NewApplication(
@@ -25,6 +27,7 @@ func NewApplication(
 	x *xorm.Engine,
 	services *service.Service,
 	middleware *middleware.Middleware,
+	redis *redis.Client,
 ) *Application {
 	return &Application{
 		Config:     config,
@@ -33,5 +36,6 @@ func NewApplication(
 		X:          x,
 		Service:    services,
 		Middleware: middleware,
+		Redis:      redis,
 	}
 }

@@ -78,7 +78,7 @@ type ToolDiscoveryOutput struct {
 	HomepageUrl   string                         `json:"homepage_url"`
 	CallbackUrl   string                         `json:"callback_url"`
 	Description   string                         `json:"description"`
-	ToolId        int                            `json:"tool_id"`
+	ToolId        int64                          `json:"tool_id"`
 	ToolFunctions []ToolDiscoveryOutputFunctions `json:"function"`
 }
 type ToolDiscoveryOutputFunctions struct {

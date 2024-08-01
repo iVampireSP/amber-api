@@ -12,6 +12,8 @@ type Config struct {
 
 	Database *Database `yaml:"database"`
 
+	Redis *Redis `yaml:"redis"`
+
 	JWKS *JWKS `yaml:"jwks"`
 
 	Metrics *Metrics `yaml:"metrics"`
@@ -35,6 +37,13 @@ type Database struct {
 	Password string `yaml:"password"`
 	Name     string `yaml:"name"`
 	SslMode  string `yaml:"sslmode"`
+}
+
+type Redis struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
 }
 
 type JWKS struct {

@@ -10,7 +10,7 @@ import (
 )
 
 // StreamChat 执行对话
-func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*entity.ChatHistory, tools ...llms.Tool) error {
+func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*entity.ChatMessage, tools ...llms.Tool) error {
 	var historyContent []llms.MessageContent
 
 	for _, h := range history {

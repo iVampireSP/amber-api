@@ -27,7 +27,7 @@ func (c ChatRole) String() string {
 	return string(c)
 }
 
-type ChatHistory struct {
+type ChatMessage struct {
 	Base         `xorm:"extends"`
 	ChatId       int64    `xorm:"varchar(255) notnull" json:"assistant_id"`
 	Content      string   `xorm:"varchar(255) notnull" json:"content"`
@@ -37,6 +37,6 @@ type ChatHistory struct {
 	TotalTokens  int      `xorm:"varchar(255) notnull" json:"total_tokens"`
 }
 
-func (at *ChatHistory) TableName() string {
-	return "chat_histories"
+func (at *ChatMessage) TableName() string {
+	return "chat_messages"
 }

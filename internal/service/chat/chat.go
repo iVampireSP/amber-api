@@ -76,8 +76,8 @@ func (s *Service) ListChatFromAssistantId(ctx context.Context, assistantId int64
 }
 
 // StreamChat 执行对话
-func (s *Service) StreamChat(ctx context.Context, assistantId int64, history []*entity.ChatHistory) ([]*entity.Chat, error) {
-	var chats []*entity.Chat
-	err := s.x.Context(ctx).Where("assistant_id = ?", assistantId).Find(&chats)
-	return chats, err
-}
+//func (s *Service) StreamChat(ctx context.Context, assistantId int64, history []*entity.ChatHistory) ([]*entity.Chat, error) {
+//	var chats []*entity.Chat
+//	err := s.x.Context(ctx).Where("assistant_id = ?", assistantId).Find(&chats)
+//	return chats, err
+//}

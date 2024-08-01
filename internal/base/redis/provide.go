@@ -8,7 +8,6 @@ import (
 )
 
 func NewRedis(c *conf.Config) *redis.Client {
-	//var pass string
 	var r = redis.NewClient(&redis.Options{
 		Addr:     c.Redis.Host + ":" + strconv.Itoa(c.Redis.Port),
 		Password: c.Redis.Password,

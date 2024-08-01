@@ -503,6 +503,15 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "409":
+          description: Conflict
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
         "500":
           description: Internal Server Error
           schema:
@@ -534,6 +543,58 @@ paths:
       summary: Greet
       tags:
       - ping
+  /api/v1/stream/{stream_id}:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Chat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Chat stream id
+        in: path
+        name: stream_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "409":
+          description: Conflict
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 流式传输聊天内容
+      tags:
+      - chat_message
   /api/v1/tools:
     get:
       consumes:

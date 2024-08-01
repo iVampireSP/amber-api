@@ -9,6 +9,8 @@ import (
 	"rag-new/internal/entity"
 )
 
+type Callback func(string)
+
 // StreamChat 执行对话
 func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*entity.ChatMessage, tools ...llms.Tool) error {
 	var historyContent []llms.MessageContent
@@ -145,14 +147,14 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
 
-		//responseChan <- &AssistantResponse{
-		//	State:   StateDone,
-		//	Content: resp.Choices[0].Content,
-		//}
+		responseChan <- &AssistantResponse{
+			State: StateDone,
+		}
 
 		//fmt.Println("本轮历史", historyContent)
 	}
 
+	close(responseChan)
 	return nil
 }
 

@@ -145,10 +145,10 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
 
-		responseChan <- &AssistantResponse{
-			State:   StateDone,
-			Content: resp.Choices[0].Content,
-		}
+		//responseChan <- &AssistantResponse{
+		//	State:   StateDone,
+		//	Content: resp.Choices[0].Content,
+		//}
 
 		//fmt.Println("本轮历史", historyContent)
 	}

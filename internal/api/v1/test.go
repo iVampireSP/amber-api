@@ -26,14 +26,14 @@ func NewUserController(authService *auth.Service) *UserController {
 // @Failure      400  {object}  schema.ResponseBody
 // @Router       /api/v1/ping [get]
 func (u *UserController) Test(c *gin.Context) {
-	//user := u.authService.GetUser(c)
+	user := u.authService.GetUser(c)
 
-	//var currentUserResponse = &schema.CurrentUserResponse{
-	//	IP:        c.ClientIP(),
-	//	Valid:     user.Valid,
-	//	UserEmail: user.Token.Email,
-	//	UserId:    user.Token.Sub,
-	//}
+	var currentUserResponse = &schema.CurrentUserResponse{
+		IP:        c.ClientIP(),
+		Valid:     user.Valid,
+		UserEmail: user.Token.Email,
+		UserId:    user.Token.Sub,
+	}
 
-	schema.NewResponse(c).Status(http.StatusOK).Data("hello").Send()
+	schema.NewResponse(c).Status(http.StatusOK).Data(currentUserResponse).Send()
 }

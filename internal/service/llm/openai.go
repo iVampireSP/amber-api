@@ -2,7 +2,6 @@ package llm
 
 import (
 	"context"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
@@ -79,14 +78,14 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 		respChoice := resp.Choices[0]
 
 		if respChoice.FuncCall != nil {
-			fmt.Println("FunCall 检测到工具调用")
+			//fmt.Println("FunCall 检测到工具调用")
 
 			isToolCall = true
 			requestAgain = true
 		}
 
 		if isToolCall {
-			fmt.Printf("正在调用: %v\n", respChoice.FuncCall.Name)
+			//fmt.Printf("正在调用: %v\n", respChoice.FuncCall.Name)
 
 			var fullArgs = ""
 
@@ -102,7 +101,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 			historyContent = append(historyContent, assistantResponse)
 
-			fmt.Println("最终参数", fullArgs)
+			//fmt.Println("最终参数", fullArgs)
 
 			// 解析工具
 			var functionCallArgs FunctionCallArgs
@@ -152,7 +151,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
 
-		fmt.Println("本轮历史", historyContent)
+		//fmt.Println("本轮历史", historyContent)
 	}
 
 	responseChan <- &AssistantResponse{
@@ -170,7 +169,7 @@ func (s *Service) spiltFunctionName(functionName string) string {
 	// 从第 1 个开始取到最后一个
 	var toolName = strings.Join(functionNames[1:], "_")
 
-	fmt.Println("解析的工具名称：" + toolName)
+	//fmt.Println("解析的工具名称：" + toolName)
 
 	return toolName
 }

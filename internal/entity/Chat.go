@@ -11,6 +11,11 @@ type Chat struct {
 	UserId      schema.UserId `xorm:"user_id int(11) notnull" json:"user_id"`
 }
 
+type ChatWithAssistant struct {
+	Chat      `xorm:"extends"`
+	Assistant *Assistant `xorm:"extends" json:"assistant"`
+}
+
 func (a *Base) TableName() string {
 	return "chats"
 }

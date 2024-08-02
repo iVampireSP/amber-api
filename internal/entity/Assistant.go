@@ -18,10 +18,19 @@ func (a *Assistant) TableName() string {
 
 type AssistantTool struct {
 	Base        `xorm:"extends"`
-	AssistantId int64 `xorm:"varchar(255) notnull" json:"assistant_id"`
-	ToolId      int64 `xorm:"varchar(255) notnull" json:"tool_id"`
+	AssistantId int64 `xorm:"int(255) notnull" json:"assistant_id"`
+	ToolId      int64 `xorm:"int(255) notnull" json:"tool_id"`
+}
+
+type AssistantToolType struct {
+	Base      `xorm:"extends"`
+	Assistant *Assistant `xorm:"extends" json:"assistant"`
+	Tool      *Tool      `xorm:"extends" json:"tool"`
 }
 
 func (at *AssistantTool) TableName() string {
+	return "assistant_tools"
+}
+func (att *AssistantToolType) TableName() string {
 	return "assistant_tools"
 }

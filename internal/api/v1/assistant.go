@@ -105,7 +105,7 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 		return
 	}
 
-	toolList, err := u.assistantService.ListAssistantTool(c, int64(assistantId))
+	toolList, err := u.assistantService.ListAssistantTool(c, assistantEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -163,7 +163,7 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 		return
 	}
 
-	assistantTool, err := u.assistantService.BindTool(c, assistantId, toolId)
+	assistantTool, err := u.assistantService.BindTool(c, assistantEntity, toolEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -221,7 +221,7 @@ func (u *AssistantController) UnbindTool(c *gin.Context) {
 		return
 	}
 
-	err = u.assistantService.UnbindTool(c, assistantId, toolId)
+	err = u.assistantService.UnbindTool(c, assistantEntity, toolEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/bytedance/sonic"
-	"github.com/tmc/langchaingo/jsonschema"
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
+	"strings"
 )
 
 type Callback func(string)
@@ -53,17 +53,21 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 				//fmt.Printf("Received chunk: %s\n", chunk)
 
-				var stringChunk = string(chunk)
+				// 检测是否 json
+				var isJson = sonic.Valid(chunk)
+				if !isJson {
+					var stringChunk = string(chunk)
 
-				responseChan <- &AssistantResponse{
-					State: StateChunk,
-					ChunkMessage: &ChunkMessage{
+					responseChan <- &AssistantResponse{
+						State: StateChunk,
+						ChunkMessage: &ChunkMessage{
+							Content: stringChunk,
+						},
 						Content: stringChunk,
-					},
-					Content: stringChunk,
-				}
+					}
 
-				fullResponse = append(fullResponse, chunk)
+					fullResponse = append(fullResponse, chunk)
+				}
 
 				return nil
 			}),
@@ -108,7 +112,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 			}
 
 			responseChan <- &AssistantResponse{
-				State: StateChunk,
+				State: StateToolCalling,
 				ToolCallMessage: &ToolCallMessage{
 					Name: respChoice.FuncCall.Name,
 					Args: functionCallArgs,
@@ -117,8 +121,9 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 			var fakeToolResponseContent = "天气晴天，气温 25°C"
 
-			switch respChoice.FuncCall.Name {
-			case "getCurrentWeather":
+			functionName := s.spiltFunctionName(respChoice.FuncCall.Name)
+			switch functionName {
+			case "get_current_weather":
 
 				historyContent = append(historyContent, llms.MessageContent{
 					Role: llms.ChatMessageTypeTool,
@@ -134,7 +139,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 			}
 
 			responseChan <- &AssistantResponse{
-				State: StateChunk,
+				State: StateToolResponse,
 				ToolResponseMessage: &ToolResponseMessage{
 					Name:    respChoice.FuncCall.Name,
 					Content: fakeToolResponseContent,
@@ -147,90 +152,25 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
 
-		responseChan <- &AssistantResponse{
-			State: StateDone,
-		}
-
-		//fmt.Println("本轮历史", historyContent)
+		fmt.Println("本轮历史", historyContent)
 	}
 
-	close(responseChan)
+	responseChan <- &AssistantResponse{
+		State: StateDone,
+	}
+
+	//close(responseChan)
 	return nil
 }
 
-var tools1 = []llms.Tool{
-	{
-		Type: "function",
-		Function: &llms.FunctionDefinition{
-			Name:        "getCurrentWeather",
-			Description: "Get the current weather in a given location",
-			Parameters: jsonschema.Definition{
-				Type: jsonschema.Object,
-				Properties: map[string]jsonschema.Definition{
-					"rationale": {
-						Type:        jsonschema.String,
-						Description: "The rationale for choosing this function call with these parameters",
-					},
-					"location": {
-						Type:        jsonschema.String,
-						Description: "The city and state, e.g. San Francisco, CA",
-					},
-					"unit": {
-						Type: jsonschema.String,
-						Enum: []string{"celsius", "fahrenheit"},
-					},
-				},
-				Required: []string{"rationale", "location"},
-			},
-		},
-	},
-	{
-		Type: "function",
-		Function: &llms.FunctionDefinition{
-			Name:        "getTomorrowWeather",
-			Description: "Get the predicted weather in a given location",
-			Parameters: jsonschema.Definition{
-				Type: jsonschema.Object,
-				Properties: map[string]jsonschema.Definition{
-					"rationale": {
-						Type:        jsonschema.String,
-						Description: "The rationale for choosing this function call with these parameters",
-					},
-					"location": {
-						Type:        jsonschema.String,
-						Description: "The city and state, e.g. San Francisco, CA",
-					},
-					"unit": {
-						Type: jsonschema.String,
-						Enum: []string{"celsius", "fahrenheit"},
-					},
-				},
-				Required: []string{"rationale", "location"},
-			},
-		},
-	},
-	{
-		Type: "function",
-		Function: &llms.FunctionDefinition{
-			Name:        "getSuggestedPrompts",
-			Description: "Given the user's input prompt suggest some related prompts",
-			Parameters: jsonschema.Definition{
-				Type: jsonschema.Object,
-				Properties: map[string]jsonschema.Definition{
-					"rationale": {
-						Type:        jsonschema.String,
-						Description: "The rationale for choosing this function call with these parameters",
-					},
-					"suggestions": {
-						Type: jsonschema.Array,
-						Items: &jsonschema.Definition{
-							Type:        jsonschema.String,
-							Description: "A suggested prompt",
-						},
-					},
-				},
-				Required: []string{"rationale", "suggestions"},
-			},
-		},
-	},
+func (s *Service) spiltFunctionName(functionName string) string {
+	// 根据 _ 分割
+	var functionNames = strings.Split(functionName, "_")
+
+	// 从第 1 个开始取到最后一个
+	var toolName = strings.Join(functionNames[1:], "_")
+
+	fmt.Println("解析的工具名称：" + toolName)
+
+	return toolName
 }

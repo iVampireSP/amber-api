@@ -9,7 +9,7 @@ import (
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
 	var ChatMessage []*entity.ChatMessage
-	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Find(&ChatMessage)
+	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).OrderBy("created_at desc").Find(&ChatMessage)
 	return ChatMessage, err
 }
 

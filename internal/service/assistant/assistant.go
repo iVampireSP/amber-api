@@ -2,6 +2,7 @@ package assistant
 
 import (
 	"context"
+	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 )
@@ -44,4 +45,34 @@ func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.Assi
 func (s *Service) DeleteAssistant(ctx context.Context, id int64) error {
 	_, err := s.x.Context(ctx).ID(id).Delete(&entity.Assistant{})
 	return err
+}
+
+func (s *Service) ToLLMTool(ctx context.Context, assistant *entity.Assistant) ([]llms.Tool, error) {
+	var toolList []llms.Tool
+
+	toolEntity, err := s.ListAssistantToolWithType(ctx, assistant)
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换格式
+	for _, v := range toolEntity {
+		var fnData = v.Tool.Data
+		var llmTool = llms.Tool{
+			Type: "function",
+		}
+
+		for _, v := range fnData.ToolFunctions {
+			for _, j := range v.Function {
+				llmTool.Function = &llms.FunctionDefinition{
+					Name:        j.Name,
+					Description: j.Description,
+					Parameters:  j.Parameters,
+				}
+			}
+		}
+		toolList = append(toolList, llmTool)
+	}
+	return toolList, nil
+
 }

@@ -76,6 +76,9 @@ func historyCallLLM(app *base.Application) {
 			select {
 			case msg := <-responseChan:
 				//fmt.Println("接收到", msg.Content)
+				if msg == nil {
+					break
+				}
 				fmt.Print(msg.Content)
 
 				if msg.State == llm.StateDone {
@@ -90,7 +93,7 @@ func historyCallLLM(app *base.Application) {
 
 	}()
 
-	err := app.Service.LLM.StreamChat(responseChan, histories)
+	err := app.Service.LLM.StreamChat(responseChan, histories, tools...)
 	if err != nil {
 		return
 	}

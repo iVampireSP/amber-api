@@ -45,7 +45,7 @@ func CreateApp() (*base.Application, error) {
 	chatService := chat.NewService(engine, assistantService)
 	client := redis.NewRedis(config)
 	llmService := llm.NewLLM(config)
-	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger)
+	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)

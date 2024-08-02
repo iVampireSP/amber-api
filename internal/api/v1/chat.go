@@ -13,6 +13,7 @@ import (
 	"rag-new/internal/entity"
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/llm"
@@ -22,15 +23,16 @@ import (
 )
 
 type ChatController struct {
-	authService *auth.Service
-	chatService *chat.Service
-	redis       *redis.Client
-	llmService  *llm.Service
-	logger      *logger.Logger
+	authService      *auth.Service
+	chatService      *chat.Service
+	redis            *redis.Client
+	llmService       *llm.Service
+	logger           *logger.Logger
+	assistantService *assistant.Service
 }
 
-func NewChatController(authService *auth.Service, chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger) *ChatController {
-	return &ChatController{authService, chatService, redis, llmService, logger}
+func NewChatController(authService *auth.Service, chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger, assistantService *assistant.Service) *ChatController {
+	return &ChatController{authService, chatService, redis, llmService, logger, assistantService}
 }
 
 // List godoc
@@ -342,9 +344,22 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
+	assistantEntity, err := u.assistantService.GetAssistant(c, chatEntity.AssistantId)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	// 获取 assistant 绑定的 tools
+	tools, err := u.assistantService.ToLLMTool(c, assistantEntity)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
 	// 提取 history
 	histories, err := u.chatService.GetChatMessage(c, chatEntity)
-	var llmResonseChan = make(chan *llm.AssistantResponse)
+	var llmResponseChan = make(chan *llm.AssistantResponse)
 
 	// SSE
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
@@ -353,7 +368,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	c.Writer.Header().Set("Transfer-Encoding", "chunked")
 
 	go func() {
-		err = u.llmService.StreamChat(llmResonseChan, histories)
+		err = u.llmService.StreamChat(llmResponseChan, histories, tools...)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 		}
@@ -362,7 +377,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	var llmFullMessage = ""
 	c.Stream(func(w io.Writer) bool {
 		// Emit Server Sent Events compatible
-		msg, ok := <-llmResonseChan
+		msg, ok := <-llmResponseChan
 		if !ok {
 			return false
 		}
@@ -371,7 +386,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 			return true
 		}
 
-		if msg.State == llm.StateChunk {
+		if msg.State == llm.StateChunk && msg.ChunkMessage != nil {
 			llmFullMessage += msg.ChunkMessage.Content
 		}
 
@@ -384,7 +399,8 @@ func (u *ChatController) Stream(c *gin.Context) {
 		c.SSEvent("data", string(j))
 
 		if msg.State == llm.StateDone {
-			return true
+			// 退出
+			return false
 		}
 
 		c.Writer.Flush()
@@ -396,16 +412,22 @@ func (u *ChatController) Stream(c *gin.Context) {
 	u.redis.Del(c, streamIdCacheKey)
 	u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))
 
-	// 添加到消息 entity.ChatMessage
-	newMessage := &entity.ChatMessage{
-		Role:    entity.RoleAssistant,
-		Content: llmFullMessage,
-		ChatId:  chatEntity.ID,
+	if llmFullMessage != "" {
+		// 添加到消息 entity.ChatMessage
+		newMessage := &entity.ChatMessage{
+			Role:    entity.RoleAssistant,
+			Content: llmFullMessage,
+			ChatId:  chatEntity.ID,
+		}
+
+		err = u.chatService.CreateChatMessage(c, newMessage)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
 	}
 
-	err = u.chatService.CreateChatMessage(c, newMessage)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	// disconnect
+
+	//response.Status(http.StatusOK).Send()
 }

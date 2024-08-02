@@ -35,6 +35,11 @@ const (
 	JWTIDToken     JWTTokenTypes = "id_token"
 )
 
+type UserPublicInfo struct {
+	Name string `json:"name"`
+	Id   UserId `json:"id"`
+}
+
 func (jwtTokenTypes JWTTokenTypes) String() string {
 	return string(jwtTokenTypes)
 }

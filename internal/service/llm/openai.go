@@ -206,11 +206,16 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, user *schema.UserTokenIn
 		return nil, err
 	}
 
+	var userPublicInfo = &schema.UserPublicInfo{
+		Name: user.Name,
+		Id:   user.Sub,
+	}
+
 	var toolRequest = &schema.ToolRemoteRequest{
 		FunctionName: functionName,
 		Parameters:   string(argsJson),
 		ApiKey:       tool.ApiKey,
-		User:         user,
+		User:         userPublicInfo,
 	}
 
 	toolRequestJson, err := sonic.Marshal(toolRequest)

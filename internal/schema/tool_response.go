@@ -5,10 +5,10 @@ type ToolListResponse struct {
 }
 
 type ToolRemoteRequest struct {
-	ApiKey       string         `json:"-"`
-	FunctionName string         `json:"function_name"`
-	Parameters   string         `json:"parameters"`
-	User         *UserTokenInfo `json:"user"`
+	ApiKey       string          `json:"-"`
+	FunctionName string          `json:"function_name"`
+	Parameters   string          `json:"parameters"`
+	User         *UserPublicInfo `json:"user"`
 }
 
 type ToolRemoteResponse struct {

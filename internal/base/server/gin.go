@@ -57,6 +57,7 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 
 	apiV1 := rootGroup.Group("/api/v1")
 	{
+		apiV1.Use(hs.middleware.CORS.AllowAllCORS)
 		apiV1.Use(hs.middleware.JSONResponse.ContentTypeJSON)
 		apiV1.Use(hs.middleware.Auth.RequireJWTIDToken)
 		hs.apiRouter.InitApiRouter(apiV1)
@@ -64,6 +65,7 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 
 	apiV1NoAuth := rootGroup.Group("/api/v1")
 	{
+		apiV1NoAuth.Use(hs.middleware.CORS.AllowAllCORS)
 		hs.apiRouter.InitNoAuthApiRouter(apiV1NoAuth)
 	}
 

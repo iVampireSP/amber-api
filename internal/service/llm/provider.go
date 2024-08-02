@@ -30,21 +30,21 @@ type ChunkMessage struct {
 }
 
 type ToolCallMessage struct {
-	Name string
-	Args FunctionCallArgs
+	Name string           `json:"name"`
+	Args FunctionCallArgs `json:"args"`
 }
 
 type ToolResponseMessage struct {
-	Name    string
-	Content string
+	Name    string `json:"name"`
+	Content string `json:"content"`
 }
 
 type AssistantResponse struct {
-	State               ResponseState
-	ChunkMessage        *ChunkMessage
-	ToolCallMessage     *ToolCallMessage
-	ToolResponseMessage *ToolResponseMessage
-	Content             string
+	State               ResponseState        `json:"state"`
+	ChunkMessage        *ChunkMessage        `json:"chunk_message"`
+	ToolCallMessage     *ToolCallMessage     `json:"tool_call_message"`
+	ToolResponseMessage *ToolResponseMessage `json:"tool_response_message"`
+	Content             string               `json:"content"`
 }
 
 type Service struct {

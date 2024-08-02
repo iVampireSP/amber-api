@@ -18,4 +18,5 @@ var (
 	ErrChatStreamNotOpen                   = errors.New("聊天流未打开，你无法添加消息，请先获取之前的聊天流")
 	ErrChatStreamNotOpenAndOverrideMessage = errors.New(ErrChatStreamNotOpen.Error() + "，我们已经更正上一条消息为本消息的内容")
 	ErrChatStreamNotFound                  = errors.New("未找到该聊天流，你无法获取消息。它可能已经超时了，重新生成一个试试")
+	ErrChatIdNotProvided                   = errors.New("未提供聊天 ID, 这样无法确保聊天记录存在指定的聊天中")
 )

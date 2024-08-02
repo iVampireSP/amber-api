@@ -7,6 +7,7 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"io"
 	"net/http"
 	"rag-new/internal/base/logger"
 	"rag-new/internal/entity"
@@ -18,7 +19,6 @@ import (
 	"rag-new/pkg/consts"
 	"rag-new/pkg/random"
 	"strconv"
-	"time"
 )
 
 type ChatController struct {
@@ -59,6 +59,7 @@ func (u *ChatController) List(c *gin.Context) {
 // @Tags         chat
 // @Accept       json
 // @Produce      json
+// @Param        chat  body  	schema.ChatCreateRequest  true  "Chat"
 // @Success      200  {object}  schema.ResponseBody{data=entity.Chat}
 // @Failure      400  {object}  schema.ResponseBody
 // @Failure      500  {object}  schema.ResponseBody
@@ -311,7 +312,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	if i == 0 {
+	if i == consts.NoRecord {
 		response.Status(http.StatusNotFound).Error(consts.ErrChatStreamNotFound).Send()
 		return
 	}
@@ -357,71 +358,53 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}()
 
-	for {
-		var closed = false
-		select {
-		case msg, ok := <-llmResonseChan:
-			if !ok {
-				closed = true
-				fmt.Println("chan 关闭了")
-				u.sseWrite(c, "完成！")
-				break
-			}
-
-			if msg == nil || msg.Content == "" {
-				fmt.Println("接收到 nil")
-
-				break
-			}
-
-			fmt.Println("接收到", msg.Content)
-
-			j, err := sonic.Marshal(msg)
-			if err != nil {
-				u.logger.Sugar.Error(err)
-			}
-
-			u.sseWrite(c, string(j))
-
-			//fmt.Println(msg.State)
-
-			if msg.State == llm.StateDone {
-				//fmt.Println("完成")
-				u.sseWrite(c, "完成！")
-
-				// 关闭 chan
-				//close(llmResponseChan)
-
-				// 跳出循环
-				break
-			}
-
+	var llmFullMessage = ""
+	c.Stream(func(w io.Writer) bool {
+		// Emit Server Sent Events compatible
+		msg, ok := <-llmResonseChan
+		if !ok {
+			return false
 		}
 
-		// 等待 0.5s
-		time.Sleep(500 * time.Millisecond)
-
-		// 跳出循环
-		if closed {
-			break
+		if msg == nil {
+			return true
 		}
+
+		if msg.State == llm.StateChunk {
+			llmFullMessage += msg.ChunkMessage.Content
+		}
+
+		//fmt.Println("接收到", msg.Content)
+		j, err := sonic.Marshal(msg)
+		if err != nil {
+			u.logger.Sugar.Error(err)
+		}
+
+		c.SSEvent("data", string(j))
+
+		if msg.State == llm.StateDone {
+			return true
+		}
+
+		c.Writer.Flush()
+
+		return true
+	})
+
+	// 移除缓存
+	u.redis.Del(c, streamIdCacheKey)
+	u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))
+
+	// 添加到消息 entity.ChatMessage
+	newMessage := &entity.ChatMessage{
+		Role:    entity.RoleAssistant,
+		Content: llmFullMessage,
+		ChatId:  chatEntity.ID,
 	}
 
-	fmt.Println("ok")
-	//
-	//c.Stream(func(w io.Writer) bool {
-	//	w.Write([]byte("ok"))
-	//	return true
-	//})
-	// TODO: 移除缓存
-	// TODO: 添加到消息 entity.ChatMessage
-
-}
-
-func (u *ChatController) sseWrite(c *gin.Context, msg string) {
-	c.SSEvent("data", msg+"\n\n")
-	_, ok := c.Writer.(http.Flusher)
-	if !ok {
+	err = u.chatService.CreateChatMessage(c, newMessage)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
 }

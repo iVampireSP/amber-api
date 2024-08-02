@@ -4,6 +4,7 @@ import (
 	"context"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
 )
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
@@ -13,6 +14,10 @@ func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*ent
 }
 
 func (s *Service) CreateChatMessage(ctx context.Context, ChatMessage *entity.ChatMessage) error {
+	if ChatMessage.ChatId == consts.NoRecord {
+		return consts.ErrChatIdNotProvided
+	}
+
 	_, err := s.x.Context(ctx).Insert(ChatMessage)
 	return err
 }

@@ -3,7 +3,7 @@ package schema
 type ChatCreateRequest struct {
 	Name        string `json:"name" binding:"required" validate:"max=255"`
 	AssistantId int64  `json:"assistant_id" binding:"required"`
-	UserId      UserId `json:"user_id" binding:"-"`
+	UserId      UserId `json:"user_id" swaggerignore:"true" binding:"-"`
 }
 
 type ChatMessageAddRequest struct {

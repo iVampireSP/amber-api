@@ -4,7 +4,7 @@ type AssistantCreateRequest struct {
 	Name        string `json:"name" binding:"required" validate:"max=255"`
 	Description string `json:"description" binding:"required" validate:"max=255"`
 	Prompt      string `json:"prompt"`
-	UserId      UserId `json:"user_id" binding:"-"`
+	UserId      UserId `json:"user_id" swaggerignore:"true" binding:"-"`
 }
 
 type AssistantUpdateRequest struct {

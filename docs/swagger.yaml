@@ -96,10 +96,19 @@ definitions:
         type: string
       prompt:
         type: string
-      user_id:
-        type: integer
     required:
     - description
+    - name
+    type: object
+  rag-new_internal_schema.ChatCreateRequest:
+    properties:
+      assistant_id:
+        type: integer
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - assistant_id
     - name
     type: object
   rag-new_internal_schema.ChatMessageAddRequest:
@@ -383,6 +392,13 @@ paths:
       consumes:
       - application/json
       description: get string by ID
+      parameters:
+      - description: Chat
+        in: body
+        name: chat
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ChatCreateRequest'
       produces:
       - application/json
       responses:

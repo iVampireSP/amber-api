@@ -329,6 +329,17 @@ const docTemplate = `{
                     "chat"
                 ],
                 "summary": "Create Chat",
+                "parameters": [
+                    {
+                        "description": "Chat",
+                        "name": "chat",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ChatCreateRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1016,9 +1027,22 @@ const docTemplate = `{
                 },
                 "prompt": {
                     "type": "string"
-                },
-                "user_id": {
+                }
+            }
+        },
+        "rag-new_internal_schema.ChatCreateRequest": {
+            "type": "object",
+            "required": [
+                "assistant_id",
+                "name"
+            ],
+            "properties": {
+                "assistant_id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255
                 }
             }
         },

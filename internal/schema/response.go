@@ -78,11 +78,7 @@ func (r *HttpResponse) Send() {
 	}
 
 	// if 20x or 20x, set success
-	if r.httpStatus >= 200 && r.httpStatus < 300 {
-		r.body.Success = true
-	} else {
-		r.body.Success = false
-	}
+	r.body.Success = r.httpStatus >= http.StatusOK && r.httpStatus < http.StatusMultipleChoices
 
 	r.ctx.JSON(r.httpStatus, r.body)
 }

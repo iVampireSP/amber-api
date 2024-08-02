@@ -158,6 +158,7 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
+
 	if toolEntity.ID == consts.NoRecord || toolEntity.UserId != u.authService.GetUserId(c) {
 		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
 		return

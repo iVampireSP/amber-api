@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
 
 	"github.com/bytedance/sonic"
 )
@@ -57,11 +58,9 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 		return nil, err
 	}
 
-	toolEntity.Data = *toolData.Output()
-
 	_, err = s.x.Context(ctx).Insert(&toolEntity)
-
-	toolEntity.Data.ToolId = toolEntity.ID
+	toolData.ToolId = toolEntity.ID
+	toolEntity.Data = *toolData.Output()
 	// update
 	//_, err = s.x.Context(ctx).ID(toolEntity.ID).AllCols().Update(&toolEntity)
 
@@ -72,7 +71,16 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 }
 
 func (s *Service) DeleteTool(ctx context.Context, id int64) error {
-	_, err := s.x.Context(ctx).ID(id).Delete(&entity.Tool{})
+	// 做检查，不能删除已经绑定的 tool
+	count, err := s.x.Context(ctx).Where("tool_id = ?", id).Count(&entity.AssistantTool{})
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return consts.ErrToolFailedDeleteBecauseHasBindAssistant
+	}
+
+	_, err = s.x.Context(ctx).ID(id).Delete(&entity.Tool{})
 	return err
 }
 
@@ -82,7 +90,7 @@ func (s *Service) DeleteTool(ctx context.Context, id int64) error {
 //}
 
 func (s *Service) GetTool(ctx context.Context, id int64) (*entity.Tool, error) {
-	var tool entity.Tool
+	var tool = entity.Tool{}
 	_, err := s.x.Context(ctx).Where("id = ?", id).Get(&tool)
 	return &tool, err
 }

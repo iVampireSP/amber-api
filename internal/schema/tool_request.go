@@ -2,7 +2,7 @@ package schema
 
 import (
 	"github.com/bytedance/sonic"
-	"rag-new/pkg/random"
+	"strconv"
 )
 
 type ToolCreateRequest struct {
@@ -20,6 +20,7 @@ type ToolDiscoveryInput struct {
 	Description string `json:"description"`
 	HomepageUrl string `json:"homepage_url"`
 	CallbackUrl string `json:"callback_url"`
+	ToolId      int64  `json:"-"`
 	Functions   []struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
@@ -47,8 +48,6 @@ func (td *ToolDiscoveryInput) Output() *ToolDiscoveryOutput {
 
 	// foreach
 	for _, v := range td.Functions {
-		randStr := random.String(8)
-
 		var requires = make([]string, 0)
 
 		if len(v.Required) > 0 {
@@ -59,7 +58,7 @@ func (td *ToolDiscoveryInput) Output() *ToolDiscoveryOutput {
 			Type: "function",
 			Function: []ToolDiscoveryOutputFunction{
 				{
-					Name:        randStr + "_" + v.Name,
+					Name:        strconv.Itoa(int(td.ToolId)) + "_" + v.Name,
 					Description: v.Description,
 					Parameters:  v.Parameters,
 					Required:    requires,
@@ -78,7 +77,6 @@ type ToolDiscoveryOutput struct {
 	HomepageUrl   string                         `json:"homepage_url"`
 	CallbackUrl   string                         `json:"callback_url"`
 	Description   string                         `json:"description"`
-	ToolId        int64                          `json:"tool_id"`
 	ToolFunctions []ToolDiscoveryOutputFunctions `json:"function"`
 }
 type ToolDiscoveryOutputFunctions struct {

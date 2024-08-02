@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"rag-new/internal/base"
 	"rag-new/internal/entity"
+	"rag-new/internal/schema"
 	"rag-new/internal/service/llm"
+	"time"
 
 	"github.com/bytedance/sonic"
 	"github.com/spf13/cobra"
@@ -59,6 +61,31 @@ type FunctionChunk struct {
 type FunctionCallArgs map[string]interface{}
 
 func historyCallLLM(app *base.Application) {
+	// assistant
+	//assistant, err := app.Service.Assistant.GetAssistant(context.Background(), 1)
+	//if err != nil {
+	//	return
+	//}
+
+	fakeUser := &schema.UserTokenInfo{
+		Aud:              "",
+		Iss:              "",
+		Iat:              0,
+		Exp:              0,
+		Sub:              0,
+		Scopes:           nil,
+		Id:               0,
+		Uuid:             "",
+		Avatar:           "",
+		Name:             "",
+		EmailVerified:    false,
+		RealNameVerified: false,
+		PhoneVerified:    false,
+		Email:            "",
+		Phone:            "",
+		CreatedAt:        time.Time{},
+	}
+
 	// fake history
 	histories := []*entity.ChatMessage{
 		{
@@ -93,7 +120,7 @@ func historyCallLLM(app *base.Application) {
 
 	}()
 
-	err := app.Service.LLM.StreamChat(responseChan, histories, tools...)
+	err := app.Service.LLM.StreamChat(responseChan, histories, fakeUser, tools...)
 	if err != nil {
 		return
 	}

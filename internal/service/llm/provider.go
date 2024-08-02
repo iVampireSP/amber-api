@@ -1,8 +1,12 @@
 package llm
 
 import (
+	"github.com/bytedance/sonic"
 	"github.com/tmc/langchaingo/llms/openai"
 	"rag-new/internal/base/conf"
+	"rag-new/internal/base/logger"
+	"rag-new/internal/service/assistant"
+	"rag-new/internal/service/tool"
 )
 
 type FunctionChunk struct {
@@ -11,6 +15,10 @@ type FunctionChunk struct {
 }
 
 type FunctionCallArgs map[string]interface{}
+
+func (f *FunctionCallArgs) JSON() ([]byte, error) {
+	return sonic.Marshal(f)
+}
 
 type ResponseState string
 
@@ -48,10 +56,13 @@ type AssistantResponse struct {
 }
 
 type Service struct {
-	OpenAI *openai.LLM
+	OpenAI           *openai.LLM
+	Logger           *logger.Logger
+	AssistantService *assistant.Service
+	ToolService      *tool.Service
 }
 
-func NewLLM(config *conf.Config) *Service {
+func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assistant.Service, toolService *tool.Service) *Service {
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.BaseUrl),
@@ -62,5 +73,5 @@ func NewLLM(config *conf.Config) *Service {
 		panic(err)
 	}
 
-	return &Service{llm}
+	return &Service{llm, logger, assistantService, toolService}
 }

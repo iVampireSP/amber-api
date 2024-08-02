@@ -284,6 +284,16 @@ func (u *ChatController) generateChatStream(c context.Context, chatId string) (s
 		return "", err
 	}
 
+	userJson, err := sonic.Marshal(u.authService.GetUser(c))
+	if err != nil {
+		return "", err
+	}
+
+	err = u.redis.Set(c, u.getCacheKey("stream:"+randomId+":user"), userJson, consts.ChatStreamExpire).Err()
+	if err != nil {
+		return "", err
+	}
+
 	return randomId, nil
 }
 
@@ -367,8 +377,35 @@ func (u *ChatController) Stream(c *gin.Context) {
 	c.Writer.Header().Set("Connection", "keep-alive")
 	c.Writer.Header().Set("Transfer-Encoding", "chunked")
 
+	streamUserCacheKey := u.getCacheKey("stream:" + streamIdStr + ":user")
+
+	// 检查缓存是否存在
+	i, err = u.redis.Exists(c, streamUserCacheKey).Result()
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	if i == consts.NoRecord {
+		response.Status(http.StatusNotFound).Error(consts.ErrChatStreamNotFound).Send()
+		return
+	}
+
+	userCmd, err := u.redis.Get(c, streamUserCacheKey).Result()
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	user := &schema.User{}
+	err = sonic.Unmarshal([]byte(userCmd), user)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
 	go func() {
-		err = u.llmService.StreamChat(llmResponseChan, histories, tools...)
+		err = u.llmService.StreamChat(llmResponseChan, histories, &user.Token, tools...)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 		}
@@ -413,6 +450,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	// 移除缓存
 	u.redis.Del(c, streamIdCacheKey)
 	u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))
+	u.redis.Del(c, u.getCacheKey("stream:"+streamIdStr+":user"))
 
 	if llmFullMessage != "" {
 		// 添加到消息 entity.ChatMessage

@@ -1,17 +1,24 @@
 package llm
 
 import (
+	"bytes"
 	"context"
+	"errors"
+	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/tmc/langchaingo/llms"
+	"io"
+	"net/http"
 	"rag-new/internal/entity"
+	"rag-new/internal/schema"
+	"strconv"
 	"strings"
 )
 
 type Callback func(string)
 
 // StreamChat 执行对话
-func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*entity.ChatMessage, tools ...llms.Tool) error {
+func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*entity.ChatMessage, user *schema.UserTokenInfo, tools ...llms.Tool) error {
 	var historyContent []llms.MessageContent
 
 	for _, h := range history {
@@ -118,31 +125,45 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 				},
 			}
 
-			var fakeToolResponseContent = "天气晴天，气温 25°C"
+			tool, functionName, err := s.spiltFunctionName(respChoice.FuncCall.Name)
+			if err != nil {
+				responseChan <- &AssistantResponse{
+					State:   StateFailed,
+					Content: err.Error(),
+				}
+			}
 
-			functionName := s.spiltFunctionName(respChoice.FuncCall.Name)
-			switch functionName {
-			case "get_current_weather":
-
+			remoteFunctionResponse, err := s.callRemoteFunction(tool, user, functionName, functionCallArgs)
+			if err != nil {
+				responseChan <- &AssistantResponse{
+					State:   StateToolFailed,
+					Content: err.Error(),
+					ToolResponseMessage: &ToolResponseMessage{
+						Name:    respChoice.FuncCall.Name,
+						Content: err.Error(),
+					},
+				}
+				return err
+				//remoteFunctionResponse.Content = err.Error()
+			} else {
 				historyContent = append(historyContent, llms.MessageContent{
 					Role: llms.ChatMessageTypeTool,
 					Parts: []llms.ContentPart{
 						llms.ToolCallResponse{
 							ToolCallID: respChoice.ToolCalls[0].ID,
 							Name:       respChoice.FuncCall.Name,
-							Content:    fakeToolResponseContent,
+							Content:    remoteFunctionResponse.Content,
 						},
 					},
 				})
 
-			}
-
-			responseChan <- &AssistantResponse{
-				State: StateToolResponse,
-				ToolResponseMessage: &ToolResponseMessage{
-					Name:    respChoice.FuncCall.Name,
-					Content: fakeToolResponseContent,
-				},
+				responseChan <- &AssistantResponse{
+					State: StateToolResponse,
+					ToolResponseMessage: &ToolResponseMessage{
+						Name:    respChoice.FuncCall.Name,
+						Content: remoteFunctionResponse.Content,
+					},
+				}
 			}
 
 		} else {
@@ -151,7 +172,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
 
-		//fmt.Println("本轮历史", historyContent)
+		fmt.Println("本轮历史", historyContent)
 	}
 
 	responseChan <- &AssistantResponse{
@@ -161,14 +182,81 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 	return nil
 }
 
-func (s *Service) spiltFunctionName(functionName string) string {
+func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, error) {
 	// 根据 _ 分割
 	var functionNames = strings.Split(functionName, "_")
 
 	// 从第 1 个开始取到最后一个
 	var toolName = strings.Join(functionNames[1:], "_")
 
-	//fmt.Println("解析的工具名称：" + toolName)
+	// 第一个是 id
+	toolId, err := strconv.Atoi(functionNames[0])
+	if err != nil {
+		return nil, toolName, err
+	}
 
-	return toolName
+	// 从数据库中获取
+	tool, err := s.ToolService.GetTool(context.Background(), int64(toolId))
+
+	return tool, toolName, err
+}
+
+func (s *Service) callRemoteFunction(tool *entity.Tool, user *schema.UserTokenInfo, functionName string, args FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
+	var callbackUrl = tool.Data.CallbackUrl
+
+	argsJson, err := args.JSON()
+	if err != nil {
+		return nil, err
+	}
+
+	var toolRequest = &schema.ToolRemoteRequest{
+		FunctionName: functionName,
+		Parameters:   string(argsJson),
+		ApiKey:       tool.ApiKey,
+		User:         user,
+	}
+
+	toolRequestJson, err := sonic.Marshal(toolRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", callbackUrl, bytes.NewBuffer(toolRequestJson))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+toolRequest.ApiKey)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			return
+		}
+	}(resp.Body)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	bodyJson := &schema.ToolRemoteResponse{}
+
+	err = sonic.Unmarshal(body, bodyJson)
+	if err != nil {
+		return nil, err
+	}
+
+	if bodyJson.Success {
+		return bodyJson, nil
+	}
+
+	return bodyJson, errors.New(bodyJson.Content)
 }

@@ -19,7 +19,7 @@ func (s *Service) BindTool(ctx context.Context, assistant *entity.Assistant, too
 	}
 
 	// 检测 tool 是否存在
-	toolExists, err := s.ToolExists(ctx, assistant)
+	toolExists, err := s.ToolExists(ctx, tool)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +63,8 @@ func (s *Service) UnbindTool(ctx context.Context, assistant *entity.Assistant, t
 	return err
 }
 
-func (s *Service) ToolExists(ctx context.Context, assistant *entity.Assistant) (bool, error) {
-	count, err := s.x.Context(ctx).Where("id = ?", assistant.ID).Count(&entity.Tool{})
+func (s *Service) ToolExists(ctx context.Context, tool *entity.Tool) (bool, error) {
+	count, err := s.x.Context(ctx).Where("id = ?", tool.ID).Count(&entity.Tool{})
 	return count > 0, err
 }
 

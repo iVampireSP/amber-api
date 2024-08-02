@@ -30,3 +30,15 @@ func (a AuthMiddleware) RequireJWTIDToken(c *gin.Context) {
 	c.Set(consts.AuthMiddlewareKey, user)
 	c.Next()
 }
+
+func (a AuthMiddleware) RequireJWTAccessToken(c *gin.Context) {
+	user, err := a.authService.GinMiddlewareAuth(schema.JWTAccessToken, c)
+	if err != nil {
+		c.Abort()
+		schema.NewResponse(c).Error(err).Status(http.StatusUnauthorized).Send()
+		return
+	}
+
+	c.Set(consts.AuthMiddlewareKey, user)
+	c.Next()
+}

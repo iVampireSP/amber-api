@@ -9,7 +9,7 @@ import (
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
 	var ChatMessage []*entity.ChatMessage
-	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).OrderBy("created_at desc").Find(&ChatMessage)
+	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).OrderBy("id asc").Find(&ChatMessage)
 	return ChatMessage, err
 }
 
@@ -45,7 +45,7 @@ func (s *Service) DeleteChatMessageByUserId(ctx context.Context, userId schema.U
 // GetLatestMessage get latest chat message
 func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*entity.ChatMessage, error) {
 	var chatMessage entity.ChatMessage
-	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Limit(1).OrderBy("created_at desc").Get(&chatMessage)
+	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Limit(1).OrderBy("id asc").Get(&chatMessage)
 	return &chatMessage, err
 }
 

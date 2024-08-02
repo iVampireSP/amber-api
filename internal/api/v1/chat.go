@@ -408,6 +408,8 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return true
 	})
 
+	close(llmResponseChan)
+
 	// 移除缓存
 	u.redis.Del(c, streamIdCacheKey)
 	u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))

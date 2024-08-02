@@ -158,7 +158,6 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 		State: StateDone,
 	}
 
-	//close(responseChan)
 	return nil
 }
 

@@ -265,6 +265,35 @@ paths:
       summary: 创建 Assistant
       tags:
       - assistant
+  /api/v1/assistants/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: Assistant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除 Assistant
+      tags:
+      - assistant
   /api/v1/assistants/{id}/tools:
     get:
       consumes:

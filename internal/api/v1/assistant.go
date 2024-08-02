@@ -78,6 +78,46 @@ func (u *AssistantController) CreateAssistant(c *gin.Context) {
 	response.Status(http.StatusOK).Data(assistants).Send()
 }
 
+// DeleteAssistant godoc
+// @Summary      删除 Assistant
+// @Description  get string by ID
+// @Tags         assistant
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id  path  int  true  "Assistant ID"
+// @Success      204
+// @Failure      500  {object}  schema.ResponseBody{}
+// @Failure      404  {object}  schema.ResponseBody{}
+// @Router       /api/v1/assistants/{id} [delete]
+func (u *AssistantController) DeleteAssistant(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
+	assistantId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+
+	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+		return
+	}
+
+	err = u.assistantService.DeleteAssistant(c, int64(assistantId))
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	response.Status(http.StatusNoContent).Send()
+}
+
 // ListTool godoc
 // @Summary      获取 Assistant 所绑定的 Tool
 // @Description  get string by ID

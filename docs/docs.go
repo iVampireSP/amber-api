@@ -119,6 +119,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/assistants/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get string by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "删除 Assistant",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Assistant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/assistants/{id}/tools": {
             "get": {
                 "security": [

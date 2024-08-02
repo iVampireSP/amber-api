@@ -51,15 +51,14 @@ func NewHTTPServer(
 }
 
 func (hs *HttpServer) AllowAllCors() {
-	var corsMiddleWare = cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"*"},
-		AllowHeaders:     []string{"*"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	})
+	var config = cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowCredentials = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Cookie", "X-Requested-With", "X-Auth-Token", "Authorization"}
+	config.MaxAge = 12 * time.Hour
 
-	hs.Gin.Use(corsMiddleWare)
+	hs.Gin.Use(cors.New(config))
 }
 
 func (hs *HttpServer) BizRouter() *gin.Engine {

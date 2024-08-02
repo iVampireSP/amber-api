@@ -10,6 +10,7 @@ import (
 	"rag-new/internal/router"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"time"
 )
 
 func promHandler(handler http.Handler) gin.HandlerFunc {
@@ -55,6 +56,7 @@ func (hs *HttpServer) AllowAllCors() {
 		AllowMethods:     []string{"*"},
 		AllowHeaders:     []string{"*"},
 		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	})
 
 	hs.Gin.Use(corsMiddleWare)

@@ -86,6 +86,8 @@ func (a *Service) GinMiddlewareAuth(tokenType schema.JWTTokenTypes, c *gin.Conte
 			return nil, nil
 		}
 
+		// 手动指定，因为 mapstructure 无法转换 UserID 类型
+		jwtIdToken.Token.Sub = sub
 	}
 
 	return jwtIdToken, nil

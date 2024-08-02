@@ -7,7 +7,7 @@ type UserTokenInfo struct {
 	Iss              string    `json:"iss"`
 	Iat              float64   `json:"iat"`
 	Exp              float64   `json:"exp"`
-	Sub              UserId    `json:"sub"`
+	Sub              UserId    `json:"sub" mapstructure:"-"`
 	Scopes           []string  `json:"scopes"`
 	Id               int       `json:"id"`
 	Uuid             string    `json:"uuid"`

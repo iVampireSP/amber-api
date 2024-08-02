@@ -7,6 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/MicahParks/keyfunc/v3 v3.3.3
 	github.com/bytedance/sonic v1.11.6
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/wire v0.6.0

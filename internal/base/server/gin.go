@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
@@ -48,7 +49,20 @@ func NewHTTPServer(
 	}
 }
 
+func (hs *HttpServer) AllowAllCors() {
+	var corsMiddleWare = cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"*"},
+		AllowHeaders:     []string{"*"},
+		AllowCredentials: true,
+	})
+
+	hs.Gin.Use(corsMiddleWare)
+}
+
 func (hs *HttpServer) BizRouter() *gin.Engine {
+	hs.AllowAllCors()
+
 	rootGroup := hs.Gin.Group("")
 	rootGroup.Use(hs.middleware.GinLogger.GinLogger)
 
@@ -57,7 +71,7 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 
 	apiV1 := rootGroup.Group("/api/v1")
 	{
-		apiV1.Use(hs.middleware.CORS.AllowAllCORS)
+		//apiV1.Use(corsMiddleWare)
 		apiV1.Use(hs.middleware.JSONResponse.ContentTypeJSON)
 		apiV1.Use(hs.middleware.Auth.RequireJWTIDToken)
 		hs.apiRouter.InitApiRouter(apiV1)
@@ -65,7 +79,7 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 
 	apiV1NoAuth := rootGroup.Group("/api/v1")
 	{
-		apiV1NoAuth.Use(hs.middleware.CORS.AllowAllCORS)
+		//apiV1.Use(corsMiddleWare)
 		hs.apiRouter.InitNoAuthApiRouter(apiV1NoAuth)
 	}
 

@@ -7,6 +7,8 @@ import (
 	"sync"
 )
 
+// @title           Leaflow Amber
+// @version         1.0
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization

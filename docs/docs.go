@@ -387,6 +387,15 @@ const docTemplate = `{
                     "chat"
                 ],
                 "summary": "Delete Chat",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Chat ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -428,6 +437,15 @@ const docTemplate = `{
                     "chat_message"
                 ],
                 "summary": "查看聊天记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Chat ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1149,9 +1167,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "tool_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -1199,11 +1214,11 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "",
+	Title:            "Leaflow Amber",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

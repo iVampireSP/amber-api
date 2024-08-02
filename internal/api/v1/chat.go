@@ -91,6 +91,7 @@ func (u *ChatController) Create(c *gin.Context) {
 // @Tags         chat
 // @Accept       json
 // @Produce      json
+// @Param        id  path  int  true  "Chat ID"
 // @Success      200  {object}  schema.ResponseBody
 // @Failure      400  {object}  schema.ResponseBody
 // @Failure      404  {object}  schema.ResponseBody
@@ -125,6 +126,7 @@ func (u *ChatController) Delete(c *gin.Context) {
 // @Tags         chat_message
 // @Accept       json
 // @Produce      json
+// @Param        id  path  int  true  "Chat ID"
 // @Success      200  {object}  schema.ResponseBody{data=[]entity.ChatMessage}
 // @Failure      400  {object}  schema.ResponseBody
 // @Failure      404  {object}  schema.ResponseBody

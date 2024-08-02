@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/tmc/langchaingo/llms"
 	"io"
@@ -14,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 )
-
-type Callback func(string)
 
 // StreamChat 执行对话
 func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*entity.ChatMessage, user *schema.UserTokenInfo, tools ...llms.Tool) error {
@@ -172,7 +169,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
 
-		fmt.Println("本轮历史", historyContent)
+		//fmt.Println("本轮历史", historyContent)
 	}
 
 	responseChan <- &AssistantResponse{

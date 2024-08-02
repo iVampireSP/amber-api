@@ -423,10 +423,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 			return true
 		}
 
-		if msg.State == llm.StateChunk && msg.ChunkMessage != nil {
-			llmFullMessage += msg.ChunkMessage.Content
-		}
-
 		//fmt.Println("接收到", msg.Content)
 		j, err := sonic.Marshal(msg)
 		if err != nil {
@@ -435,12 +431,27 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 		c.SSEvent("data", string(j))
 
-		if msg.State == llm.StateDone {
-			// 退出
-			return false
-		}
-
 		c.Writer.Flush()
+
+		if msg.ChunkMessage != nil {
+			if msg.State == llm.StateChunk {
+				llmFullMessage += msg.ChunkMessage.Content
+			}
+
+			if msg.State == llm.StateFailed {
+				return false
+			}
+
+			if msg.State == llm.StateDone {
+				// 退出
+				return false
+			}
+
+			if msg.State == llm.StateToolFailed {
+				return false
+			}
+
+		}
 
 		return true
 	})

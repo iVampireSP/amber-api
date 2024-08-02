@@ -91,6 +91,7 @@ func (u *ChatController) Create(c *gin.Context) {
 // @Tags         chat
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Chat ID"
 // @Success      200  {object}  schema.ResponseBody
 // @Failure      400  {object}  schema.ResponseBody
@@ -126,6 +127,7 @@ func (u *ChatController) Delete(c *gin.Context) {
 // @Tags         chat_message
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Chat ID"
 // @Success      200  {object}  schema.ResponseBody{data=[]entity.ChatMessage}
 // @Failure      400  {object}  schema.ResponseBody
@@ -167,6 +169,7 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 // @Tags         chat_message
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Chat ID"
 // @Param        message  body  schema.ChatMessageAddRequest  true  "Message"
 // @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}

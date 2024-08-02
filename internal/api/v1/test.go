@@ -21,6 +21,7 @@ func NewUserController(authService *auth.Service) *UserController {
 // @Tags         ping
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
 // @Failure      400  {object}  schema.ResponseBody
 // @Router       /api/v1/ping [get]

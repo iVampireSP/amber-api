@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/api/v1/assistants": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -59,6 +64,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -111,6 +121,11 @@ const docTemplate = `{
         },
         "/api/v1/assistants/{id}/tools": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -164,6 +179,11 @@ const docTemplate = `{
         },
         "/api/v1/assistants/{id}/tools/{tool_id}": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -219,6 +239,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -376,6 +401,11 @@ const docTemplate = `{
         },
         "/api/v1/chats/{id}": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -426,6 +456,11 @@ const docTemplate = `{
         },
         "/api/v1/chats/{id}/messages": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -489,6 +524,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -578,6 +618,11 @@ const docTemplate = `{
         },
         "/api/v1/ping": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -711,6 +756,11 @@ const docTemplate = `{
         },
         "/api/v1/tools": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "List tools",
                 "consumes": [
                     "application/json"
@@ -750,6 +800,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create tool",
                 "consumes": [
                     "application/json"
@@ -805,6 +860,11 @@ const docTemplate = `{
         },
         "/api/v1/tools/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get tool",
                 "consumes": [
                     "application/json"
@@ -859,6 +919,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "DeleteTool",
                 "consumes": [
                     "application/json"

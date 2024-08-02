@@ -228,6 +228,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: 获取 Assistant 列表
       tags:
       - assistant
@@ -258,6 +260,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: 创建 Assistant
       tags:
       - assistant
@@ -290,6 +294,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: 获取 Assistant 所绑定的 Tool
       tags:
       - assistant
@@ -325,6 +331,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: 解绑 Tool
       tags:
       - assistant
@@ -359,6 +367,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: 绑定 Tool
       tags:
       - assistant
@@ -452,6 +462,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: Delete Chat
       tags:
       - chat
@@ -492,6 +504,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: 查看聊天记录
       tags:
       - chat_message
@@ -544,6 +558,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: 添加聊天记录
       tags:
       - chat_message
@@ -568,6 +584,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: Greet
       tags:
       - ping
@@ -646,6 +664,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: List Tool
       tags:
       - tool
@@ -678,6 +698,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: Create Tool
       tags:
       - tool
@@ -705,6 +727,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: DeleteTool
       tags:
       - tool
@@ -738,6 +762,8 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: Get Tool
       tags:
       - tool

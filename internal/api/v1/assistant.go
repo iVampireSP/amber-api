@@ -32,6 +32,7 @@ func NewAssistantController(
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Success      200  {object}  schema.ResponseBody{data=[]entity.Assistant}
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants [get]
@@ -52,6 +53,7 @@ func (u *AssistantController) List(c *gin.Context) {
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        assistant  body  schema.AssistantCreateRequest  true  "Assistant"
 // @Success      200  {object}  schema.ResponseBody{data=entity.Assistant}
 // @Failure      400  {object}  schema.ResponseBody{}
@@ -82,6 +84,7 @@ func (u *AssistantController) CreateAssistant(c *gin.Context) {
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Assistant ID"
 // @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantTool}
 // @Failure      500  {object}  schema.ResponseBody{}
@@ -120,6 +123,7 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Assistant ID"
 // @Param        tool_id  path  int  true  "Tool ID"
 // @Success      200  {object}  schema.ResponseBody{data=entity.AssistantTool}
@@ -179,6 +183,7 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Assistant ID"
 // @Param        tool_id  path  int  true  "Tool ID"
 // @Success      200  {object}  schema.ResponseBody{data=entity.AssistantTool}

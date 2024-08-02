@@ -62,6 +62,11 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 		hs.apiRouter.InitApiRouter(apiV1)
 	}
 
+	apiV1NoAuth := rootGroup.Group("/api/v1")
+	{
+		hs.apiRouter.InitNoAuthApiRouter(apiV1NoAuth)
+	}
+
 	hs.Gin.NoRoute(func(ctx *gin.Context) {
 		schema.NewResponse(ctx).Status(http.StatusNotFound).Error(consts.ErrPageNotFound).Send()
 	})

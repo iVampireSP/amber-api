@@ -608,6 +608,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - none: []
       summary: 流式传输聊天内容
       tags:
       - chat_message

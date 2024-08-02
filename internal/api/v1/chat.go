@@ -291,6 +291,7 @@ func (u *ChatController) generateChatStream(c context.Context, chatId string) (s
 // @Tags         chat_message
 // @Accept       json
 // @Produce      json
+// @Security     none
 // @Param        id  path  int  true  "Chat ID"
 // @Param        stream_id  path  string  true  "Chat stream id"
 // @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}

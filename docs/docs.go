@@ -601,6 +601,11 @@ const docTemplate = `{
         },
         "/api/v1/stream/{stream_id}": {
             "get": {
+                "security": [
+                    {
+                        "none": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"

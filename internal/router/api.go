@@ -46,6 +46,8 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 	r.GET("/chats/:id/messages", a.Chat.ListChatMessage)
 	r.POST("/chats/:id/messages", a.Chat.AddChatMessage)
+}
 
+func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {
 	r.GET("/stream/:stream_id", a.Chat.Stream)
 }

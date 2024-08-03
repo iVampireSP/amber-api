@@ -29,6 +29,23 @@ definitions:
       updated_at:
         type: string
     type: object
+  rag-new_internal_entity.AssistantToolType:
+    properties:
+      assistant:
+        $ref: '#/definitions/rag-new_internal_entity.Assistant'
+      assistant_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      tool:
+        $ref: '#/definitions/rag-new_internal_entity.Tool'
+      tool_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
   rag-new_internal_entity.Chat:
     properties:
       assistant_id:
@@ -342,7 +359,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.AssistantTool'
+                    $ref: '#/definitions/rag-new_internal_entity.AssistantToolType'
                   type: array
               type: object
         "500":

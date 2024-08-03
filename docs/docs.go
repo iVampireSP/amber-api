@@ -254,7 +254,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantToolType"
                                             }
                                         }
                                     }
@@ -1094,6 +1094,32 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "tool_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "rag-new_internal_entity.AssistantToolType": {
+            "type": "object",
+            "properties": {
+                "assistant": {
+                    "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                },
+                "assistant_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "tool": {
+                    "$ref": "#/definitions/rag-new_internal_entity.Tool"
                 },
                 "tool_id": {
                     "type": "integer"

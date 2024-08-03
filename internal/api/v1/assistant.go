@@ -153,7 +153,7 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Assistant ID"
-// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantTool}
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantToolType}
 // @Failure      500  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants/{id}/tools [get]
 func (u *AssistantController) ListTool(c *gin.Context) {
@@ -175,7 +175,7 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 		return
 	}
 
-	toolList, err := u.assistantService.ListAssistantTool(c, assistantEntity)
+	toolList, err := u.assistantService.ListAssistantToolWithType(c, assistantEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return

@@ -474,6 +474,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		switch msg.State {
 		case llm.StateChunk:
 			llmFullMessage += msg.ChunkMessage.Content
+			return true
 		case llm.StateFailed:
 			return false
 		case llm.StateFinished:
@@ -481,8 +482,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 		default:
 			return true
 		}
-
-		return true
 	})
 
 	if !result {

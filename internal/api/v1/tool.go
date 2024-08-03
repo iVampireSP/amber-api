@@ -94,7 +94,7 @@ func (t *ToolController) CreateTool(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
-// @Param        id  path  string  true  "Tool ID"
+// @Param        id  path  id  true  "Tool ID"
 // @Success      200  {object}  schema.ResponseBody{data=entity.Tool}
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Failure      404  {object}  schema.ResponseBody{}
@@ -133,7 +133,7 @@ func (t *ToolController) GetTool(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
-// @Param        id  path  string  true  "Tool ID"
+// @Param        id  path  int  true  "Tool ID"
 // @Success      200  {object}  nil
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Failure      404  {object}  schema.ResponseBody{}

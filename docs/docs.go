@@ -983,7 +983,7 @@ const docTemplate = `{
                 "summary": "DeleteTool",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Tool ID",
                         "name": "id",
                         "in": "path",

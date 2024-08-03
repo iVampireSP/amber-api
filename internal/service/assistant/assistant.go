@@ -3,7 +3,6 @@ package assistant
 import (
 	"context"
 	"github.com/tmc/langchaingo/llms"
-	"rag-new/internal/batch"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -61,13 +60,7 @@ func (s *Service) DeleteAssistant(ctx context.Context, id int64) error {
 		return consts.ErrAssistantHasBindToolCantDelete
 	}
 
-	// batch
-	s.batch.AssistantDelete(ctx, &batch.AssistantDeleteBatch{
-		AssistantEntity:    assistant,
-		AssistantService:   s,
-		ChatService:        nil,
-		ChatMessageService: nil,
-	})
+	_, err = s.x.Context(ctx).ID(id).Delete(&entity.Assistant{})
 
 	return err
 }

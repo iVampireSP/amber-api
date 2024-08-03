@@ -3,27 +3,36 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"rag-new/internal/batch"
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
+	"rag-new/internal/service/chat"
+	"rag-new/internal/service/chat_message"
 	"rag-new/internal/service/tool"
 	"rag-new/pkg/consts"
 	"strconv"
 )
 
 type AssistantController struct {
-	authService      *auth.Service
-	toolService      *tool.Service
-	assistantService *assistant.Service
+	authService        *auth.Service
+	toolService        *tool.Service
+	assistantService   *assistant.Service
+	chatService        *chat.Service
+	chatMessageService *chat_message.Service
+	batch              *batch.Batch
 }
 
 func NewAssistantController(
 	authService *auth.Service,
 	toolService *tool.Service,
 	assistantService *assistant.Service,
+	chatService *chat.Service,
+	chatMessageService *chat_message.Service,
+	batch *batch.Batch,
 ) *AssistantController {
-	return &AssistantController{authService, toolService, assistantService}
+	return &AssistantController{authService, toolService, assistantService, chatService, chatMessageService, batch}
 }
 
 // List godoc
@@ -137,7 +146,15 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 		return
 	}
 
-	err = u.assistantService.DeleteAssistant(c, int64(assistantId))
+	// batch
+	var adb = &batch.AssistantDeleteBatch{
+		AssistantEntity:    assistantEntity,
+		AssistantService:   u.assistantService,
+		ChatService:        u.chatService,
+		ChatMessageService: u.chatMessageService,
+	}
+
+	err = u.batch.AssistantDelete(c, adb)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return

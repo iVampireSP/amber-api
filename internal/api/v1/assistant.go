@@ -28,7 +28,6 @@ func NewAssistantController(
 
 // List godoc
 // @Summary      获取 Assistant 列表
-// @Description  get string by ID
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
@@ -47,9 +46,39 @@ func (u *AssistantController) List(c *gin.Context) {
 	response.Status(http.StatusOK).Data(assistants).Send()
 }
 
+// GetAssistant godoc
+// @Summary      获取指定的 Assistant
+// @Tags         assistant
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id  path  int  true  "Assistant ID"
+// @Success      200  {object}  schema.ResponseBody{data=entity.Assistant}
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Router       /api/v1/assistants/{id} [get]
+func (u *AssistantController) GetAssistant(c *gin.Context) {
+	var response = schema.NewResponse(c)
+	assistantId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+
+	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+		return
+	}
+
+	response.Status(http.StatusOK).Data(assistantEntity).Send()
+}
+
 // CreateAssistant godoc
 // @Summary      创建 Assistant
-// @Description  get string by ID
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
@@ -80,7 +109,6 @@ func (u *AssistantController) CreateAssistant(c *gin.Context) {
 
 // DeleteAssistant godoc
 // @Summary      删除 Assistant
-// @Description  get string by ID
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
@@ -120,7 +148,6 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 
 // ListTool godoc
 // @Summary      获取 Assistant 所绑定的 Tool
-// @Description  get string by ID
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
@@ -159,7 +186,6 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 
 // BindTool godoc
 // @Summary      绑定 Tool
-// @Description  get string by ID
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
@@ -219,7 +245,6 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 
 // UnbindTool godoc
 // @Summary      解绑 Tool
-// @Description  get string by ID
 // @Tags         assistant
 // @Accept       json
 // @Produce      json

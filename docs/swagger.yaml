@@ -209,7 +209,6 @@ paths:
     get:
       consumes:
       - application/json
-      description: get string by ID
       produces:
       - application/json
       responses:
@@ -236,7 +235,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: get string by ID
       parameters:
       - description: Assistant
         in: body
@@ -269,7 +267,6 @@ paths:
     delete:
       consumes:
       - application/json
-      description: get string by ID
       parameters:
       - description: Assistant ID
         in: path
@@ -294,11 +291,40 @@ paths:
       summary: 删除 Assistant
       tags:
       - assistant
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Assistant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.Assistant'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取指定的 Assistant
+      tags:
+      - assistant
   /api/v1/assistants/{id}/tools:
     get:
       consumes:
       - application/json
-      description: get string by ID
       parameters:
       - description: Assistant ID
         in: path
@@ -332,7 +358,6 @@ paths:
     delete:
       consumes:
       - application/json
-      description: get string by ID
       parameters:
       - description: Assistant ID
         in: path
@@ -368,7 +393,6 @@ paths:
     post:
       consumes:
       - application/json
-      description: get string by ID
       parameters:
       - description: Assistant ID
         in: path
@@ -770,7 +794,7 @@ paths:
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:

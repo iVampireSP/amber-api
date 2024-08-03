@@ -22,7 +22,6 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -69,7 +68,6 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -120,13 +118,64 @@ const docTemplate = `{
             }
         },
         "/api/v1/assistants/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "获取指定的 Assistant",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Assistant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -172,7 +221,6 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -230,7 +278,6 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -290,7 +337,6 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -924,7 +970,7 @@ const docTemplate = `{
                 "summary": "Get Tool",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Tool ID",
                         "name": "id",
                         "in": "path",

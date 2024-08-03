@@ -16,10 +16,10 @@ type ToolUpdateRequest struct {
 }
 
 type ToolDiscoveryInput struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	HomepageUrl string `json:"homepage_url"`
-	CallbackUrl string `json:"callback_url"`
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description"  validate:"required"`
+	HomepageUrl string `json:"homepage_url" validate:"url"`
+	CallbackUrl string `json:"callback_url" validate:"url"`
 	ToolId      int64  `json:"-"`
 	Functions   []struct {
 		Name        string `json:"name"`
@@ -32,8 +32,8 @@ type ToolDiscoveryInput struct {
 					Description string `json:"description"`
 				} `json:"location"`
 			} `json:"properties,omitempty"`
-		} `json:"parameters"`
-		Required []string `json:"required,omitempty"`
+		} `json:"parameters"  validate:"required min=1"`
+		Required []string `json:"required,omitempty" validate:"required"`
 	} `json:"functions"`
 }
 
@@ -73,8 +73,8 @@ func (td *ToolDiscoveryInput) Output() *ToolDiscoveryOutput {
 }
 
 type ToolDiscoveryOutput struct {
-	Name          string                         `json:"name"`
-	HomepageUrl   string                         `json:"homepage_url"`
+	Name          string                         `json:"name" `
+	HomepageUrl   string                         `json:"homepage_url" `
 	CallbackUrl   string                         `json:"callback_url"`
 	Description   string                         `json:"description"`
 	ToolFunctions []ToolDiscoveryOutputFunctions `json:"function"`

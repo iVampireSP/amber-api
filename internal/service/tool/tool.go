@@ -2,6 +2,7 @@ package tool
 
 import (
 	"context"
+	"github.com/go-playground/validator/v10"
 	"io"
 	"net/http"
 	"rag-new/internal/entity"
@@ -58,6 +59,11 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 		return nil, err
 	}
 
+	err = s.ValidateSyntax(&toolData)
+	if err != nil {
+		return nil, err
+	}
+
 	_, err = s.x.Context(ctx).Insert(&toolEntity)
 	toolData.ToolId = toolEntity.ID
 	toolEntity.Data = *toolData.Output()
@@ -103,4 +109,10 @@ func (s *Service) CheckTool(ctx context.Context, url string, userId schema.UserI
 func (s *Service) Exists(ctx context.Context, id int64) (bool, error) {
 	count, err := s.x.Context(ctx).Where("id = ?", id).Count(&entity.Tool{})
 	return count > 0, err
+}
+
+func (s *Service) ValidateSyntax(toolDiscoveryOutput *schema.ToolDiscoveryInput) error {
+	var validate = validator.New()
+	err := validate.Struct(toolDiscoveryOutput)
+	return err
 }

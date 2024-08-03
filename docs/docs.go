@@ -830,7 +830,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.CurrentUserResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            }
                                         }
                                     }
                                 }
@@ -885,10 +888,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Tool"
-                                            }
+                                            "$ref": "#/definitions/rag-new_internal_entity.Tool"
                                         }
                                     }
                                 }

@@ -687,7 +687,9 @@ paths:
             - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.Tool'
+                  type: array
               type: object
         "400":
           description: Bad Request
@@ -719,9 +721,7 @@ paths:
             - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/rag-new_internal_entity.Tool'
-                  type: array
+                  $ref: '#/definitions/rag-new_internal_entity.Tool'
               type: object
         "400":
           description: Bad Request

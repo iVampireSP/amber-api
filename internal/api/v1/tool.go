@@ -31,7 +31,7 @@ func NewToolController(toolService *tool.Service, authService *auth.Service) *To
 // @Accept       json
 // @Produce      json
 // @Security 	 ApiKeyAuth
-// @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.Tool}
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools [get]
 func (t *ToolController) List(c *gin.Context) {
@@ -53,7 +53,7 @@ func (t *ToolController) List(c *gin.Context) {
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        tool  body  schema.ToolCreateRequest  true  "Tool"
-// @Success      200  {object}  schema.ResponseBody{data=[]entity.Tool}
+// @Success      200  {object}  schema.ResponseBody{data=entity.Tool}
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/tools [post]
 func (t *ToolController) CreateTool(c *gin.Context) {

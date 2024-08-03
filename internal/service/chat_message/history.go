@@ -62,7 +62,7 @@ func (s *Service) DeleteChatMessageByUserId(ctx context.Context, userId schema.U
 // GetLatestMessage get latest chat message
 func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*entity.ChatMessage, error) {
 	var chatMessage entity.ChatMessage
-	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Limit(1).OrderBy("id asc").Get(&chatMessage)
+	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Limit(1).OrderBy("id desc").Get(&chatMessage)
 	return &chatMessage, err
 }
 

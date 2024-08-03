@@ -108,7 +108,7 @@ func historyCallLLM(app *base.Application) {
 				}
 				fmt.Print(msg.Content)
 
-				if msg.State == llm.StateDone {
+				if msg.State == llm.StateFinished {
 					fmt.Println("")
 					// 关闭 chan
 					close(responseChan)
@@ -120,7 +120,7 @@ func historyCallLLM(app *base.Application) {
 
 	}()
 
-	err := app.Service.LLM.StreamChat(responseChan, histories, fakeUser, tools...)
+	err := app.Service.LLM.StreamChat(responseChan, "", histories, fakeUser, tools...)
 	if err != nil {
 		return
 	}

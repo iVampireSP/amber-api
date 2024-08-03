@@ -443,17 +443,18 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	go func() {
-		err = u.llmService.StreamChat(llmResponseChan, histories, &user.Token, tools...)
+		err = u.llmService.StreamChat(llmResponseChan, assistantEntity.Prompt, histories, &user.Token, tools...)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 		}
 	}()
 
 	var llmFullMessage = ""
-	c.Stream(func(w io.Writer) bool {
+	var result = c.Stream(func(w io.Writer) bool {
 		// Emit Server Sent Events compatible
 		msg, ok := <-llmResponseChan
 		if !ok {
+			fmt.Println("done!")
 			return false
 		}
 
@@ -461,7 +462,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 			return true
 		}
 
-		//fmt.Println("接收到", msg.Content)
 		j, err := sonic.Marshal(msg)
 		if err != nil {
 			u.logger.Sugar.Error(err)
@@ -471,28 +471,25 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 		c.Writer.Flush()
 
-		if msg.ChunkMessage != nil {
-			if msg.State == llm.StateChunk {
-				llmFullMessage += msg.ChunkMessage.Content
-			}
-
-			if msg.State == llm.StateFailed {
-				return false
-			}
-
-			if msg.State == llm.StateDone {
-				// 退出
-				return false
-			}
-
-			if msg.State == llm.StateToolFailed {
-				return false
-			}
-
+		switch msg.State {
+		case llm.StateChunk:
+			llmFullMessage += msg.ChunkMessage.Content
+		case llm.StateFailed:
+			return false
+		case llm.StateFinished:
+			return false
+		default:
+			return true
 		}
 
 		return true
 	})
+
+	if !result {
+		// close sse stream
+		c.SSEvent("close", "")
+		c.Writer.Flush()
+	}
 
 	close(llmResponseChan)
 
@@ -514,9 +511,8 @@ func (u *ChatController) Stream(c *gin.Context) {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
+
 	}
 
-	// disconnect
-
-	//response.Status(http.StatusOK).Send()
+	response.Status(http.StatusOK).Send()
 }

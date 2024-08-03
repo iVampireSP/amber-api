@@ -15,8 +15,12 @@ import (
 )
 
 // StreamChat 执行对话
-func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*entity.ChatMessage, user *schema.UserTokenInfo, tools ...llms.Tool) error {
+func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt string, history []*entity.ChatMessage, user *schema.UserTokenInfo, tools ...llms.Tool) error {
 	var historyContent []llms.MessageContent
+
+	if systemPrompt != "" {
+		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt))
+	}
 
 	for _, h := range history {
 		switch h.Role {
@@ -173,7 +177,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, history []*en
 	}
 
 	responseChan <- &AssistantResponse{
-		State: StateDone,
+		State: StateFinished,
 	}
 
 	return nil

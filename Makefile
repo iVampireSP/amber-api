@@ -6,7 +6,6 @@ install-deps:
 
 generate:
 	go generate ./...
-	swag init -g ./cmd/http.go --parseDependency
 
 swag:
 	swag init -g ./cmd/http.go --parseDependency

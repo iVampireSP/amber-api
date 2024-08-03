@@ -24,8 +24,8 @@ type AssistantTool struct {
 
 type AssistantToolType struct {
 	Base        `xorm:"extends"`
-	AssistantId int64      `xorm:"int(255) notnull" json:"assistant_id"`
-	ToolId      int64      `xorm:"int(255) notnull" json:"tool_id"`
+	AssistantId int64      `xorm:"int(8) notnull index" json:"assistant_id"`
+	ToolId      int64      `xorm:"int(8) notnull index" json:"tool_id"`
 	Assistant   *Assistant `xorm:"extends" json:"assistant"`
 	Tool        *Tool      `xorm:"extends" json:"tool"`
 }

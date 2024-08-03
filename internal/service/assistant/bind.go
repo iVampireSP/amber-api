@@ -83,8 +83,8 @@ func (s *Service) ListAssistantTool(ctx context.Context, assistant *entity.Assis
 func (s *Service) ListAssistantToolWithType(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantToolType, error) {
 	var assistantToolType = make([]*entity.AssistantToolType, 0)
 	err := s.x.Context(ctx).
-		Join("INNER", "tools", "tools.id = assistant_tools.tool_id").
 		Join("INNER", "assistants", "assistants.id = assistant_tools.assistant_id").
+		Join("INNER", "tools", "tools.id = assistant_tools.tool_id").
 		Where("assistant_id = ?", assistant.ID).Find(&assistantToolType)
 	return assistantToolType, err
 }

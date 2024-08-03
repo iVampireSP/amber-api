@@ -12,6 +12,7 @@ import (
 	"rag-new/internal/base/orm"
 	"rag-new/internal/base/redis"
 	"rag-new/internal/base/server"
+	"rag-new/internal/batch"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
@@ -23,6 +24,7 @@ var ProviderSet = wire.NewSet(
 	orm.NewXORM,
 	redis.NewRedis,
 	middleware.Provider,
+	batch.NewBatch,
 	service.Provider,
 	v1.ProviderApiControllerSet,
 	router.ProviderSetRouter,

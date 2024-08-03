@@ -5,6 +5,7 @@ import (
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
 	"rag-new/internal/base/server"
+	"rag-new/internal/batch"
 	"rag-new/internal/middleware"
 	"rag-new/internal/service"
 	"xorm.io/xorm"
@@ -18,6 +19,7 @@ type Application struct {
 	Service    *service.Service
 	Middleware *middleware.Middleware
 	Redis      *redis.Client
+	Batch      *batch.Batch
 }
 
 func NewApplication(
@@ -28,6 +30,7 @@ func NewApplication(
 	services *service.Service,
 	middleware *middleware.Middleware,
 	redis *redis.Client,
+	batch *batch.Batch,
 ) *Application {
 	return &Application{
 		Config:     config,
@@ -37,5 +40,6 @@ func NewApplication(
 		Service:    services,
 		Middleware: middleware,
 		Redis:      redis,
+		Batch:      batch,
 	}
 }

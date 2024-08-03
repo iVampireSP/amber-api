@@ -3,8 +3,10 @@ package assistant
 import (
 	"context"
 	"github.com/tmc/langchaingo/llms"
+	"rag-new/internal/batch"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
 )
 
 func (s *Service) ListAssistant(ctx context.Context) ([]*entity.Assistant, error) {
@@ -43,7 +45,30 @@ func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.Assi
 //}
 
 func (s *Service) DeleteAssistant(ctx context.Context, id int64) error {
-	_, err := s.x.Context(ctx).ID(id).Delete(&entity.Assistant{})
+	// assistant
+	assistant, err := s.GetAssistant(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// 如果已经绑定过工具，则不能删除
+	toolEntity, err := s.ListAssistantTool(ctx, assistant)
+	if err != nil {
+		return err
+	}
+
+	if len(toolEntity) > 0 {
+		return consts.ErrAssistantHasBindToolCantDelete
+	}
+
+	// batch
+	s.batch.AssistantDelete(ctx, &batch.AssistantDeleteBatch{
+		AssistantEntity:    assistant,
+		AssistantService:   s,
+		ChatService:        nil,
+		ChatMessageService: nil,
+	})
+
 	return err
 }
 
@@ -74,5 +99,4 @@ func (s *Service) ToLLMTool(ctx context.Context, assistant *entity.Assistant) ([
 		toolList = append(toolList, llmTool)
 	}
 	return toolList, nil
-
 }

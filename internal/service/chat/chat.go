@@ -2,6 +2,7 @@ package chat
 
 import (
 	"context"
+	"errors"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -37,11 +38,11 @@ func (s *Service) GetChat(ctx context.Context, id int64) (*entity.Chat, error) {
 	return &chat, err
 }
 
-func (s *Service) GetChatWithAssistant(ctx context.Context, id int64) (*entity.ChatWithAssistant, error) {
+func (s *Service) GetChatWithAssistant(ctx context.Context, chatId int64) (*entity.ChatWithAssistant, error) {
 	var chat entity.ChatWithAssistant
 	_, err := s.x.Context(ctx).
 		Join("INNER", "assistants", "assistants.id = chats.assistant_id").
-		ID(id).
+		ID(chatId).
 		Get(&chat)
 	return &chat, err
 }
@@ -52,9 +53,39 @@ func (s *Service) ListChat(ctx context.Context) ([]*entity.Chat, error) {
 	return chats, err
 }
 
-func (s *Service) DeleteChat(ctx context.Context, id int64) error {
-	_, err := s.x.Context(ctx).ID(id).Delete(&entity.Chat{})
+func (s *Service) DeleteChat(ctx context.Context, chat *entity.Chat) error {
+	// 确保所有的 message 已被删除
+	count, err := s.cm.CountChatMessage(ctx, chat)
+
+	if count > 0 {
+		return consts.ErrChatCanNotDeleteBecauseNotCleared
+	}
+
+	_, err = s.x.Context(ctx).ID(chat.ID).Delete(&entity.Chat{})
 	return err
+}
+
+func (s *Service) DeleteChats(ctx context.Context, chat ...*entity.Chat) error {
+	//  至少提供一个
+	if len(chat) == 0 {
+		return errors.New("no chat provided")
+	}
+
+	for _, v := range chat {
+		// 确保所有的 message 已被删除
+		count, err := s.cm.CountChatMessage(ctx, v)
+		if err != nil {
+			return err
+		}
+
+		if count > 0 {
+			return consts.ErrChatCanNotDeleteBecauseNotCleared
+		}
+
+		_, err = s.x.Context(ctx).ID(v.ID).Delete(&entity.Chat{})
+	}
+
+	return nil
 }
 
 func (s *Service) DeleteChatFromUserId(ctx context.Context, id int64, userId schema.UserId) error {
@@ -83,5 +114,12 @@ func (s *Service) ListChatFromUserId(ctx context.Context, userId schema.UserId) 
 func (s *Service) ListChatFromAssistantIdWithAssistant(ctx context.Context, assistantId int64) ([]*entity.Chat, error) {
 	var chats []*entity.Chat
 	err := s.x.Context(ctx).Where("assistant_id = ?", assistantId).Find(&chats)
+	return chats, err
+}
+
+func (s *Service) ListChatFromAssistantByPage(ctx context.Context, assistant *entity.Assistant, page int) ([]*entity.Chat, error) {
+	var chats []*entity.Chat
+	var limit = 20
+	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.ID).Limit(limit, (page-1)*limit).Find(&chats)
 	return chats, err
 }

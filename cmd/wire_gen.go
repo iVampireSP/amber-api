@@ -15,12 +15,14 @@ import (
 	"rag-new/internal/base/orm"
 	"rag-new/internal/base/redis"
 	"rag-new/internal/base/server"
+	"rag-new/internal/batch"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/chat"
+	"rag-new/internal/service/chat_message"
 	"rag-new/internal/service/jwks"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/tool"
@@ -40,21 +42,23 @@ func CreateApp() (*base.Application, error) {
 	}
 	toolService := tool.NewService(engine)
 	toolController := v1.NewToolController(toolService, authService)
-	assistantService := assistant.NewService(engine)
+	batchBatch := batch.NewBatch(engine, loggerLogger)
+	assistantService := assistant.NewService(engine, batchBatch)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService)
-	chatService := chat.NewService(engine, assistantService)
+	chat_messageService := chat_message.NewService(engine)
+	chatService := chat.NewService(engine, assistantService, chat_messageService)
 	client := redis.NewRedis(config)
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService)
-	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService)
+	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService)
-	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, batchBatch)
+	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, redis.NewRedis, middleware.Provider, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, redis.NewRedis, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

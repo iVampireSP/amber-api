@@ -1,7 +1,8 @@
-package chat
+package chat_message
 
 import (
 	"context"
+	"errors"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -27,9 +28,25 @@ func (s *Service) DeleteChatMessage(ctx context.Context, ChatMessage *entity.Cha
 	return err
 }
 
-func (s *Service) DeleteChatMessageByChatId(ctx context.Context, chatId int64) error {
-	_, err := s.x.Context(ctx).Where("chat_id = ?", chatId).Delete(&entity.ChatMessage{})
+func (s *Service) DeleteChatMessageByChats(ctx context.Context, chat ...*entity.Chat) error {
+	// build wherein
+	var ids = make([]int64, 0)
+	for _, v := range chat {
+		ids = append(ids, v.ID)
+	}
+
+	if len(ids) == 0 {
+		return errors.New("no chat provided")
+	}
+
+	_, err := s.x.Context(ctx).In("chat_id", ids).Delete(&entity.ChatMessage{})
 	return err
+}
+
+// CountChatMessage count messages
+func (s *Service) CountChatMessage(ctx context.Context, chat *entity.Chat) (int64, error) {
+	count, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Count(&entity.ChatMessage{})
+	return count, err
 }
 
 func (s *Service) DeleteChatMessageByAssistantId(ctx context.Context, assistantId int64) error {

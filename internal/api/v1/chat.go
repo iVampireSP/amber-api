@@ -16,6 +16,7 @@ import (
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/chat"
+	"rag-new/internal/service/chat_message"
 	"rag-new/internal/service/llm"
 	"rag-new/pkg/consts"
 	"rag-new/pkg/random"
@@ -29,10 +30,12 @@ type ChatController struct {
 	llmService       *llm.Service
 	logger           *logger.Logger
 	assistantService *assistant.Service
+	cm               *chat_message.Service
 }
 
-func NewChatController(authService *auth.Service, chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger, assistantService *assistant.Service) *ChatController {
-	return &ChatController{authService, chatService, redis, llmService, logger, assistantService}
+func NewChatController(authService *auth.Service,
+	chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger, assistantService *assistant.Service, chatMessageService *chat_message.Service) *ChatController {
+	return &ChatController{authService, chatService, redis, llmService, logger, assistantService, chatMessageService}
 }
 
 // List godoc
@@ -154,7 +157,7 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 		}
 	}
 
-	chatHistories, err := u.chatService.GetChatMessage(c, chatEntity)
+	chatHistories, err := u.cm.GetChatMessage(c, chatEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -225,7 +228,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	// last chat message
-	lastChatMessage, err := u.chatService.GetLatestMessage(c, chatEntity)
+	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -233,7 +236,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 
 	if lastChatMessage.Role == entity.RoleHuman {
 		lastChatMessage.Content = request.Message
-		err := u.chatService.UpdateMessageContent(c, lastChatMessage)
+		err := u.cm.UpdateMessageContent(c, lastChatMessage)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -256,7 +259,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	chatMessage.Content = request.Message
 	chatMessage.Role = entity.RoleHuman
 
-	err = u.chatService.CreateChatMessage(c, &chatMessage)
+	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -373,7 +376,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 提取 history
-	histories, err := u.chatService.GetChatMessage(c, chatEntity)
+	histories, err := u.cm.GetChatMessage(c, chatEntity)
 	var llmResponseChan = make(chan *llm.AssistantResponse)
 
 	// SSE
@@ -476,7 +479,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 			ChatId:  chatEntity.ID,
 		}
 
-		err = u.chatService.CreateChatMessage(c, newMessage)
+		err = u.cm.CreateChatMessage(c, newMessage)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return

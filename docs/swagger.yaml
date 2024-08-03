@@ -447,6 +447,11 @@ paths:
       consumes:
       - application/json
       description: get string by ID
+      parameters:
+      - description: Assistant ID
+        in: query
+        name: assistant_id
+        type: integer
       produces:
       - application/json
       responses:

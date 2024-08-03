@@ -404,6 +404,14 @@ const docTemplate = `{
                     "chat"
                 ],
                 "summary": "获取所有 Chat",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Assistant ID",
+                        "name": "assistant_id",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

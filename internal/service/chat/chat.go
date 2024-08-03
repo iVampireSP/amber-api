@@ -111,9 +111,9 @@ func (s *Service) ListChatFromUserId(ctx context.Context, userId schema.UserId) 
 	return chats, err
 }
 
-func (s *Service) ListChatFromAssistantIdWithAssistant(ctx context.Context, assistantId int64) ([]*entity.Chat, error) {
+func (s *Service) ListChatFromAssistantIdWithAssistant(ctx context.Context, assistant *entity.Assistant) ([]*entity.Chat, error) {
 	var chats []*entity.Chat
-	err := s.x.Context(ctx).Where("assistant_id = ?", assistantId).Find(&chats)
+	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.ID).Find(&chats)
 	return chats, err
 }
 

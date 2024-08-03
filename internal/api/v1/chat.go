@@ -44,18 +44,48 @@ func NewChatController(authService *auth.Service,
 // @Tags         chat
 // @Accept       json
 // @Produce      json
+// @Param        assistant_id  query  int  false  "Assistant ID"
 // @Success      200  {object}  schema.ResponseBody{data=[]entity.Chat}
 // @Failure      400  {object}  schema.ResponseBody
 // @Router       /api/v1/chats [get]
 func (u *ChatController) List(c *gin.Context) {
 	var response = schema.NewResponse(c)
-	chatEntities, err := u.chatService.ListChatFromUserId(c, u.authService.GetUserId(c))
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
+
+	// 检测 query 中是否有 assistant_id
+	assistantId, _ := c.GetQuery("assistant_id")
+	if assistantId != "" {
+		assistantIdInt, err := strconv.Atoi(assistantId)
+		if err != nil {
+			response.Status(http.StatusBadRequest).Error(err).Send()
+			return
+		}
+
+		assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantIdInt))
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+		if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+			response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+			return
+		}
+
+		chatEntities, err := u.chatService.ListChatFromAssistantIdWithAssistant(c, assistantEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+		response.Status(http.StatusOK).Data(chatEntities).Send()
+	} else {
+		chatEntities, err := u.chatService.ListChatFromUserId(c, u.authService.GetUserId(c))
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		response.Status(http.StatusOK).Data(chatEntities).Send()
 	}
 
-	response.Status(http.StatusOK).Data(chatEntities).Send()
 }
 
 // Create godoc

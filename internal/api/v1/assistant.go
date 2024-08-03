@@ -146,6 +146,18 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 		return
 	}
 
+	// 如果已经绑定过工具，则不能删除
+	toolEntity, err := u.assistantService.ListAssistantTool(c, assistantEntity)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	if len(toolEntity) > 0 {
+		response.Status(http.StatusBadRequest).Error(consts.ErrAssistantHasBindToolCantDelete).Send()
+		return
+	}
+
 	// batch
 	var adb = &batch.AssistantDeleteBatch{
 		AssistantEntity:    assistantEntity,

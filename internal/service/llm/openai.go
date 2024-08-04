@@ -209,11 +209,6 @@ func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, 
 func (s *Service) callRemoteFunction(tool *entity.Tool, user *schema.UserTokenInfo, functionName string, args FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
 	var callbackUrl = tool.Data.CallbackUrl
 
-	argsJson, err := args.JSON()
-	if err != nil {
-		return nil, err
-	}
-
 	var userPublicInfo = &schema.UserPublicInfo{
 		Name: user.Name,
 		Id:   user.Sub,
@@ -221,7 +216,7 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, user *schema.UserTokenIn
 
 	var toolRequest = &schema.ToolRemoteRequest{
 		FunctionName: functionName,
-		Parameters:   string(argsJson),
+		Parameters:   args,
 		ApiKey:       tool.ApiKey,
 		User:         userPublicInfo,
 	}

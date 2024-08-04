@@ -25,13 +25,8 @@ type ToolDiscoveryInput struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
 		Parameters  struct {
-			Type       string `json:"type,omitempty"`
-			Properties struct {
-				Location struct {
-					Type        string `json:"type"`
-					Description string `json:"description"`
-				} `json:"location"`
-			} `json:"properties,omitempty"`
+			Type       string      `json:"type,omitempty"`
+			Properties interface{} `json:"properties,omitempty"`
 		} `json:"parameters"  validate:"required min=1"`
 		Required []string `json:"required,omitempty" validate:"required"`
 	} `json:"functions"`

@@ -109,58 +109,6 @@
             }
         },
         "/api/v1/assistants/{assistantId}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "assistant"
-                ],
-                "summary": "显示 Assistant 数据",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Assistant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                        }
-                    }
-                }
-            },
             "patch": {
                 "security": [
                     {

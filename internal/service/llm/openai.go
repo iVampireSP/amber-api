@@ -118,20 +118,22 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 				panic(err)
 			}
 
-			responseChan <- &AssistantResponse{
-				State: StateToolCalling,
-				ToolCallMessage: &ToolCallMessage{
-					Name: respChoice.FuncCall.Name,
-					Args: functionCallArgs,
-				},
-			}
-
 			tool, functionName, err := s.spiltFunctionName(respChoice.FuncCall.Name)
 			if err != nil {
 				responseChan <- &AssistantResponse{
 					State:   StateFailed,
 					Content: err.Error(),
 				}
+				return err
+			}
+
+			responseChan <- &AssistantResponse{
+				State: StateToolCalling,
+				ToolCallMessage: &ToolCallMessage{
+					ToolName:     tool.Name,
+					FunctionName: respChoice.FuncCall.Name,
+					Args:         functionCallArgs,
+				},
 			}
 
 			remoteFunctionResponse, err := s.callRemoteFunction(tool, user, functionName, functionCallArgs)
@@ -140,8 +142,9 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 					State:   StateToolFailed,
 					Content: err.Error(),
 					ToolResponseMessage: &ToolResponseMessage{
-						Name:    respChoice.FuncCall.Name,
-						Content: err.Error(),
+						ToolName:     tool.Name,
+						FunctionName: respChoice.FuncCall.Name,
+						Content:      err.Error(),
 					},
 				}
 				return err
@@ -161,8 +164,9 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 				responseChan <- &AssistantResponse{
 					State: StateToolResponse,
 					ToolResponseMessage: &ToolResponseMessage{
-						Name:    respChoice.FuncCall.Name,
-						Content: remoteFunctionResponse.Content,
+						ToolName:     tool.Name,
+						FunctionName: respChoice.FuncCall.Name,
+						Content:      remoteFunctionResponse.Content,
 					},
 				}
 			}

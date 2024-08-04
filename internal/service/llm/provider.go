@@ -38,13 +38,15 @@ type ChunkMessage struct {
 }
 
 type ToolCallMessage struct {
-	Name string           `json:"name"`
-	Args FunctionCallArgs `json:"args"`
+	ToolName     string           `json:"tool_name"`
+	FunctionName string           `json:"function_name"`
+	Args         FunctionCallArgs `json:"args"`
 }
 
 type ToolResponseMessage struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
+	ToolName     string `json:"tool_name"`
+	FunctionName string `json:"function_name"`
+	Content      string `json:"content"`
 }
 
 type AssistantResponse struct {

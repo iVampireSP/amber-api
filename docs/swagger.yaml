@@ -181,6 +181,50 @@ definitions:
     - name
     - url
     type: object
+  rag-new_internal_schema.ToolDiscoveryInput:
+    properties:
+      callback_url:
+        type: string
+      description:
+        type: string
+      functions:
+        items:
+          properties:
+            description:
+              type: string
+            name:
+              type: string
+            parameters:
+              properties:
+                properties:
+                  properties:
+                    location:
+                      properties:
+                        description:
+                          type: string
+                        type:
+                          type: string
+                      type: object
+                  type: object
+                type:
+                  type: string
+              type: object
+            required:
+              items:
+                type: string
+              type: array
+          required:
+          - required
+          type: object
+        type: array
+      homepage_url:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
   rag-new_internal_schema.ToolDiscoveryOutput:
     properties:
       callback_url:
@@ -844,6 +888,70 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Tool
+      tags:
+      - tool
+  /api/v1/tools/{id}/update:
+    post:
+      consumes:
+      - application/json
+      description: 如果你的 Tool Discovery 内容改变了，你需要调用此接口更新数据
+      parameters:
+      - description: Tool ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.Tool'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新 Tool 的数据
+      tags:
+      - tool
+  /api/v1/tools/syntax:
+    post:
+      consumes:
+      - application/json
+      description: 如果你的 Tool Discovery 内容改变了，你需要调用此接口更新数据
+      parameters:
+      - description: ToolDiscoveryInput
+        in: body
+        name: toolDiscoveryInput
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 校验 Discovery 语法
       tags:
       - tool
 securityDefinitions:

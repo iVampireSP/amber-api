@@ -152,13 +152,8 @@ func (t *ToolController) DeleteTool(c *gin.Context) {
 		return
 	}
 
-	if getTool.ID == consts.NoRecord {
+	if getTool.ID == consts.NoRecord || getTool.UserId != t.authService.GetUserId(c) {
 		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
-		return
-	}
-
-	if getTool.UserId != t.authService.GetUserId(c) {
-		response.Error(consts.ErrToolNotYours).Send()
 		return
 	}
 
@@ -169,4 +164,75 @@ func (t *ToolController) DeleteTool(c *gin.Context) {
 	}
 
 	response.Status(http.StatusNoContent).Send()
+}
+
+// UpdateToolData godoc
+// @Summary      更新 Tool 的数据
+// @Description  如果你的 Tool Discovery 内容改变了，你需要调用此接口更新数据
+// @Tags         tool
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id  path  int  true  "Tool ID"
+// @Success      200  {object}  schema.ResponseBody{data=entity.Tool}
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Failure      404  {object}  schema.ResponseBody{}
+// @Router       /api/v1/tools/{id}/update [post]
+func (t *ToolController) UpdateToolData(c *gin.Context) {
+	var response = schema.NewResponse(c)
+	toolId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+
+	getTool, err := t.toolService.GetTool(c, int64(toolId))
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+
+	if getTool.ID == consts.NoRecord || getTool.UserId != t.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
+		return
+	}
+
+	err = t.toolService.UpdateToolData(c, getTool)
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+
+	response.Data(getTool).Send()
+}
+
+// ValidateSyntax godoc
+// @Summary      校验 Discovery 语法
+// @Description  如果你的 Tool Discovery 内容改变了，你需要调用此接口更新数据
+// @Tags         tool
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        toolDiscoveryInput  body  schema.ToolDiscoveryInput  true  "ToolDiscoveryInput"
+// @Success      200  {object}  schema.ResponseBody{}
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Router       /api/v1/tools/syntax [post]
+func (t *ToolController) ValidateSyntax(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
+	var toolDiscoveryInput schema.ToolDiscoveryInput
+
+	err := c.ShouldBindJSON(&toolDiscoveryInput)
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+
+	err = t.toolService.ValidateSyntax(&toolDiscoveryInput)
+	if err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Message(consts.ErrToolSyntaxError.Error()).Send()
+		return
+	}
+
+	response.Status(http.StatusOK).Message(consts.StatusToolSyntaxMaybeOK).Send()
 }

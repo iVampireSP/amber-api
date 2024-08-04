@@ -24,9 +24,7 @@ func (s *Service) ListToolFromUserId(ctx context.Context, userId schema.UserId) 
 
 func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest, userId schema.UserId) (*entity.Tool, error) {
 	var toolEntity entity.Tool
-	var toolData schema.ToolDiscoveryInput
 
-	// map to entity
 	toolEntity.UserId = userId
 
 	toolEntity.Name = tool.Name
@@ -34,8 +32,51 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 	toolEntity.DiscoveryUrl = tool.Url
 	toolEntity.ApiKey = tool.ApiKey
 
+	toolData, err := s.getToolData(tool.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.ValidateSyntax(toolData)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.x.Context(ctx).Insert(&toolEntity)
+	toolData.ToolId = toolEntity.ID
+	toolEntity.Data = *toolData.Output()
+
+	_, err = s.x.Context(ctx).ID(toolEntity.ID).Cols("data").Update(&toolEntity)
+
+	return &toolEntity, err
+}
+
+func (s *Service) UpdateToolData(ctx context.Context, tool *entity.Tool) error {
+	toolData, err := s.getToolData(tool.DiscoveryUrl)
+
+	if err != nil {
+		return err
+	}
+
+	toolData.ToolId = tool.ID
+
+	err = s.ValidateSyntax(toolData)
+	if err != nil {
+		return err
+	}
+
+	tool.Data = *toolData.Output()
+
+	_, err = s.x.Context(ctx).ID(tool.ID).Cols("data").Update(tool)
+
+	return err
+}
+
+func (s *Service) getToolData(url string) (*schema.ToolDiscoveryInput, error) {
+	var toolData schema.ToolDiscoveryInput
+
 	// post url
-	resp, err := http.Get(tool.Url)
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -59,21 +100,7 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 		return nil, err
 	}
 
-	err = s.ValidateSyntax(&toolData)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = s.x.Context(ctx).Insert(&toolEntity)
-	toolData.ToolId = toolEntity.ID
-	toolEntity.Data = *toolData.Output()
-	// update
-	//_, err = s.x.Context(ctx).ID(toolEntity.ID).AllCols().Update(&toolEntity)
-
-	// only update data
-	_, err = s.x.Context(ctx).ID(toolEntity.ID).Cols("data").Update(&toolEntity)
-
-	return &toolEntity, err
+	return &toolData, err
 }
 
 func (s *Service) DeleteTool(ctx context.Context, id int64) error {

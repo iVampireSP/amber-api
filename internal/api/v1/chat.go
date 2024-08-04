@@ -23,6 +23,8 @@ import (
 	"strconv"
 )
 
+const eventName = "data"
+
 type ChatController struct {
 	authService      *auth.Service
 	chatService      *chat.Service
@@ -478,16 +480,19 @@ func (u *ChatController) Stream(c *gin.Context) {
 	go func() {
 		err = u.llmService.StreamChat(llmResponseChan, assistantEntity.Prompt, histories, &user.Token, tools...)
 		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
+			u.logger.Sugar.Error(err)
+			// 关闭连接
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+			//response.Status(http.StatusInternalServerError).Message("Streaming chat failed").Error(err).Send()
 		}
 	}()
 
 	var llmFullMessage = ""
-	var result = c.Stream(func(w io.Writer) bool {
+	c.Stream(func(w io.Writer) bool {
 		// Emit Server Sent Events compatible
 		msg, ok := <-llmResponseChan
 		if !ok {
-			fmt.Println("done!")
 			return false
 		}
 
@@ -500,7 +505,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 			u.logger.Sugar.Error(err)
 		}
 
-		c.SSEvent("data", string(j))
+		c.SSEvent(eventName, string(j))
 
 		c.Writer.Flush()
 
@@ -508,20 +513,22 @@ func (u *ChatController) Stream(c *gin.Context) {
 		case llm.StateChunk:
 			llmFullMessage += msg.ChunkMessage.Content
 			return true
+		case llm.StateToolCalling, llm.StateToolCalled, llm.StateToolSuccess:
+			return true
 		case llm.StateFailed:
 			return false
 		case llm.StateFinished:
+			return false
+		case llm.StateToolFailed:
 			return false
 		default:
 			return true
 		}
 	})
 
-	if !result {
-		// close sse stream
-		c.SSEvent("close", "")
-		c.Writer.Flush()
-	}
+	// close sse stream
+	c.SSEvent("close", "")
+	c.Writer.Flush()
 
 	close(llmResponseChan)
 

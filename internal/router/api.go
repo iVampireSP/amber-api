@@ -35,6 +35,8 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.POST("/tools", a.Tool.CreateTool)
 	r.GET("/tools/:id", a.Tool.GetTool)
 	r.DELETE("/tools/:id", a.Tool.DeleteTool)
+	r.POST("/tools/:id/update", a.Tool.UpdateToolData)
+	r.POST("/tools/syntax", a.Tool.ValidateSyntax)
 
 	r.GET("/assistants/:id/tools", a.Assistant.ListTool)
 	r.POST("/assistants/:id/tools/:tool_id", a.Assistant.BindTool)

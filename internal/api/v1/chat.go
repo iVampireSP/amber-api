@@ -478,7 +478,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	go func() {
-		err = u.llmService.StreamChat(llmResponseChan, assistantEntity.Prompt, histories, &user.Token, tools...)
+		err = u.llmService.StreamChat(llmResponseChan, assistantEntity, histories, &user.Token, tools...)
 		if err != nil {
 			u.logger.Sugar.Error(err)
 			// 关闭连接

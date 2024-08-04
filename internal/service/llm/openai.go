@@ -15,12 +15,27 @@ import (
 )
 
 // StreamChat 执行对话
-func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt string, history []*entity.ChatMessage, user *schema.UserTokenInfo, tools ...llms.Tool) error {
+func (s *Service) StreamChat(responseChan chan *AssistantResponse, assistant *entity.Assistant, history []*entity.ChatMessage, user *schema.UserTokenInfo, tools ...llms.Tool) error {
 	var historyContent []llms.MessageContent
 
-	if systemPrompt != "" {
-		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt))
+	var prompt = `
+Your name: ` + assistant.Name + `
+Your description: ` + assistant.Description + `
+
+`
+	if user != nil {
+		prompt += `
+Human(user) name: ` + user.Name + `
+Human account id: ` + strconv.Itoa(int(user.Sub)) + `
+
+`
 	}
+
+	if assistant.Prompt != "" {
+		prompt += assistant.Prompt
+	}
+
+	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, prompt))
 
 	for _, h := range history {
 		switch h.Role {

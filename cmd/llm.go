@@ -62,10 +62,10 @@ type FunctionCallArgs map[string]interface{}
 
 func historyCallLLM(app *base.Application) {
 	// assistant
-	//assistant, err := app.Service.Assistant.GetAssistant(context.Background(), 1)
-	//if err != nil {
-	//	return
-	//}
+	assistant, err := app.Service.Assistant.GetAssistant(context.Background(), 1)
+	if err != nil {
+		return
+	}
 
 	fakeUser := &schema.UserTokenInfo{
 		Aud:              "",
@@ -120,7 +120,7 @@ func historyCallLLM(app *base.Application) {
 
 	}()
 
-	err := app.Service.LLM.StreamChat(responseChan, "", histories, fakeUser, tools...)
+	err = app.Service.LLM.StreamChat(responseChan, assistant, histories, fakeUser, tools...)
 	if err != nil {
 		return
 	}

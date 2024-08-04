@@ -1,3 +1,4 @@
+# docker build -t registry.leafdev.top/leaf/rag-new:v0.0.1-fix .
 FROM golang:latest as builder
 
 COPY . /app

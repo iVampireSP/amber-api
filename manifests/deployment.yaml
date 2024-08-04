@@ -7,12 +7,28 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: amber
+      app: amber-api
   template:
     metadata:
       labels:
-        app: amber
+        app: amber-api
     spec:
+      volumes:
+        - name: config-vol
+          configMap:
+            name: amber-config
+      imagePullSecrets:
+        - name: leaf
       containers:
-      - name: nginx
-        image: nginx
+        - name: amber
+          image: registry.leafdev.top/leaf/rag-new:v0.0.1-fix
+          imagePullPolicy: IfNotPresent
+          args:
+            - http
+          ports:
+            - containerPort: 8000
+              name: http-8000
+          volumeMounts:
+            - mountPath: /app/config.yaml
+              name: config-vol
+              subPath: config.yaml

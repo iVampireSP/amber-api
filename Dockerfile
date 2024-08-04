@@ -5,9 +5,12 @@ WORKDIR /app/cmd
 
 
 RUN go env -w GO111MODULE=on && go env -w GOPROXY=https://goproxy.cn,direct && go mod download
-RUN go build -ldflags "-w -s" -gcflags "-N -l" -o main .
+RUN CGO_ENABLED=0 go build -ldflags "-w -s" -gcflags "-N -l" -o main .
 
 # RUN
 FROM alpine:latest
+
+WORKDIR /app
+
 COPY --from=builder /app/cmd/main /app/main
 ENTRYPOINT ["/app/main"]

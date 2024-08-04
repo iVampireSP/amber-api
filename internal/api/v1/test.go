@@ -33,6 +33,7 @@ func (u *UserController) Test(c *gin.Context) {
 		Valid:     user.Valid,
 		UserEmail: user.Token.Email,
 		UserId:    user.Token.Sub,
+		UserName:  user.Token.Name,
 	}
 
 	schema.NewResponse(c).Status(http.StatusOK).Data(currentUserResponse).Send()

@@ -5,4 +5,5 @@ type CurrentUserResponse struct {
 	Valid     bool   `json:"valid"`
 	UserEmail string `json:"userEmail"`
 	UserId    UserId `json:"userId"`
+	UserName  string `json:"userName"`
 }

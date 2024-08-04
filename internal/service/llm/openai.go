@@ -19,20 +19,16 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, assistant *en
 	var historyContent []llms.MessageContent
 
 	var prompt = `
-Your name: ` + assistant.Name + `
-Your description: ` + assistant.Description + `
-
-`
+Your name: ` + assistant.Name + `current user give you` + `
+Your description: ` + assistant.Description + "(current user given)"
 	if user != nil {
 		prompt += `
-Human(user) name: ` + user.Name + `
-Human account id: ` + strconv.Itoa(int(user.Sub)) + `
-
-`
+current user's name: ` + user.Name + `(system give you this)` + `
+current user's id: ` + strconv.Itoa(int(user.Sub)) + "(system gives you this, user can't change it)"
 	}
 
 	if assistant.Prompt != "" {
-		prompt += assistant.Prompt
+		prompt += "\n" + assistant.Prompt
 	}
 
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, prompt))

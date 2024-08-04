@@ -393,6 +393,11 @@ const docTemplate = `{
         },
         "/api/v1/chats": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"
@@ -443,6 +448,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get string by ID",
                 "consumes": [
                     "application/json"

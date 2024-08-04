@@ -470,6 +470,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: 获取所有 Chat
       tags:
       - chat
@@ -504,6 +506,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
       summary: Create Chat
       tags:
       - chat

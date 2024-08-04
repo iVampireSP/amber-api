@@ -44,6 +44,7 @@ func NewChatController(authService *auth.Service,
 // @Tags         chat
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        assistant_id  query  int  false  "Assistant ID"
 // @Success      200  {object}  schema.ResponseBody{data=[]entity.Chat}
 // @Failure      400  {object}  schema.ResponseBody
@@ -94,6 +95,7 @@ func (u *ChatController) List(c *gin.Context) {
 // @Tags         chat
 // @Accept       json
 // @Produce      json
+// @Security     ApiKeyAuth
 // @Param        chat  body  	schema.ChatCreateRequest  true  "Chat"
 // @Success      200  {object}  schema.ResponseBody{data=entity.Chat}
 // @Failure      400  {object}  schema.ResponseBody

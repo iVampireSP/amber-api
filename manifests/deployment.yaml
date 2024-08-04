@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amber
+  namespace: amber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: amber
+  template:
+    metadata:
+      labels:
+        app: amber
+    spec:
+      containers:
+      - name: nginx
+        image: nginx

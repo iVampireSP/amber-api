@@ -126,7 +126,7 @@ func (u *AssistantController) CreateAssistant(c *gin.Context) {
 // @Param        assistantUpdateRequest  body  schema.AssistantUpdateRequest  true  "Assistant Update"
 // @Success      200  {object}  schema.ResponseBody{data=entity.Assistant}
 // @Failure      400  {object}  schema.ResponseBody{}
-// @Router       /api/v1/assistants/{assistantId} [patch]
+// @Router       /api/v1/assistants/{id} [patch]
 func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 	var updateReq schema.AssistantUpdateRequest
 	var response = schema.NewResponse(c)

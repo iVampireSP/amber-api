@@ -28,6 +28,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 	r.GET("/assistants", a.Assistant.List)
 	r.GET("/assistants/:id", a.Assistant.GetAssistant)
+	r.PATCH("/assistants/:id", a.Assistant.UpdateAssistant)
 	r.POST("/assistants", a.Assistant.CreateAssistant)
 	r.DELETE("/assistants/:id", a.Assistant.DeleteAssistant)
 

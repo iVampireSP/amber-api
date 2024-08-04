@@ -116,6 +116,62 @@ func (u *AssistantController) CreateAssistant(c *gin.Context) {
 	response.Status(http.StatusOK).Data(assistants).Send()
 }
 
+// UpdateAssistant godoc
+// @Summary      更新 Assistant
+// @Tags         assistant
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id  path  int  true  "Assistant ID"
+// @Param        assistantUpdateRequest  body  schema.AssistantUpdateRequest  true  "Assistant Update"
+// @Success      200  {object}  schema.ResponseBody{data=entity.Assistant}
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Router       /api/v1/assistants/{assistantId} [patch]
+func (u *AssistantController) UpdateAssistant(c *gin.Context) {
+	var updateReq schema.AssistantUpdateRequest
+	var response = schema.NewResponse(c)
+
+	if err := c.ShouldBindJSON(&updateReq); err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	assistantId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		response.Error(err).Send()
+		return
+	}
+	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+		return
+	}
+
+	if updateReq.Name != "" {
+		assistantEntity.Name = updateReq.Name
+	}
+
+	if updateReq.Description != "" {
+		assistantEntity.Description = updateReq.Description
+	}
+
+	if updateReq.Prompt != "" {
+		assistantEntity.Prompt = updateReq.Prompt
+	}
+
+	err = u.assistantService.UpdateAssistant(c, assistantEntity)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	response.Status(http.StatusOK).Data(assistantEntity).Send()
+}
+
 // DeleteAssistant godoc
 // @Summary      删除 Assistant
 // @Tags         assistant

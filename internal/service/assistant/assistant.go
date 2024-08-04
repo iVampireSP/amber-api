@@ -37,11 +37,10 @@ func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.Assi
 	return &assistant, err
 }
 
-//
-//func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assistant) error {
-//	_, err := s.x.Context(ctx).ID(assistant.Id).AllCols().Update(assistant)
-//	return err
-//}
+func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assistant) error {
+	_, err := s.x.Context(ctx).ID(assistant.ID).Cols("name", "description", "prompt").Update(assistant)
+	return err
+}
 
 func (s *Service) DeleteAssistant(ctx context.Context, id int64) error {
 	// assistant

@@ -117,6 +117,15 @@ definitions:
     - description
     - name
     type: object
+  rag-new_internal_schema.AssistantUpdateRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      prompt:
+        type: string
+    type: object
   rag-new_internal_schema.ChatCreateRequest:
     properties:
       assistant_id:
@@ -322,6 +331,73 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 创建 Assistant
+      tags:
+      - assistant
+  /api/v1/assistants/{assistantId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Assistant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.Assistant'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 显示 Assistant 数据
+      tags:
+      - assistant
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Assistant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Assistant Update
+        in: body
+        name: assistantUpdateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.AssistantUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.Assistant'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新 Assistant
       tags:
       - assistant
   /api/v1/assistants/{id}:

@@ -23,9 +23,10 @@ func (a *Base) TableName() string {
 type ChatRole string
 
 var (
-	RoleAssistant ChatRole = "assistant"
-	RoleHuman     ChatRole = "user"
-	RoleSystem    ChatRole = "system"
+	RoleAssistant  ChatRole = "assistant"
+	RoleHuman      ChatRole = "user"
+	RoleSystem     ChatRole = "system"
+	RoleHideSystem ChatRole = "system_hide"
 )
 
 func (c ChatRole) String() string {

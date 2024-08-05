@@ -210,6 +210,7 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 	}
 
 	chatHistories, err := u.cm.GetChatMessage(c, chatEntity)
+	//chatHistories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -459,7 +460,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 提取 history
-	histories, err := u.cm.GetChatMessage(c, chatEntity)
+	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
 	var llmResponseChan = make(chan *llm.AssistantResponse)
 
 	// SSE
@@ -507,6 +508,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}()
 
 	var llmFullMessage = ""
+	var toolResponse = ""
 	c.Stream(func(w io.Writer) bool {
 		// Emit Server Sent Events compatible
 		msg, ok := <-llmResponseChan
@@ -531,7 +533,14 @@ func (u *ChatController) Stream(c *gin.Context) {
 		case llm.StateChunk:
 			llmFullMessage += msg.ChunkMessage.Content
 			return true
-		case llm.StateToolCalling, llm.StateToolCalled, llm.StateToolSuccess:
+		case llm.StateToolSuccess:
+			return true
+		case llm.StateToolResponse:
+			toolResponse += `Tool/Function Call Logs:
+Function Name: ` + msg.ToolResponseMessage.FunctionName + `
+Function Response: ` + msg.ToolResponseMessage.Content + `
+
+`
 			return true
 		case llm.StateFailed:
 			return false
@@ -556,9 +565,25 @@ func (u *ChatController) Stream(c *gin.Context) {
 	u.redis.Del(c, u.getCacheKey("stream:"+streamIdStr+":user"))
 	u.redis.Del(c, chatIdStreamingKey)
 
+	var newMessage *entity.ChatMessage
+	if toolResponse != "" {
+		// 添加到消息 entity.ChatMessage
+		newMessage = &entity.ChatMessage{
+			Role:    entity.RoleHideSystem,
+			Content: toolResponse,
+			ChatId:  chatEntity.ID,
+		}
+
+		err = u.cm.CreateChatMessage(c, newMessage)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
+
 	if llmFullMessage != "" {
 		// 添加到消息 entity.ChatMessage
-		newMessage := &entity.ChatMessage{
+		newMessage = &entity.ChatMessage{
 			Role:    entity.RoleAssistant,
 			Content: llmFullMessage,
 			ChatId:  chatEntity.ID,

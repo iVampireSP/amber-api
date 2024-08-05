@@ -41,6 +41,8 @@ current user's id: ` + strconv.Itoa(int(user.Sub)) + "(system gives you this, us
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
 		case entity.RoleSystem:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
+		case entity.RoleHideSystem:
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		}
 	}
 

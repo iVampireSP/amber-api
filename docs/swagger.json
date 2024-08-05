@@ -266,6 +266,163 @@
                 }
             }
         },
+        "/api/v1/assistants/{id}/shares": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "此 API 可以创建一个 Assistant 共享 Token，可以将你的 Assistant 公开出去使用。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "获取 Assistant 共享列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantShare"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "此方法将会获取一个 Token，用户将会通过这个 Token 来访问你的 Assistant 并调用工具。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "创建 Assistant 共享",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantShare"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/assistants/{id}/shares/{share_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "此方法将会删除共享，删除后，共享将会立即失效。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "删除 Assistant 共享",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "share_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/assistants/{id}/tools": {
             "get": {
                 "security": [
@@ -428,6 +585,311 @@
                                     "properties": {
                                         "data": {
                                             "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/chat_public": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_public"
+                ],
+                "summary": "获取公开对话",
+                "parameters": [
+                    {
+                        "description": "ChatPublicListRequest",
+                        "name": "schema.ChatPublicListRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ChatPublicListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_public"
+                ],
+                "summary": "通过 API 创建一个公开的对话记录",
+                "parameters": [
+                    {
+                        "description": "ChatPublicRequest",
+                        "name": "schema.ChatPublicRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ChatPublicRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/chat_public/{chat_id}/clear": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_public"
+                ],
+                "summary": "清空公开对话的聊天记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "GetPublicChatMessageRequest",
+                        "name": "schema.GetPublicChatMessageRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.GetPublicChatMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/chat_public/{chat_id}/messages": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_public"
+                ],
+                "summary": "获取公开对话的聊天记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "assistant_token",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "guest_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/rag-new_internal_entity.ChatMessage"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_public"
+                ],
+                "summary": "增加公开对话的聊天记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "AddPublicChatMessageRequest",
+                        "name": "schema.AddPublicChatMessageRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.AddPublicChatMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1317,6 +1779,26 @@
                 }
             }
         },
+        "rag-new_internal_entity.AssistantShare": {
+            "type": "object",
+            "properties": {
+                "assistant_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "rag-new_internal_entity.AssistantTool": {
             "type": "object",
             "properties": {
@@ -1372,10 +1854,19 @@
                 "created_at": {
                     "type": "string"
                 },
+                "expired_at": {
+                    "type": "string"
+                },
+                "guest_id": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "owner": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -1447,6 +1938,25 @@
                 },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "rag-new_internal_schema.AddPublicChatMessageRequest": {
+            "type": "object",
+            "required": [
+                "assistant_token",
+                "guest_id",
+                "message"
+            ],
+            "properties": {
+                "assistant_token": {
+                    "type": "string"
+                },
+                "guest_id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -1524,6 +2034,37 @@
                 }
             }
         },
+        "rag-new_internal_schema.ChatPublicListRequest": {
+            "type": "object",
+            "required": [
+                "guest_id"
+            ],
+            "properties": {
+                "guest_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "rag-new_internal_schema.ChatPublicRequest": {
+            "type": "object",
+            "required": [
+                "assistant_token",
+                "guest_id",
+                "name"
+            ],
+            "properties": {
+                "assistant_token": {
+                    "type": "string"
+                },
+                "guest_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 32
+                }
+            }
+        },
         "rag-new_internal_schema.CurrentUserResponse": {
             "type": "object",
             "properties": {
@@ -1541,6 +2082,21 @@
                 },
                 "valid": {
                     "type": "boolean"
+                }
+            }
+        },
+        "rag-new_internal_schema.GetPublicChatMessageRequest": {
+            "type": "object",
+            "required": [
+                "assistant_token",
+                "guest_id"
+            ],
+            "properties": {
+                "assistant_token": {
+                    "type": "string"
+                },
+                "guest_id": {
+                    "type": "string"
                 }
             }
         },

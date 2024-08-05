@@ -112,6 +112,7 @@ definitions:
         maxLength: 255
         type: string
       prompt:
+        maxLength: 512
         type: string
     required:
     - description
@@ -120,10 +121,13 @@ definitions:
   rag-new_internal_schema.AssistantUpdateRequest:
     properties:
       description:
+        maxLength: 255
         type: string
       name:
+        maxLength: 255
         type: string
       prompt:
+        maxLength: 512
         type: string
     type: object
   rag-new_internal_schema.ChatCreateRequest:
@@ -158,6 +162,8 @@ definitions:
         type: string
       userId:
         type: integer
+      userName:
+        type: string
       valid:
         type: boolean
     type: object
@@ -205,16 +211,7 @@ definitions:
               type: string
             parameters:
               properties:
-                properties:
-                  properties:
-                    location:
-                      properties:
-                        description:
-                          type: string
-                        type:
-                          type: string
-                      type: object
-                  type: object
+                properties: {}
                 type:
                   type: string
               type: object
@@ -635,6 +632,49 @@ paths:
       summary: Delete Chat
       tags:
       - chat
+  /api/v1/chats/{id}/clear:
+    post:
+      consumes:
+      - application/json
+      description: 清空当前聊天记录
+      parameters:
+      - description: Chat ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Message
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ChatMessageAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 清空聊天记录
+      tags:
+      - chat_message
   /api/v1/chats/{id}/messages:
     get:
       consumes:

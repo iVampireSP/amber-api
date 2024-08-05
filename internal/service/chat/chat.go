@@ -154,3 +154,10 @@ func (s *Service) ListChatFromGuestByPage(ctx context.Context, guestId string, p
 	err := s.x.Context(ctx).Where("owner", schema.OwnerGuest.String()).Where("guest_id = ?", guestId).Limit(limit, (page-1)*limit).Find(&chats)
 	return chats, err
 }
+
+func (s *Service) DeleteExpiredChats(ctx context.Context, beforeTime time.Time) error {
+	// 防止瞬时压力过大，一次删除固定数量
+	var num = 1000
+	_, err := s.x.Context(ctx).Where("expired_at < ?", beforeTime).Limit(num).Delete(&entity.Chat{})
+	return err
+}

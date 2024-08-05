@@ -54,7 +54,7 @@ func (hs *HttpServer) AllowAllCors() {
 	var config = cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowCredentials = true
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowMethods = []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Cookie", "X-Requested-With", "X-Auth-Token", "Authorization"}
 	config.MaxAge = 12 * time.Hour
 

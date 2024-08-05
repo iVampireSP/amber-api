@@ -584,7 +584,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Chat ID"
 // @Param        message  body  schema.ChatMessageAddRequest  true  "Message"
-// @Success      200  {object}
+// @Success      200
 // @Failure      400  {object}  schema.ResponseBody
 // @Failure      404  {object}  schema.ResponseBody
 // @Failure      409  {object}  schema.ResponseBody

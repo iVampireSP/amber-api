@@ -625,6 +625,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/chats/{id}/clear": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "清空当前聊天记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_message"
+                ],
+                "summary": "清空聊天记录",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Chat ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/chats/{id}/messages": {
             "get": {
                 "security": [
@@ -1417,7 +1475,8 @@ const docTemplate = `{
                     "maxLength": 255
                 },
                 "prompt": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 512
                 }
             }
         },
@@ -1425,13 +1484,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255
                 },
                 "prompt": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 512
                 }
             }
         },
@@ -1482,6 +1544,9 @@ const docTemplate = `{
                 },
                 "userId": {
                     "type": "integer"
+                },
+                "userName": {
+                    "type": "string"
                 },
                 "valid": {
                     "type": "boolean"
@@ -1559,22 +1624,7 @@ const docTemplate = `{
                             "parameters": {
                                 "type": "object",
                                 "properties": {
-                                    "properties": {
-                                        "type": "object",
-                                        "properties": {
-                                            "location": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "description": {
-                                                        "type": "string"
-                                                    },
-                                                    "type": {
-                                                        "type": "string"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
+                                    "properties": {},
                                     "type": {
                                         "type": "string"
                                     }

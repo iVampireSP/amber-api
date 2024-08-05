@@ -144,6 +144,19 @@ func (u *ChatController) Delete(c *gin.Context) {
 		return
 	}
 
+	chatIdStr := strconv.Itoa(chatId)
+	// 检查状态是否是回复中
+	chatIdStreamingKey := u.getCacheKey("entity:" + chatIdStr + ":streaming")
+	i, err := u.redis.Exists(c, chatIdStreamingKey).Result()
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if i != consts.NoRecord {
+		response.Status(http.StatusConflict).Error(consts.ErrChatStreaming).Send()
+		return
+	}
+
 	err = u.chatService.DeleteChatFromUserId(c, int64(chatId), u.authService.GetUserId(c))
 	if err != nil {
 		if errors.Is(err, consts.ErrChatNotFound) {
@@ -189,6 +202,11 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
+	}
+
+	if chatEntity.ID == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
+		return
 	}
 
 	chatHistories, err := u.cm.GetChatMessage(c, chatEntity)
@@ -555,4 +573,64 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	response.Status(http.StatusOK).Send()
+}
+
+// ClearChatMessage godoc
+// @Summary      清空聊天记录
+// @Description  清空当前聊天记录
+// @Tags         chat_message
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id  path  int  true  "Chat ID"
+// @Success      200
+// @Failure      400  {object}  schema.ResponseBody
+// @Failure      404  {object}  schema.ResponseBody
+// @Failure      409  {object}  schema.ResponseBody
+// @Failure      500  {object}  schema.ResponseBody
+// @Router       /api/v1/chats/{id}/clear [post]
+func (u *ChatController) ClearChatMessage(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
+	chatId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	chatEntity, err := u.chatService.GetChat(c, int64(chatId))
+	if err != nil {
+		if errors.Is(err, consts.ErrChatNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
+
+	if chatEntity.ID == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
+		return
+	}
+
+	// 检查状态是否是回复中
+	chatIdStreamingKey := u.getCacheKey("entity:" + strconv.Itoa(int(chatEntity.ID)) + ":streaming")
+	i, err := u.redis.Exists(c, chatIdStreamingKey).Result()
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if i != consts.NoRecord {
+		response.Status(http.StatusConflict).Error(consts.ErrChatStreaming).Send()
+		return
+	}
+
+	err = u.cm.ClearChatMessage(c, chatEntity)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	response.Status(http.StatusNoContent).Send()
 }

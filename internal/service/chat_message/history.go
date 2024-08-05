@@ -71,3 +71,8 @@ func (s *Service) UpdateMessageContent(ctx context.Context, chatMessage *entity.
 	_, err := s.x.Context(ctx).ID(chatMessage.ID).Cols("content").Update(chatMessage)
 	return err
 }
+
+func (s *Service) ClearChatMessage(ctx context.Context, chat *entity.Chat) error {
+	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Delete(&entity.ChatMessage{})
+	return err
+}

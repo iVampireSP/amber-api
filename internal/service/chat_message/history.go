@@ -9,13 +9,13 @@ import (
 )
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
-	var chatMessage []*entity.ChatMessage
-	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).And("role != ?", entity.RoleHideSystem.String()).OrderBy("id asc").Find(&chatMessage)
+	var chatMessage = make([]*entity.ChatMessage, 0)
+	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).And("role != ?", schema.RoleHideSystem.String()).OrderBy("id asc").Find(&chatMessage)
 	return chatMessage, err
 }
 
 func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
-	var chatMessage []*entity.ChatMessage
+	var chatMessage = make([]*entity.ChatMessage, 0)
 	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).OrderBy("id asc").Find(&chatMessage)
 	return chatMessage, err
 }

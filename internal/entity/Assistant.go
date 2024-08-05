@@ -15,6 +15,9 @@ type Assistant struct {
 func (a *Assistant) TableName() string {
 	return "assistants"
 }
+func (a *Assistant) GetUserId() schema.UserId {
+	return a.UserId
+}
 
 type AssistantTool struct {
 	Base        `xorm:"extends"`

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"rag-new/internal/batch"
@@ -75,10 +76,14 @@ func (u *AssistantController) GetAssistant(c *gin.Context) {
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
 	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
+		if errors.Is(err, consts.ErrAssistantNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+		}
 		return
 	}
-	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+	if !u.authService.Compare(c, assistantEntity) {
 		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
 		return
 	}
@@ -143,10 +148,14 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 	}
 	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
 	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
+		if errors.Is(err, consts.ErrAssistantNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+		}
 		return
 	}
-	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+	if !u.authService.Compare(c, assistantEntity) {
 		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
 		return
 	}
@@ -194,10 +203,14 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
 	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
+		if errors.Is(err, consts.ErrAssistantNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+		}
 		return
 	}
-	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+	if !u.authService.Compare(c, assistantEntity) {
 		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
 		return
 	}
@@ -252,10 +265,14 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
 	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
+		if errors.Is(err, consts.ErrAssistantNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+		}
 		return
 	}
-	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+	if !u.authService.Compare(c, assistantEntity) {
 		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
 		return
 	}
@@ -300,10 +317,14 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, assistantId)
 	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
+		if errors.Is(err, consts.ErrAssistantNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+		}
 		return
 	}
-	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+	if !u.authService.Compare(c, assistantEntity) {
 		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
 		return
 	}
@@ -359,10 +380,14 @@ func (u *AssistantController) UnbindTool(c *gin.Context) {
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, assistantId)
 	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
+		if errors.Is(err, consts.ErrAssistantNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+		}
 		return
 	}
-	if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+	if !u.authService.Compare(c, assistantEntity) {
 		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
 		return
 	}

@@ -20,8 +20,8 @@ type GetPublicChatMessageRequestParams struct {
 }
 
 type GetPublicChatMessageRequest struct {
-	AssistantToken string `json:"assistant_token" binding:"required"`
-	GuestId        string `json:"guest_id" binding:"required"`
+	AssistantToken string `query:"assistant_token" form:"assistant_token"  json:"assistant_token" binding:"required"`
+	GuestId        string `query:"guest_id" form:"guest_id"  json:"guest_id" binding:"required"`
 }
 
 type AddPublicChatMessageRequest struct {

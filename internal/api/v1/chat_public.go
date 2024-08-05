@@ -83,7 +83,7 @@ func (u *ChatController) GetChatPublic(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        schema.GetPublicChatMessageRequestParams  path  schema.GetPublicChatMessageRequestParams  true  "GetPublicChatMessageRequestParams"
-// @Param        schema.GetPublicChatMessageRequest  body  schema.GetPublicChatMessageRequest true  "ChatPublicListRequest"
+// @Param        schema.GetPublicChatMessageRequest  query  schema.GetPublicChatMessageRequest true  "ChatPublicListRequest"
 // @Success      200  {object}  schema.ResponseBody{data=[]entity.ChatMessage}
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/chat_public/{chat_id}/messages [get]
@@ -97,7 +97,7 @@ func (u *ChatController) GetPublicChatMessages(c *gin.Context) {
 	}
 
 	var getPublicChatMessageRequest schema.GetPublicChatMessageRequest
-	if err := c.ShouldBindJSON(&getPublicChatMessageRequest); err != nil {
+	if err := c.ShouldBindQuery(&getPublicChatMessageRequest); err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
 	}

@@ -26,6 +26,9 @@ CREATE INDEX "chats_owner_index" ON "public"."chats" USING btree (
 CREATE INDEX "chats_guest_id_index" ON "public"."chats" USING btree (
   "guest_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
 );
+
+UPDATE "public"."chats" SET "owner" = 'user' WHERE "owner" IS NULL;
+
 `
 
 			_, err := tx.Exec(rawSQL)

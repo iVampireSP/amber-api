@@ -650,15 +650,6 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Message",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageAddRequest"
-                        }
                     }
                 ],
                 "responses": {

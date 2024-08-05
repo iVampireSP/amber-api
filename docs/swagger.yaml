@@ -643,12 +643,6 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Message
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/rag-new_internal_schema.ChatMessageAddRequest'
       produces:
       - application/json
       responses:

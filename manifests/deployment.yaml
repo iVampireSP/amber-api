@@ -21,7 +21,7 @@ spec:
         - name: leaf
       containers:
         - name: amber
-          image: registry.leafdev.top/leaf/rag-new:v0.0.3
+          image: registry.leafdev.top/leaf/rag-new:v0.0.3-fix-1
           imagePullPolicy: IfNotPresent
           args:
             - http
@@ -56,7 +56,7 @@ spec:
         - name: leaf
       containers:
         - name: amber-schedule
-          image: registry.leafdev.top/leaf/rag-new:v0.0.3
+          image: registry.leafdev.top/leaf/rag-new:v0.0.3-fix-1
           imagePullPolicy: IfNotPresent
           args:
             - schedule

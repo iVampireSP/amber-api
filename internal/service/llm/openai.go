@@ -80,7 +80,11 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 			}),
 			llms.WithTools(tools))
 		if err != nil {
-			panic(err)
+			responseChan <- &AssistantResponse{
+				State:   StateFailed,
+				Content: err.Error(),
+			}
+			return err
 		}
 
 		respChoice := resp.Choices[0]

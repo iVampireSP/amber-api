@@ -25,9 +25,15 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8082
           ports:
             - containerPort: 8000
               name: http-8000
+            - containerPort: 8082
+              name: health
           volumeMounts:
             - mountPath: /app/config.yaml
               name: config-vol

@@ -61,7 +61,9 @@ func initHttpServer() {
 	// 启动 metrics
 	if app.Config.Metrics.Enabled {
 		go func() {
-			err := app.HttpServer.MetricRouter().Run(app.Config.Metrics.Host + ":" + strconv.Itoa(app.Config.Metrics.Port))
+			var metricsAddr = app.Config.Metrics.Host + ":" + strconv.Itoa(app.Config.Metrics.Port)
+			app.Logger.Sugar.Info("Metrics and serving HTTP on ", metricsAddr)
+			err := app.HttpServer.MetricRouter().Run(metricsAddr)
 			if err != nil {
 				panic(err)
 				return

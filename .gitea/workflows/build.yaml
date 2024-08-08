@@ -23,12 +23,12 @@ jobs:
         run: |
           cd cmd
           CGO_ENABLED=0 go build -ldflags "-w -s" -gcflags "-N -l" -o main .
-      - name: 'Login to GitHub Container Registry'
+      - name: 'Login to Container Registry'
         uses: docker/login-action@v3
         with:
           registry: leafdev.top
-          username: ${{github.actor}}
-          password: ${{secrets.GITHUB_TOKEN}}
+          username: ${{ gitea.actor }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
       - name: 'Build Inventory Image'
         run: |
             docker build . -f Dockerfile2 --tag leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}

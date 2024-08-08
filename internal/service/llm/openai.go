@@ -27,10 +27,9 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 		case schema.RoleAssistant:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
 		case schema.RoleSystem:
-			s.Logger.Sugar.Warn("Multi system message is forbidden, it will convert to human message.")
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideSystem:
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		}
 	}
 

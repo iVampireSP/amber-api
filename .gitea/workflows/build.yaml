@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: https://leafdev.top/actions/checkout@v4
-      - uses: https://leafdev.top/actions/setup-go@v3
+      - uses: "https://leafdev.top/actions/checkout@v4"
+      - uses: "https://mirror.ghproxy.com/https://github.com/actions/setup-go@v3"
         with:
           go-version: '^1.13.1' # The Go version to download (if necessary) and use.
       - run: go version

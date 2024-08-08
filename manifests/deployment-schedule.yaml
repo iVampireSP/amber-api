@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: amber
+  name: amber-schedule
   namespace: amber
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: amber-api
+      app: amber-schedule
   template:
     metadata:
       labels:
-        app: amber-api
+        app: amber-schedule
     spec:
       volumes:
         - name: config-vol
@@ -20,20 +20,11 @@ spec:
       imagePullSecrets:
         - name: leaf
       containers:
-        - name: amber
+        - name: amber-schedule
           image: registry.leafdev.top/leaf/rag-new:v0.0.3-fix-1
           imagePullPolicy: IfNotPresent
           args:
-            - http
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 8082
-          ports:
-            - containerPort: 8000
-              name: http-8000
-            - containerPort: 8082
-              name: health
+            - schedule
           volumeMounts:
             - mountPath: /app/config.yaml
               name: config-vol

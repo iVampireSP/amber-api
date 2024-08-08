@@ -21,7 +21,7 @@ spec:
         - name: leaf
       containers:
         - name: amber-schedule
-          image: leafdev.top/leaf/rag-new:eb3d235
+          image: leafdev.top/leaf/rag-new:efd643e
           imagePullPolicy: IfNotPresent
           args:
             - schedule

@@ -8,7 +8,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: https://mirror.ghproxy.com/https://github.com/actions/checkout@v3
 #      - uses: https://leafdev.top/actions/setup-go@v3
 #        with:
 #          go-version: '^1.13.1' # The Go version to download (if necessary) and use.

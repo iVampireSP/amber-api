@@ -18,6 +18,8 @@ import (
 func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt string, userPublicInfo *schema.UserPublicInfo, history []*entity.ChatMessage, tools ...llms.Tool) error {
 	var historyContent []llms.MessageContent
 
+	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt))
+
 	for _, h := range history {
 		switch h.Role {
 		case schema.RoleHuman:
@@ -25,14 +27,11 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 		case schema.RoleAssistant:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
 		case schema.RoleSystem:
-			//historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
-			systemPrompt = h.Content + "\n" + systemPrompt
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideSystem:
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		}
 	}
-
-	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt))
 
 	var requestAgain = true
 

@@ -22,7 +22,7 @@ jobs:
           cd cmd
           CGO_ENABLED=0 go build -ldflags "-w -s" -gcflags "-N -l" -o main .
       - name: Artifact
-        uses: actions/upload-artifact@v4
+        uses: christopherhx/gitea-upload-artifact@v4
         with:
           name: artifact
           path: cmd/main

@@ -21,7 +21,7 @@ spec:
         - name: leaf
       containers:
         - name: amber
-          image: leafdev.top/leaf/rag-new:ff80e59
+          image: leafdev.top/leaf/rag-new:54aed79
           imagePullPolicy: IfNotPresent
           args:
             - http

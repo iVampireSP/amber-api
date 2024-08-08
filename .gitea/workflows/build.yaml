@@ -54,7 +54,8 @@ jobs:
         run: |
           git config user.name ${{ gitea.actor }}
           git config user.email ${{ gitea.actor }}@users.noreply.leafdev.top
-          git add manifests/deployment.yaml
+          git add manifests/deployment-api.yaml
+          git add manifests/deployment-schedule.yaml
           git commit -m "Update manifests"
           git push
 #      - name: docker

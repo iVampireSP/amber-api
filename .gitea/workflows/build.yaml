@@ -31,8 +31,8 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: 'Build Inventory Image'
         run: |
-            docker build . --tag leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}
-            docker push  leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}
+            docker build . -f Dockerfile2 --tag leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}
+            docker push leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}
 #      - name: docker
 #        run: |
 #          - name: Build Docker Image

@@ -21,13 +21,51 @@ spec:
         - name: leaf
       containers:
         - name: amber
-          image: registry.leafdev.top/leaf/rag-new:v0.0.2-fix-1
+          image: registry.leafdev.top/leaf/rag-new:v0.0.3-fix-1
           imagePullPolicy: IfNotPresent
           args:
             - http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8082
           ports:
             - containerPort: 8000
               name: http-8000
+            - containerPort: 8082
+              name: health
+          volumeMounts:
+            - mountPath: /app/config.yaml
+              name: config-vol
+              subPath: config.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amber-schedule
+  namespace: amber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: amber-schedule
+  template:
+    metadata:
+      labels:
+        app: amber-schedule
+    spec:
+      volumes:
+        - name: config-vol
+          configMap:
+            name: amber-config
+      imagePullSecrets:
+        - name: leaf
+      containers:
+        - name: amber-schedule
+          image: registry.leafdev.top/leaf/rag-new:v0.0.3-fix-1
+          imagePullPolicy: IfNotPresent
+          args:
+            - schedule
           volumeMounts:
             - mountPath: /app/config.yaml
               name: config-vol

@@ -28,7 +28,6 @@ const (
 	StateToolResponse ResponseState = "tool_response"
 	StateToolSuccess  ResponseState = "tool_success"
 	StateToolFailed   ResponseState = "tool_failed"
-	StateToolCalled   ResponseState = "tool_called"
 	StateFinished     ResponseState = "finished"
 	StateFailed       ResponseState = "failed"
 )

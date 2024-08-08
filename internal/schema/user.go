@@ -1,6 +1,8 @@
 package schema
 
-import "time"
+import (
+	"time"
+)
 
 type UserTokenInfo struct {
 	Aud              string    `json:"aud"`
@@ -36,8 +38,9 @@ const (
 )
 
 type UserPublicInfo struct {
-	Name string `json:"name"`
-	Id   UserId `json:"id"`
+	Name      string    `json:"name"`
+	Id        string    `json:"id"`
+	ChatOwner ChatOwner `json:"chat_owner"`
 }
 
 func (jwtTokenTypes JWTTokenTypes) String() string {

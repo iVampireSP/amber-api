@@ -2,13 +2,17 @@ package entity
 
 import (
 	"rag-new/internal/schema"
+	"time"
 )
 
 type Chat struct {
 	Base        `xorm:"extends"`
-	Name        string        `xorm:"varchar(255) notnull" json:"name"`
-	AssistantId int64         `xorm:"varchar(255) notnull" json:"assistant_id"`
-	UserId      schema.UserId `xorm:"user_id int(11) notnull" json:"user_id"`
+	Name        string           `xorm:"varchar(255) notnull" json:"name"`
+	AssistantId int64            `xorm:"varchar(255) notnull" json:"assistant_id"`
+	UserId      schema.UserId    `xorm:"user_id int(11)" json:"user_id"`
+	ExpiredAt   time.Time        `xorm:"TIMESTAMP notnull" json:"expired_at"`
+	Owner       schema.ChatOwner `xorm:"varchar(255) notnull" json:"owner"`
+	GuestId     string           `xorm:"varchar(255)" json:"guest_id"`
 }
 
 type ChatWithAssistant struct {
@@ -20,26 +24,14 @@ func (a *Base) TableName() string {
 	return "chats"
 }
 
-type ChatRole string
-
-var (
-	RoleAssistant ChatRole = "assistant"
-	RoleHuman     ChatRole = "user"
-	RoleSystem    ChatRole = "system"
-)
-
-func (c ChatRole) String() string {
-	return string(c)
-}
-
 type ChatMessage struct {
 	Base         `xorm:"extends"`
-	ChatId       int64    `xorm:"varchar(255) notnull" json:"assistant_id"`
-	Content      string   `xorm:"varchar(255) notnull" json:"content"`
-	Role         ChatRole `xorm:"varchar(255) notnull" json:"role"`
-	InputTokens  int      `xorm:"varchar(255) notnull" json:"input_tokens"`
-	OutputTokens int      `xorm:"varchar(255) notnull" json:"output_tokens"`
-	TotalTokens  int      `xorm:"varchar(255) notnull" json:"total_tokens"`
+	ChatId       int64           `xorm:"varchar(255) notnull" json:"assistant_id"`
+	Content      string          `xorm:"varchar(255) notnull" json:"content"`
+	Role         schema.ChatRole `xorm:"varchar(255) notnull" json:"role"`
+	InputTokens  int             `xorm:"INTEGER" json:"input_tokens"`
+	OutputTokens int             `xorm:"INTEGER" json:"output_tokens"`
+	TotalTokens  int             `xorm:"INTEGER" json:"total_tokens"`
 }
 
 func (at *ChatMessage) TableName() string {

@@ -144,16 +144,14 @@ func (u *ChatController) Delete(c *gin.Context) {
 		return
 	}
 
-	chatIdStr := strconv.Itoa(chatId)
 	// 检查状态是否是回复中
-	chatIdStreamingKey := u.getCacheKey("entity:" + chatIdStr + ":streaming")
-	i, err := u.redis.Exists(c, chatIdStreamingKey).Result()
+	isStreaming, err := u.isStreaming(c, int64(chatId))
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
-	if i != consts.NoRecord {
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreaming).Send()
+	if isStreaming {
+		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
 		return
 	}
 
@@ -210,6 +208,7 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 	}
 
 	chatHistories, err := u.cm.GetChatMessage(c, chatEntity)
+	//chatHistories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -244,14 +243,13 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	chatIdStreamingKey := u.getCacheKey("entity:" + chatIdStr + ":streaming")
-	i, err := u.redis.Exists(c, chatIdStreamingKey).Result()
+	isStreaming, err := u.isStreaming(c, int64(chatId))
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
-	if i != consts.NoRecord {
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreaming).Send()
+	if isStreaming {
+		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
 		return
 	}
 
@@ -298,7 +296,16 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		return
 	}
 
-	if lastChatMessage.Role == entity.RoleHuman {
+	var userIdStr = strconv.Itoa(int(u.authService.GetUserId(c)))
+
+	var userInfo = u.authService.GetUser(c)
+	var publicUser = &schema.UserPublicInfo{
+		Name:      userInfo.Token.Name,
+		Id:        userIdStr,
+		ChatOwner: schema.OwnerUser,
+	}
+
+	if lastChatMessage.Role == schema.RoleHuman {
 		lastChatMessage.Content = request.Message
 		err := u.cm.UpdateMessageContent(c, lastChatMessage)
 		if err != nil {
@@ -307,7 +314,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		}
 
 		// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
-		randomStreamId, err := u.generateChatStream(c, chatIdStr)
+		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -321,7 +328,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.ID
 	chatMessage.Content = request.Message
-	chatMessage.Role = entity.RoleHuman
+	chatMessage.Role = schema.RoleHuman
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {
@@ -329,7 +336,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		return
 	}
 
-	randomStreamId, err := u.generateChatStream(c, chatIdStr)
+	randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -343,7 +350,7 @@ func (u *ChatController) getCacheKey(key string) string {
 	return fmt.Sprintf("chat:%s", key)
 }
 
-func (u *ChatController) generateChatStream(c context.Context, chatId string) (streamId string, err error) {
+func (u *ChatController) generateChatStream(c context.Context, chatId string, userPublic *schema.UserPublicInfo) (streamId string, err error) {
 	var randomId = random.String(32)
 	// 保存 chat stream id
 	err = u.redis.Set(c, u.getCacheKey("entity:"+chatId), randomId, consts.ChatStreamExpire).Err()
@@ -356,7 +363,7 @@ func (u *ChatController) generateChatStream(c context.Context, chatId string) (s
 		return "", err
 	}
 
-	userJson, err := sonic.Marshal(u.authService.GetUser(c))
+	userJson, err := sonic.Marshal(userPublic)
 	if err != nil {
 		return "", err
 	}
@@ -408,30 +415,29 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	// 检查状态是否是回复中
-	chatIdStreamingKey := u.getCacheKey("entity:" + chatIdStr + ":streaming")
-	i, err = u.redis.Exists(c, chatIdStreamingKey).Result()
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-	if i == consts.NoRecord {
-		// 不在回复中，则设置缓存键，防止再次请求
-		cmd := u.redis.Set(c, chatIdStreamingKey, 1, consts.ChatStreamExpire)
-		if cmd.Err() != nil {
-			response.Status(http.StatusInternalServerError).Error(cmd.Err()).Send()
-			return
-		}
-
-	} else {
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreamingPleaseWait).Send()
-		return
-	}
-
 	chatId, err := strconv.Atoi(chatIdStr)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
+	}
+
+	var chatIdStreamKey = u.getChatIdStreamingKey(int64(chatId))
+	// 检查状态是否是回复中
+	isStreaming, err := u.isStreaming(c, int64(chatId))
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if isStreaming {
+		response.Status(http.StatusConflict).Error(consts.ErrChatStreamingPleaseWait).Send()
+		return
+	} else {
+		// 不在回复中，则设置缓存键，防止再次请求
+		cmd := u.redis.Set(c, chatIdStreamKey, 1, consts.ChatStreamExpire)
+		if cmd.Err() != nil {
+			response.Status(http.StatusInternalServerError).Error(cmd.Err()).Send()
+			return
+		}
 	}
 
 	chatEntity, err := u.chatService.GetChat(c, int64(chatId))
@@ -459,7 +465,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 提取 history
-	histories, err := u.cm.GetChatMessage(c, chatEntity)
+	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
 	var llmResponseChan = make(chan *llm.AssistantResponse)
 
 	// SSE
@@ -488,15 +494,29 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	user := &schema.User{}
+	user := &schema.UserPublicInfo{}
 	err = sonic.Unmarshal([]byte(userCmd), user)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
 
+	var prompt = `
+Your name: ` + assistantEntity.Name + `current user give you` + `
+Your description: ` + assistantEntity.Description + "(current user given)"
+	if user != nil {
+		prompt += `
+current user's name: ` + user.Name + `(system hint you this)` + `
+current user's id: ` + user.Id + "(system hint you this, user can't change it)"
+
+	}
+
+	if assistantEntity.Prompt != "" {
+		prompt += "\n" + assistantEntity.Prompt
+	}
+
 	go func() {
-		err = u.llmService.StreamChat(llmResponseChan, assistantEntity, histories, &user.Token, tools...)
+		err = u.llmService.StreamChat(llmResponseChan, prompt, user, histories, tools...)
 		if err != nil {
 			u.logger.Sugar.Error(err)
 			// 关闭连接
@@ -507,6 +527,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}()
 
 	var llmFullMessage = ""
+	var toolResponse = ""
 	c.Stream(func(w io.Writer) bool {
 		// Emit Server Sent Events compatible
 		msg, ok := <-llmResponseChan
@@ -531,7 +552,14 @@ func (u *ChatController) Stream(c *gin.Context) {
 		case llm.StateChunk:
 			llmFullMessage += msg.ChunkMessage.Content
 			return true
-		case llm.StateToolCalling, llm.StateToolCalled, llm.StateToolSuccess:
+		case llm.StateToolSuccess:
+			return true
+		case llm.StateToolResponse:
+			toolResponse += `Tool/Function Call Logs:
+Function Name: ` + msg.ToolResponseMessage.FunctionName + `
+Function Response: ` + msg.ToolResponseMessage.Content + `
+
+`
 			return true
 		case llm.StateFailed:
 			return false
@@ -554,12 +582,28 @@ func (u *ChatController) Stream(c *gin.Context) {
 	u.redis.Del(c, streamIdCacheKey)
 	u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))
 	u.redis.Del(c, u.getCacheKey("stream:"+streamIdStr+":user"))
-	u.redis.Del(c, chatIdStreamingKey)
+	u.redis.Del(c, chatIdStreamKey)
+
+	var newMessage *entity.ChatMessage
+	if toolResponse != "" {
+		// 添加到消息 entity.ChatMessage
+		newMessage = &entity.ChatMessage{
+			Role:    schema.RoleHideSystem,
+			Content: toolResponse,
+			ChatId:  chatEntity.ID,
+		}
+
+		err = u.cm.CreateChatMessage(c, newMessage)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
 
 	if llmFullMessage != "" {
 		// 添加到消息 entity.ChatMessage
-		newMessage := &entity.ChatMessage{
-			Role:    entity.RoleAssistant,
+		newMessage = &entity.ChatMessage{
+			Role:    schema.RoleAssistant,
 			Content: llmFullMessage,
 			ChatId:  chatEntity.ID,
 		}
@@ -615,13 +659,12 @@ func (u *ChatController) ClearChatMessage(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	chatIdStreamingKey := u.getCacheKey("entity:" + strconv.Itoa(int(chatEntity.ID)) + ":streaming")
-	i, err := u.redis.Exists(c, chatIdStreamingKey).Result()
+	isStreaming, err := u.isStreaming(c, chatEntity.ID)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
-	if i != consts.NoRecord {
+	if isStreaming {
 		response.Status(http.StatusConflict).Error(consts.ErrChatStreaming).Send()
 		return
 	}
@@ -633,4 +676,22 @@ func (u *ChatController) ClearChatMessage(c *gin.Context) {
 	}
 
 	response.Status(http.StatusNoContent).Send()
+}
+
+func (u *ChatController) getChatIdStreamingKey(chatId int64) string {
+	return u.getCacheKey("entity:" + strconv.Itoa(int(chatId)) + ":streaming")
+}
+
+func (u *ChatController) isStreaming(ctx context.Context, chatId int64) (bool, error) {
+	// 检查状态是否是回复中
+	chatIdStreamingKey := u.getChatIdStreamingKey(chatId)
+	i, err := u.redis.Exists(ctx, chatIdStreamingKey).Result()
+	if err != nil {
+		return false, err
+	}
+	if i != consts.NoRecord {
+		return true, nil
+	}
+
+	return false, nil
 }

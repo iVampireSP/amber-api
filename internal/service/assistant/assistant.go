@@ -23,6 +23,9 @@ func (s *Service) ListAssistantFromUserId(ctx context.Context, userId schema.Use
 func (s *Service) GetAssistant(ctx context.Context, id int64) (*entity.Assistant, error) {
 	assistant := new(entity.Assistant)
 	_, err := s.x.Context(ctx).ID(id).Get(assistant)
+	if assistant.ID == consts.NoRecord {
+		return nil, consts.ErrAssistantNotFound
+	}
 	return assistant, err
 }
 

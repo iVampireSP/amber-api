@@ -31,6 +31,9 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.PATCH("/assistants/:id", a.Assistant.UpdateAssistant)
 	r.POST("/assistants", a.Assistant.CreateAssistant)
 	r.DELETE("/assistants/:id", a.Assistant.DeleteAssistant)
+	r.GET("/assistants/:id/shares", a.Assistant.ListAssistantShares)
+	r.POST("/assistants/:id/shares", a.Assistant.CreateAssistantShare)
+	r.DELETE("/assistants/:id/shares/:share_id", a.Assistant.DeleteAssistantShare)
 
 	r.GET("/tools", a.Tool.List)
 	r.POST("/tools", a.Tool.CreateTool)
@@ -54,4 +57,9 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {
 	r.GET("/stream/:stream_id", a.Chat.Stream)
+	r.GET("/chat_public", a.Chat.GetChatPublic)
+	r.POST("/chat_public", a.Chat.CreatePublicChat)
+	r.GET("/chat_public/:chat_id/messages", a.Chat.GetPublicChatMessages)
+	r.POST("/chat_public/:chat_id/messages", a.Chat.AddPublicChatMessages)
+	r.POST("/chat_public/:chat_id/clear", a.Chat.ClearPublicChatMessages)
 }

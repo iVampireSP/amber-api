@@ -6,6 +6,7 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"time"
 )
 
 func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.ChatCreateRequest) (*entity.Chat, error) {
@@ -24,10 +25,27 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 	chat.Name = createChatRequest.Name
 	chat.AssistantId = createChatRequest.AssistantId
 	chat.UserId = createChatRequest.UserId
+	chat.Owner = schema.OwnerUser
 
 	_, err = s.x.Context(ctx).Insert(&chat)
 
 	return &chat, err
+}
+
+// CreateGuestChat 用于创建访客对话，这个对话应是临时的，到时间后会删除
+func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *schema.ChatGuestCreateRequest) (*entity.Chat, error) {
+	var chat = &entity.Chat{}
+
+	chat.Name = createGuestChatRequest.Name
+	chat.AssistantId = createGuestChatRequest.AssistantId
+	chat.Owner = schema.OwnerGuest
+	chat.GuestId = createGuestChatRequest.GuestID
+
+	chat.ExpiredAt = time.Now().Add(time.Hour * 24)
+
+	_, err := s.x.Context(ctx).Insert(chat)
+
+	return chat, err
 }
 
 func (s *Service) GetChat(ctx context.Context, id int64) (*entity.Chat, error) {
@@ -122,4 +140,24 @@ func (s *Service) ListChatFromAssistantByPage(ctx context.Context, assistant *en
 	var limit = 20
 	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.ID).Limit(limit, (page-1)*limit).Find(&chats)
 	return chats, err
+}
+
+func (s *Service) ListChatFromGuestId(ctx context.Context, guestId string) ([]*entity.Chat, error) {
+	var chats []*entity.Chat
+	err := s.x.Context(ctx).Where("owner = ?", schema.OwnerGuest.String()).Where("guest_id = ?", guestId).Find(&chats)
+	return chats, err
+}
+
+func (s *Service) ListChatFromGuestByPage(ctx context.Context, guestId string, page int) ([]*entity.Chat, error) {
+	var chats []*entity.Chat
+	var limit = 20
+	err := s.x.Context(ctx).Where("owner", schema.OwnerGuest.String()).Where("guest_id = ?", guestId).Limit(limit, (page-1)*limit).Find(&chats)
+	return chats, err
+}
+
+func (s *Service) DeleteExpiredChats(ctx context.Context, beforeTime time.Time) error {
+	// 防止瞬时压力过大，一次删除固定数量
+	var num = 1000
+	_, err := s.x.Context(ctx).Where("expired_at < ?", beforeTime).Limit(num).Delete(&entity.Chat{})
+	return err
 }

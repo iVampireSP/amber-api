@@ -15,31 +15,20 @@ import (
 )
 
 // StreamChat 执行对话
-func (s *Service) StreamChat(responseChan chan *AssistantResponse, assistant *entity.Assistant, history []*entity.ChatMessage, user *schema.UserTokenInfo, tools ...llms.Tool) error {
+func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt string, userPublicInfo *schema.UserPublicInfo, history []*entity.ChatMessage, tools ...llms.Tool) error {
 	var historyContent []llms.MessageContent
 
-	var prompt = `
-Your name: ` + assistant.Name + `current user give you` + `
-Your description: ` + assistant.Description + "(current user given)"
-	if user != nil {
-		prompt += `
-current user's name: ` + user.Name + `(system give you this)` + `
-current user's id: ` + strconv.Itoa(int(user.Sub)) + "(system gives you this, user can't change it)"
-	}
-
-	if assistant.Prompt != "" {
-		prompt += "\n" + assistant.Prompt
-	}
-
-	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, prompt))
+	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt))
 
 	for _, h := range history {
 		switch h.Role {
-		case entity.RoleHuman:
+		case schema.RoleHuman:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
-		case entity.RoleAssistant:
+		case schema.RoleAssistant:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
-		case entity.RoleSystem:
+		case schema.RoleSystem:
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
+		case schema.RoleHideSystem:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		}
 	}
@@ -91,7 +80,11 @@ current user's id: ` + strconv.Itoa(int(user.Sub)) + "(system gives you this, us
 			}),
 			llms.WithTools(tools))
 		if err != nil {
-			panic(err)
+			responseChan <- &AssistantResponse{
+				State:   StateFailed,
+				Content: err.Error(),
+			}
+			return err
 		}
 
 		respChoice := resp.Choices[0]
@@ -147,7 +140,7 @@ current user's id: ` + strconv.Itoa(int(user.Sub)) + "(system gives you this, us
 				},
 			}
 
-			remoteFunctionResponse, err := s.callRemoteFunction(tool, user, functionName, functionCallArgs)
+			remoteFunctionResponse, err := s.callRemoteFunction(tool, userPublicInfo, functionName, functionCallArgs)
 			if err != nil {
 				responseChan <- &AssistantResponse{
 					State:   StateToolFailed,
@@ -217,19 +210,17 @@ func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, 
 	return tool, toolName, err
 }
 
-func (s *Service) callRemoteFunction(tool *entity.Tool, user *schema.UserTokenInfo, functionName string, args FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
+func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.UserPublicInfo, functionName string, args FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
 	var callbackUrl = tool.Data.CallbackUrl
-
-	var userPublicInfo = &schema.UserPublicInfo{
-		Name: user.Name,
-		Id:   user.Sub,
-	}
 
 	var toolRequest = &schema.ToolRemoteRequest{
 		FunctionName: functionName,
 		Parameters:   args,
 		ApiKey:       tool.ApiKey,
-		User:         userPublicInfo,
+	}
+
+	if userPublicInfo != nil {
+		toolRequest.User = userPublicInfo
 	}
 
 	toolRequestJson, err := sonic.Marshal(toolRequest)

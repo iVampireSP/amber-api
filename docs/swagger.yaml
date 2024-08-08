@@ -16,6 +16,19 @@ definitions:
       user_id:
         type: integer
     type: object
+  rag-new_internal_entity.AssistantShare:
+    properties:
+      assistant_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      token:
+        type: string
+      updated_at:
+        type: string
+    type: object
   rag-new_internal_entity.AssistantTool:
     properties:
       assistant_id:
@@ -52,9 +65,15 @@ definitions:
         type: integer
       created_at:
         type: string
+      expired_at:
+        type: string
+      guest_id:
+        type: string
       id:
         type: integer
       name:
+        type: string
+      owner:
         type: string
       updated_at:
         type: string
@@ -102,6 +121,19 @@ definitions:
         type: string
       user_id:
         type: integer
+    type: object
+  rag-new_internal_schema.AddPublicChatMessageRequest:
+    properties:
+      assistant_token:
+        type: string
+      guest_id:
+        type: string
+      message:
+        type: string
+    required:
+    - assistant_token
+    - guest_id
+    - message
     type: object
   rag-new_internal_schema.AssistantCreateRequest:
     properties:
@@ -154,6 +186,27 @@ definitions:
       stream_id:
         type: string
     type: object
+  rag-new_internal_schema.ChatPublicListRequest:
+    properties:
+      guest_id:
+        type: string
+    required:
+    - guest_id
+    type: object
+  rag-new_internal_schema.ChatPublicRequest:
+    properties:
+      assistant_token:
+        type: string
+      guest_id:
+        type: string
+      name:
+        maxLength: 32
+        type: string
+    required:
+    - assistant_token
+    - guest_id
+    - name
+    type: object
   rag-new_internal_schema.CurrentUserResponse:
     properties:
       ip:
@@ -166,6 +219,16 @@ definitions:
         type: string
       valid:
         type: boolean
+    type: object
+  rag-new_internal_schema.GetPublicChatMessageRequest:
+    properties:
+      assistant_token:
+        type: string
+      guest_id:
+        type: string
+    required:
+    - assistant_token
+    - guest_id
     type: object
   rag-new_internal_schema.ResponseBody:
     properties:
@@ -424,6 +487,99 @@ paths:
       summary: 更新 Assistant
       tags:
       - assistant
+  /api/v1/assistants/{id}/shares:
+    get:
+      consumes:
+      - application/json
+      description: 此 API 可以创建一个 Assistant 共享 Token，可以将你的 Assistant 公开出去使用。
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.AssistantShare'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取 Assistant 共享列表
+      tags:
+      - assistant
+    post:
+      consumes:
+      - application/json
+      description: 此方法将会获取一个 Token，用户将会通过这个 Token 来访问你的 Assistant 并调用工具。
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.AssistantShare'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建 Assistant 共享
+      tags:
+      - assistant
+  /api/v1/assistants/{id}/shares/{share_id}:
+    delete:
+      consumes:
+      - application/json
+      description: 此方法将会删除共享，删除后，共享将会立即失效。
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      - in: path
+        name: share_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除 Assistant 共享
+      tags:
+      - assistant
   /api/v1/assistants/{id}/tools:
     get:
       consumes:
@@ -528,6 +684,190 @@ paths:
       summary: 绑定 Tool
       tags:
       - assistant
+  /api/v1/chat_public:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ChatPublicListRequest
+        in: body
+        name: schema.ChatPublicListRequest
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ChatPublicListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.Chat'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 获取公开对话
+      tags:
+      - chat_public
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ChatPublicRequest
+        in: body
+        name: schema.ChatPublicRequest
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ChatPublicRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_entity.Chat'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 通过 API 创建一个公开的对话记录
+      tags:
+      - chat_public
+  /api/v1/chat_public/{chat_id}/clear:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: chat_id
+        required: true
+        type: integer
+      - description: GetPublicChatMessageRequest
+        in: body
+        name: schema.GetPublicChatMessageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.GetPublicChatMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 清空公开对话的聊天记录
+      tags:
+      - chat_public
+  /api/v1/chat_public/{chat_id}/messages:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: chat_id
+        required: true
+        type: integer
+      - in: query
+        name: assistant_token
+        required: true
+        type: string
+      - in: query
+        name: guest_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/rag-new_internal_entity.ChatMessage'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 获取公开对话的聊天记录
+      tags:
+      - chat_public
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: chat_id
+        required: true
+        type: integer
+      - description: AddPublicChatMessageRequest
+        in: body
+        name: schema.AddPublicChatMessageRequest
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.AddPublicChatMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "409":
+          description: Conflict
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 增加公开对话的聊天记录
+      tags:
+      - chat_public
   /api/v1/chats:
     get:
       consumes:

@@ -28,7 +28,7 @@ jobs:
         with:
           registry: leafdev.top
           username: ${{ gitea.actor }}
-          password: ${{ secrets.GITEA_TOKEN }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
       - name: 'Build Inventory Image'
         run: |
             docker build . -f Dockerfile2 --tag leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}

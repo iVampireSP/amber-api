@@ -50,6 +50,11 @@ jobs:
           propertyPath: 'spec.template.spec.containers[0].image'
           value: 'leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}'
           commitChange: false
+      - name: Check out Maifests
+        uses: actions/checkout@v4
+        with:
+          repository: leaf/manifests
+          path: /tmp/manifests
       - name: Push
         run: |
           git config user.name ${{ gitea.actor }}

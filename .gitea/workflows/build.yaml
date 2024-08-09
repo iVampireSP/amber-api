@@ -54,7 +54,7 @@ jobs:
         run: |
           git config user.name ${{ gitea.actor }}
           git config user.email ${{ gitea.actor }}@users.noreply.leafdev.top
-          git clone git@repo.leafdev.top:Leaf/manifests.git /tmp/manifests
+          git clone https://leafdev.top/Leaf/manifests.git /tmp/manifests
           mkdir -p /tmp/manifests/amber-go
           mv manifests/* /tmp/manifests/amber-go
           cd /tmp/manifests/amber-go

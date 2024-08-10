@@ -11,8 +11,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: true
       - id: commit
         uses: prompt/actions-commit-hash@v3
       - name: Setup go
@@ -38,6 +36,11 @@ jobs:
             docker build . -f Dockerfile2 --tag leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}
             docker push leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}
             docker tag leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }} leafdev.top/leaf/rag-new:latest
+      - name: 'Switch Branch'
+        run: |
+            git config user.name ${{ gitea.actor }}
+            git config user.email ${{ gitea.actor }}@users.noreply.leafdev.top
+            git checkout -b manifests
       - name: 'Patch API Manifest'
         uses: fjogeleit/yaml-update-action@main
         with:
@@ -52,21 +55,10 @@ jobs:
           propertyPath: 'spec.template.spec.containers[0].image'
           value: 'leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}'
           commitChange: false
-      - name: Check out Maifests
-        uses: actions/checkout@v4
-        with:
-          repository: leaf/manifests
-          path: /tmp/manifests
       - name: Push
         run: |
-          git config user.name ${{ gitea.actor }}
-          git config user.email ${{ gitea.actor }}@users.noreply.leafdev.top
-          git clone https://leafdev.top/Leaf/manifests.git /tmp/manifests
-          mkdir -p /tmp/manifests/amber-go
-          mv manifests/* /tmp/manifests/amber-go
-          cd /tmp/manifests/amber-go
-          git add amber-go/deployment-api.yaml
-          git add amber-go/deployment-schedule.yaml
+          git add manifests/deployment-api.yaml
+          git add manifests/deployment-schedule.yaml
           git commit -m "Update manifests"
           git push
 #      - name: docker

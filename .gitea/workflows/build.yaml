@@ -36,11 +36,11 @@ jobs:
             docker build . -f Dockerfile2 --tag leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}
             docker push leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }}
             docker tag leafdev.top/leaf/rag-new:${{ steps.commit.outputs.short }} leafdev.top/leaf/rag-new:latest
-      - name: 'Switch Branch'
-        run: |
-            git config user.name ${{ gitea.actor }}
-            git config user.email ${{ gitea.actor }}@users.noreply.leafdev.top
-            git checkout manifests
+      - name: 'Checkout Manifests branch'
+        uses: actions/checkout@v4
+        with:
+          ref: manifests
+
       - name: 'Patch API Manifest'
         uses: fjogeleit/yaml-update-action@main
         with:
@@ -57,6 +57,8 @@ jobs:
           commitChange: false
       - name: Push
         run: |
+          git config user.name ${{ gitea.actor }}
+          git config user.email ${{ gitea.actor }}@users.noreply.leafdev.top
           git add manifests/deployment-api.yaml
           git add manifests/deployment-schedule.yaml
           git commit -m "Update manifests"

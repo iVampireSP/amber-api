@@ -23,15 +23,15 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 	for _, h := range history {
 		switch h.Role {
 		case schema.RoleHuman:
-			content := "[User says] " + h.Content
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, content))
+			//content := "[User says] " + h.Content
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
 		case schema.RoleAssistant:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
-		//case schema.RoleSystem:
-		//	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
+		case schema.RoleSystem:
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideSystem:
-			content := "[System Hint]" + h.Content
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, content))
+			//content := "[System Hint]" + h.Content
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		}
 	}
 

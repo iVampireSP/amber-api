@@ -25,13 +25,13 @@ func (a *Base) TableName() string {
 }
 
 type ChatMessage struct {
-	Base         `xorm:"extends"`
-	ChatId       int64           `xorm:"varchar(255) notnull" json:"assistant_id"`
-	Content      string          `xorm:"varchar(255) notnull" json:"content"`
-	Role         schema.ChatRole `xorm:"varchar(255) notnull" json:"role"`
-	InputTokens  int             `xorm:"INTEGER" json:"input_tokens"`
-	OutputTokens int             `xorm:"INTEGER" json:"output_tokens"`
-	TotalTokens  int             `xorm:"INTEGER" json:"total_tokens"`
+	Base             `xorm:"extends"`
+	ChatId           int64           `xorm:"varchar(255) notnull" json:"assistant_id"`
+	Content          string          `xorm:"varchar(255) notnull" json:"content"`
+	Role             schema.ChatRole `xorm:"varchar(255) notnull" json:"role"`
+	PromptTokens     int             `xorm:"INTEGER" json:"prompt_tokens"`
+	CompletionTokens int             `xorm:"INTEGER" json:"completion_tokens"`
+	TotalTokens      int             `xorm:"INTEGER" json:"total_tokens"`
 }
 
 func (at *ChatMessage) TableName() string {

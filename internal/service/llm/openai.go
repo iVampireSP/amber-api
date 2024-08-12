@@ -90,6 +90,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 		}
 
 		respChoice := resp.Choices[0]
+		tokenUsage := s.getTokenUsage(respChoice)
 
 		if respChoice.FuncCall != nil {
 			//fmt.Println("FunCall 检测到工具调用")
@@ -127,8 +128,9 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 			tool, functionName, err := s.spiltFunctionName(respChoice.FuncCall.Name)
 			if err != nil {
 				responseChan <- &AssistantResponse{
-					State:   StateFailed,
-					Content: err.Error(),
+					State:      StateFailed,
+					Content:    err.Error(),
+					TokenUsage: tokenUsage,
 				}
 				return err
 			}
@@ -140,6 +142,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 					FunctionName: respChoice.FuncCall.Name,
 					Args:         functionCallArgs,
 				},
+				TokenUsage: tokenUsage,
 			}
 
 			remoteFunctionResponse, err := s.callRemoteFunction(tool, userPublicInfo, functionName, functionCallArgs)
@@ -152,6 +155,7 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 						FunctionName: respChoice.FuncCall.Name,
 						Content:      err.Error(),
 					},
+					TokenUsage: tokenUsage,
 				}
 				return err
 				//remoteFunctionResponse.Content = err.Error()
@@ -174,11 +178,17 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 						FunctionName: respChoice.FuncCall.Name,
 						Content:      remoteFunctionResponse.Content,
 					},
+					TokenUsage: tokenUsage,
 				}
 			}
 
 		} else {
 			requestAgain = false
+		}
+
+		responseChan <- &AssistantResponse{
+			State:      StateDone,
+			TokenUsage: tokenUsage,
 		}
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
@@ -268,4 +278,31 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.U
 	}
 
 	return bodyJson, errors.New(bodyJson.Content)
+}
+
+func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *TokenUsage {
+	var tokenUsage = &TokenUsage{}
+
+	// 如果 respChoice.GenerationInfo 中有 prompt_tokens
+	if respChoice.GenerationInfo["PromptTokens"] != nil {
+		tokenUsage.PromptTokens = respChoice.GenerationInfo["PromptTokens"].(int)
+	} else {
+		tokenUsage.PromptTokens = 0
+	}
+
+	// 如果 respChoice.GenerationInfo 中有 completion_tokens
+	if respChoice.GenerationInfo["CompletionTokens"] != nil {
+		tokenUsage.CompletionTokens = respChoice.GenerationInfo["CompletionTokens"].(int)
+	} else {
+		tokenUsage.CompletionTokens = 0
+	}
+
+	// 如果 respChoice.GenerationInfo 中有 total_tokens
+	if respChoice.GenerationInfo["TotalTokens"] != nil {
+		tokenUsage.TotalTokens = respChoice.GenerationInfo["TotalTokens"].(int)
+	} else {
+		tokenUsage.TotalTokens = 0
+	}
+
+	return tokenUsage
 }

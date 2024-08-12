@@ -28,7 +28,8 @@ const (
 	StateToolResponse ResponseState = "tool_response"
 	StateToolSuccess  ResponseState = "tool_success"
 	StateToolFailed   ResponseState = "tool_failed"
-	StateFinished     ResponseState = "finished"
+	StateFinished     ResponseState = "finished" // finished 为全部完成
+	StateDone         ResponseState = "done"     // done 为一轮请求完成
 	StateFailed       ResponseState = "failed"
 )
 
@@ -54,6 +55,13 @@ type AssistantResponse struct {
 	ToolCallMessage     *ToolCallMessage     `json:"tool_call_message"`
 	ToolResponseMessage *ToolResponseMessage `json:"tool_response_message"`
 	Content             string               `json:"content"`
+	TokenUsage          *TokenUsage          `json:"token_usage"`
+}
+
+type TokenUsage struct {
+	PromptTokens     int `json:"prompt_tokens"`
+	CompletionTokens int `json:"completion_tokens"`
+	TotalTokens      int `json:"total_tokens"`
 }
 
 type Service struct {

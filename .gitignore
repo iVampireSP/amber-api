@@ -1,2 +1,4 @@
 /build
 /cmd/config.yaml
+.idea
+.vscode

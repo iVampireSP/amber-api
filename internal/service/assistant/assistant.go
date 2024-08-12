@@ -35,13 +35,14 @@ func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.Assi
 	assistant.Name = assistantReq.Name
 	assistant.Prompt = assistantReq.Prompt
 	assistant.Description = assistantReq.Description
+	assistant.DisableDefaultPrompt = assistantReq.DisableDefaultPrompt
 
 	_, err := s.x.Context(ctx).Insert(&assistant)
 	return &assistant, err
 }
 
 func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assistant) error {
-	_, err := s.x.Context(ctx).ID(assistant.ID).Cols("name", "description", "prompt").Update(assistant)
+	_, err := s.x.Context(ctx).ID(assistant.ID).Cols("name", "description", "prompt", "disable_default_prompt").Update(assistant)
 	return err
 }
 

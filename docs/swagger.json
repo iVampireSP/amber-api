@@ -1762,6 +1762,9 @@
                 "description": {
                     "type": "string"
                 },
+                "disable_default_prompt": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1971,6 +1974,13 @@
                     "type": "string",
                     "maxLength": 255
                 },
+                "disable_default_prompt": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
+                },
                 "name": {
                     "type": "string",
                     "maxLength": 255
@@ -1987,6 +1997,13 @@
                 "description": {
                     "type": "string",
                     "maxLength": 255
+                },
+                "disable_default_prompt": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
                 },
                 "name": {
                     "type": "string",

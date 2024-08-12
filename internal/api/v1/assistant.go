@@ -172,6 +172,8 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 		assistantEntity.Prompt = updateReq.Prompt
 	}
 
+	assistantEntity.DisableDefaultPrompt = updateReq.DisableDefaultPrompt
+
 	err = u.assistantService.UpdateAssistant(c, assistantEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()

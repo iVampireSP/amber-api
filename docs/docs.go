@@ -1771,6 +1771,9 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "disable_default_prompt": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1980,6 +1983,13 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255
                 },
+                "disable_default_prompt": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
+                },
                 "name": {
                     "type": "string",
                     "maxLength": 255
@@ -1996,6 +2006,13 @@ const docTemplate = `{
                 "description": {
                     "type": "string",
                     "maxLength": 255
+                },
+                "disable_default_prompt": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
                 },
                 "name": {
                     "type": "string",

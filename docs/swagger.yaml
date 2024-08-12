@@ -5,6 +5,8 @@ definitions:
         type: string
       description:
         type: string
+      disable_default_prompt:
+        type: boolean
       id:
         type: integer
       name:
@@ -140,6 +142,11 @@ definitions:
       description:
         maxLength: 255
         type: string
+      disable_default_prompt:
+        enum:
+        - true
+        - false
+        type: boolean
       name:
         maxLength: 255
         type: string
@@ -155,6 +162,11 @@ definitions:
       description:
         maxLength: 255
         type: string
+      disable_default_prompt:
+        enum:
+        - true
+        - false
+        type: boolean
       name:
         maxLength: 255
         type: string

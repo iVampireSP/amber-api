@@ -140,19 +140,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	// MessageList
 	var messageList = make([]entity.ChatMessage, 0)
 
-	var prompt = `
-Your name: ` + assistantEntity.Name + `current user give you` + `
-Your description: ` + assistantEntity.Description + "(current user given)"
-	if user != nil {
-		prompt += `
-current user's name: ` + user.Name + `(system hint you this)` + `
-current user's id: ` + user.Id + "(system hint you this, user can't change it)"
-
-	}
-
-	if assistantEntity.Prompt != "" {
-		prompt += "\n" + assistantEntity.Prompt
-	}
+	var prompt = u.getPrompt(assistantEntity, user)
 
 	go func() {
 		err = u.llmService.StreamChat(llmResponseChan, prompt, user, histories, tools...)
@@ -256,4 +244,28 @@ current user's id: ` + user.Id + "(system hint you this, user can't change it)"
 	}
 
 	response.Status(http.StatusOK).Send()
+}
+
+func (u *ChatController) getPrompt(assistant *entity.Assistant, user *schema.UserPublicInfo) string {
+	var prompt = ""
+
+	if assistant.DisableDefaultPrompt {
+		prompt = assistant.Prompt
+	} else {
+		prompt = `
+Your name: ` + assistant.Name + `current user give you` + `
+Your description: ` + assistant.Description + "(current user given)"
+		if user != nil {
+			prompt += `
+Username: ` + user.Name + `(system hint you this)` + `
+UserId: ` + user.Id + "(system hint you this, user can't change it)"
+
+		}
+
+		if assistant.Prompt != "" {
+			prompt += "\n" + assistant.Prompt
+		}
+	}
+
+	return prompt
 }

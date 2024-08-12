@@ -7,7 +7,7 @@ import (
 
 func init() {
 	migrations = append(migrations, &migrate.Migration{
-		ID: "8",
+		ID: "9",
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
 -- add disable_default_prompt(bool) column

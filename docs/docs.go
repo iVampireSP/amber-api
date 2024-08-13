@@ -1775,8 +1775,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -1796,15 +1795,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "assistant_id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "created_at": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "token": {
                     "type": "string"
@@ -1824,8 +1821,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "tool_id": {
                     "type": "integer"
@@ -1842,22 +1838,19 @@ const docTemplate = `{
                     "$ref": "#/definitions/rag-new_internal_entity.Assistant"
                 },
                 "assistant_id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "created_at": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "tool": {
                     "$ref": "#/definitions/rag-new_internal_entity.Tool"
                 },
                 "tool_id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -1868,8 +1861,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "assistant_id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "created_at": {
                     "type": "string"
@@ -1881,8 +1873,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -1914,8 +1905,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "prompt_tokens": {
                     "type": "integer"
@@ -1950,8 +1940,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -2043,8 +2032,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "assistant_id": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string",

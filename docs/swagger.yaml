@@ -8,8 +8,7 @@ definitions:
       disable_default_prompt:
         type: boolean
       id:
-        example: "0"
-        type: string
+        type: integer
       name:
         type: string
       prompt:
@@ -22,13 +21,11 @@ definitions:
   rag-new_internal_entity.AssistantShare:
     properties:
       assistant_id:
-        example: "0"
-        type: string
+        type: integer
       created_at:
         type: string
       id:
-        example: "0"
-        type: string
+        type: integer
       token:
         type: string
       updated_at:
@@ -41,8 +38,7 @@ definitions:
       created_at:
         type: string
       id:
-        example: "0"
-        type: string
+        type: integer
       tool_id:
         type: integer
       updated_at:
@@ -53,26 +49,22 @@ definitions:
       assistant:
         $ref: '#/definitions/rag-new_internal_entity.Assistant'
       assistant_id:
-        example: "0"
-        type: string
+        type: integer
       created_at:
         type: string
       id:
-        example: "0"
-        type: string
+        type: integer
       tool:
         $ref: '#/definitions/rag-new_internal_entity.Tool'
       tool_id:
-        example: "0"
-        type: string
+        type: integer
       updated_at:
         type: string
     type: object
   rag-new_internal_entity.Chat:
     properties:
       assistant_id:
-        example: "0"
-        type: string
+        type: integer
       created_at:
         type: string
       expired_at:
@@ -80,8 +72,7 @@ definitions:
       guest_id:
         type: string
       id:
-        example: "0"
-        type: string
+        type: integer
       name:
         type: string
       owner:
@@ -102,8 +93,7 @@ definitions:
       created_at:
         type: string
       id:
-        example: "0"
-        type: string
+        type: integer
       prompt_tokens:
         type: integer
       role:
@@ -126,8 +116,7 @@ definitions:
       discovery_url:
         type: string
       id:
-        example: "0"
-        type: string
+        type: integer
       name:
         type: string
       updated_at:
@@ -188,8 +177,7 @@ definitions:
   rag-new_internal_schema.ChatCreateRequest:
     properties:
       assistant_id:
-        example: "0"
-        type: string
+        type: integer
       name:
         maxLength: 255
         type: string

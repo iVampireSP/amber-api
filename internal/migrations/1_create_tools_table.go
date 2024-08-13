@@ -11,7 +11,7 @@ func init() {
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
 CREATE TABLE tools (
-  id serial NOT NULL primary key ,
+  id  bigint AUTO_RANDOM,
   name varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   description varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   discovery_url varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -19,7 +19,8 @@ CREATE TABLE tools (
   data json DEFAULT NULL,
   user_id bigint NOT NULL,
   created_at timestamp NULL DEFAULT NULL,
-  updated_at timestamp NULL DEFAULT NULL
+  updated_at timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (id)
 );
 `
 			_, err := tx.Exec(rawSQL)

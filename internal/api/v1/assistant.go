@@ -146,6 +146,7 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 		response.Error(err).Send()
 		return
 	}
+
 	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {

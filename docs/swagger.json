@@ -1766,7 +1766,8 @@
                     "type": "boolean"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"
@@ -1792,7 +1793,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "token": {
                     "type": "string"
@@ -1812,7 +1814,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "tool_id": {
                     "type": "integer"
@@ -1835,7 +1838,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "tool": {
                     "$ref": "#/definitions/rag-new_internal_entity.Tool"
@@ -1864,7 +1868,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"
@@ -1886,6 +1891,9 @@
                 "assistant_id": {
                     "type": "integer"
                 },
+                "completion_tokens": {
+                    "type": "integer"
+                },
                 "content": {
                     "type": "string"
                 },
@@ -1893,12 +1901,10 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
-                "input_tokens": {
-                    "type": "integer"
-                },
-                "output_tokens": {
+                "prompt_tokens": {
                     "type": "integer"
                 },
                 "role": {
@@ -1931,7 +1937,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"

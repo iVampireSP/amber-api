@@ -11,14 +11,15 @@ func init() {
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
 CREATE TABLE assistants (
-  id serial NOT NULL primary key ,
+    id  bigint AUTO_RANDOM,
   name varchar(255) DEFAULT NULL,
   description varchar(255) DEFAULT NULL,
   prompt text DEFAULT NULL,
   disable_default_prompt boolean NOT NULL,
   user_id bigint NOT NULL,
   created_at timestamp NULL DEFAULT NULL,
-  updated_at timestamp NULL DEFAULT NULL
+  updated_at timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 `
 

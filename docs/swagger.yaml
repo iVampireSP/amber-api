@@ -8,7 +8,8 @@ definitions:
       disable_default_prompt:
         type: boolean
       id:
-        type: integer
+        example: "0"
+        type: string
       name:
         type: string
       prompt:
@@ -25,7 +26,8 @@ definitions:
       created_at:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       token:
         type: string
       updated_at:
@@ -38,7 +40,8 @@ definitions:
       created_at:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       tool_id:
         type: integer
       updated_at:
@@ -53,7 +56,8 @@ definitions:
       created_at:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       tool:
         $ref: '#/definitions/rag-new_internal_entity.Tool'
       tool_id:
@@ -72,7 +76,8 @@ definitions:
       guest_id:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       name:
         type: string
       owner:
@@ -86,15 +91,16 @@ definitions:
     properties:
       assistant_id:
         type: integer
+      completion_tokens:
+        type: integer
       content:
         type: string
       created_at:
         type: string
       id:
-        type: integer
-      input_tokens:
-        type: integer
-      output_tokens:
+        example: "0"
+        type: string
+      prompt_tokens:
         type: integer
       role:
         type: string
@@ -116,7 +122,8 @@ definitions:
       discovery_url:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       name:
         type: string
       updated_at:

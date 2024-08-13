@@ -11,7 +11,7 @@ func init() {
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
 CREATE TABLE chat_messages (
-  id serial NOT NULL PRIMARY KEY ,
+  id  bigint AUTO_RANDOM,
   chat_id bigint NOT NULL,
   content text NOT NULL,
   role varchar(255) DEFAULT NULL,
@@ -19,9 +19,11 @@ CREATE TABLE chat_messages (
   completion_tokens bigint NOT NULL DEFAULT 0,
   total_tokens bigint NOT NULL DEFAULT 0,
   created_at timestamp NULL DEFAULT NULL,
-  updated_at timestamp NULL DEFAULT NULL
+  updated_at timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- drop primary key
 `
 
 			_, err := tx.Exec(rawSQL)

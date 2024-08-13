@@ -1775,7 +1775,8 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"
@@ -1801,7 +1802,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "token": {
                     "type": "string"
@@ -1821,7 +1823,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "tool_id": {
                     "type": "integer"
@@ -1844,7 +1847,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "tool": {
                     "$ref": "#/definitions/rag-new_internal_entity.Tool"
@@ -1873,7 +1877,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"
@@ -1895,6 +1900,9 @@ const docTemplate = `{
                 "assistant_id": {
                     "type": "integer"
                 },
+                "completion_tokens": {
+                    "type": "integer"
+                },
                 "content": {
                     "type": "string"
                 },
@@ -1902,12 +1910,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
-                "input_tokens": {
-                    "type": "integer"
-                },
-                "output_tokens": {
+                "prompt_tokens": {
                     "type": "integer"
                 },
                 "role": {
@@ -1940,7 +1946,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"

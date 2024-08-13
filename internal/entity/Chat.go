@@ -8,7 +8,7 @@ import (
 type Chat struct {
 	Base        `xorm:"extends"`
 	Name        string           `xorm:"varchar(255) notnull" json:"name"`
-	AssistantId int64            `xorm:"varchar(255) notnull" json:"assistant_id,string"`
+	AssistantId int64            `xorm:"varchar(255) notnull" json:"assistant_id"`
 	UserId      schema.UserId    `xorm:"user_id int(11)" json:"user_id"`
 	ExpiredAt   time.Time        `xorm:"TIMESTAMP" json:"expired_at"`
 	Owner       schema.ChatOwner `xorm:"varchar(255) notnull" json:"owner"`

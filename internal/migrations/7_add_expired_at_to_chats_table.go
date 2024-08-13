@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"fmt"
 	"xorm.io/xorm"
 	"xorm.io/xorm/migrate"
 )
@@ -9,29 +10,31 @@ func init() {
 	migrations = append(migrations, &migrate.Migration{
 		ID: "7",
 		Migrate: func(tx *xorm.Engine) error {
-			var rawSQL = `
-ALTER TABLE "public"."chats"  ADD COLUMN "expired_at"  timestamp(0);
-ALTER TABLE "public"."chats" ADD COLUMN "owner" varchar(255) COLLATE "pg_catalog"."default";
-ALTER TABLE "public"."chats" ADD COLUMN "guest_id" varchar(255) COLLATE "pg_catalog"."default";
+			_, err := tx.Exec(`ALTER TABLE chats add column expired_at timestamp NULL DEFAULT NULL AFTER user_id;`)
+			if err != nil {
+				return err
+			}
+			_, err = tx.Exec(`ALTER TABLE chats add column owner varchar(255) DEFAULT NULL AFTER user_id;`)
+			if err != nil {
+				return err
+			}
 
--- set user_id null able
-ALTER TABLE "public"."chats" ALTER COLUMN "user_id" DROP NOT NULL;
+			_, err = tx.Exec(`ALTER TABLE chats add column guest_id varchar(255) DEFAULT NULL AFTER user_id;`)
+			if err != nil {
+				return err
+			}
 
-CREATE INDEX "chats_expired_at_index" ON "public"."chats" USING btree (
-  "expired_at" "pg_catalog"."timestamp_ops" ASC NULLS LAST
-);
-CREATE INDEX "chats_owner_index" ON "public"."chats" USING btree (
-  "owner" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
-);
-CREATE INDEX "chats_guest_id_index" ON "public"."chats" USING btree (
-  "guest_id" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
-);
+			_, err = tx.Exec(`create index chats_expired_at_index on chats (expired_at);`)
+			if err != nil {
+				return err
+			}
 
-UPDATE "public"."chats" SET "owner" = 'user' WHERE "owner" IS NULL;
+			_, err = tx.Exec(`create index chats_owner_index on chats (owner);`)
+			if err != nil {
+				return err
+			}
 
-`
-
-			_, err := tx.Exec(rawSQL)
+			_, err = tx.Exec(`create index chats_guest_id_index on chats (guest_id);`)
 			if err != nil {
 				return err
 			}
@@ -39,18 +42,30 @@ UPDATE "public"."chats" SET "owner" = 'user' WHERE "owner" IS NULL;
 			return nil
 		},
 		Rollback: func(tx *xorm.Engine) error {
-			// drop table
-			_, err := tx.Exec(`
--- Drop indexes
-DROP INDEX "chats_expired_at_index";
-DROP INDEX "chats_owner_index";
-DROP INDEX "chats_guest_id_index";
+			_, err := tx.Exec("DROP INDEX chats_owner_index on chats;")
+			if err != nil {
+				fmt.Println("errr")
+				return err
+			}
 
--- Drop columns
-ALTER TABLE "public"."chats" DROP COLUMN "expired_at";
-ALTER TABLE "public"."chats" DROP COLUMN "owner";
-ALTER TABLE "public"."chats" DROP COLUMN "guest_id";
-`)
+			_, err = tx.Exec(`DROP INDEX chats_expired_at_index on chats;`)
+			if err != nil {
+				return err
+			}
+			_, err = tx.Exec(`DROP INDEX chats_guest_id_index on chats;`)
+			if err != nil {
+				return err
+			}
+
+			_, err = tx.Exec(`alter table chats drop column expired_at;`)
+			if err != nil {
+				return err
+			}
+			_, err = tx.Exec(`alter table chats drop column owner;`)
+			if err != nil {
+				return err
+			}
+			_, err = tx.Exec(`alter table chats drop column guest_id;`)
 			if err != nil {
 				return err
 			}

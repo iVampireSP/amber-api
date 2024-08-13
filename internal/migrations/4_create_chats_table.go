@@ -10,20 +10,14 @@ func init() {
 		ID: "4",
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
-CREATE TABLE "public"."chats" (
-  "id" bigserial PRIMARY KEY ,
-  "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "assistant_id" int8 NOT NULL,
-  "user_id" int8 NOT NULL,
-  "created_at" timestamp(0),
-  "updated_at" timestamp(0)
-);
-
-CREATE INDEX "chats_assistant_id_user_id_index" ON "public"."chats" USING btree (
-  "assistant_id" "pg_catalog"."int8_ops" ASC NULLS LAST,
-  "user_id" "pg_catalog"."int8_ops" ASC NULLS LAST
-);
-
+CREATE TABLE chats (
+  id serial NOT NULL primary key ,
+  name varchar(255) DEFAULT NULL,
+  assistant_id bigint NOT NULL,
+  user_id bigint DEFAULT NULL,
+  created_at timestamp NULL DEFAULT NULL,
+  updated_at timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 `
 
 			_, err := tx.Exec(rawSQL)
@@ -31,6 +25,16 @@ CREATE INDEX "chats_assistant_id_user_id_index" ON "public"."chats" USING btree 
 				return err
 			}
 
+			rawSQL = `CREATE INDEX chats_assistant_id_index ON chats (assistant_id);`
+			_, err = tx.Exec(rawSQL)
+			if err != nil {
+				return err
+			}
+			rawSQL = `CREATE INDEX chats_user_id_index ON chats (user_id);`
+			_, err = tx.Exec(rawSQL)
+			if err != nil {
+				return err
+			}
 			return nil
 		},
 		Rollback: func(tx *xorm.Engine) error {

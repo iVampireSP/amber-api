@@ -2,7 +2,7 @@ package orm
 
 import (
 	"fmt"
-	_ "github.com/lib/pq"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/yxlimo/xormzap"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
@@ -18,9 +18,9 @@ func NewXORM(
 	config *conf.Config,
 	logger *logger.Logger,
 ) (*xorm.Engine, error) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Database.Host, config.Database.Port, config.Database.User, config.Database.Password, config.Database.Name)
-
-	engine, err := xorm.NewEngine("postgres", dsn)
+	//dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", config.Database.Host, config.Database.Port, config.Database.User, config.Database.Password, config.Database.Name)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", config.Database.User, config.Database.Password, config.Database.Host, config.Database.Port, config.Database.Name)
+	engine, err := xorm.NewEngine("mysql", dsn)
 	if err != nil {
 		panic(err)
 	}

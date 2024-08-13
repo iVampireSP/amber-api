@@ -10,28 +10,25 @@ func init() {
 		ID: "1",
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
-CREATE TABLE "public"."tools" (
-  "id" bigserial PRIMARY KEY,
-  "name" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "description" varchar(255) COLLATE "pg_catalog"."default",
-  "discovery_url" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "api_key" varchar(255) COLLATE "pg_catalog"."default",
-  "data" json,
-  "user_id" BIGINT NOT NULL,
-  "created_at" timestamp(0),
-  "updated_at" timestamp(0)
+CREATE TABLE tools (
+  id serial NOT NULL primary key ,
+  name varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  description varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  discovery_url varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  api_key varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  data json DEFAULT NULL,
+  user_id bigint NOT NULL,
+  created_at timestamp NULL DEFAULT NULL,
+  updated_at timestamp NULL DEFAULT NULL
 );
-
-CREATE INDEX "tools_discovery_url_index" ON "public"."tools" USING btree (
-  "discovery_url" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
-);
-CREATE INDEX "tools_user_id_index" ON "public"."tools" USING btree (
-  "user_id" "pg_catalog"."int8_ops" ASC NULLS LAST
-);
-
-
 `
 			_, err := tx.Exec(rawSQL)
+			if err != nil {
+				return err
+			}
+
+			rawSQL = `CREATE INDEX tools_user_id_index ON tools (user_id);`
+			_, err = tx.Exec(rawSQL)
 			if err != nil {
 				return err
 			}

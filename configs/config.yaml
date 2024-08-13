@@ -7,11 +7,10 @@ debug:
 
 database:
   host: 127.0.0.1
-  port: 5432
+  port: 3306
   user: root
   password: root
   name: db_name
-  sslmode: disable
 
 redis:
   host: 127.0.0.1

@@ -10,27 +10,36 @@ func init() {
 		ID: "5",
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
-CREATE TABLE "public"."chat_messages" (
-  "id" bigserial PRIMARY KEY ,
-  "chat_id" int8 NOT NULL,
-  "content" text COLLATE "pg_catalog"."default" NOT NULL,
-  "role" varchar(255) COLLATE "pg_catalog"."default" NOT NULL,
-  "input_tokens" int4,
-  "output_tokens" int4,
-  "total_tokens" int4,
-  "created_at" timestamp(0),
-  "updated_at" timestamp(0),
-  "tool_calls" json
-);
-
-CREATE INDEX "chat_messages_chat_id_role_index" ON "public"."chat_messages" USING btree (
-  "chat_id" "pg_catalog"."int8_ops" ASC NULLS LAST,
-  "role" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
-);
+CREATE TABLE chat_messages (
+  id serial NOT NULL PRIMARY KEY ,
+  chat_id bigint NOT NULL,
+  content text NOT NULL,
+  role varchar(255) DEFAULT NULL,
+  prompt_tokens bigint NOT NULL DEFAULT 0,
+  completion_tokens bigint NOT NULL DEFAULT 0,
+  total_tokens bigint NOT NULL DEFAULT 0,
+  created_at timestamp NULL DEFAULT NULL,
+  updated_at timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 `
 
 			_, err := tx.Exec(rawSQL)
+			if err != nil {
+				return err
+			}
+
+			_, err = tx.Exec(`CREATE INDEX chat_messages_chat_id_index ON chat_messages (chat_id);`)
+			if err != nil {
+				return err
+			}
+
+			_, err = tx.Exec(`CREATE INDEX chat_messages_created_at_index ON chat_messages (created_at);`)
+			if err != nil {
+				return err
+			}
+
+			_, err = tx.Exec(`CREATE INDEX chat_messages_role_index ON chat_messages (role);`)
 			if err != nil {
 				return err
 			}

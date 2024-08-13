@@ -10,24 +10,28 @@ func init() {
 		ID: "3",
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
-CREATE TABLE "public"."assistant_tools" (
-  "id" bigserial PRIMARY KEY,
-  "assistant_id" bigint NOT NULL,
-  "tool_id" bigint NOT NULL,
-  "created_at" timestamp(0),
-  "updated_at" timestamp(0)
-);
-
-CREATE INDEX "assistant_tools_assistant_id_tool_id_index" ON "public"."assistant_tools" USING btree (
-  "assistant_id" "pg_catalog"."int8_ops" ASC NULLS LAST,
-  "tool_id" "pg_catalog"."int8_ops" ASC NULLS LAST
-);
-
-
-
+CREATE TABLE assistant_tools (
+ id serial NOT NULL primary key ,
+ assistant_id bigint NOT NULL,
+ tool_id bigint NOT NULL,
+ created_at timestamp NULL DEFAULT NULL,
+ updated_at timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 `
 
 			_, err := tx.Exec(rawSQL)
+			if err != nil {
+				return err
+			}
+
+			rawSQL = `CREATE INDEX assistant_tools_tool_id_index ON assistant_tools (tool_id);`
+			_, err = tx.Exec(rawSQL)
+			if err != nil {
+				return err
+			}
+
+			rawSQL = `CREATE INDEX assistant_tools_assistant_id_index ON assistant_tools (assistant_id);`
+			_, err = tx.Exec(rawSQL)
 			if err != nil {
 				return err
 			}

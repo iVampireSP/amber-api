@@ -10,22 +10,27 @@ func init() {
 		ID: "6",
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
-CREATE TABLE "public"."assistant_shares" (
-  "id" bigserial PRIMARY KEY ,
-  "assistant_id" int8 NOT NULL,
-  "token" varchar(255) COLLATE "pg_catalog"."default" NOT NULL UNIQUE,
-  "created_at" timestamp(0),
-  "updated_at" timestamp(0)
-);
-
-CREATE INDEX "assistant_shares_assistant_id_token_index" ON "public"."assistant_shares" USING btree (
-  "assistant_id" "pg_catalog"."int8_ops" ASC NULLS LAST,
-  "token" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST 
-);
+CREATE TABLE assistant_shares (
+  id serial NOT NULL PRIMARY KEY ,
+  assistant_id bigint NOT NULL,
+  token varchar(255) NOT NULL,
+  created_at timestamp NULL DEFAULT NULL,
+  updated_at timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 `
 
 			_, err := tx.Exec(rawSQL)
+			if err != nil {
+				return err
+			}
+
+			_, err = tx.Exec(`CREATE INDEX assistant_shares_assistant_id_index ON assistant_shares (assistant_id);`)
+			if err != nil {
+				return err
+			}
+
+			_, err = tx.Exec(`CREATE INDEX assistant_shares_token_index ON assistant_shares (token);`)
 			if err != nil {
 				return err
 			}

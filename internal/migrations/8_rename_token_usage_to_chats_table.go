@@ -7,7 +7,7 @@ import (
 
 func init() {
 	migrations = append(migrations, &migrate.Migration{
-		ID: "9",
+		ID: "8",
 		Migrate: func(tx *xorm.Engine) error {
 			return nil
 		},

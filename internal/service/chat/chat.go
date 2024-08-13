@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"errors"
+	"fmt"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -18,7 +19,7 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 		return nil, err
 	}
 
-	if a.ID == consts.NoRecord || a.UserId != createChatRequest.UserId {
+	if a.Id == consts.NoRecord || a.UserId != createChatRequest.UserId {
 		return nil, consts.ErrAssistantNotFound
 	}
 
@@ -34,7 +35,7 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 
 // CreateGuestChat 用于创建访客对话，这个对话应是临时的，到时间后会删除
 func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *schema.ChatGuestCreateRequest) (*entity.Chat, error) {
-	var chat = &entity.Chat{}
+	var chat = entity.Chat{}
 
 	chat.Name = createGuestChatRequest.Name
 	chat.AssistantId = createGuestChatRequest.AssistantId
@@ -43,9 +44,11 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 
 	chat.ExpiredAt = time.Now().Add(time.Hour * 24)
 
-	_, err := s.x.Context(ctx).Insert(chat)
+	_, err := s.x.Context(ctx).Insert(&chat)
 
-	return chat, err
+	fmt.Println(chat.Id)
+
+	return &chat, err
 }
 
 func (s *Service) GetChat(ctx context.Context, id int64) (*entity.Chat, error) {
@@ -79,7 +82,7 @@ func (s *Service) DeleteChat(ctx context.Context, chat *entity.Chat) error {
 		return consts.ErrChatCanNotDeleteBecauseNotCleared
 	}
 
-	_, err = s.x.Context(ctx).ID(chat.ID).Delete(&entity.Chat{})
+	_, err = s.x.Context(ctx).ID(chat.Id).Delete(&entity.Chat{})
 	return err
 }
 
@@ -100,7 +103,7 @@ func (s *Service) DeleteChats(ctx context.Context, chat ...*entity.Chat) error {
 			return consts.ErrChatCanNotDeleteBecauseNotCleared
 		}
 
-		_, err = s.x.Context(ctx).ID(v.ID).Delete(&entity.Chat{})
+		_, err = s.x.Context(ctx).ID(v.Id).Delete(&entity.Chat{})
 	}
 
 	return nil
@@ -131,14 +134,14 @@ func (s *Service) ListChatFromUserId(ctx context.Context, userId schema.UserId) 
 
 func (s *Service) ListChatFromAssistantIdWithAssistant(ctx context.Context, assistant *entity.Assistant) ([]*entity.Chat, error) {
 	var chats []*entity.Chat
-	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.ID).Find(&chats)
+	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Find(&chats)
 	return chats, err
 }
 
 func (s *Service) ListChatFromAssistantByPage(ctx context.Context, assistant *entity.Assistant, page int) ([]*entity.Chat, error) {
 	var chats []*entity.Chat
 	var limit = 20
-	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.ID).Limit(limit, (page-1)*limit).Find(&chats)
+	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Limit(limit, (page-1)*limit).Find(&chats)
 	return chats, err
 }
 

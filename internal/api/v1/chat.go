@@ -67,7 +67,7 @@ func (u *ChatController) List(c *gin.Context) {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
-		if assistantEntity.ID == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
+		if assistantEntity.Id == consts.NoRecord || assistantEntity.UserId != u.authService.GetUserId(c) {
 			response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
 			return
 		}
@@ -201,7 +201,7 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 		}
 	}
 
-	if chatEntity.ID == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
+	if chatEntity.Id == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
 		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
 		return
 	}
@@ -325,7 +325,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	var chatMessage entity.ChatMessage
-	chatMessage.ChatId = chatEntity.ID
+	chatMessage.ChatId = chatEntity.Id
 	chatMessage.Content = request.Message
 	chatMessage.Role = schema.RoleHuman
 
@@ -409,13 +409,13 @@ func (u *ChatController) ClearChatMessage(c *gin.Context) {
 		}
 	}
 
-	if chatEntity.ID == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
+	if chatEntity.Id == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
 		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
 		return
 	}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.ID)
+	isStreaming, err := u.isStreaming(c, chatEntity.Id)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return

@@ -22,7 +22,8 @@ definitions:
   rag-new_internal_entity.AssistantShare:
     properties:
       assistant_id:
-        type: integer
+        example: "0"
+        type: string
       created_at:
         type: string
       id:
@@ -52,7 +53,8 @@ definitions:
       assistant:
         $ref: '#/definitions/rag-new_internal_entity.Assistant'
       assistant_id:
-        type: integer
+        example: "0"
+        type: string
       created_at:
         type: string
       id:
@@ -61,14 +63,16 @@ definitions:
       tool:
         $ref: '#/definitions/rag-new_internal_entity.Tool'
       tool_id:
-        type: integer
+        example: "0"
+        type: string
       updated_at:
         type: string
     type: object
   rag-new_internal_entity.Chat:
     properties:
       assistant_id:
-        type: integer
+        example: "0"
+        type: string
       created_at:
         type: string
       expired_at:

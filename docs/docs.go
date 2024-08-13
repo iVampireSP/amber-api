@@ -1796,7 +1796,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "assistant_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "created_at": {
                     "type": "string"
@@ -1841,7 +1842,8 @@ const docTemplate = `{
                     "$ref": "#/definitions/rag-new_internal_entity.Assistant"
                 },
                 "assistant_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "created_at": {
                     "type": "string"
@@ -1854,7 +1856,8 @@ const docTemplate = `{
                     "$ref": "#/definitions/rag-new_internal_entity.Tool"
                 },
                 "tool_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "updated_at": {
                     "type": "string"
@@ -1865,7 +1868,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "assistant_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "created_at": {
                     "type": "string"

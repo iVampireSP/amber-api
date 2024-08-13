@@ -2,12 +2,13 @@ package tool
 
 import (
 	"context"
-	"github.com/go-playground/validator/v10"
 	"io"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/bytedance/sonic"
 )
@@ -43,10 +44,10 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 	}
 
 	_, err = s.x.Context(ctx).Insert(&toolEntity)
-	toolData.ToolId = toolEntity.ID
+	toolData.ToolId = toolEntity.Id
 	toolEntity.Data = *toolData.Output()
 
-	_, err = s.x.Context(ctx).ID(toolEntity.ID).Cols("data").Update(&toolEntity)
+	_, err = s.x.Context(ctx).ID(toolEntity.Id).Cols("data").Update(&toolEntity)
 
 	return &toolEntity, err
 }
@@ -58,7 +59,7 @@ func (s *Service) UpdateToolData(ctx context.Context, tool *entity.Tool) error {
 		return err
 	}
 
-	toolData.ToolId = tool.ID
+	toolData.ToolId = tool.Id
 
 	err = s.ValidateSyntax(toolData)
 	if err != nil {
@@ -67,7 +68,7 @@ func (s *Service) UpdateToolData(ctx context.Context, tool *entity.Tool) error {
 
 	tool.Data = *toolData.Output()
 
-	_, err = s.x.Context(ctx).ID(tool.ID).Cols("data").Update(tool)
+	_, err = s.x.Context(ctx).ID(tool.Id).Cols("data").Update(tool)
 
 	return err
 }

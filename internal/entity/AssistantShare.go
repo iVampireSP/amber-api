@@ -2,14 +2,14 @@ package entity
 
 type AssistantShare struct {
 	Base        `xorm:"extends"`
-	AssistantId int64  `xorm:"varchar(255) notnull" json:"assistant_id"`
+	AssistantId int64  `xorm:"varchar(255) notnull" json:"assistant_id,string"`
 	Token       string `xorm:"varchar(255) notnull" json:"token"`
 }
 
 type AssistantShareType struct {
 	Base        `xorm:"extends"`
 	Token       string     `xorm:"varchar(255) notnull" json:"token"`
-	AssistantId int64      `xorm:"int(8) notnull index" json:"assistant_id"`
+	AssistantId int64      `xorm:"int(8) notnull index" json:"assistant_id,string"`
 	Assistant   *Assistant `xorm:"extends" json:"assistant"`
 }
 
@@ -23,7 +23,7 @@ func (a *AssistantShareType) TableName() string {
 
 func (a *AssistantShareType) ToAssistantShare() *AssistantShare {
 	var assistantShare = &AssistantShare{}
-	assistantShare.ID = a.ID
+	assistantShare.Id = a.Id
 	assistantShare.AssistantId = a.AssistantId
 	assistantShare.Token = a.Token
 	assistantShare.CreatedAt = a.Assistant.CreatedAt

@@ -23,7 +23,7 @@ func (s *Service) ListAssistantFromUserId(ctx context.Context, userId schema.Use
 func (s *Service) GetAssistant(ctx context.Context, id int64) (*entity.Assistant, error) {
 	assistant := new(entity.Assistant)
 	_, err := s.x.Context(ctx).ID(id).Get(assistant)
-	if assistant.ID == consts.NoRecord {
+	if assistant.Id == consts.NoRecord {
 		return nil, consts.ErrAssistantNotFound
 	}
 	return assistant, err
@@ -42,7 +42,7 @@ func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.Assi
 }
 
 func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assistant) error {
-	_, err := s.x.Context(ctx).ID(assistant.ID).Cols("name", "description", "prompt", "disable_default_prompt").Update(assistant)
+	_, err := s.x.Context(ctx).ID(assistant.Id).Cols("name", "description", "prompt", "disable_default_prompt").Update(assistant)
 	return err
 }
 

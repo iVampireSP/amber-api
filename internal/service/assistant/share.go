@@ -10,16 +10,16 @@ import (
 func (s *Service) CrateShare(ctx context.Context, assistant *entity.Assistant) (*entity.AssistantShare, error) {
 	var assistantShare = &entity.AssistantShare{}
 
-	assistantShare.AssistantId = assistant.ID
+	assistantShare.AssistantId = assistant.Id
 	// 生成 token
 	assistantShare.Token = random.String(40)
 
 	//// 检测 assistant 是否存在
-	//assistant, err := s.GetAssistant(ctx, assistant.ID)
+	//assistant, err := s.GetAssistant(ctx, assistant.Id)
 	//if err != nil {
 	//	return nil, err
 	//}
-	//if assistant.ID == consts.NoRecord {
+	//if assistant.Id == consts.NoRecord {
 	//	return nil, consts.ErrAssistantNotFound
 	//}
 
@@ -65,16 +65,16 @@ func (s *Service) GetShareByToken(ctx context.Context, assistantShareToken strin
 // ListShare 获取当前助理的所有分享
 func (s *Service) ListShare(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantShare, error) {
 	var assistantShares = make([]*entity.AssistantShare, 0)
-	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.ID).Find(&assistantShares)
+	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Find(&assistantShares)
 	return assistantShares, err
 }
 
 func (s *Service) DeleteShare(ctx context.Context, assistantShare *entity.AssistantShare) error {
-	_, err := s.x.Context(ctx).ID(assistantShare.ID).Delete(&entity.AssistantShare{})
+	_, err := s.x.Context(ctx).ID(assistantShare.Id).Delete(&entity.AssistantShare{})
 	return err
 }
 
 //func (s *Service) UpdateShare(ctx context.Context, assistant *entity.Assistant) error {
-//	_, err := s.x.Context(ctx).ID(assistant.ID).AllCols().Update(assistant)
+//	_, err := s.x.Context(ctx).ID(assistant.Id).AllCols().Update(assistant)
 //	return err
 //}

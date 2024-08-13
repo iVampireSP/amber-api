@@ -338,7 +338,7 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 		return
 	}
 
-	if toolEntity.ID == consts.NoRecord || toolEntity.UserId != u.authService.GetUserId(c) {
+	if toolEntity.Id == consts.NoRecord || toolEntity.UserId != u.authService.GetUserId(c) {
 		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
 		return
 	}
@@ -400,7 +400,7 @@ func (u *AssistantController) UnbindTool(c *gin.Context) {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
-	if toolEntity.ID == consts.NoRecord || toolEntity.UserId != u.authService.GetUserId(c) {
+	if toolEntity.Id == consts.NoRecord || toolEntity.UserId != u.authService.GetUserId(c) {
 		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
 		return
 	}

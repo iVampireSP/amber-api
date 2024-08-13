@@ -47,7 +47,7 @@ func (b *Batch) AssistantDelete(ctx context.Context, adb *AssistantDeleteBatch) 
 			chatPage++
 		}
 
-		err := adb.AssistantService.DeleteAssistant(ctx, adb.AssistantEntity.ID)
+		err := adb.AssistantService.DeleteAssistant(ctx, adb.AssistantEntity.Id)
 		if err != nil {
 			b.logger.Sugar.Errorf("Batch AssistantDelete: %v", err)
 			return

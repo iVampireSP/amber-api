@@ -113,7 +113,7 @@ func (t *ToolController) GetTool(c *gin.Context) {
 		return
 	}
 
-	if getTool.ID == consts.NoRecord {
+	if getTool.Id == consts.NoRecord {
 		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
 		return
 	}
@@ -152,7 +152,7 @@ func (t *ToolController) DeleteTool(c *gin.Context) {
 		return
 	}
 
-	if getTool.ID == consts.NoRecord || getTool.UserId != t.authService.GetUserId(c) {
+	if getTool.Id == consts.NoRecord || getTool.UserId != t.authService.GetUserId(c) {
 		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
 		return
 	}
@@ -192,7 +192,7 @@ func (t *ToolController) UpdateToolData(c *gin.Context) {
 		return
 	}
 
-	if getTool.ID == consts.NoRecord || getTool.UserId != t.authService.GetUserId(c) {
+	if getTool.Id == consts.NoRecord || getTool.UserId != t.authService.GetUserId(c) {
 		response.Status(http.StatusNotFound).Error(consts.ErrToolNotFound).Send()
 		return
 	}

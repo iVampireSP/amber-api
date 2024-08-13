@@ -82,7 +82,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	if chatEntity.ID == consts.NoRecord {
+	if chatEntity.Id == consts.NoRecord {
 		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
 		return
 	}
@@ -189,7 +189,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 			messageList = append(messageList, entity.ChatMessage{
 				Role:    schema.RoleHideSystem,
 				Content: msg.ToolResponseMessage.Content,
-				ChatId:  chatEntity.ID,
+				ChatId:  chatEntity.Id,
 			})
 
 			return true
@@ -225,7 +225,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		newMessage := &entity.ChatMessage{
 			Role:             schema.RoleAssistant,
 			Content:          llmFullMessage,
-			ChatId:           chatEntity.ID,
+			ChatId:           chatEntity.Id,
 			PromptTokens:     tokenUsage.PromptTokens,
 			CompletionTokens: tokenUsage.CompletionTokens,
 			TotalTokens:      tokenUsage.TotalTokens,

@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"net/http"
@@ -9,7 +10,6 @@ import (
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
-	"strconv"
 )
 
 // CreatePublicChat godoc
@@ -174,7 +174,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.ID)
+	isStreaming, err := u.isStreaming(c, chatEntity.Id)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -186,7 +186,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 
 	var chatMessageResponse = &schema.ChatMessageResponse{}
 
-	var chatIdStr = strconv.Itoa(int(chatEntity.ID))
+	var chatIdStr = fmt.Sprintf("%d", chatEntity.Id)
 
 	// 检测 chat 是否存在缓存
 	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatIdStr))
@@ -238,7 +238,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	}
 
 	var chatMessage entity.ChatMessage
-	chatMessage.ChatId = chatEntity.ID
+	chatMessage.ChatId = chatEntity.Id
 	chatMessage.Content = addPublicChatMessageRequest.Message
 	chatMessage.Role = schema.RoleHuman
 

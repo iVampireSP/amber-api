@@ -10,13 +10,13 @@ import (
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
 	var chatMessage = make([]*entity.ChatMessage, 0)
-	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).And("role != ?", schema.RoleHideSystem.String()).OrderBy("created_at asc").Find(&chatMessage)
+	err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).And("role != ?", schema.RoleHideSystem.String()).OrderBy("created_at asc").Find(&chatMessage)
 	return chatMessage, err
 }
 
 func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
 	var chatMessage = make([]*entity.ChatMessage, 0)
-	err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).OrderBy("created_at asc").Find(&chatMessage)
+	err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).OrderBy("created_at asc").Find(&chatMessage)
 	return chatMessage, err
 }
 
@@ -30,7 +30,7 @@ func (s *Service) CreateChatMessage(ctx context.Context, ChatMessage *entity.Cha
 }
 
 func (s *Service) DeleteChatMessage(ctx context.Context, ChatMessage *entity.ChatMessage) error {
-	_, err := s.x.Context(ctx).ID(ChatMessage.ID).Delete(ChatMessage)
+	_, err := s.x.Context(ctx).ID(ChatMessage.Id).Delete(ChatMessage)
 	return err
 }
 
@@ -38,7 +38,7 @@ func (s *Service) DeleteChatMessageByChats(ctx context.Context, chat ...*entity.
 	// build wherein
 	var ids = make([]int64, 0)
 	for _, v := range chat {
-		ids = append(ids, v.ID)
+		ids = append(ids, v.Id)
 	}
 
 	if len(ids) == 0 {
@@ -51,7 +51,7 @@ func (s *Service) DeleteChatMessageByChats(ctx context.Context, chat ...*entity.
 
 // CountChatMessage count messages
 func (s *Service) CountChatMessage(ctx context.Context, chat *entity.Chat) (int64, error) {
-	count, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Count(&entity.ChatMessage{})
+	count, err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).Count(&entity.ChatMessage{})
 	return count, err
 }
 
@@ -68,17 +68,17 @@ func (s *Service) DeleteChatMessageByUserId(ctx context.Context, userId schema.U
 // GetLatestMessage get latest chat message
 func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*entity.ChatMessage, error) {
 	var chatMessage entity.ChatMessage
-	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Limit(1).OrderBy("id desc").Get(&chatMessage)
+	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).Limit(1).OrderBy("id desc").Get(&chatMessage)
 	return &chatMessage, err
 }
 
 // UpdateMessageContent update message content
 func (s *Service) UpdateMessageContent(ctx context.Context, chatMessage *entity.ChatMessage) error {
-	_, err := s.x.Context(ctx).ID(chatMessage.ID).Cols("content").Update(chatMessage)
+	_, err := s.x.Context(ctx).ID(chatMessage.Id).Cols("content").Update(chatMessage)
 	return err
 }
 
 func (s *Service) ClearChatMessage(ctx context.Context, chat *entity.Chat) error {
-	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.ID).Delete(&entity.ChatMessage{})
+	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).Delete(&entity.ChatMessage{})
 	return err
 }

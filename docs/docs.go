@@ -2039,7 +2039,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "assistant_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string",

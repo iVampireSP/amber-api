@@ -11,9 +11,9 @@ func init() {
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
 CREATE TABLE assistant_tools (
- id  bigint AUTO_RANDOM,
- assistant_id bigint NOT NULL,
- tool_id bigint NOT NULL,
+  id   bigint unsigned AUTO_INCREMENT,
+ assistant_id bigint unsigned NOT NULL,
+ tool_id bigint unsigned NOT NULL,
  created_at timestamp NULL DEFAULT NULL,
  updated_at timestamp NULL DEFAULT NULL,
  PRIMARY KEY (id)

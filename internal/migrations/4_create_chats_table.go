@@ -11,10 +11,10 @@ func init() {
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
 CREATE TABLE chats (
-  id  bigint AUTO_RANDOM,
+  id   bigint unsigned AUTO_INCREMENT,
   name varchar(255) DEFAULT NULL,
-  assistant_id bigint NOT NULL,
-  user_id bigint DEFAULT NULL,
+  assistant_id bigint unsigned NOT NULL,
+  user_id bigint unsigned DEFAULT NULL,
   created_at timestamp NULL DEFAULT NULL,
   updated_at timestamp NULL DEFAULT NULL,
   PRIMARY KEY (id)

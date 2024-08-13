@@ -11,7 +11,7 @@ func init() {
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
 CREATE TABLE tools (
-  id  bigint AUTO_RANDOM,
+  id   bigint unsigned AUTO_INCREMENT,
   name varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   description varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   discovery_url varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,

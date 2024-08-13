@@ -11,12 +11,12 @@ func init() {
 		Migrate: func(tx *xorm.Engine) error {
 			var rawSQL = `
 CREATE TABLE assistants (
-    id  bigint AUTO_RANDOM,
+  id   bigint unsigned AUTO_INCREMENT,
   name varchar(255) DEFAULT NULL,
   description varchar(255) DEFAULT NULL,
   prompt text DEFAULT NULL,
   disable_default_prompt boolean NOT NULL,
-  user_id bigint NOT NULL,
+  user_id bigint unsigned NOT NULL,
   created_at timestamp NULL DEFAULT NULL,
   updated_at timestamp NULL DEFAULT NULL,
   PRIMARY KEY (id)

@@ -1,9 +1,11 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"io"
+	"net"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
@@ -139,7 +141,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	// MessageList
 	var messageList = make([]entity.ChatMessage, 0)
 
-	var prompt = u.getPrompt(assistantEntity, user)
+	var prompt = u.getPrompt(c, assistantEntity, user)
 
 	var llmChat = &schema.LLMChat{
 		ResponseChan:   llmResponseChan,
@@ -252,7 +254,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	response.Status(http.StatusOK).Send()
 }
 
-func (u *ChatController) getPrompt(assistant *entity.Assistant, user *schema.UserPublicInfo) string {
+func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, user *schema.UserPublicInfo) string {
 	var prompt = ""
 
 	if assistant.DisableDefaultPrompt {
@@ -265,13 +267,21 @@ Your description: ` + assistant.Description + "(current user given)"
 			prompt += `
 Username: ` + user.Name + `(system hint you this)` + `
 UserId: ` + user.Id + "(system hint you this, user can't change it)"
+		}
 
+		var clientIP = c.ClientIP()
+		var ip = net.ParseIP(clientIP)
+		// 如果是内部 IP
+		if !ip.IsLoopback() && !ip.IsPrivate() {
+			prompt += `Visitor IP: ` + clientIP
 		}
 
 		if assistant.Prompt != "" {
 			prompt += "\n" + assistant.Prompt
 		}
 	}
+
+	fmt.Println(prompt)
 
 	return prompt
 }

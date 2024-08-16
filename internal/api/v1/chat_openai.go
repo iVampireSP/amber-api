@@ -40,7 +40,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		return
 	}
 
-	var prompt = u.getPrompt(assistantEntity, nil)
+	var prompt = u.getPrompt(c, assistantEntity, nil)
 	var llmResponseChan = make(chan *schema.AssistantResponse)
 
 	var llmChat = &schema.LLMChat{

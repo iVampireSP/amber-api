@@ -17,16 +17,22 @@ var (
 type JWKS struct {
 	url    string
 	logger *logger.Logger
+	config *conf.Config
 }
 
 func NewJWKS(config *conf.Config, logger *logger.Logger) *JWKS {
 	return &JWKS{
 		url:    config.JWKS.Url,
 		logger: logger,
+		config: config,
 	}
 }
 
 func (j *JWKS) RefreshJWKS() {
+	if j.config.Debug.Enabled {
+		return
+	}
+
 	j.logger.Logger.Info("Refreshing JWKS...")
 
 	var err error

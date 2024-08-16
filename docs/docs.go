@@ -15,6 +15,69 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/openai-compatible/v1/chat/completions": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "兼容 OpenAI Chat Completion 接口，认证需要使用 Assistant Share Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "OpenAI Chat Completion",
+                "parameters": [
+                    {
+                        "description": "Chat",
+                        "name": "chat",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/assistants": {
             "get": {
                 "security": [
@@ -2126,6 +2189,92 @@ const docTemplate = `{
                 }
             }
         },
+        "rag-new_internal_schema.OpenAIChatCompletionRequest": {
+            "type": "object",
+            "properties": {
+                "max_tokens": {
+                    "description": "Optional",
+                    "type": "integer"
+                },
+                "messages": {
+                    "description": "Required",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage"
+                    }
+                },
+                "model": {
+                    "description": "Required",
+                    "type": "string"
+                },
+                "n": {
+                    "description": "Optional",
+                    "type": "integer"
+                },
+                "stream": {
+                    "description": "Optional",
+                    "type": "boolean"
+                },
+                "temperature": {
+                    "description": "Optional",
+                    "type": "number"
+                },
+                "top_p": {
+                    "description": "Optional",
+                    "type": "number"
+                }
+            }
+        },
+        "rag-new_internal_schema.OpenAIChatCompletionRequestMessage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "Required",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "Required",
+                    "type": "string"
+                }
+            }
+        },
+        "rag-new_internal_schema.OpenAIChatCompletionResponse": {
+            "type": "object",
+            "properties": {
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponseChoice"
+                    }
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "object": {
+                    "type": "string"
+                },
+                "usage": {
+                    "$ref": "#/definitions/rag-new_internal_schema.TokenUsage"
+                }
+            }
+        },
+        "rag-new_internal_schema.OpenAIChatCompletionResponseChoice": {
+            "type": "object",
+            "properties": {
+                "index": {
+                    "type": "integer"
+                },
+                "message": {
+                    "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage"
+                }
+            }
+        },
         "rag-new_internal_schema.ResponseBody": {
             "type": "object",
             "properties": {
@@ -2138,6 +2287,20 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "rag-new_internal_schema.TokenUsage": {
+            "type": "object",
+            "properties": {
+                "completion_tokens": {
+                    "type": "integer"
+                },
+                "prompt_tokens": {
+                    "type": "integer"
+                },
+                "total_tokens": {
+                    "type": "integer"
                 }
             }
         },

@@ -52,7 +52,7 @@ func CreateApp() (*base.Application, error) {
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController)
 	swaggerRouter := router.NewSwaggerRoute()
-	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService)
+	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, batchBatch)
 	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch)

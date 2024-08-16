@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	"rag-new/internal/service/llm"
 	"rag-new/pkg/consts"
 	"strconv"
 )
@@ -102,7 +101,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	// 提取 history
 	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
-	var llmResponseChan = make(chan *llm.AssistantResponse)
+	var llmResponseChan = make(chan *schema.AssistantResponse)
 
 	// SSE
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
@@ -142,19 +141,24 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	var prompt = u.getPrompt(assistantEntity, user)
 
+	var llmChat = &schema.LLMChat{
+		ResponseChan:   llmResponseChan,
+		SystemPrompt:   prompt,
+		UserPublicInfo: user,
+		Tools:          tools,
+	}
+
 	go func() {
-		err = u.llmService.StreamChat(llmResponseChan, prompt, user, histories, tools...)
+		err = u.llmService.StreamChat(llmChat, histories)
 		if err != nil {
 			u.logger.Sugar.Error(err)
-			// 关闭连接
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
-			//response.Status(http.StatusInternalServerError).Message("Streaming chat failed").Error(err).Send()
 		}
 	}()
 
 	var llmFullMessage = ""
-	var tokenUsage = &llm.TokenUsage{
+	var tokenUsage = &schema.TokenUsage{
 		PromptTokens:     0,
 		CompletionTokens: 0,
 		TotalTokens:      0,
@@ -170,22 +174,22 @@ func (u *ChatController) Stream(c *gin.Context) {
 			return true
 		}
 
-		j, err := sonic.Marshal(msg)
+		j, err := sonic.MarshalString(msg)
 		if err != nil {
 			u.logger.Sugar.Error(err)
 		}
 
-		c.SSEvent(eventName, string(j))
+		c.SSEvent(eventName, j)
 
 		c.Writer.Flush()
 
 		switch msg.State {
-		case llm.StateChunk:
+		case schema.StateChunk:
 			llmFullMessage += msg.ChunkMessage.Content
 			return true
-		case llm.StateToolSuccess:
+		case schema.StateToolSuccess:
 			return true
-		case llm.StateToolResponse:
+		case schema.StateToolResponse:
 			messageList = append(messageList, entity.ChatMessage{
 				Role:    schema.RoleHideSystem,
 				Content: msg.ToolResponseMessage.Content,
@@ -193,20 +197,22 @@ func (u *ChatController) Stream(c *gin.Context) {
 			})
 
 			return true
-		case llm.StateDone:
+		case schema.StateDone:
 			tokenUsage = msg.TokenUsage
 			return true
-		case llm.StateFailed:
+		case schema.StateFailed:
 			return false
-
-		case llm.StateFinished:
+		case schema.StateFinished:
 			return false
-		case llm.StateToolFailed:
+		case schema.StateToolFailed:
 			return false
 		default:
 			return true
 		}
 	})
+
+	// 发送 [DONE]
+	c.SSEvent(eventName, eventDone)
 
 	// close sse stream
 	c.SSEvent("close", "")

@@ -10,6 +10,7 @@ type ResponseBody struct {
 	Error   string `json:"error"`
 	Success bool   `json:"success"`
 	Data    any    `json:"data,omitempty"`
+	Wrap    bool   `json:"-"`
 }
 
 type HttpResponse struct {
@@ -20,7 +21,9 @@ type HttpResponse struct {
 
 func NewResponse(c *gin.Context) *HttpResponse {
 	return &HttpResponse{
-		body:       &ResponseBody{},
+		body: &ResponseBody{
+			Wrap: true,
+		},
 		httpStatus: 0,
 		ctx:        c,
 	}
@@ -33,6 +36,18 @@ func (r *HttpResponse) Message(message string) *HttpResponse {
 		r.httpStatus = http.StatusOK
 	}
 
+	return r
+}
+
+// WithoutWrap 将不在 body 中包裹 data
+func (r *HttpResponse) WithoutWrap() *HttpResponse {
+	r.body.Wrap = false
+
+	return r
+}
+
+func (r *HttpResponse) Wrap() *HttpResponse {
+	r.body.Wrap = true
 	return r
 }
 
@@ -80,7 +95,12 @@ func (r *HttpResponse) Send() {
 	// if 20x or 20x, set success
 	r.body.Success = r.httpStatus >= http.StatusOK && r.httpStatus < http.StatusMultipleChoices
 
-	r.ctx.JSON(r.httpStatus, r.body)
+	if r.body.Wrap {
+		r.ctx.JSON(r.httpStatus, r.body)
+		return
+	}
+
+	r.ctx.JSON(r.httpStatus, r.body.Data)
 }
 
 func (r *HttpResponse) Abort() {

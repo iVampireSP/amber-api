@@ -23,6 +23,7 @@ import (
 )
 
 const eventName = "data"
+const eventDone = "[DONE]"
 
 type ChatController struct {
 	authService      *auth.Service

@@ -96,3 +96,9 @@ func (s *Service) ToLLMTool(ctx context.Context, assistant *entity.Assistant) ([
 	}
 	return toolList, nil
 }
+
+func (s *Service) GetAssistantFromCtx(ctx context.Context) *entity.Assistant {
+	assistantEntity := ctx.Value(consts.AuthAssistantShareMiddlewareKey)
+
+	return assistantEntity.(*entity.Assistant)
+}

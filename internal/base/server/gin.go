@@ -41,6 +41,7 @@ func NewHTTPServer(
 
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(middleware.GinLogger.GinLogger)
 
 	return &HttpServer{
 		Gin:           r,
@@ -65,7 +66,6 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 	hs.AllowAllCors()
 
 	rootGroup := hs.Gin.Group("")
-	rootGroup.Use(hs.middleware.GinLogger.GinLogger)
 
 	// swagger
 	hs.swaggerRouter.Register(rootGroup)
@@ -82,6 +82,12 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 	{
 		//apiV1.Use(corsMiddleWare)
 		hs.apiRouter.InitNoAuthApiRouter(apiV1NoAuth)
+	}
+
+	apiV1OpenAICompatible := rootGroup.Group("/api/openai-compatible/v1")
+	{
+		apiV1OpenAICompatible.Use(hs.middleware.AssistantTokenValidate.AssistantTokenValidate)
+		hs.apiRouter.InitOpenAICompatibleApiRouter(apiV1OpenAICompatible)
 	}
 
 	hs.Gin.NoRoute(func(ctx *gin.Context) {

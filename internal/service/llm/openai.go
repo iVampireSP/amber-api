@@ -10,21 +10,53 @@ import (
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
 	"strconv"
 	"strings"
 )
 
 // StreamChat 执行对话
-func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt string, userPublicInfo *schema.UserPublicInfo, history []*entity.ChatMessage, tools ...llms.Tool) error {
+func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
 	var historyContent []llms.MessageContent
 
-	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt))
+	var hasHumanMessage = false
 
-	for _, h := range history {
+	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
+
+	for i, h := range history {
+		// 如果第一条消息是 system
+		if i == 0 && h.Role == schema.RoleSystem {
+			var newPrompt = ""
+			if llmChat.SystemPrompt == "" {
+				newPrompt = h.Content
+			} else {
+				newPrompt = llmChat.SystemPrompt + "\n" + h.Content
+			}
+			historyContent[0] = llms.TextParts(llms.ChatMessageTypeSystem, newPrompt)
+			continue
+		}
+
+		// 检测下一条消息的 role 是否是 system 或者且和现在的相同
+		if i+1 < len(history) {
+			if history[i+1].Role == schema.RoleSystem || history[i+1].Role == schema.RoleHideSystem {
+				history[i+1].Content = history[i].Content + "\n" + history[i+1].Content
+				continue
+			}
+			//if history[i+1].Role == h.Role {
+			//	// 修改下一条消息的 content
+			//	history[i+1].Content = history[i].Content + "\n" + history[i+1].Content
+			//	continue
+			//}
+		}
+
 		switch h.Role {
 		case schema.RoleHuman:
 			//content := "[User says] " + h.Content
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+
+			if !hasHumanMessage {
+				hasHumanMessage = true
+			}
 		case schema.RoleAssistant:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
 		case schema.RoleSystem:
@@ -33,6 +65,10 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 			//content := "[System Hint]" + h.Content
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		}
+	}
+
+	if !hasHumanMessage {
+		return consts.ErrNoHumanMessage
 	}
 
 	var requestAgain = true
@@ -67,9 +103,9 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 				if !isJson {
 					var stringChunk = string(chunk)
 
-					responseChan <- &AssistantResponse{
-						State: StateChunk,
-						ChunkMessage: &ChunkMessage{
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						State: schema.StateChunk,
+						ChunkMessage: &schema.ChunkMessage{
 							Content: stringChunk,
 						},
 						Content: stringChunk,
@@ -80,10 +116,15 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 
 				return nil
 			}),
-			llms.WithTools(tools))
+			llms.WithTools(llmChat.Tools),
+			llms.WithN(llmChat.N),
+			llms.WithMaxTokens(llmChat.MaxTokens),
+			llms.WithTemperature(llmChat.Temperature),
+			llms.WithTopP(llmChat.TopP),
+			llms.WithTopK(llmChat.TopK))
 		if err != nil {
-			responseChan <- &AssistantResponse{
-				State:   StateFailed,
+			llmChat.ResponseChan <- &schema.AssistantResponse{
+				State:   schema.StateFailed,
 				Content: err.Error(),
 			}
 			return err
@@ -116,28 +157,37 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 
 			historyContent = append(historyContent, assistantResponse)
 
-			//fmt.Println("最终参数", fullArgs)
+			// 去除 fullArgs 的首尾 \n（一直检测）
+			for {
+				if fullArgs[0] == '\n' {
+					fullArgs = fullArgs[1:]
+				} else if fullArgs[len(fullArgs)-1] == '\n' {
+					fullArgs = fullArgs[:len(fullArgs)-1]
+				} else {
+					break
+				}
+			}
 
 			// 解析工具
-			var functionCallArgs FunctionCallArgs
+			var functionCallArgs schema.FunctionCallArgs
 			err = sonic.Unmarshal([]byte(fullArgs), &functionCallArgs)
 			if err != nil {
-				panic(err)
+				return err
 			}
 
 			tool, functionName, err := s.spiltFunctionName(respChoice.FuncCall.Name)
 			if err != nil {
-				responseChan <- &AssistantResponse{
-					State:      StateFailed,
+				llmChat.ResponseChan <- &schema.AssistantResponse{
+					State:      schema.StateFailed,
 					Content:    err.Error(),
 					TokenUsage: tokenUsage,
 				}
 				return err
 			}
 
-			responseChan <- &AssistantResponse{
-				State: StateToolCalling,
-				ToolCallMessage: &ToolCallMessage{
+			llmChat.ResponseChan <- &schema.AssistantResponse{
+				State: schema.StateToolCalling,
+				ToolCallMessage: &schema.ToolCallMessage{
 					ToolName:     tool.Name,
 					FunctionName: respChoice.FuncCall.Name,
 					Args:         functionCallArgs,
@@ -145,12 +195,12 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 				TokenUsage: tokenUsage,
 			}
 
-			remoteFunctionResponse, err := s.callRemoteFunction(tool, userPublicInfo, functionName, functionCallArgs)
+			remoteFunctionResponse, err := s.callRemoteFunction(tool, llmChat.UserPublicInfo, functionName, functionCallArgs)
 			if err != nil {
-				responseChan <- &AssistantResponse{
-					State:   StateToolFailed,
+				llmChat.ResponseChan <- &schema.AssistantResponse{
+					State:   schema.StateToolFailed,
 					Content: err.Error(),
-					ToolResponseMessage: &ToolResponseMessage{
+					ToolResponseMessage: &schema.ToolResponseMessage{
 						ToolName:     tool.Name,
 						FunctionName: respChoice.FuncCall.Name,
 						Content:      err.Error(),
@@ -171,9 +221,9 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 					},
 				})
 
-				responseChan <- &AssistantResponse{
-					State: StateToolResponse,
-					ToolResponseMessage: &ToolResponseMessage{
+				llmChat.ResponseChan <- &schema.AssistantResponse{
+					State: schema.StateToolResponse,
+					ToolResponseMessage: &schema.ToolResponseMessage{
 						ToolName:     tool.Name,
 						FunctionName: respChoice.FuncCall.Name,
 						Content:      remoteFunctionResponse.Content,
@@ -186,8 +236,8 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 			requestAgain = false
 		}
 
-		responseChan <- &AssistantResponse{
-			State:      StateDone,
+		llmChat.ResponseChan <- &schema.AssistantResponse{
+			State:      schema.StateDone,
 			TokenUsage: tokenUsage,
 		}
 
@@ -196,8 +246,8 @@ func (s *Service) StreamChat(responseChan chan *AssistantResponse, systemPrompt 
 		//fmt.Println("本轮历史", historyContent)
 	}
 
-	responseChan <- &AssistantResponse{
-		State: StateFinished,
+	llmChat.ResponseChan <- &schema.AssistantResponse{
+		State: schema.StateFinished,
 	}
 
 	return nil
@@ -222,7 +272,7 @@ func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, 
 	return tool, toolName, err
 }
 
-func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.UserPublicInfo, functionName string, args FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
+func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.UserPublicInfo, functionName string, args schema.FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
 	var callbackUrl = tool.Data.CallbackUrl
 
 	var toolRequest = &schema.ToolRemoteRequest{
@@ -280,8 +330,8 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.U
 	return bodyJson, errors.New(bodyJson.Content)
 }
 
-func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *TokenUsage {
-	var tokenUsage = &TokenUsage{}
+func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsage {
+	var tokenUsage = &schema.TokenUsage{}
 
 	// 如果 respChoice.GenerationInfo 中有 prompt_tokens
 	if respChoice.GenerationInfo["PromptTokens"] != nil {

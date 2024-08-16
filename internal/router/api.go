@@ -63,3 +63,7 @@ func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {
 	r.POST("/chat_public/:chat_id/messages", a.Chat.AddPublicChatMessages)
 	r.POST("/chat_public/:chat_id/clear", a.Chat.ClearPublicChatMessages)
 }
+
+func (a *Api) InitOpenAICompatibleApiRouter(r *gin.RouterGroup) {
+	r.POST("/chat/completions", a.Chat.OpenAIChatCompletion)
+}

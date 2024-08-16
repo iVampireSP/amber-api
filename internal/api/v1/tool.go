@@ -77,7 +77,6 @@ func (t *ToolController) CreateTool(c *gin.Context) {
 		return
 	}
 
-	// create
 	toolEntity, err := t.toolService.CreateTool(c, &req, t.authService.GetUserId(c))
 	if err != nil {
 		response.Error(err).Send()

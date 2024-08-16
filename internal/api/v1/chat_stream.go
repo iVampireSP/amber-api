@@ -13,6 +13,8 @@ import (
 	"strconv"
 )
 
+const HeaderUserIp = "X-User-IP"
+
 // Stream godoc
 // @Summary      流式传输聊天内容
 // @Description  get string by ID
@@ -261,19 +263,37 @@ func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, 
 		prompt = assistant.Prompt
 	} else {
 		prompt = `
-Your name: ` + assistant.Name + `current user give you` + `
+Your(assistant) name: ` + assistant.Name + `(current user give you)` + `
 Your description: ` + assistant.Description + "(current user given)"
 		if user != nil {
 			prompt += `
-Username: ` + user.Name + `(system hint you this)` + `
-UserId: ` + user.Id + "(system hint you this, user can't change it)"
+Username: ` + user.Name + `(system hint you)` + `
+UserId: ` + user.Id + "(system hint you, user can't change it)"
 		}
 
-		var clientIP = c.ClientIP()
-		var ip = net.ParseIP(clientIP)
-		// 如果是内部 IP
-		if !ip.IsLoopback() && !ip.IsPrivate() {
-			prompt += `Visitor IP: ` + clientIP
+		var clientIP = ""
+
+		// 如果 header 里面有 HeaderUserIp
+		if c.GetHeader(HeaderUserIp) != "" {
+			var headerIP = c.GetHeader(HeaderUserIp)
+			var ip = net.ParseIP(headerIP)
+			if ip != nil && !ip.IsLoopback() && !ip.IsPrivate() {
+				clientIP = headerIP
+			}
+		}
+
+		if clientIP == "" {
+			var cIP = c.ClientIP()
+			var ip = net.ParseIP(cIP)
+			// 如果是内部 IP
+			if ip != nil && !ip.IsLoopback() && !ip.IsPrivate() {
+				clientIP = ip.String()
+			}
+		}
+
+		if clientIP != "" {
+			prompt += `
+The user(who is using this assistant) IP address is: ` + clientIP
 		}
 
 		if assistant.Prompt != "" {

@@ -242,6 +242,65 @@ definitions:
     - assistant_token
     - guest_id
     type: object
+  rag-new_internal_schema.OpenAIChatCompletionRequest:
+    properties:
+      max_tokens:
+        description: Optional
+        type: integer
+      messages:
+        description: Required
+        items:
+          $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage'
+        type: array
+      model:
+        description: Required
+        type: string
+      "n":
+        description: Optional
+        type: integer
+      stream:
+        description: Optional
+        type: boolean
+      temperature:
+        description: Optional
+        type: number
+      top_p:
+        description: Optional
+        type: number
+    type: object
+  rag-new_internal_schema.OpenAIChatCompletionRequestMessage:
+    properties:
+      content:
+        description: Required
+        type: string
+      role:
+        description: Required
+        type: string
+    type: object
+  rag-new_internal_schema.OpenAIChatCompletionResponse:
+    properties:
+      choices:
+        items:
+          $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponseChoice'
+        type: array
+      created:
+        type: integer
+      id:
+        type: string
+      model:
+        type: string
+      object:
+        type: string
+      usage:
+        $ref: '#/definitions/rag-new_internal_schema.TokenUsage'
+    type: object
+  rag-new_internal_schema.OpenAIChatCompletionResponseChoice:
+    properties:
+      index:
+        type: integer
+      message:
+        $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage'
+    type: object
   rag-new_internal_schema.ResponseBody:
     properties:
       data: {}
@@ -251,6 +310,15 @@ definitions:
         type: string
       success:
         type: boolean
+    type: object
+  rag-new_internal_schema.TokenUsage:
+    properties:
+      completion_tokens:
+        type: integer
+      prompt_tokens:
+        type: integer
+      total_tokens:
+        type: integer
     type: object
   rag-new_internal_schema.ToolCreateRequest:
     properties:
@@ -347,6 +415,43 @@ info:
   title: Leaflow Amber
   version: "1.0"
 paths:
+  /api/openai-compatible/v1/chat/completions:
+    post:
+      consumes:
+      - application/json
+      description: 兼容 OpenAI Chat Completion 接口，认证需要使用 Assistant Share Token
+      parameters:
+      - description: Chat
+        in: body
+        name: chat
+        required: true
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: OpenAI Chat Completion
+      tags:
+      - chat
   /api/v1/assistants:
     get:
       consumes:

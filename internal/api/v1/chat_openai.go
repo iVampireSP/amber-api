@@ -19,6 +19,7 @@ import (
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
+// @Param 	     X-User-IP  header  string  false  "指定聊天中的用户 IP 地址，不指定则自动获取。此 IP 地址只会增加至 Prompt 中，如果不希望增加，请关闭系统自带 Prompt 选项"
 // @Param        chat  body  	schema.OpenAIChatCompletionRequest  true  "Chat"
 // @Success      200  {object}  schema.ResponseBody{data=schema.OpenAIChatCompletionResponse}
 // @Failure      400  {object}  schema.ResponseBody

@@ -273,7 +273,15 @@ func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, 
 }
 
 func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.UserPublicInfo, functionName string, args schema.FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
-	var callbackUrl = tool.Data.CallbackUrl
+	if !s.config.Debug.Enabled {
+		internalAddress, err := s.ToolService.IsAllowed(tool.Data.CallbackUrl)
+		if err != nil {
+			return nil, err
+		}
+		if internalAddress {
+			return nil, consts.ErrToolAddressIsInternal
+		}
+	}
 
 	var toolRequest = &schema.ToolRemoteRequest{
 		FunctionName: functionName,
@@ -290,7 +298,7 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.U
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", callbackUrl, bytes.NewBuffer(toolRequestJson))
+	req, err := http.NewRequest("POST", tool.Data.CallbackUrl, bytes.NewBuffer(toolRequestJson))
 	if err != nil {
 		return nil, err
 	}

@@ -3,10 +3,13 @@ package tool
 import (
 	"context"
 	"io"
+	"net"
 	"net/http"
+	url2 "net/url"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 
@@ -24,6 +27,16 @@ func (s *Service) ListToolFromUserId(ctx context.Context, userId schema.UserId) 
 }
 
 func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest, userId schema.UserId) (*entity.Tool, error) {
+	if !s.config.Debug.Enabled {
+		internalAddress, err := s.IsAllowed(tool.Url)
+		if err != nil {
+			return nil, err
+		}
+		if internalAddress {
+			return nil, consts.ErrToolAddressIsInternal
+		}
+	}
+
 	var toolEntity entity.Tool
 
 	toolEntity.UserId = userId
@@ -43,6 +56,16 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 		return nil, err
 	}
 
+	if !s.config.Debug.Enabled {
+		internalAddress, err := s.IsAllowed(toolData.CallbackUrl)
+		if err != nil {
+			return nil, err
+		}
+		if internalAddress {
+			return nil, consts.ErrToolAddressIsInternal
+		}
+	}
+
 	_, err = s.x.Context(ctx).Insert(&toolEntity)
 	toolData.ToolId = toolEntity.Id
 	toolEntity.Data = *toolData.Output()
@@ -53,6 +76,24 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 }
 
 func (s *Service) UpdateToolData(ctx context.Context, tool *entity.Tool) error {
+	if !s.config.Debug.Enabled {
+		internalAddress, err := s.IsAllowed(tool.DiscoveryUrl)
+		if err != nil {
+			return err
+		}
+		if internalAddress {
+			return consts.ErrToolAddressIsInternal
+		}
+
+		internalAddress, err = s.IsAllowed(tool.Data.CallbackUrl)
+		if err != nil {
+			return err
+		}
+		if internalAddress {
+			return consts.ErrToolAddressIsInternal
+		}
+	}
+
 	toolData, err := s.getToolData(tool.DiscoveryUrl)
 
 	if err != nil {
@@ -143,4 +184,32 @@ func (s *Service) ValidateSyntax(toolDiscoveryOutput *schema.ToolDiscoveryInput)
 	var validate = validator.New()
 	err := validate.Struct(toolDiscoveryOutput)
 	return err
+}
+
+// IsAllowed 检测是否允许使用此 URL
+func (s *Service) IsAllowed(url string) (bool, error) {
+	urlParse, err := url2.Parse(url)
+	if err != nil {
+		return false, err
+	}
+
+	host := urlParse.Hostname()
+
+	// 如果在集群内
+	if strings.HasSuffix(host, "cluster.local") || strings.HasSuffix(host, ".svc") {
+		return true, nil
+	}
+
+	ips, err := net.LookupIP(host)
+	if err != nil || len(ips) == 0 {
+		return false, err
+	}
+
+	for _, ip := range ips {
+		if ip.IsLoopback() || ip.IsPrivate() {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

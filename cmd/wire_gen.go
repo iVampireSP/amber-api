@@ -40,7 +40,7 @@ func CreateApp() (*base.Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	toolService := tool.NewService(engine)
+	toolService := tool.NewService(engine, config)
 	toolController := v1.NewToolController(toolService, authService)
 	assistantService := assistant.NewService(engine)
 	chat_messageService := chat_message.NewService(engine)

@@ -13,6 +13,7 @@ type Service struct {
 	Logger           *logger.Logger
 	AssistantService *assistant.Service
 	ToolService      *tool.Service
+	config           *conf.Config
 }
 
 func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assistant.Service, toolService *tool.Service) *Service {
@@ -26,5 +27,5 @@ func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assist
 		panic(err)
 	}
 
-	return &Service{llm, logger, assistantService, toolService}
+	return &Service{llm, logger, assistantService, toolService, config}
 }

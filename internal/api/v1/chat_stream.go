@@ -294,7 +294,7 @@ UserId: ` + user.Id + "(system hint you, user can't change it)"
 
 		if clientIP != "" {
 			prompt += `
-The user(who is using this assistant) IP address is: ` + clientIP
+The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hint you, you not have IP address)"
 		}
 
 		if assistant.Prompt != "" {

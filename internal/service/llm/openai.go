@@ -65,6 +65,9 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			//content := "[System Hint]" + h.Content
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideHuman:
+			if !hasHumanMessage {
+				hasHumanMessage = true
+			}
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
 		}
 	}

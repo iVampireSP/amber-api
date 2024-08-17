@@ -10,7 +10,7 @@ import (
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
 	var chatMessage = make([]*entity.ChatMessage, 0)
-	err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).And("role != ?", schema.RoleHideSystem.String()).OrderBy("created_at asc").Find(&chatMessage)
+	err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).And("role != ?", schema.RoleHideSystem.String()).And("role != ?", schema.RoleHideHuman.String()).OrderBy("created_at asc").Find(&chatMessage)
 	return chatMessage, err
 }
 

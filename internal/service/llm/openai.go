@@ -15,6 +15,16 @@ import (
 	"strings"
 )
 
+// 强制停止（如果连续函数调用超过 4 次，则强制停止输出）
+const forceStopCount = 4
+
+// 警告次数（如果 LLM 连续调用超过 2次，则警告输出）
+const warningCount = 2
+
+// 警告 LLM 调用太多次工具， 要求停止
+const warningMessage = "[Warning]You are attempting to call the tool/function repeatedly, please use the tool/function properly. If you continue to call repeatedly, the chat will be forcibly terminated."
+const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the tool/function many times, and the chat has been forcibly terminated."
+
 // StreamChat 执行对话
 func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
 	var historyContent []llms.MessageContent
@@ -79,6 +89,8 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 
 	// 是否再次请求
 	var requestAgain = true
+	// 连续的函数调用次数
+	var functionCallCount = 0
 
 	for {
 		var fullResponse [][]byte
@@ -92,6 +104,15 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 
 		// 标记不再请求，因为默认情况是不需要调用工具的。如果需要调用工具并等待工具回应，则需要设置为 true
 		requestAgain = false
+
+		// 计算工具调用次数
+		if functionCallCount >= forceStopCount {
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, forceStopSystemMessage))
+			continue
+		} else if functionCallCount >= warningCount {
+			// 添加 system 消息
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, warningMessage))
+		}
 
 		resp, err := s.OpenAI.GenerateContent(ctx,
 			historyContent,
@@ -141,6 +162,9 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 		if respChoice.FuncCall != nil {
 			// 检测到工具调用，标记为需要再次请求
 			requestAgain = true
+
+			// 将计数器加一次
+			functionCallCount += 1
 
 			// 拼接完整参数
 			var fullArgs = ""
@@ -237,9 +261,12 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			if remoteFunctionResponse.StopGeneration {
 				requestAgain = false
 			}
+
 		} else {
 			// 不是工具调用，不再进行新的一轮请求
 			requestAgain = false
+			// 清空计数器
+			functionCallCount = 0
 		}
 
 		llmChat.ResponseChan <- &schema.AssistantResponse{

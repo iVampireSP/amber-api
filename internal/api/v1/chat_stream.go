@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -11,6 +10,7 @@ import (
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
 	"strconv"
+	"time"
 )
 
 const HeaderUserIp = "X-User-IP"
@@ -263,7 +263,10 @@ func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, 
 	if assistant.DisableDefaultPrompt {
 		prompt = assistant.Prompt
 	} else {
+		var currentTime = time.Now().Format("2006-01-02 15:04:05")
 		prompt = `
+Time: ` + currentTime + `
+Your(assistant) name: ` + assistant.Name + `(current user give you)` + `
 Your(assistant) name: ` + assistant.Name + `(current user give you)` + `
 Your description: ` + assistant.Description + "(current user given)"
 		if user != nil {
@@ -301,8 +304,6 @@ The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hin
 			prompt += "\n" + assistant.Prompt
 		}
 	}
-
-	fmt.Println(prompt)
 
 	return prompt
 }

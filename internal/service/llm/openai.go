@@ -67,10 +67,12 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 		}
 	}
 
+	// 如果整个对话里面没有 Human 消息，则不能继续
 	if !hasHumanMessage {
 		return consts.ErrNoHumanMessage
 	}
 
+	// 是否再次请求
 	var requestAgain = true
 
 	for {
@@ -83,10 +85,8 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			break
 		}
 
+		// 标记不再请求，因为默认情况是不需要调用工具的。如果需要调用工具并等待工具回应，则需要设置为 true
 		requestAgain = false
-		var isToolCall = false
-
-		//fmt.Println("对话历史", historyContent)
 
 		resp, err := s.OpenAI.GenerateContent(ctx,
 			historyContent,
@@ -98,7 +98,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 
 				//fmt.Printf("Received chunk: %s\n", chunk)
 
-				// 检测是否 json
+				// 检测是否 json，判断是否是工具调用
 				var isJson = sonic.Valid(chunk)
 				if !isJson {
 					var stringChunk = string(chunk)
@@ -134,15 +134,10 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 		tokenUsage := s.getTokenUsage(respChoice)
 
 		if respChoice.FuncCall != nil {
-			//fmt.Println("FunCall 检测到工具调用")
-
-			isToolCall = true
+			// 检测到工具调用，标记为需要再次请求
 			requestAgain = true
-		}
 
-		if isToolCall {
-			//fmt.Printf("正在调用: %v\n", respChoice.FuncCall.Name)
-
+			// 拼接完整参数
 			var fullArgs = ""
 
 			assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, respChoice.Content)
@@ -238,6 +233,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 				requestAgain = false
 			}
 		} else {
+			// 不是工具调用，不再进行新的一轮请求
 			requestAgain = false
 		}
 
@@ -258,6 +254,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 	return nil
 }
 
+// spiltFunctionName 将函数名分割为 entity_toolName （entity 为 *entity.Tool，toolName 为 string）的形式
 func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, error) {
 	// 根据 _ 分割
 	var functionNames = strings.Split(functionName, "_")
@@ -277,6 +274,7 @@ func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, 
 	return tool, toolName, err
 }
 
+// callRemoteFunction 可以调用远程函数
 func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.UserPublicInfo, functionName string, args schema.FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
 	if !s.config.Debug.Enabled {
 		internalAddress, err := s.ToolService.IsAllowed(tool.Data.CallbackUrl)

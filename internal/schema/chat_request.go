@@ -13,9 +13,11 @@ type ChatGuestCreateRequest struct {
 }
 
 type ChatMessageAddRequest struct {
-	Message string `json:"message" binding:"required" validate:"max=255"`
+	Message string   `json:"message" binding:"required" validate:"max=255"`
+	Role    ChatRole `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant"`
 }
 
 type ChatMessageResponse struct {
 	StreamId string `json:"stream_id"`
+	Stream   bool   `json:"stream"`
 }

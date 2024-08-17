@@ -132,10 +132,19 @@ definitions:
         type: string
       message:
         type: string
+      role:
+        enum:
+        - user
+        - user_hide
+        - system
+        - system_hide
+        - assistant
+        type: string
     required:
     - assistant_token
     - guest_id
     - message
+    - role
     type: object
   rag-new_internal_schema.AssistantCreateRequest:
     properties:
@@ -190,11 +199,22 @@ definitions:
       message:
         maxLength: 255
         type: string
+      role:
+        enum:
+        - user
+        - user_hide
+        - system
+        - system_hide
+        - assistant
+        type: string
     required:
     - message
+    - role
     type: object
   rag-new_internal_schema.ChatMessageResponse:
     properties:
+      stream:
+        type: boolean
       stream_id:
         type: string
     type: object
@@ -421,6 +441,11 @@ paths:
       - application/json
       description: 兼容 OpenAI Chat Completion 接口，认证需要使用 Assistant Share Token
       parameters:
+      - description: 指定聊天中的用户 IP 地址，不指定则自动获取。此 IP 地址只会增加至 Prompt 中，如果不希望增加，请关闭系统自带
+          Prompt 选项
+        in: header
+        name: X-User-IP
+        type: string
       - description: Chat
         in: body
         name: chat

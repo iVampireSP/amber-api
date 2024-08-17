@@ -35,6 +35,12 @@ const docTemplate = `{
                 "summary": "OpenAI Chat Completion",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "指定聊天中的用户 IP 地址，不指定则自动获取。此 IP 地址只会增加至 Prompt 中，如果不希望增加，请关闭系统自带 Prompt 选项",
+                        "name": "X-User-IP",
+                        "in": "header"
+                    },
+                    {
                         "description": "Chat",
                         "name": "chat",
                         "in": "body",
@@ -2027,7 +2033,8 @@ const docTemplate = `{
             "required": [
                 "assistant_token",
                 "guest_id",
-                "message"
+                "message",
+                "role"
             ],
             "properties": {
                 "assistant_token": {
@@ -2038,6 +2045,16 @@ const docTemplate = `{
                 },
                 "message": {
                     "type": "string"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "user_hide",
+                        "system",
+                        "system_hide",
+                        "assistant"
+                    ]
                 }
             }
         },
@@ -2112,18 +2129,32 @@ const docTemplate = `{
         "rag-new_internal_schema.ChatMessageAddRequest": {
             "type": "object",
             "required": [
-                "message"
+                "message",
+                "role"
             ],
             "properties": {
                 "message": {
                     "type": "string",
                     "maxLength": 255
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "user_hide",
+                        "system",
+                        "system_hide",
+                        "assistant"
+                    ]
                 }
             }
         },
         "rag-new_internal_schema.ChatMessageResponse": {
             "type": "object",
             "properties": {
+                "stream": {
+                    "type": "boolean"
+                },
                 "stream_id": {
                     "type": "string"
                 }

@@ -3,9 +3,12 @@ package schema
 type ChatRole string
 
 var (
-	RoleAssistant  ChatRole = "assistant"
-	RoleHuman      ChatRole = "user"
-	RoleSystem     ChatRole = "system"
+	RoleAssistant ChatRole = "assistant"
+	RoleHuman     ChatRole = "user"
+	// RoleHideHuman 为用户隐藏消息，不会在聊天历史中显示，但是会交给 LLM 处理
+	RoleHideHuman ChatRole = "user_hide"
+	RoleSystem    ChatRole = "system"
+	// RoleHideSystem 为系统隐藏消息，不会在聊天历史中显示，但是会交给 LLM 处理
 	RoleHideSystem ChatRole = "system_hide"
 )
 

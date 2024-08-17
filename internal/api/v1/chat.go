@@ -278,6 +278,13 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		return
 	}
 
+	var needStream = true
+	// 如果不是 human 或者 hide_human，则不需要回复
+	if request.Role != schema.RoleHuman && request.Role != schema.RoleHideHuman {
+		// 不需要生成 ID,直接添加
+		needStream = false
+	}
+
 	chatEntity, err := u.chatService.GetChat(c, int64(chatId))
 	if err != nil || chatEntity.UserId != u.authService.GetUserId(c) {
 		if errors.Is(err, consts.ErrChatNotFound) {
@@ -328,7 +335,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id
 	chatMessage.Content = request.Message
-	chatMessage.Role = schema.RoleHuman
+	chatMessage.Role = request.Role
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {
@@ -336,12 +343,15 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		return
 	}
 
-	randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
+	chatMessageResponse.Stream = needStream
+	if needStream {
+		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+		chatMessageResponse.StreamId = randomStreamId
 	}
-	chatMessageResponse.StreamId = randomStreamId
 
 	response.Status(http.StatusOK).Data(chatMessageResponse).Send()
 }

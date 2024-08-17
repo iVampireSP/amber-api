@@ -188,7 +188,14 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 
 	var chatIdStr = fmt.Sprintf("%d", chatEntity.Id)
 
-	// 检测 chat 是否存在缓存
+	var needStream = true
+	// 如果不是 human 或者 hide_human，则不需要回复
+	if addPublicChatMessageRequest.Role != schema.RoleHuman && addPublicChatMessageRequest.Role != schema.RoleHideHuman {
+		// 不需要生成 ID,直接添加
+		needStream = false
+	}
+
+	// 检测 chat 是否存在缓存，用于判断是否已经打开了对话
 	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatIdStr))
 	result, err := cmd.Result()
 	if err != nil {
@@ -198,26 +205,30 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 			return
 		}
 	} else {
+		// 如果存在，则说明用户没有打开对话，直接返回错误
 		chatMessageResponse.StreamId = result
 
 		response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpen).Data(chatMessageResponse).Send()
 		return
 	}
 
-	// last chat message
+	// 用户打开了会话且没有正在输出的情况，获取最后一条消息
 	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
 
+	// 生成访客信息
 	var publicUser = &schema.UserPublicInfo{
 		Name:      "Guest",
 		Id:        addPublicChatMessageRequest.GuestId,
 		ChatOwner: schema.OwnerUser,
 	}
 
+	// 检测角色是否是 human
 	if lastChatMessage.Role == schema.RoleHuman {
+		// 如果两个消息都是 human，则丢弃上一条消息，修改上一条消息的内容
 		lastChatMessage.Content = addPublicChatMessageRequest.Message
 		err := u.cm.UpdateMessageContent(c, lastChatMessage)
 		if err != nil {
@@ -240,7 +251,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id
 	chatMessage.Content = addPublicChatMessageRequest.Message
-	chatMessage.Role = schema.RoleHuman
+	chatMessage.Role = addPublicChatMessageRequest.Role
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {
@@ -248,12 +259,16 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		return
 	}
 
-	randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
+	// 如果需要流式输出的情况
+	chatMessageResponse.Stream = needStream
+	if needStream {
+		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+		chatMessageResponse.StreamId = randomStreamId
 	}
-	chatMessageResponse.StreamId = randomStreamId
 
 	response.Status(http.StatusOK).Data(chatMessageResponse).Send()
 }

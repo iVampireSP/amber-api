@@ -25,7 +25,8 @@ type GetPublicChatMessageRequest struct {
 }
 
 type AddPublicChatMessageRequest struct {
-	AssistantToken string `json:"assistant_token" binding:"required"`
-	GuestId        string `json:"guest_id" binding:"required"`
-	Message        string `json:"message" binding:"required"`
+	AssistantToken string   `json:"assistant_token" binding:"required"`
+	GuestId        string   `json:"guest_id" binding:"required"`
+	Message        string   `json:"message" binding:"required"`
+	Role           ChatRole `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant"`
 }

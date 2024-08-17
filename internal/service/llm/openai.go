@@ -195,6 +195,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 				TokenUsage: tokenUsage,
 			}
 
+			// 调用远程函数
 			remoteFunctionResponse, err := s.callRemoteFunction(tool, llmChat.UserPublicInfo, functionName, functionCallArgs)
 			if err != nil {
 				llmChat.ResponseChan <- &schema.AssistantResponse{
@@ -209,29 +210,33 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 				}
 				return err
 				//remoteFunctionResponse.Content = err.Error()
-			} else {
-				historyContent = append(historyContent, llms.MessageContent{
-					Role: llms.ChatMessageTypeTool,
-					Parts: []llms.ContentPart{
-						llms.ToolCallResponse{
-							ToolCallID: respChoice.ToolCalls[0].ID,
-							Name:       respChoice.FuncCall.Name,
-							Content:    remoteFunctionResponse.Content,
-						},
+			}
+			historyContent = append(historyContent, llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{
+						ToolCallID: respChoice.ToolCalls[0].ID,
+						Name:       respChoice.FuncCall.Name,
+						Content:    remoteFunctionResponse.Content,
 					},
-				})
+				},
+			})
 
-				llmChat.ResponseChan <- &schema.AssistantResponse{
-					State: schema.StateToolResponse,
-					ToolResponseMessage: &schema.ToolResponseMessage{
-						ToolName:     tool.Name,
-						FunctionName: respChoice.FuncCall.Name,
-						Content:      remoteFunctionResponse.Content,
-					},
-					TokenUsage: tokenUsage,
-				}
+			llmChat.ResponseChan <- &schema.AssistantResponse{
+				State: schema.StateToolResponse,
+				ToolResponseMessage: &schema.ToolResponseMessage{
+					ToolName:       tool.Name,
+					FunctionName:   respChoice.FuncCall.Name,
+					Content:        remoteFunctionResponse.Content,
+					StopGeneration: remoteFunctionResponse.StopGeneration,
+				},
+				TokenUsage: tokenUsage,
 			}
 
+			// 如果函数要求停止生成
+			if remoteFunctionResponse.StopGeneration {
+				requestAgain = false
+			}
 		} else {
 			requestAgain = false
 		}

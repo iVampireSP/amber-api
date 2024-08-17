@@ -29,9 +29,10 @@ type ToolCallMessage struct {
 }
 
 type ToolResponseMessage struct {
-	ToolName     string `json:"tool_name"`
-	FunctionName string `json:"function_name"`
-	Content      string `json:"content"`
+	ToolName       string `json:"tool_name"`
+	FunctionName   string `json:"function_name"`
+	StopGeneration bool   `json:"stop_generation"`
+	Content        string `json:"content"`
 }
 
 type AssistantResponse struct {

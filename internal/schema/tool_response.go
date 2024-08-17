@@ -12,6 +12,7 @@ type ToolRemoteRequest struct {
 }
 
 type ToolRemoteResponse struct {
-	Success bool   `json:"success"`
-	Content string `json:"content"`
+	Success        bool   `json:"success"`
+	StopGeneration bool   `json:"stop_generation"`
+	Content        string `json:"content"`
 }

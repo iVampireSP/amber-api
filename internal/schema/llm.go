@@ -23,16 +23,17 @@ type ChunkMessage struct {
 }
 
 type ToolCallMessage struct {
-	ToolName     string           `json:"tool_name"`
-	FunctionName string           `json:"function_name"`
-	Args         FunctionCallArgs `json:"args"`
+	ToolName     string                `json:"tool_name"`
+	FunctionName string                `json:"function_name"`
+	Arguments    FunctionCallArguments `json:"args"`
 }
 
 type ToolResponseMessage struct {
-	ToolName       string `json:"tool_name"`
-	FunctionName   string `json:"function_name"`
-	StopGeneration bool   `json:"stop_generation"`
-	Content        string `json:"content"`
+	ToolName       string                `json:"tool_name"`
+	FunctionName   string                `json:"function_name"`
+	Arguments      FunctionCallArguments `json:"arguments"`
+	StopGeneration bool                  `json:"stop_generation"`
+	Content        string                `json:"content"`
 }
 
 type AssistantResponse struct {
@@ -55,10 +56,16 @@ type FunctionChunk struct {
 	Arguments string `json:"arguments"`
 }
 
-type FunctionCallArgs map[string]interface{}
+type FunctionCallArguments map[string]interface{}
 
-func (f *FunctionCallArgs) JSON() ([]byte, error) {
+func (f *FunctionCallArguments) JSON() ([]byte, error) {
 	return sonic.Marshal(f)
+}
+
+func (f *FunctionCallArguments) String() (string, error) {
+	j, err := f.JSON()
+
+	return string(j), err
 }
 
 type LLMChat struct {

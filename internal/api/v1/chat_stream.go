@@ -193,9 +193,20 @@ func (u *ChatController) Stream(c *gin.Context) {
 		case schema.StateToolSuccess:
 			return true
 		case schema.StateToolResponse:
+			args, err := msg.ToolResponseMessage.Arguments.String()
+			if err != nil {
+				u.logger.Sugar.Error(err)
+				args = ""
+			}
+
+			var toolResponseText = `Tool/Function Call Response\nTool Name: ` + msg.ToolResponseMessage.ToolName + `\nFunction Name: ` + msg.ToolResponseMessage.FunctionName
+			toolResponseText += `\nArguments: ` + args
+			toolResponseText += `\nResponse: ` + msg.ToolResponseMessage.Content
+			toolResponseText += `\n\n`
+
 			messageList = append(messageList, entity.ChatMessage{
 				Role:    schema.RoleHideSystem,
-				Content: msg.ToolResponseMessage.Content,
+				Content: toolResponseText,
 				ChatId:  chatEntity.Id,
 			})
 

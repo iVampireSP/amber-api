@@ -72,7 +72,6 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 		case schema.RoleSystem:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideSystem:
-			//content := "[System Hint]" + h.Content
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideHuman:
 			if !hasHumanMessage {
@@ -193,7 +192,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			}
 
 			// 解析工具
-			var functionCallArgs schema.FunctionCallArgs
+			var functionCallArgs schema.FunctionCallArguments
 			err = sonic.Unmarshal([]byte(fullArgs), &functionCallArgs)
 			if err != nil {
 				return err
@@ -214,7 +213,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 				ToolCallMessage: &schema.ToolCallMessage{
 					ToolName:     tool.Name,
 					FunctionName: respChoice.FuncCall.Name,
-					Args:         functionCallArgs,
+					Arguments:    functionCallArgs,
 				},
 				TokenUsage: tokenUsage,
 			}
@@ -307,7 +306,7 @@ func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, 
 }
 
 // callRemoteFunction 可以调用远程函数
-func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.UserPublicInfo, functionName string, args schema.FunctionCallArgs) (*schema.ToolRemoteResponse, error) {
+func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.UserPublicInfo, functionName string, args schema.FunctionCallArguments) (*schema.ToolRemoteResponse, error) {
 	if !s.config.Debug.Enabled {
 		internalAddress, err := s.ToolService.IsAllowed(tool.Data.CallbackUrl)
 		if err != nil {

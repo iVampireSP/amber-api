@@ -1,8 +1,8 @@
 package entity
 
 import (
+	"database/sql"
 	"rag-new/internal/schema"
-	"time"
 )
 
 type Chat struct {
@@ -10,7 +10,7 @@ type Chat struct {
 	Name        string           `xorm:"varchar(255) notnull" json:"name"`
 	AssistantId int64            `xorm:"varchar(255) notnull" json:"assistant_id"`
 	UserId      schema.UserId    `xorm:"user_id int(11)" json:"user_id"`
-	ExpiredAt   time.Time        `xorm:"TIMESTAMP" json:"expired_at"`
+	ExpiredAt   sql.NullTime     `xorm:"TIMESTAMP" json:"expired_at"`
 	Owner       schema.ChatOwner `xorm:"varchar(255) notnull" json:"owner"`
 	GuestId     string           `xorm:"varchar(255)" json:"guest_id"`
 }

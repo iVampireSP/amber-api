@@ -54,19 +54,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse"
                         }
                     },
                     "400": {
@@ -1942,7 +1930,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expired_at": {
-                    "type": "string"
+                    "$ref": "#/definitions/sql.NullTime"
                 },
                 "guest_id": {
                     "type": "string"
@@ -2122,7 +2110,7 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string",
-                    "maxLength": 255
+                    "maxLength": 30
                 }
             }
         },
@@ -2472,6 +2460,18 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "sql.NullTime": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
                 }
             }
         }

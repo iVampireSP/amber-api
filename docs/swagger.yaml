@@ -68,7 +68,7 @@ definitions:
       created_at:
         type: string
       expired_at:
-        type: string
+        $ref: '#/definitions/sql.NullTime'
       guest_id:
         type: string
       id:
@@ -188,7 +188,7 @@ definitions:
       assistant_id:
         type: integer
       name:
-        maxLength: 255
+        maxLength: 30
         type: string
     required:
     - assistant_id
@@ -430,6 +430,14 @@ definitions:
       type:
         type: string
     type: object
+  sql.NullTime:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
 info:
   contact: {}
   title: Leaflow Amber
@@ -458,12 +466,7 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
-            - properties:
-                data:
-                  $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse'
-              type: object
+            $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse'
         "400":
           description: Bad Request
           schema:

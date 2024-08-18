@@ -1,13 +1,13 @@
 package schema
 
 type ChatCreateRequest struct {
-	Name        string `json:"name" binding:"required" validate:"max=255"`
+	Name        string `json:"name" binding:"required" validate:"max=30"`
 	AssistantId int64  `json:"assistant_id" binding:"required"`
 	UserId      UserId `json:"user_id" swaggerignore:"true" binding:"-"`
 }
 
 type ChatGuestCreateRequest struct {
-	Name        string `json:"name" binding:"required" validate:"max=255"`
+	Name        string `json:"name" binding:"required" validate:"max=30"`
 	AssistantId int64  `json:"assistant_id" binding:"required"`
 	GuestID     string `json:"guest_id" binding:"required" validate:"max=32"`
 }

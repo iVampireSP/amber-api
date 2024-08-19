@@ -120,7 +120,7 @@ func (u *ChatController) GetPublicChatMessages(c *gin.Context) {
 		return
 	}
 
-	if chatEntity.Owner != schema.OwnerGuest || chatEntity.GuestId != &getPublicChatMessageRequest.GuestId {
+	if chatEntity.Owner != schema.OwnerGuest || (chatEntity.GuestId != nil && *chatEntity.GuestId != getPublicChatMessageRequest.GuestId) {
 		response.Status(http.StatusForbidden).Error(err).Send()
 		return
 	}
@@ -168,7 +168,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		return
 	}
 
-	if chatEntity.Owner != schema.OwnerGuest || chatEntity.GuestId != &addPublicChatMessageRequest.GuestId {
+	if chatEntity.Owner != schema.OwnerGuest || (chatEntity.GuestId != nil && *chatEntity.GuestId != addPublicChatMessageRequest.GuestId) {
 		response.Status(http.StatusForbidden).Error(err).Send()
 		return
 	}
@@ -318,7 +318,7 @@ func (u *ChatController) ClearPublicChatMessages(c *gin.Context) {
 		return
 	}
 
-	if chatEntity.Owner != schema.OwnerGuest || chatEntity.GuestId != &getPublicChatMessageRequest.GuestId {
+	if chatEntity.Owner != schema.OwnerGuest || (chatEntity.GuestId != nil && *chatEntity.GuestId != getPublicChatMessageRequest.GuestId) {
 		response.Status(http.StatusForbidden).Error(err).Send()
 		return
 	}

@@ -42,7 +42,9 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 	chat.Owner = schema.OwnerGuest
 	chat.GuestId = createGuestChatRequest.GuestID
 
-	chat.ExpiredAt.Time = time.Now().Add(time.Hour * 24)
+	var t = time.Now().Add(time.Hour * 24)
+
+	chat.ExpiredAt = &t
 
 	_, err := s.x.Context(ctx).Insert(&chat)
 

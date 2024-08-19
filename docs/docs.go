@@ -1930,7 +1930,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expired_at": {
-                    "$ref": "#/definitions/sql.NullTime"
+                    "type": "string"
                 },
                 "guest_id": {
                     "type": "string"
@@ -2460,18 +2460,6 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
-                }
-            }
-        },
-        "sql.NullTime": {
-            "type": "object",
-            "properties": {
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
                 }
             }
         }

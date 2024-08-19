@@ -3,7 +3,6 @@ package chat
 import (
 	"context"
 	"errors"
-	"fmt"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -47,8 +46,6 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 	chat.ExpiredAt = &t
 
 	_, err := s.x.Context(ctx).Insert(&chat)
-
-	fmt.Println(chat.Id)
 
 	return &chat, err
 }

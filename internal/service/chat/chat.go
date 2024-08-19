@@ -40,7 +40,7 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 	chat.Name = createGuestChatRequest.Name
 	chat.AssistantId = createGuestChatRequest.AssistantId
 	chat.Owner = schema.OwnerGuest
-	chat.GuestId = createGuestChatRequest.GuestID
+	chat.GuestId = &createGuestChatRequest.GuestID
 
 	var t = time.Now().Add(time.Hour * 24)
 

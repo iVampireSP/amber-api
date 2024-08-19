@@ -149,6 +149,13 @@ func (u *ChatController) Stream(c *gin.Context) {
 		SystemPrompt:   prompt,
 		UserPublicInfo: user,
 		Tools:          tools,
+		Chat: &schema.ChatPublicModel{
+			Name:        chatEntity.Name,
+			AssistantId: chatEntity.AssistantId,
+			ExpiredAt:   chatEntity.ExpiredAt,
+			Owner:       chatEntity.Owner,
+			GuestId:     chatEntity.GuestId,
+		},
 	}
 
 	go func() {

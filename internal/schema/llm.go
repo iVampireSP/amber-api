@@ -3,6 +3,7 @@ package schema
 import (
 	"github.com/bytedance/sonic"
 	"github.com/tmc/langchaingo/llms"
+	"time"
 )
 
 type ResponseState string
@@ -72,10 +73,19 @@ type LLMChat struct {
 	ResponseChan   chan *AssistantResponse
 	SystemPrompt   string
 	UserPublicInfo *UserPublicInfo
+	Chat           *ChatPublicModel `json:"chat"`
 	Tools          []llms.Tool
 	MaxTokens      int     `json:"max_tokens,omitempty"`
 	Temperature    float64 `json:"temperature,omitempty"`
 	TopK           int     `json:"top_k,omitempty"`
 	TopP           float64 `json:"top_p,omitempty"`
 	N              int     `json:"n,omitempty"`
+}
+
+type ChatPublicModel struct {
+	Name        string     `json:"name"`
+	AssistantId int64      `json:"assistant_id"`
+	ExpiredAt   *time.Time `json:"expired_at"`
+	Owner       ChatOwner  `json:"owner"`
+	GuestId     *string    `json:"guest_id"`
 }

@@ -219,7 +219,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			}
 
 			// 调用远程函数
-			remoteFunctionResponse, err := s.callRemoteFunction(tool, llmChat.UserPublicInfo, functionName, functionCallArgs)
+			remoteFunctionResponse, err := s.callRemoteFunction(tool, llmChat, functionName, functionCallArgs)
 			if err != nil {
 				llmChat.ResponseChan <- &schema.AssistantResponse{
 					State:   schema.StateToolFailed,
@@ -306,7 +306,7 @@ func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, 
 }
 
 // callRemoteFunction 可以调用远程函数
-func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.UserPublicInfo, functionName string, args schema.FunctionCallArguments) (*schema.ToolRemoteResponse, error) {
+func (s *Service) callRemoteFunction(tool *entity.Tool, llmChat *schema.LLMChat, functionName string, args schema.FunctionCallArguments) (*schema.ToolRemoteResponse, error) {
 	if !s.config.Debug.Enabled {
 		internalAddress, err := s.ToolService.IsAllowed(tool.Data.CallbackUrl)
 		if err != nil {
@@ -320,11 +320,11 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.U
 	var toolRequest = &schema.ToolRemoteRequest{
 		FunctionName: functionName,
 		Parameters:   args,
-		ApiKey:       tool.ApiKey,
+		Chat:         llmChat.Chat,
 	}
 
-	if userPublicInfo != nil {
-		toolRequest.User = userPublicInfo
+	if llmChat.UserPublicInfo != nil {
+		toolRequest.User = llmChat.UserPublicInfo
 	}
 
 	toolRequestJson, err := sonic.Marshal(toolRequest)
@@ -338,7 +338,9 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, userPublicInfo *schema.U
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+toolRequest.ApiKey)
+	if tool.ApiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+tool.ApiKey)
+	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

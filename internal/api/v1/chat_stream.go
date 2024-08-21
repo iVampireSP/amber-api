@@ -148,6 +148,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		ResponseChan:   llmResponseChan,
 		SystemPrompt:   prompt,
 		UserPublicInfo: user,
+		MaxTokens:      u.config.LLM.MaxTokens,
 		Tools:          tools,
 		Chat: &schema.ChatPublicModel{
 			Name:        chatEntity.Name,

@@ -19,6 +19,8 @@ type Config struct {
 	Metrics *Metrics `yaml:"metrics"`
 
 	OpenAI *OpenAI `yaml:"openai"`
+
+	LLM *LLM `yaml:"llm"`
 }
 
 type Http struct {
@@ -59,6 +61,13 @@ type OpenAI struct {
 	ApiKey  string `yaml:"api_key" mapstructure:"api_key"`
 	BaseUrl string `yaml:"api_base" mapstructure:"base_url"`
 	Model   string `yaml:"model" mapstructure:"model"`
+}
+
+type LLM struct {
+	MaxTokens int `yaml:"max_tokens"`
+	//Temperature float64 `yaml:"temperature"`
+	//TopP float64 `yaml:"top_p"`
+	//N int `yaml:"n"`
 }
 
 func CreateConfigIfNotExists() {

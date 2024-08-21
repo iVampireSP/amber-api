@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"net/http"
+	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
 	"rag-new/internal/entity"
 	_ "rag-new/internal/entity"
@@ -33,11 +34,12 @@ type ChatController struct {
 	logger           *logger.Logger
 	assistantService *assistant.Service
 	cm               *chat_message.Service
+	config           *conf.Config
 }
 
 func NewChatController(authService *auth.Service,
-	chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger, assistantService *assistant.Service, chatMessageService *chat_message.Service) *ChatController {
-	return &ChatController{authService, chatService, redis, llmService, logger, assistantService, chatMessageService}
+	chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger, assistantService *assistant.Service, chatMessageService *chat_message.Service, config *conf.Config) *ChatController {
+	return &ChatController{authService, chatService, redis, llmService, logger, assistantService, chatMessageService, config}
 }
 
 // List godoc

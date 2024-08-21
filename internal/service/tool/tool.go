@@ -183,6 +183,7 @@ func (s *Service) Exists(ctx context.Context, id int64) (bool, error) {
 func (s *Service) ValidateSyntax(toolDiscoveryOutput *schema.ToolDiscoveryInput) error {
 	var validate = validator.New()
 	err := validate.Struct(toolDiscoveryOutput)
+
 	return err
 }
 

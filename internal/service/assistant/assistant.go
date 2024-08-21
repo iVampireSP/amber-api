@@ -84,7 +84,7 @@ func (s *Service) ToLLMTool(ctx context.Context, assistant *entity.Assistant) ([
 		}
 
 		for _, v := range fnData.ToolFunctions {
-			for _, j := range v.Function {
+			for _, j := range v.Functions {
 				llmTool.Function = &llms.FunctionDefinition{
 					Name:        j.Name,
 					Description: j.Description,

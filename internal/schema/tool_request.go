@@ -16,20 +16,18 @@ type ToolUpdateRequest struct {
 }
 
 type ToolDiscoveryInput struct {
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description"  validate:"required"`
-	HomepageUrl string `json:"homepage_url" validate:"url"`
-	CallbackUrl string `json:"callback_url" validate:"url"`
-	ToolId      int64  `json:"-"`
-	Functions   []struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		Parameters  struct {
-			Type       string      `json:"type,omitempty"`
-			Properties interface{} `json:"properties,omitempty"`
-		} `json:"parameters"  validate:"required min=1"`
-		Required []string `json:"required,omitempty" validate:"required"`
-	} `json:"functions"`
+	Name        string            `json:"name" validate:"required"`
+	Description string            `json:"description"  validate:"required"`
+	HomepageUrl string            `json:"homepage_url" validate:"url"`
+	CallbackUrl string            `json:"callback_url" validate:"url"`
+	ToolId      int64             `json:"-"`
+	Functions   []*FunctionsInput `json:"functions"`
+}
+
+type FunctionsInput struct {
+	Name        string                                `json:"name" validate:"required"`
+	Description string                                `json:"description" validate:"required"`
+	Parameters  ToolDiscoveryOutputFunctionParameters `json:"parameters" validate:"required"`
 }
 
 func (td *ToolDiscoveryInput) Output() *ToolDiscoveryOutput {
@@ -41,22 +39,22 @@ func (td *ToolDiscoveryInput) Output() *ToolDiscoveryOutput {
 	output.HomepageUrl = td.HomepageUrl
 	output.CallbackUrl = td.CallbackUrl
 
-	// foreach
 	for _, v := range td.Functions {
+		// 容忍处理，OpenAI 官方不允许 required 为 null 或缺失的情况。
+		// 本程序如果检测到了这种情况，将 required 设置为 []
 		var requires = make([]string, 0)
 
-		if len(v.Required) > 0 {
-			requires = v.Required
+		if len(v.Parameters.Required) == 0 {
+			v.Parameters.Required = requires
 		}
 
 		outputFunctions = append(outputFunctions, ToolDiscoveryOutputFunctions{
 			Type: "function",
-			Function: []ToolDiscoveryOutputFunction{
+			Functions: []*ToolDiscoveryOutputFunction{
 				{
 					Name:        strconv.Itoa(int(td.ToolId)) + "_" + v.Name,
 					Description: v.Description,
 					Parameters:  v.Parameters,
-					Required:    requires,
 				},
 			},
 		})
@@ -75,14 +73,19 @@ type ToolDiscoveryOutput struct {
 	ToolFunctions []ToolDiscoveryOutputFunctions `json:"function"`
 }
 type ToolDiscoveryOutputFunctions struct {
-	Type     string `json:"type"`
-	Function []ToolDiscoveryOutputFunction
+	Type      string                         `json:"type"`
+	Functions []*ToolDiscoveryOutputFunction `json:"functions"`
 }
 type ToolDiscoveryOutputFunction struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Parameters  interface{} `json:"parameters"`
-	Required    []string    `json:"required"`
+	Name        string                                `json:"name"`
+	Description string                                `json:"description"`
+	Parameters  ToolDiscoveryOutputFunctionParameters `json:"parameters"`
+}
+
+type ToolDiscoveryOutputFunctionParameters struct {
+	Type       string      `json:"type,omitempty" validate:"required"`
+	Properties interface{} `json:"properties" validate:"required"`
+	Required   []string    `json:"required" validate:"required"`
 }
 
 func (td *ToolDiscoveryOutput) FromDB(data []byte) error {

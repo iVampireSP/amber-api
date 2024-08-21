@@ -2,31 +2,37 @@ package builtin_tool
 
 import (
 	"context"
-	"github.com/tmc/langchaingo/jsonschema"
+	"errors"
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/schema"
 )
 
-var PREFIX = "builtin_"
 var NAME = "builtin"
 
 var tools = []llms.Tool{
-	{
-		Type: "function",
-		Function: &llms.FunctionDefinition{
-			Name:        "now",
-			Description: "Get the server time using server's timezone(not users)",
-			Parameters:  jsonschema.Definition{},
-		},
-	},
+	//{
+	//	Type: "function",
+	//	Function: &llms.FunctionDefinition{
+	//		Name:        prefix("now"),
+	//		Description: "Get the server time using server's timezone(not users)",
+	//		Parameters: jsonschema.Definition{
+	//			Type: jsonschema.Object,
+	//			Properties: map[string]jsonschema.Definition{
+	//				"rationale": {
+	//					Type:        jsonschema.String,
+	//					Description: "The rationale for choosing this function call with these parameters",
+	//				},
+	//			},
+	//		},
+	//	},
+	//},
+}
+
+func prefix(name string) string {
+	return NAME + "_" + name
 }
 
 func (s *Service) GetTools() []llms.Tool {
-	// 为每个 function name 加上 prefix
-	for i := range tools {
-		tools[i].Function.Name = PREFIX + tools[i].Function.Name
-	}
-
 	return tools
 }
 
@@ -35,6 +41,8 @@ func (s *Service) CallFunction(ctx context.Context, functionName string, args sc
 	switch functionName {
 	case "now":
 		response.Content = s.GetCurrentTime()
+	default:
+		return nil, errors.New("function not found")
 	}
 
 	return response, nil
@@ -44,7 +52,7 @@ func (s *Service) CallFunction(ctx context.Context, functionName string, args sc
 func (*Service) Exists(functionName string, withPrefix bool) bool {
 	for _, tool := range tools {
 		if withPrefix {
-			if PREFIX+tool.Function.Name == functionName {
+			if NAME+"_"+tool.Function.Name == functionName {
 				return true
 			}
 		} else {

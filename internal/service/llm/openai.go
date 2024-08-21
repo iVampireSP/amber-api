@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/tmc/langchaingo/llms"
 	"io"
@@ -258,10 +259,6 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 	return nil
 }
 
-func (s *Service) isBuiltInFunction(functionName string) bool {
-	return strings.HasPrefix(functionName, builtin_tool.PREFIX)
-}
-
 // spiltFunctionName 将函数名分割为 entity_toolName （entity 为 *entity.Tool，toolName 为 string）的形式
 func (s *Service) spiltFunctionName(functionName string) (prefix string, realFunctionName string) {
 	// 根据 _ 分割
@@ -269,12 +266,6 @@ func (s *Service) spiltFunctionName(functionName string) (prefix string, realFun
 
 	// 从第 1 个开始取到最后一个
 	var toolName = strings.Join(functionNames[1:], "_")
-
-	//// 第一个是 id
-	//toolId, err := strconv.Atoi(functionNames[0])
-	//if err != nil {
-	//	return toolName, err
-	//}
 
 	return functionNames[0], toolName
 }
@@ -442,6 +433,12 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 }
 
 func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, llmTools []llms.Tool, historyContent []llms.MessageContent) (response *llms.ContentResponse, err error) {
+	j, err := sonic.MarshalString(llmTools)
+	if err != nil {
+		return
+	}
+	fmt.Printf("llmTools: %s\n", j)
+
 	resp, err := s.OpenAI.GenerateContent(ctx,
 		historyContent,
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {

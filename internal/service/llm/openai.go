@@ -222,7 +222,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 
 			var toolRemoteResponse = &schema.ToolRemoteResponse{}
 			var toolName = ""
-			if prefix == builtin_tool.PREFIX {
+			if prefix == builtin_tool.NAME {
 				// 是 builtin
 				// 调用内置函数
 				toolRemoteResponse, err = s.BuiltInTools.CallFunction(ctx, functionName, functionCallArgs)
@@ -268,6 +268,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 						State:   schema.StateToolFailed,
 						Content: err.Error(),
 						ToolResponseMessage: &schema.ToolResponseMessage{
+							ToolName:     toolName,
 							FunctionName: respChoice.FuncCall.Name,
 							Content:      err.Error(),
 						},
@@ -285,6 +286,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 						State:   schema.StateToolFailed,
 						Content: err.Error(),
 						ToolResponseMessage: &schema.ToolResponseMessage{
+							ToolName:     toolName,
 							FunctionName: respChoice.FuncCall.Name,
 							Content:      err.Error(),
 						},
@@ -366,7 +368,7 @@ func (s *Service) spiltFunctionName(functionName string) (prefix string, realFun
 	//	return toolName, err
 	//}
 
-	return functionNames[0] + "_", toolName
+	return functionNames[0], toolName
 }
 
 func (s *Service) GetToolById(ctx context.Context, id int64) (*entity.Tool, error) {

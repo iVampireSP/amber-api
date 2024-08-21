@@ -28,63 +28,9 @@ const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the
 
 // StreamChat 执行对话
 func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
-	var historyContent []llms.MessageContent
-
-	var hasHumanMessage = false
-
-	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
-
-	for i, h := range history {
-		// 如果第一条消息是 system
-		if i == 0 && h.Role == schema.RoleSystem {
-			var newPrompt = ""
-			if llmChat.SystemPrompt == "" {
-				newPrompt = h.Content
-			} else {
-				newPrompt = llmChat.SystemPrompt + "\n" + h.Content
-			}
-			historyContent[0] = llms.TextParts(llms.ChatMessageTypeSystem, newPrompt)
-			continue
-		}
-
-		// 检测下一条消息的 role 是否是 system 或者且和现在的相同
-		if i+1 < len(history) {
-			if history[i+1].Role == schema.RoleSystem || history[i+1].Role == schema.RoleHideSystem {
-				history[i+1].Content = history[i].Content + "\n" + history[i+1].Content
-				continue
-			}
-			//if history[i+1].Role == h.Role {
-			//	// 修改下一条消息的 content
-			//	history[i+1].Content = history[i].Content + "\n" + history[i+1].Content
-			//	continue
-			//}
-		}
-
-		switch h.Role {
-		case schema.RoleHuman:
-			//content := "[User says] " + h.Content
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
-
-			if !hasHumanMessage {
-				hasHumanMessage = true
-			}
-		case schema.RoleAssistant:
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
-		case schema.RoleSystem:
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
-		case schema.RoleHideSystem:
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
-		case schema.RoleHideHuman:
-			if !hasHumanMessage {
-				hasHumanMessage = true
-			}
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
-		}
-	}
-
-	// 如果整个对话里面没有 Human 消息，则不能继续
-	if !hasHumanMessage {
-		return consts.ErrNoHumanMessage
+	historyContent, err := s.processHistory(llmChat, history)
+	if err != nil {
+		return err
 	}
 
 	// 是否再次请求
@@ -93,8 +39,6 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 	var functionCallCount = 0
 
 	for {
-		var fullResponse [][]byte
-
 		ctx := context.Background()
 
 		//fmt.Println("再次请求吗?" + fmt.Sprint(requestAgain))
@@ -116,40 +60,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 
 		var llmTools = append(s.BuiltInTools.GetTools(), llmChat.Tools...)
 
-		resp, err := s.OpenAI.GenerateContent(ctx,
-			historyContent,
-			llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-				// 检测长度
-				if len(chunk) == 0 {
-					return nil
-				}
-
-				//fmt.Printf("Received chunk: %s\n", chunk)
-
-				// 检测是否 json，判断是否是工具调用
-				var isJson = sonic.Valid(chunk)
-				if !isJson {
-					var stringChunk = string(chunk)
-
-					llmChat.ResponseChan <- &schema.AssistantResponse{
-						State: schema.StateChunk,
-						ChunkMessage: &schema.ChunkMessage{
-							Content: stringChunk,
-						},
-						Content: stringChunk,
-					}
-
-					fullResponse = append(fullResponse, chunk)
-				}
-
-				return nil
-			}),
-			llms.WithTools(llmTools),
-			llms.WithN(llmChat.N),
-			llms.WithMaxTokens(llmChat.MaxTokens),
-			llms.WithTemperature(llmChat.Temperature),
-			llms.WithTopP(llmChat.TopP),
-			llms.WithTopK(llmChat.TopK))
+		resp, err := s.GenerateContent(ctx, llmChat, llmTools, historyContent)
 		if err != nil {
 			llmChat.ResponseChan <- &schema.AssistantResponse{
 				State:   schema.StateFailed,
@@ -223,8 +134,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			var toolRemoteResponse = &schema.ToolRemoteResponse{}
 			var toolName = ""
 			if prefix == builtin_tool.NAME {
-				// 是 builtin
-				// 调用内置函数
+				// 是 builtin，则调用内置函数
 				toolRemoteResponse, err = s.BuiltInTools.CallFunction(ctx, functionName, functionCallArgs)
 				toolName = builtin_tool.NAME
 				if err != nil {
@@ -293,7 +203,6 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 						TokenUsage: tokenUsage,
 					}
 					return err
-					//remoteFunctionResponse.Content = err.Error()
 				}
 			}
 
@@ -327,9 +236,8 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			}
 
 		} else {
-			// 不是工具调用，不再进行新的一轮请求
+			// 不是工具调用，不再进行新的一轮请求，然后清除计数器
 			requestAgain = false
-			// 清空计数器
 			functionCallCount = 0
 		}
 
@@ -469,4 +377,102 @@ func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsa
 	}
 
 	return tokenUsage
+}
+
+func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) ([]llms.MessageContent, error) {
+	var hasHumanMessage = false
+
+	var historyContent []llms.MessageContent
+	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
+
+	for i, h := range history {
+		// 如果第一条消息是 system
+		if i == 0 && h.Role == schema.RoleSystem {
+			var newPrompt = ""
+			if llmChat.SystemPrompt == "" {
+				newPrompt = h.Content
+			} else {
+				newPrompt = llmChat.SystemPrompt + "\n" + h.Content
+			}
+			historyContent[0] = llms.TextParts(llms.ChatMessageTypeSystem, newPrompt)
+			continue
+		}
+
+		// 检测下一条消息的 role 是否是 system 或者且和现在的相同
+		if i+1 < len(history) {
+			if history[i+1].Role == schema.RoleSystem || history[i+1].Role == schema.RoleHideSystem {
+				history[i+1].Content = history[i].Content + "\n" + history[i+1].Content
+				continue
+			}
+			//if history[i+1].Role == h.Role {
+			//	// 修改下一条消息的 content
+			//	history[i+1].Content = history[i].Content + "\n" + history[i+1].Content
+			//	continue
+			//}
+		}
+
+		switch h.Role {
+		case schema.RoleHuman:
+			//content := "[User says] " + h.Content
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+
+			if !hasHumanMessage {
+				hasHumanMessage = true
+			}
+		case schema.RoleAssistant:
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
+		case schema.RoleSystem:
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
+		case schema.RoleHideSystem:
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
+		case schema.RoleHideHuman:
+			if !hasHumanMessage {
+				hasHumanMessage = true
+			}
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+		}
+	}
+
+	// 如果整个对话里面没有 Human 消息，则不能继续
+	if !hasHumanMessage {
+		return historyContent, consts.ErrNoHumanMessage
+	}
+
+	return historyContent, nil
+}
+
+func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, llmTools []llms.Tool, historyContent []llms.MessageContent) (response *llms.ContentResponse, err error) {
+	resp, err := s.OpenAI.GenerateContent(ctx,
+		historyContent,
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			// 检测长度
+			if len(chunk) == 0 {
+				return nil
+			}
+
+			//fmt.Printf("Received chunk: %s\n", chunk)
+
+			// 检测是否 json，判断是否是工具调用
+			var isJson = sonic.Valid(chunk)
+			if !isJson {
+				var stringChunk = string(chunk)
+
+				llmChat.ResponseChan <- &schema.AssistantResponse{
+					State: schema.StateChunk,
+					ChunkMessage: &schema.ChunkMessage{
+						Content: stringChunk,
+					},
+					Content: stringChunk,
+				}
+			}
+
+			return nil
+		}),
+		llms.WithTools(llmTools),
+		llms.WithN(llmChat.N),
+		llms.WithMaxTokens(llmChat.MaxTokens),
+		llms.WithTemperature(llmChat.Temperature),
+		llms.WithTopP(llmChat.TopP),
+		llms.WithTopK(llmChat.TopK))
+	return resp, err
 }

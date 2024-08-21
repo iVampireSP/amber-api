@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/tmc/langchaingo/llms"
 	"io"
@@ -433,12 +432,6 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 }
 
 func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, llmTools []llms.Tool, historyContent []llms.MessageContent) (response *llms.ContentResponse, err error) {
-	j, err := sonic.MarshalString(llmTools)
-	if err != nil {
-		return
-	}
-	fmt.Printf("llmTools: %s\n", j)
-
 	resp, err := s.OpenAI.GenerateContent(ctx,
 		historyContent,
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {

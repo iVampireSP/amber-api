@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/internal/service/builtin_tool"
 	"rag-new/pkg/consts"
 	"strconv"
 	"strings"
@@ -113,6 +114,8 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, warningMessage))
 		}
 
+		var llmTools = append(s.BuiltInTools.GetTools(), llmChat.Tools...)
+
 		resp, err := s.OpenAI.GenerateContent(ctx,
 			historyContent,
 			llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
@@ -141,7 +144,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 
 				return nil
 			}),
-			llms.WithTools(llmChat.Tools),
+			llms.WithTools(llmTools),
 			llms.WithN(llmChat.N),
 			llms.WithMaxTokens(llmChat.MaxTokens),
 			llms.WithTemperature(llmChat.Temperature),
@@ -198,49 +201,109 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 				return err
 			}
 
-			tool, functionName, err := s.spiltFunctionName(respChoice.FuncCall.Name)
-			if err != nil {
-				llmChat.ResponseChan <- &schema.AssistantResponse{
-					State:      schema.StateFailed,
-					Content:    err.Error(),
-					TokenUsage: tokenUsage,
-				}
-				return err
-			}
+			prefix, functionName := s.spiltFunctionName(respChoice.FuncCall.Name)
+			//if err != nil {
+			//	llmChat.ResponseChan <- &schema.AssistantResponse{
+			//		State:      schema.StateFailed,
+			//		Content:    err.Error(),
+			//		TokenUsage: tokenUsage,
+			//	}
+			//	return err
+			//}
 
-			llmChat.ResponseChan <- &schema.AssistantResponse{
+			var toolCalling = &schema.AssistantResponse{
 				State: schema.StateToolCalling,
 				ToolCallMessage: &schema.ToolCallMessage{
-					ToolName:     tool.Name,
 					FunctionName: respChoice.FuncCall.Name,
 					Arguments:    functionCallArgs,
 				},
 				TokenUsage: tokenUsage,
 			}
 
-			// 调用远程函数
-			remoteFunctionResponse, err := s.callRemoteFunction(tool, llmChat, functionName, functionCallArgs)
-			if err != nil {
-				llmChat.ResponseChan <- &schema.AssistantResponse{
-					State:   schema.StateToolFailed,
-					Content: err.Error(),
-					ToolResponseMessage: &schema.ToolResponseMessage{
-						ToolName:     tool.Name,
-						FunctionName: respChoice.FuncCall.Name,
-						Content:      err.Error(),
-					},
-					TokenUsage: tokenUsage,
+			var toolRemoteResponse = &schema.ToolRemoteResponse{}
+			var toolName = ""
+			if prefix == builtin_tool.PREFIX {
+				// 是 builtin
+				// 调用内置函数
+				toolRemoteResponse, err = s.BuiltInTools.CallFunction(ctx, functionName, functionCallArgs)
+				toolName = builtin_tool.NAME
+				if err != nil {
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						State:   schema.StateToolFailed,
+						Content: err.Error(),
+						ToolResponseMessage: &schema.ToolResponseMessage{
+							ToolName:     builtin_tool.NAME,
+							FunctionName: respChoice.FuncCall.Name,
+							Content:      err.Error(),
+						},
+						TokenUsage: tokenUsage,
+					}
+					return err
 				}
-				return err
-				//remoteFunctionResponse.Content = err.Error()
+
+				toolCalling.ToolCallMessage.ToolName = builtin_tool.NAME
+			} else {
+				// 转换 prefix
+				toolId, err := strconv.Atoi(prefix)
+				if err != nil {
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						// 这里改成 failed 会不会更好？
+						State:   schema.StateToolFailed,
+						Content: err.Error(),
+						ToolResponseMessage: &schema.ToolResponseMessage{
+							ToolName:     builtin_tool.NAME,
+							FunctionName: respChoice.FuncCall.Name,
+							Content:      err.Error(),
+						},
+						TokenUsage: tokenUsage,
+					}
+					return err
+				}
+
+				// 获取 Tool
+				selectedTool, err := s.GetToolById(ctx, int64(toolId))
+				if err != nil {
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						// 这里改成 failed 会不会更好？
+						State:   schema.StateToolFailed,
+						Content: err.Error(),
+						ToolResponseMessage: &schema.ToolResponseMessage{
+							FunctionName: respChoice.FuncCall.Name,
+							Content:      err.Error(),
+						},
+						TokenUsage: tokenUsage,
+					}
+					return err
+				}
+
+				toolName = selectedTool.Name
+
+				// 调用远程函数
+				toolRemoteResponse, err = s.callRemoteFunction(selectedTool, llmChat, functionName, functionCallArgs)
+				if err != nil {
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						State:   schema.StateToolFailed,
+						Content: err.Error(),
+						ToolResponseMessage: &schema.ToolResponseMessage{
+							FunctionName: respChoice.FuncCall.Name,
+							Content:      err.Error(),
+						},
+						TokenUsage: tokenUsage,
+					}
+					return err
+					//remoteFunctionResponse.Content = err.Error()
+				}
 			}
+
+			llmChat.ResponseChan <- toolCalling
+
 			historyContent = append(historyContent, llms.MessageContent{
 				Role: llms.ChatMessageTypeTool,
 				Parts: []llms.ContentPart{
 					llms.ToolCallResponse{
 						ToolCallID: respChoice.ToolCalls[0].ID,
 						Name:       respChoice.FuncCall.Name,
-						Content:    remoteFunctionResponse.Content,
+						Content:    toolRemoteResponse.Content,
 					},
 				},
 			})
@@ -248,16 +311,16 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			llmChat.ResponseChan <- &schema.AssistantResponse{
 				State: schema.StateToolResponse,
 				ToolResponseMessage: &schema.ToolResponseMessage{
-					ToolName:       tool.Name,
+					ToolName:       toolName,
 					FunctionName:   respChoice.FuncCall.Name,
-					Content:        remoteFunctionResponse.Content,
-					StopGeneration: remoteFunctionResponse.StopGeneration,
+					Content:        toolRemoteResponse.Content,
+					StopGeneration: toolRemoteResponse.StopGeneration,
 				},
 				TokenUsage: tokenUsage,
 			}
 
 			// 如果函数要求停止生成
-			if remoteFunctionResponse.StopGeneration {
+			if toolRemoteResponse.StopGeneration {
 				requestAgain = false
 			}
 
@@ -285,24 +348,29 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 	return nil
 }
 
+func (s *Service) isBuiltInFunction(functionName string) bool {
+	return strings.HasPrefix(functionName, builtin_tool.PREFIX)
+}
+
 // spiltFunctionName 将函数名分割为 entity_toolName （entity 为 *entity.Tool，toolName 为 string）的形式
-func (s *Service) spiltFunctionName(functionName string) (*entity.Tool, string, error) {
+func (s *Service) spiltFunctionName(functionName string) (prefix string, realFunctionName string) {
 	// 根据 _ 分割
 	var functionNames = strings.Split(functionName, "_")
 
 	// 从第 1 个开始取到最后一个
 	var toolName = strings.Join(functionNames[1:], "_")
 
-	// 第一个是 id
-	toolId, err := strconv.Atoi(functionNames[0])
-	if err != nil {
-		return nil, toolName, err
-	}
+	//// 第一个是 id
+	//toolId, err := strconv.Atoi(functionNames[0])
+	//if err != nil {
+	//	return toolName, err
+	//}
 
-	// 从数据库中获取
-	tool, err := s.ToolService.GetTool(context.Background(), int64(toolId))
+	return functionNames[0] + "_", toolName
+}
 
-	return tool, toolName, err
+func (s *Service) GetToolById(ctx context.Context, id int64) (*entity.Tool, error) {
+	return s.ToolService.GetTool(ctx, id)
 }
 
 // callRemoteFunction 可以调用远程函数

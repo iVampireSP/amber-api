@@ -6,6 +6,7 @@ import (
 	"rag-new/internal/batch"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
+	"rag-new/internal/service/builtin_tool"
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/chat_message"
 	"rag-new/internal/service/jwks"
@@ -23,6 +24,7 @@ type Service struct {
 	LLM         *llm.Service
 	ChatMessage *chat_message.Service
 	Batch       *batch.Batch
+	BuiltinTool *builtin_tool.Service
 }
 
 var Provider = wire.NewSet(
@@ -32,6 +34,7 @@ var Provider = wire.NewSet(
 	chat.NewService,
 	tool.NewService,
 	assistant.NewService,
+	builtin_tool.NewService,
 	llm.NewLLM,
 	NewService,
 )
@@ -45,9 +48,10 @@ func NewService(
 	chat *chat.Service,
 	llm *llm.Service,
 	chatMessage *chat_message.Service,
+	builtinTool *builtin_tool.Service,
 	batch *batch.Batch,
 ) *Service {
 	return &Service{
-		logger, jwks, auth, tool, assistant, chat, llm, chatMessage, batch,
+		logger, jwks, auth, tool, assistant, chat, llm, chatMessage, batch, builtinTool,
 	}
 }

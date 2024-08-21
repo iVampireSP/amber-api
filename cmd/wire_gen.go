@@ -21,6 +21,7 @@ import (
 	"rag-new/internal/service"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
+	"rag-new/internal/service/builtin_tool"
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/chat_message"
 	"rag-new/internal/service/jwks"
@@ -48,13 +49,14 @@ func CreateApp() (*base.Application, error) {
 	batchBatch := batch.NewBatch(engine, loggerLogger)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, batchBatch)
 	client := redis.NewRedis(config)
-	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService)
+	builtin_toolService := builtin_tool.NewService()
+	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService)
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, batchBatch)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch)
 	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch)
 	return application, nil
 }

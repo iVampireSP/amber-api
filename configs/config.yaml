@@ -26,14 +26,20 @@ metrics:
   port: 8081
   host: 0.0.0.0
 
-dashscope:
-  api_key: ""
-  api_base: "https://dashscope.aliyuncs.com"
-
 openai:
-  api_key: ""
-  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-  model: "qwen-turbo"
+  api_key:
+  base_url: https://api.leaflow.net/v1
+  model: gpt-3.5-turbo
+  vision_model: gpt-4-vision-compatible
 
 llm:
   max_tokens: 2048
+
+s3:
+  endpoint: 127.0.0.1:9000
+  external_endpoint: 127.0.0.1:9000
+  access_key: minio
+  secret_key: minio123
+  bucket: amber
+  use_ssl: false
+  region:

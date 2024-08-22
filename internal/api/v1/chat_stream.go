@@ -21,7 +21,6 @@ const HeaderUserIp = "X-User-IP"
 // @Produce      json
 // @Security     none
 // @Param 	     X-User-IP  header  string  false  "指定聊天中的用户 IP 地址，不指定则自动获取。此 IP 地址只会增加至 Prompt 中，如果不希望增加，请关闭系统自带 Prompt 选项"
-// @Param        id  path  int  true  "Chat ID"
 // @Param        stream_id  path  string  true  "Chat stream id"
 // @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
 // @Failure      400  {object}  schema.ResponseBody
@@ -106,12 +105,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
 	var llmResponseChan = make(chan *schema.AssistantResponse)
 
-	// SSE
-	c.Writer.Header().Set("Content-Type", "text/event-stream")
-	c.Writer.Header().Set("Cache-Control", "no-cache")
-	c.Writer.Header().Set("Connection", "keep-alive")
-	c.Writer.Header().Set("Transfer-Encoding", "chunked")
-
 	streamUserCacheKey := u.getCacheKey("stream:" + streamIdStr + ":user")
 
 	// 检查缓存是否存在
@@ -158,6 +151,12 @@ func (u *ChatController) Stream(c *gin.Context) {
 			GuestId:     chatEntity.GuestId,
 		},
 	}
+
+	// SSE
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.Header().Set("Transfer-Encoding", "chunked")
 
 	go func() {
 		err = u.llmService.StreamChat(llmChat, histories)
@@ -271,5 +270,5 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}
 
-	response.Status(http.StatusOK).Send()
+	c.Status(http.StatusOK)
 }

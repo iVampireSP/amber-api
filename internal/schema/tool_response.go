@@ -12,7 +12,9 @@ type ToolRemoteRequest struct {
 }
 
 type ToolRemoteResponse struct {
-	Success        bool   `json:"success"`
-	StopGeneration bool   `json:"stop_generation"`
-	Content        string `json:"content"`
+	Success        bool `json:"success"`
+	StopGeneration bool `json:"stop_generation"`
+	// 记住响应。如果记住了响应，LLM 将会知道上一次工具的输出
+	RememberResponse bool   `json:"remember_response"`
+	Content          string `json:"content"`
 }

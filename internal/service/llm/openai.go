@@ -26,6 +26,8 @@ const warningCount = 3
 const warningMessage = "[Warning]You are attempting to call the tool/function repeatedly, please use the tool/function properly and stop response. If you continue to call repeatedly, the chat will be forcibly terminated."
 const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the tool/function many times, and the chat has been forcibly terminated."
 
+// TODO: 增加恶意重复输出检测（比如诺干个 i 等字符）。
+
 // StreamChat 执行对话
 func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
 	historyContent, err := s.processHistory(llmChat, history)
@@ -138,20 +140,21 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 				toolRemoteResponse, err = s.BuiltInTools.CallFunction(ctx, functionName, functionCallArgs)
 				toolName = builtin_tool.NAME
 				if err != nil {
+					// 也许内置函数不应该报 ToolFailed,不如直接 failed
 					llmChat.ResponseChan <- &schema.AssistantResponse{
-						State:   schema.StateToolFailed,
+						State:   schema.StateFailed,
 						Content: err.Error(),
-						ToolResponseMessage: &schema.ToolResponseMessage{
-							ToolName:     builtin_tool.NAME,
-							FunctionName: respChoice.FuncCall.Name,
-							Content:      err.Error(),
-						},
+						//ToolResponseMessage: &schema.ToolResponseMessage{
+						//	ToolName:     builtin_tool.NAME,
+						//	FunctionName: respChoice.FuncCall.Name,
+						//	Content:      err.Error(),
+						//},
 						TokenUsage: tokenUsage,
 					}
 					return err
 				}
 
-				toolCalling.ToolCallMessage.ToolName = builtin_tool.NAME
+				//toolCalling.ToolCallMessage.ToolName = builtin_tool.NAME
 			} else {
 				// 转换 prefix
 				toolId, err := strconv.Atoi(prefix)
@@ -206,7 +209,21 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 				}
 			}
 
-			llmChat.ResponseChan <- toolCalling
+			// 如果是 builtin ，则不告知
+			if toolName != builtin_tool.NAME {
+				llmChat.ResponseChan <- toolCalling
+				llmChat.ResponseChan <- &schema.AssistantResponse{
+					State: schema.StateToolResponse,
+					ToolResponseMessage: &schema.ToolResponseMessage{
+						ToolName:         toolName,
+						FunctionName:     respChoice.FuncCall.Name,
+						Content:          toolRemoteResponse.Content,
+						RememberResponse: toolRemoteResponse.RememberResponse,
+						StopGeneration:   toolRemoteResponse.StopGeneration,
+					},
+					TokenUsage: tokenUsage,
+				}
+			}
 
 			historyContent = append(historyContent, llms.MessageContent{
 				Role: llms.ChatMessageTypeTool,
@@ -218,17 +235,6 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 					},
 				},
 			})
-
-			llmChat.ResponseChan <- &schema.AssistantResponse{
-				State: schema.StateToolResponse,
-				ToolResponseMessage: &schema.ToolResponseMessage{
-					ToolName:       toolName,
-					FunctionName:   respChoice.FuncCall.Name,
-					Content:        toolRemoteResponse.Content,
-					StopGeneration: toolRemoteResponse.StopGeneration,
-				},
-				TokenUsage: tokenUsage,
-			}
 
 			// 如果函数要求停止生成
 			if toolRemoteResponse.StopGeneration {

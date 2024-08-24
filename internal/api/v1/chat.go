@@ -3,23 +3,20 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
-	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"net/http"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
-	"rag-new/internal/entity"
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/chat_message"
+	"rag-new/internal/service/file"
 	"rag-new/internal/service/llm"
 	"rag-new/pkg/consts"
-	"rag-new/pkg/random"
 	"strconv"
 )
 
@@ -34,12 +31,13 @@ type ChatController struct {
 	logger           *logger.Logger
 	assistantService *assistant.Service
 	cm               *chat_message.Service
+	fileService      *file.Service
 	config           *conf.Config
 }
 
 func NewChatController(authService *auth.Service,
-	chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger, assistantService *assistant.Service, chatMessageService *chat_message.Service, config *conf.Config) *ChatController {
-	return &ChatController{authService, chatService, redis, llmService, logger, assistantService, chatMessageService, config}
+	chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger, assistantService *assistant.Service, chatMessageService *chat_message.Service, config *conf.Config, fileService *file.Service) *ChatController {
+	return &ChatController{authService, chatService, redis, llmService, logger, assistantService, chatMessageService, fileService, config}
 }
 
 // List godoc
@@ -169,282 +167,6 @@ func (u *ChatController) Delete(c *gin.Context) {
 	}
 
 	response.Status(http.StatusOK).Send()
-}
-
-// ListChatMessage godoc
-// @Summary      查看聊天记录
-// @Description  get string by ID
-// @Tags         chat_message
-// @Accept       json
-// @Produce      json
-// @Security     ApiKeyAuth
-// @Param        id  path  int  true  "Chat ID"
-// @Success      200  {object}  schema.ResponseBody{data=[]entity.ChatMessage}
-// @Failure      400  {object}  schema.ResponseBody
-// @Failure      404  {object}  schema.ResponseBody
-// @Failure      500  {object}  schema.ResponseBody
-// @Router       /api/v1/chats/{id}/messages [get]
-func (u *ChatController) ListChatMessage(c *gin.Context) {
-	var response = schema.NewResponse(c)
-
-	chatId, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	chatEntity, err := u.chatService.GetChat(c, int64(chatId))
-	if err != nil {
-		if errors.Is(err, consts.ErrChatNotFound) {
-			response.Status(http.StatusNotFound).Error(err).Send()
-			return
-		} else {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-	}
-
-	if chatEntity.Id == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
-		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
-		return
-	}
-
-	chatHistories, err := u.cm.GetChatMessage(c, chatEntity)
-	//chatHistories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
-	response.Status(http.StatusOK).Data(chatHistories).Send()
-}
-
-// AddChatMessage godoc
-// @Summary      添加聊天记录
-// @Description  get string by ID
-// @Tags         chat_message
-// @Accept       json
-// @Produce      json
-// @Security     ApiKeyAuth
-// @Param        id  path  int  true  "Chat ID"
-// @Param        message  body  schema.ChatMessageAddRequest  true  "Message"
-// @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
-// @Failure      400  {object}  schema.ResponseBody
-// @Failure      404  {object}  schema.ResponseBody
-// @Failure      409  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
-// @Failure      500  {object}  schema.ResponseBody
-// @Router       /api/v1/chats/{id}/messages [post]
-func (u *ChatController) AddChatMessage(c *gin.Context) {
-	var response = schema.NewResponse(c)
-
-	chatIdStr := c.Param("id")
-	chatId, err := strconv.Atoi(chatIdStr)
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, int64(chatId))
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-	if isStreaming {
-		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
-		return
-	}
-
-	var request schema.ChatMessageAddRequest
-	err = c.ShouldBindJSON(&request)
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	var chatMessageResponse = &schema.ChatMessageResponse{}
-
-	// 检测 chat 是否存在缓存
-	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatIdStr))
-	result, err := cmd.Result()
-	if err != nil {
-		if !errors.Is(err, redis.Nil) {
-			response.Status(http.StatusInternalServerError).Error(cmd.Err()).Send()
-
-			return
-		}
-	} else {
-		chatMessageResponse.StreamId = result
-
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpen).Data(chatMessageResponse).Send()
-		return
-	}
-
-	var needStream = true
-	// 如果不是 human 或者 hide_human，则不需要回复
-	if request.Role != schema.RoleHuman && request.Role != schema.RoleHideHuman {
-		// 不需要生成 ID,直接添加
-		needStream = false
-	}
-
-	chatEntity, err := u.chatService.GetChat(c, int64(chatId))
-	if err != nil || chatEntity.UserId != u.authService.GetUserId(c) {
-		if errors.Is(err, consts.ErrChatNotFound) {
-			response.Status(http.StatusNotFound).Error(err).Send()
-			return
-		} else {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-	}
-
-	// last chat message
-	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
-	var userIdStr = strconv.Itoa(int(u.authService.GetUserId(c)))
-
-	var userInfo = u.authService.GetUser(c)
-	var publicUser = &schema.UserPublicInfo{
-		Name:      userInfo.Token.Name,
-		Id:        userIdStr,
-		ChatOwner: schema.OwnerUser,
-	}
-
-	if lastChatMessage.Role == schema.RoleHuman {
-		lastChatMessage.Content = request.Message
-		err := u.cm.UpdateMessageContent(c, lastChatMessage)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-
-		// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
-		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-		chatMessageResponse.StreamId = randomStreamId
-
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpenAndOverrideMessage).Data(chatMessageResponse).Send()
-		return
-	}
-
-	var chatMessage entity.ChatMessage
-	chatMessage.ChatId = chatEntity.Id
-	chatMessage.Content = request.Message
-	chatMessage.Role = request.Role
-
-	err = u.cm.CreateChatMessage(c, &chatMessage)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
-	chatMessageResponse.Stream = needStream
-	if needStream {
-		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-		chatMessageResponse.StreamId = randomStreamId
-	}
-
-	response.Status(http.StatusOK).Data(chatMessageResponse).Send()
-}
-
-func (u *ChatController) getCacheKey(key string) string {
-	return fmt.Sprintf("chat:%s", key)
-}
-
-func (u *ChatController) generateChatStream(c context.Context, chatId string, userPublic *schema.UserPublicInfo) (streamId string, err error) {
-	var randomId = random.String(32)
-	// 保存 chat stream id
-	err = u.redis.Set(c, u.getCacheKey("entity:"+chatId), randomId, consts.ChatStreamExpire).Err()
-	if err != nil {
-		return "", err
-	}
-
-	err = u.redis.Set(c, u.getCacheKey("stream:"+randomId), chatId, consts.ChatStreamExpire).Err()
-	if err != nil {
-		return "", err
-	}
-
-	userJson, err := sonic.Marshal(userPublic)
-	if err != nil {
-		return "", err
-	}
-
-	err = u.redis.Set(c, u.getCacheKey("stream:"+randomId+":user"), userJson, consts.ChatStreamExpire).Err()
-	if err != nil {
-		return "", err
-	}
-
-	return randomId, nil
-}
-
-// ClearChatMessage godoc
-// @Summary      清空聊天记录
-// @Description  清空当前聊天记录
-// @Tags         chat_message
-// @Accept       json
-// @Produce      json
-// @Security     ApiKeyAuth
-// @Param        id  path  int  true  "Chat ID"
-// @Success      200
-// @Failure      400  {object}  schema.ResponseBody
-// @Failure      404  {object}  schema.ResponseBody
-// @Failure      409  {object}  schema.ResponseBody
-// @Failure      500  {object}  schema.ResponseBody
-// @Router       /api/v1/chats/{id}/clear [post]
-func (u *ChatController) ClearChatMessage(c *gin.Context) {
-	var response = schema.NewResponse(c)
-
-	chatId, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	chatEntity, err := u.chatService.GetChat(c, int64(chatId))
-	if err != nil {
-		if errors.Is(err, consts.ErrChatNotFound) {
-			response.Status(http.StatusNotFound).Error(err).Send()
-			return
-		} else {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-	}
-
-	if chatEntity.Id == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
-		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
-		return
-	}
-
-	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.Id)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-	if isStreaming {
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreaming).Send()
-		return
-	}
-
-	err = u.cm.ClearChatMessage(c, chatEntity)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
-	response.Status(http.StatusNoContent).Send()
 }
 
 func (u *ChatController) getChatIdStreamingKey(chatId int64) string {

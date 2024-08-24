@@ -1,5 +1,11 @@
 package schema
 
+import "mime/multipart"
+
+type ChatRequest struct {
+	ChatId int64 `uri:"id" binding:"required"`
+}
+
 type ChatCreateRequest struct {
 	Name        string `json:"name" binding:"required" validate:"max=30"`
 	AssistantId int64  `json:"assistant_id" binding:"required"`
@@ -14,7 +20,11 @@ type ChatGuestCreateRequest struct {
 
 type ChatMessageAddRequest struct {
 	Message string   `json:"message" binding:"required" validate:"max=255"`
-	Role    ChatRole `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant"`
+	Role    ChatRole `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant,image"`
+}
+
+type ChatMessageAddImageRequest struct {
+	Image *multipart.FileHeader `form:"image" binding:"required" swaggerignore:"true"`
 }
 
 type ChatMessageResponse struct {

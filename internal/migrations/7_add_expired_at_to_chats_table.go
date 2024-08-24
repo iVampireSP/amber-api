@@ -1,7 +1,6 @@
 package migrations
 
 import (
-	"fmt"
 	"xorm.io/xorm"
 	"xorm.io/xorm/migrate"
 )
@@ -44,7 +43,6 @@ func init() {
 		Rollback: func(tx *xorm.Engine) error {
 			_, err := tx.Exec("DROP INDEX chats_owner_index on chats;")
 			if err != nil {
-				fmt.Println("errr")
 				return err
 			}
 

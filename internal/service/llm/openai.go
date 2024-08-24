@@ -377,27 +377,26 @@ func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsa
 
 func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) ([]llms.MessageContent, error) {
 	var hasHumanMessage = false
+	var hasImageMessage = false
 
 	var historyContent []llms.MessageContent
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
+	var systemPrompts []string
+
+	systemPrompts = append(systemPrompts, "Image Ability: ON")
+	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 
 	for i, h := range history {
 		// 如果第一条消息是 system
 		if i == 0 && h.Role == schema.RoleSystem {
-			var newPrompt = ""
-			if llmChat.SystemPrompt == "" {
-				newPrompt = h.Content
-			} else {
-				newPrompt = llmChat.SystemPrompt + "\n" + h.Content
-			}
-			historyContent[0] = llms.TextParts(llms.ChatMessageTypeSystem, newPrompt)
+			systemPrompts = append(systemPrompts, h.Content)
 			continue
 		}
 
 		// 检测下一条消息的 role 是否是 system 或者且和现在的相同
 		if i+1 < len(history) {
 			if history[i+1].Role == schema.RoleSystem || history[i+1].Role == schema.RoleHideSystem {
-				history[i+1].Content = history[i].Content + "\n" + history[i+1].Content
+				systemPrompts = append(systemPrompts, h.Content)
 				continue
 			}
 			//if history[i+1].Role == h.Role {
@@ -426,6 +425,12 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 				hasHumanMessage = true
 			}
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+		case schema.RoleImage:
+			if !hasImageMessage {
+				hasImageMessage = true
+			}
+			var imageText = "[Image]Image ID: " + h.Content
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, imageText))
 		}
 	}
 
@@ -433,6 +438,21 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 	if !hasHumanMessage {
 		return historyContent, consts.ErrNoHumanMessage
 	}
+
+	var imagePrompt = `
+The chat does not have images. you can't use built-in image tools. image_id can only get from user's uploaded images.
+`
+
+	// 如果有图片消息
+	if hasImageMessage {
+		imagePrompt = `
+The chat has images, you can use built-in image tools.
+`
+	}
+
+	systemPrompts = append(systemPrompts, imagePrompt)
+
+	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, strings.Join(systemPrompts, "\n")))
 
 	return historyContent, nil
 }

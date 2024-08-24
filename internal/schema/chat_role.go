@@ -10,6 +10,8 @@ var (
 	RoleSystem    ChatRole = "system"
 	// RoleHideSystem 为系统隐藏消息，不会在聊天历史中显示，但是会交给 LLM 处理
 	RoleHideSystem ChatRole = "system_hide"
+	// RoleImage 处理用于上传的图片，content 为 files 中的 id
+	RoleImage ChatRole = "image"
 )
 
 type ChatOwner string

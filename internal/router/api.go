@@ -10,6 +10,7 @@ type Api struct {
 	Tool      *v1.ToolController
 	Assistant *v1.AssistantController
 	Chat      *v1.ChatController
+	File      *v1.FileController
 }
 
 func NewApiRoute(
@@ -17,9 +18,10 @@ func NewApiRoute(
 	Tool *v1.ToolController,
 	Assistant *v1.AssistantController,
 	Chat *v1.ChatController,
+	File *v1.FileController,
 ) *Api {
 	return &Api{
-		User, Tool, Assistant, Chat,
+		User, Tool, Assistant, Chat, File,
 	}
 }
 
@@ -53,6 +55,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 	r.GET("/chats/:id/messages", a.Chat.ListChatMessage)
 	r.POST("/chats/:id/messages", a.Chat.AddChatMessage)
+	r.POST("/chats/:id/images", a.Chat.AddChatImage)
 }
 
 func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {
@@ -62,6 +65,8 @@ func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {
 	r.GET("/chat_public/:chat_id/messages", a.Chat.GetPublicChatMessages)
 	r.POST("/chat_public/:chat_id/messages", a.Chat.AddPublicChatMessages)
 	r.POST("/chat_public/:chat_id/clear", a.Chat.ClearPublicChatMessages)
+
+	r.GET("/files/:id/download", a.File.DownloadFile)
 }
 
 func (a *Api) InitOpenAICompatibleApiRouter(r *gin.RouterGroup) {

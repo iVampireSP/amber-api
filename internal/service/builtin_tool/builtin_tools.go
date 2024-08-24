@@ -9,25 +9,6 @@ import (
 
 var NAME = "builtin"
 
-var tools = []llms.Tool{
-	//{
-	//	Type: "function",
-	//	Function: &llms.FunctionDefinition{
-	//		Name:        prefix("now"),
-	//		Description: "Get the server time using server's timezone(not users)",
-	//		Parameters: jsonschema.Definition{
-	//			Type: jsonschema.Object,
-	//			Properties: map[string]jsonschema.Definition{
-	//				"rationale": {
-	//					Type:        jsonschema.String,
-	//					Description: "The rationale for choosing this function call with these parameters",
-	//				},
-	//			},
-	//		},
-	//	},
-	//},
-}
-
 func prefix(name string) string {
 	return NAME + "_" + name
 }
@@ -38,14 +19,31 @@ func (s *Service) GetTools() []llms.Tool {
 
 func (s *Service) CallFunction(ctx context.Context, functionName string, args schema.FunctionCallArguments) (*schema.ToolRemoteResponse, error) {
 	var response = &schema.ToolRemoteResponse{}
+	var err error = nil
+	var textResponse string
+
 	switch functionName {
 	case "now":
 		response.Content = s.GetCurrentTime()
+	case "describe_image":
+		textResponse, err = s.DescribeImage(ctx, args)
+
+		if err != nil {
+			response.Success = false
+			response.StopGeneration = true
+		} else {
+			response.Content = textResponse
+		}
+
 	default:
 		return nil, errors.New("function not found")
 	}
 
-	return response, nil
+	if s.config.Debug.Enabled {
+		s.logger.Sugar.Debug("call builtin function", functionName, "response", response)
+	}
+
+	return response, err
 }
 
 // Exists 这里拿到的 functionName 是不带前缀的，如果 withPrefix 为 true，则带前缀传入并判断

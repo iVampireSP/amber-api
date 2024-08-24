@@ -25,6 +25,7 @@ import (
 	"rag-new/internal/service/builtin_tool"
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/chat_message"
+	"rag-new/internal/service/file"
 	"rag-new/internal/service/jwks"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/tool"
@@ -50,16 +51,18 @@ func CreateApp() (*base.Application, error) {
 	batchBatch := batch.NewBatch(engine, loggerLogger)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, batchBatch)
 	client := redis.NewRedis(config)
-	builtin_toolService := builtin_tool.NewService()
+	s3S3 := s3.NewS3(config)
+	fileService := file.NewService(s3S3, engine, config)
+	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService)
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService)
-	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config)
-	api := router.NewApiRoute(userController, toolController, assistantController, chatController)
+	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService)
+	fileController := v1.NewFileController(fileService, loggerLogger)
+	api := router.NewApiRoute(userController, toolController, assistantController, chatController, fileController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch)
-	minioClient := s3.NewS3(config)
-	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, minioClient)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
+	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, s3S3)
 	return application, nil
 }
 

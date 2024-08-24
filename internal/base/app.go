@@ -1,10 +1,10 @@
 package base
 
 import (
-	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/s3"
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
 	"rag-new/internal/middleware"
@@ -21,7 +21,7 @@ type Application struct {
 	Middleware *middleware.Middleware
 	Redis      *redis.Client
 	Batch      *batch.Batch
-	S3         *minio.Client
+	S3         *s3.S3
 }
 
 func NewApplication(
@@ -33,7 +33,7 @@ func NewApplication(
 	middleware *middleware.Middleware,
 	redis *redis.Client,
 	batch *batch.Batch,
-	S3 *minio.Client,
+	S3 *s3.S3,
 ) *Application {
 	return &Application{
 		Config:     config,

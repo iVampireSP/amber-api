@@ -28,6 +28,7 @@ type Config struct {
 type Http struct {
 	Host string `yaml:"host"`
 	Port int    `yaml:"port"`
+	Url  string `yaml:"url"`
 }
 
 type Debug struct {

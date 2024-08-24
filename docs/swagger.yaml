@@ -92,6 +92,8 @@ definitions:
         type: string
       created_at:
         type: string
+      hidden:
+        type: boolean
       id:
         type: integer
       prompt_tokens:
@@ -206,6 +208,7 @@ definitions:
         - system
         - system_hide
         - assistant
+        - image
         type: string
     required:
     - message
@@ -251,6 +254,19 @@ definitions:
         type: string
       valid:
         type: boolean
+    type: object
+  rag-new_internal_schema.FunctionsInput:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      parameters:
+        $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters'
+    required:
+    - description
+    - name
+    - parameters
     type: object
   rag-new_internal_schema.GetPublicChatMessageRequest:
     properties:
@@ -367,24 +383,7 @@ definitions:
         type: string
       functions:
         items:
-          properties:
-            description:
-              type: string
-            name:
-              type: string
-            parameters:
-              properties:
-                properties: {}
-                type:
-                  type: string
-              type: object
-            required:
-              items:
-                type: string
-              type: array
-          required:
-          - required
-          type: object
+          $ref: '#/definitions/rag-new_internal_schema.FunctionsInput'
         type: array
       homepage_url:
         type: string
@@ -415,15 +414,26 @@ definitions:
         type: string
       name:
         type: string
-      parameters: {}
+      parameters:
+        $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters'
+    type: object
+  rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters:
+    properties:
+      properties: {}
       required:
         items:
           type: string
         type: array
+      type:
+        type: string
+    required:
+    - properties
+    - required
+    - type
     type: object
   rag-new_internal_schema.ToolDiscoveryOutputFunctions:
     properties:
-      function:
+      functions:
         items:
           $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunction'
         type: array
@@ -1115,8 +1125,7 @@ paths:
       - application/json
       description: 清空当前聊天记录
       parameters:
-      - description: Chat ID
-        in: path
+      - in: path
         name: id
         required: true
         type: integer
@@ -1146,14 +1155,66 @@ paths:
       summary: 清空聊天记录
       tags:
       - chat_message
+  /api/v1/chats/{id}/images:
+    post:
+      consumes:
+      - application/json
+      description: 将一个图片添加到聊天记录中
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      - description: 图片
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "409":
+          description: Conflict
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 添加图片
+      tags:
+      - chat_message
   /api/v1/chats/{id}/messages:
     get:
       consumes:
       - application/json
       description: get string by ID
       parameters:
-      - description: Chat ID
-        in: path
+      - in: path
         name: id
         required: true
         type: integer
@@ -1193,8 +1254,7 @@ paths:
       - application/json
       description: get string by ID
       parameters:
-      - description: Chat ID
-        in: path
+      - in: path
         name: id
         required: true
         type: integer
@@ -1242,6 +1302,22 @@ paths:
       summary: 添加聊天记录
       tags:
       - chat_message
+  /api/v1/files/{id}/download:
+    get:
+      consumes:
+      - application/json
+      description: 根据 File ID 下载文件
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: 下载文件
+      tags:
+      - file
   /api/v1/ping:
     get:
       consumes:
@@ -1279,11 +1355,6 @@ paths:
         in: header
         name: X-User-IP
         type: string
-      - description: Chat ID
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: Chat stream id
         in: path
         name: stream_id

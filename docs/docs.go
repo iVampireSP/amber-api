@@ -1165,7 +1165,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Chat ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1202,6 +1201,97 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/chats/{id}/images": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "将一个图片添加到聊天记录中",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat_message"
+                ],
+                "summary": "添加图片",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "图片",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/chats/{id}/messages": {
             "get": {
                 "security": [
@@ -1223,7 +1313,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Chat ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1291,7 +1380,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Chat ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1364,6 +1452,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/files/{id}/download": {
+            "get": {
+                "description": "根据 File ID 下载文件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "下载文件",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/api/v1/ping": {
             "get": {
                 "security": [
@@ -1434,13 +1546,6 @@ const docTemplate = `{
                         "description": "指定聊天中的用户 IP 地址，不指定则自动获取。此 IP 地址只会增加至 Prompt 中，如果不希望增加，请关闭系统自带 Prompt 选项",
                         "name": "X-User-IP",
                         "in": "header"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Chat ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
                     },
                     {
                         "type": "string",
@@ -1967,6 +2072,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "hidden": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -2132,7 +2240,8 @@ const docTemplate = `{
                         "user_hide",
                         "system",
                         "system_hide",
-                        "assistant"
+                        "assistant",
+                        "image"
                     ]
                 }
             }
@@ -2196,6 +2305,25 @@ const docTemplate = `{
                 },
                 "valid": {
                     "type": "boolean"
+                }
+            }
+        },
+        "rag-new_internal_schema.FunctionsInput": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "parameters"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parameters": {
+                    "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters"
                 }
             }
         },
@@ -2371,33 +2499,7 @@ const docTemplate = `{
                 "functions": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "required": [
-                            "required"
-                        ],
-                        "properties": {
-                            "description": {
-                                "type": "string"
-                            },
-                            "name": {
-                                "type": "string"
-                            },
-                            "parameters": {
-                                "type": "object",
-                                "properties": {
-                                    "properties": {},
-                                    "type": {
-                                        "type": "string"
-                                    }
-                                }
-                            },
-                            "required": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                        "$ref": "#/definitions/rag-new_internal_schema.FunctionsInput"
                     }
                 },
                 "homepage_url": {
@@ -2440,19 +2542,35 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "parameters": {},
+                "parameters": {
+                    "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters"
+                }
+            }
+        },
+        "rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters": {
+            "type": "object",
+            "required": [
+                "properties",
+                "required",
+                "type"
+            ],
+            "properties": {
+                "properties": {},
                 "required": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
         "rag-new_internal_schema.ToolDiscoveryOutputFunctions": {
             "type": "object",
             "properties": {
-                "function": {
+                "functions": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunction"

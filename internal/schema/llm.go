@@ -2,6 +2,7 @@ package schema
 
 import (
 	"github.com/bytedance/sonic"
+	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/llms"
 	"time"
 )
@@ -62,6 +63,10 @@ type FunctionCallArguments map[string]interface{}
 
 func (f *FunctionCallArguments) JSON() ([]byte, error) {
 	return sonic.Marshal(f)
+}
+
+func (f *FunctionCallArguments) Unmarshal(out interface{}) error {
+	return mapstructure.Decode(f, out)
 }
 
 func (f *FunctionCallArguments) String() (string, error) {

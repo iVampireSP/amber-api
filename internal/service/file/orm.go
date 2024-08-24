@@ -1,0 +1,51 @@
+package file
+
+import (
+	"context"
+	"rag-new/internal/entity"
+	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
+)
+
+func (s *Service) URLExists(ctx context.Context, urlHash string) (bool, error) {
+	i, err := s.x.Context(ctx).Where("url_hash = ?", urlHash).Count(&entity.File{})
+	return i > 0, err
+}
+
+func (s *Service) GetFileByUrlHash(ctx context.Context, urlHash string) (*entity.File, error) {
+	var file entity.File
+	_, err := s.x.Context(ctx).Where("url_hash = ?", urlHash).Get(&file)
+	return &file, err
+}
+
+func (s *Service) FileHashExists(ctx context.Context, fileHash string) (bool, error) {
+	i, err := s.x.Context(ctx).Where("file_hash = ?", fileHash).Count(&entity.File{})
+	return i > 0, err
+}
+
+func (s *Service) GetFileByFileHash(ctx context.Context, fileHash string) (*entity.File, error) {
+	var file entity.File
+	_, err := s.x.Context(ctx).Where("file_hash = ?", fileHash).Get(&file)
+	return &file, err
+}
+
+func (s *Service) GetFileById(ctx context.Context, fileId schema.EntityId) (*entity.File, error) {
+	var file = &entity.File{}
+	_, err := s.x.Context(ctx).ID(fileId).Get(file)
+	return file, err
+}
+
+func (s *Service) ExistsFileById(ctx context.Context, fileId schema.EntityId) (bool, error) {
+	i, err := s.x.Context(ctx).ID(fileId).Count(&entity.File{})
+	return i > 0, err
+}
+
+func (s *Service) GetImageUrl(file *entity.File) (string, error) {
+	if file == nil {
+		return "", consts.ErrFileNotExists
+	}
+
+	var url = s.config.Http.Url + "/api/v1/files/" + file.Id.String() + "/download"
+
+	return url, nil
+}

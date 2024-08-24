@@ -16,7 +16,7 @@ func init() {
 		Migrate: func(tx *xorm.Engine) error {
 			var err error
 			var sql = `CREATE TABLE files (
-  id   bigint unsigned AUTO_RANDOM,
+  id   bigint unsigned AUTO_INCREMENT,
   url varchar(255) DEFAULT NULL,
   url_hash varchar(255) DEFAULT NULL,
   file_hash varchar(255) DEFAULT NULL,

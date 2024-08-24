@@ -1,5 +1,5 @@
 package schema
 
 type FileDownloadRequest struct {
-	FileId int64 `uri:"id" binding:"required"`
+	FileId uint64 `uri:"id" binding:"required"`
 }

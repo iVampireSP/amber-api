@@ -5,6 +5,7 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"time"
 )
 
 func (s *Service) URLExists(ctx context.Context, urlHash string) (bool, error) {
@@ -32,6 +33,14 @@ func (s *Service) GetFileByFileHash(ctx context.Context, fileHash string) (*enti
 func (s *Service) GetFileById(ctx context.Context, fileId schema.EntityId) (*entity.File, error) {
 	var file = &entity.File{}
 	_, err := s.x.Context(ctx).ID(fileId).Get(file)
+
+	// 如果 expired_at 少于 RenewBeforeDAY 天，则延长至当前天 + ExpiredDAY
+	if file.ExpiredAt != nil && file.ExpiredAt.Before(time.Now().AddDate(0, 0, RenewBeforeDAY)) {
+		var expired = time.Now().AddDate(0, 0, ExpiredDAY)
+		file.ExpiredAt = &expired
+		_, _ = s.x.Context(ctx).ID(fileId).Cols("expired_at").Update(file)
+	}
+
 	return file, err
 }
 

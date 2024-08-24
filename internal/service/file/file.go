@@ -20,6 +20,8 @@ import (
 const TMPDIR = ""
 const RootDir = "files"
 const MaxSize = 5 * 1024 * 1024
+const ExpiredDAY = 7
+const RenewBeforeDAY = 5
 
 func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.File, error) {
 	var urlHash = s.sha256String(url)
@@ -80,6 +82,9 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 	fileEntity.FileHash = fileSha256
 	fileEntity.MimeType = fileMimeType.String()
 	fileEntity.Path = filePath + "/" + fileName
+
+	var expiredAt = time.Now().AddDate(0, 0, ExpiredDAY)
+	fileEntity.ExpiredAt = &expiredAt
 
 	// 删除临时文件
 	defer s.deleteTmpFile(path)
@@ -142,6 +147,9 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeekCloser) (*enti
 	fileEntity.FileHash = fileSha256
 	fileEntity.MimeType = fileMimeType.String()
 	fileEntity.Path = filePath + "/" + fileName
+
+	var expiredAt = time.Now().AddDate(0, 0, ExpiredDAY)
+	fileEntity.ExpiredAt = &expiredAt
 
 	_, err = s.x.Insert(fileEntity)
 	if err != nil {

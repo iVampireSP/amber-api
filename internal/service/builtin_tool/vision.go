@@ -4,12 +4,11 @@ import (
 	"context"
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/schema"
-	"strconv"
 )
 
 type describeImageParams struct {
-	Question string `json:"question"`
-	ImageId  string `json:"image_id" mapstructure:"image_id"`
+	Question string          `json:"question"`
+	ImageId  schema.EntityId `json:"image_id" mapstructure:"image_id"`
 }
 
 func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArguments) (string, error) {
@@ -19,10 +18,8 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 		return "", err
 	}
 
-	imageIdInt, err := strconv.ParseInt(params.ImageId, 10, 64)
-
 	// 文件必须存在
-	exists, err := s.fileService.ExistsFileById(ctx, schema.EntityId(imageIdInt))
+	exists, err := s.fileService.ExistsFileById(ctx, params.ImageId)
 	if err != nil {
 		return "此时无法获取文件是否存在", nil
 	}
@@ -31,7 +28,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	}
 
 	// 获取文件
-	file, err := s.fileService.GetFileById(ctx, schema.EntityId(imageIdInt))
+	file, err := s.fileService.GetFileById(ctx, params.ImageId)
 	if err != nil {
 		return "此时无法获取文件", nil
 	}

@@ -38,7 +38,7 @@ var tools = []llms.Tool{
 					},
 					"question": {
 						Type:        jsonschema.String,
-						Description: "What you need to explain, using natural language like 'What is this image about?', MUST write questions in the user's language",
+						Description: "What you need to explain, using natural language like 'What is this image about?', Write questions in the user language like '我想知道这张图片是什么关于的'。",
 					},
 				},
 				Required: []string{

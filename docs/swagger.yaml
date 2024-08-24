@@ -927,6 +927,65 @@ paths:
       summary: 清空公开对话的聊天记录
       tags:
       - chat_public
+  /api/v1/chat_public/{chat_id}/images:
+    post:
+      consumes:
+      - application/json
+      description: 将一个图片添加到聊天记录中
+      parameters:
+      - in: path
+        name: chat_id
+        required: true
+        type: integer
+      - in: formData
+        name: assistant_token
+        required: true
+        type: string
+      - in: formData
+        name: guest_id
+        required: true
+        type: string
+      - description: 图片
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+        "409":
+          description: Conflict
+          schema:
+            allOf:
+            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+      summary: 添加图片
+      tags:
+      - chat_public
   /api/v1/chat_public/{chat_id}/messages:
     get:
       consumes:

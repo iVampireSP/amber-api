@@ -126,6 +126,13 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	var needStream = true
+
+	// 不允许添加图片
+	if request.Role == schema.RoleImage {
+		response.Status(http.StatusBadRequest).Error(consts.ErrRoleCanNotBeImage).Send()
+		return
+	}
+
 	// 如果不是 human 或者 hide_human，则不需要回复
 	if request.Role != schema.RoleHuman && request.Role != schema.RoleHideHuman {
 		// 不需要生成 ID,直接添加

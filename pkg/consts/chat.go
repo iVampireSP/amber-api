@@ -17,4 +17,6 @@ var (
 	ErrChatIdNotProvided                   = errors.New("未提供聊天 ID, 这样无法确保聊天记录存在指定的聊天中")
 	ErrChatCanNotDeleteBecauseNotCleared   = errors.New("该聊天还未被清理，无法删除")
 	ErrNoHumanMessage                      = errors.New("没有 Human 角色的消息")
+	ErrRoleCanNotBeImage                   = errors.New("角色不能是图片，请使用其他端点上传图片")
+	ErrCreateChatMessage                   = errors.New("无法创建聊天消息")
 )

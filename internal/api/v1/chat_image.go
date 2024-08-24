@@ -3,6 +3,7 @@ package v1
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"mime/multipart"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
@@ -63,7 +64,7 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 
 	f, err := request.Image.Open()
 	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
+		response.Status(http.StatusInternalServerError).Error(consts.ErrUnableOpenFile).Send()
 		return
 	}
 
@@ -80,18 +81,17 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
+		response.Status(http.StatusInternalServerError).Error(consts.ErrCreateChatMessage).Send()
 		return
 	}
 
 	response.Status(http.StatusOK).Data(chatMessageResponse).Send()
 
-	//defer func(file io.ReadCloser) {
-	//	err := file.Close()
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		return
-	//	}
-	//}(f)
-
+	defer func(f multipart.File) {
+		err := f.Close()
+		if err != nil {
+			u.logger.Sugar.Error(err)
+			return
+		}
+	}(f)
 }

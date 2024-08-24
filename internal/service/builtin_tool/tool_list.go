@@ -33,7 +33,7 @@ var tools = []llms.Tool{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
 					"image_id": {
-						Type:        jsonschema.String,
+						Type:        jsonschema.Integer,
 						Description: "The id of the image you want to describe, must get from history.",
 					},
 					"question": {

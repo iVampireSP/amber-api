@@ -26,10 +26,10 @@ const warningCount = 3
 const warningMessage = "[Warning]You are attempting to call the tool/function repeatedly, please use the tool/function properly and stop response. If you continue to call repeatedly, the chat will be forcibly terminated."
 const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the tool/function many times, and the chat has been forcibly terminated."
 
-// TODO: 增加恶意重复输出检测（比如诺干个 i 等字符）。
-
 // StreamChat 执行对话
 func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
+	// 不要从接受侧关闭 channel
+	defer close(llmChat.ResponseChan)
 	historyContent, err := s.processHistory(llmChat, history)
 	if err != nil {
 		return err
@@ -458,12 +458,31 @@ The chat has images, you can use built-in image tools.
 }
 
 func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, llmTools []llms.Tool, historyContent []llms.MessageContent) (response *llms.ContentResponse, err error) {
+	// 上一个字
+	var lastWord = ""
+	// 重复次数
+	var lastWordRepeatCount = 0
+
 	resp, err := s.OpenAI.GenerateContent(ctx,
 		historyContent,
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			// 检测长度
 			if len(chunk) == 0 {
 				return nil
+			}
+
+			// 取 chunk 中最后一个字
+			var chunkLastWord = string(chunk[len(chunk)-1])
+			// 检测是否是上一个字
+			if lastWord == chunkLastWord {
+				lastWordRepeatCount++
+			} else {
+				lastWordRepeatCount = 0
+				lastWord = chunkLastWord
+			}
+			// 如果上一个字重复次数大于 10，就终止
+			if lastWordRepeatCount >= 10 {
+				return consts.ErrWordRepeatedDetected
 			}
 
 			//fmt.Printf("Received chunk: %s\n", chunk)
@@ -473,13 +492,13 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 			if !isJson {
 				var stringChunk = string(chunk)
 
-				llmChat.ResponseChan <- &schema.AssistantResponse{
+				err = s.sendResponse(llmChat.ResponseChan, schema.AssistantResponse{
 					State: schema.StateChunk,
 					ChunkMessage: &schema.ChunkMessage{
 						Content: stringChunk,
 					},
 					Content: stringChunk,
-				}
+				})
 			}
 
 			return nil
@@ -491,4 +510,15 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 		llms.WithTopP(llmChat.TopP),
 		llms.WithTopK(llmChat.TopK))
 	return resp, err
+}
+
+func (s *Service) sendResponse(responseChan chan<- *schema.AssistantResponse, response schema.AssistantResponse) error {
+	// 使用 select 来尝试写入数据，检测 channel 是否关闭
+	select {
+	case responseChan <- &response:
+		// 正常写入
+		return nil
+	default:
+		return io.EOF
+	}
 }

@@ -242,8 +242,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 	c.SSEvent("close", "")
 	c.Writer.Flush()
 
-	close(llmResponseChan)
-
 	// 移除缓存
 	u.redis.Del(c, streamIdCacheKey)
 	u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))

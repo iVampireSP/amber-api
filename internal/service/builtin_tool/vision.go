@@ -12,6 +12,7 @@ type describeImageParams struct {
 }
 
 func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArguments) (string, error) {
+	// TODO: 计算 Token 消耗
 	var params describeImageParams
 	err := args.Unmarshal(&params)
 	if err != nil {

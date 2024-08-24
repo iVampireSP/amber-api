@@ -1314,7 +1314,11 @@ paths:
         type: integer
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
       summary: 下载文件
       tags:
       - file

@@ -27,6 +27,7 @@ func NewFileController(fileService *file.Service, logger *logger.Logger) *FileCo
 // @Accept       json
 // @Produce      json
 // @Param        schema.FileDownloadRequest  path  schema.FileDownloadRequest true  "File ID"
+// @Success 	 200 {file} file
 // @Router       /api/v1/files/{id}/download [get]
 func (f *FileController) DownloadFile(c *gin.Context) {
 	var response = schema.NewResponse(c)

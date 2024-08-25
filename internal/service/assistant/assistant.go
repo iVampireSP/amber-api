@@ -91,7 +91,10 @@ func (s *Service) ToLLMTool(ctx context.Context, assistant *entity.Assistant) ([
 					Parameters:  j.Parameters,
 				}
 			}
-			toolList = append(toolList, llmTool)
+
+			if llmTool.Function != nil {
+				toolList = append(toolList, llmTool)
+			}
 		}
 	}
 	return toolList, nil

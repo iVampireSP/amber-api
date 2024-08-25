@@ -492,13 +492,13 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 			if !isJson {
 				var stringChunk = string(chunk)
 
-				err = s.sendResponse(llmChat.ResponseChan, schema.AssistantResponse{
+				llmChat.ResponseChan <- &schema.AssistantResponse{
 					State: schema.StateChunk,
 					ChunkMessage: &schema.ChunkMessage{
 						Content: stringChunk,
 					},
 					Content: stringChunk,
-				})
+				}
 			}
 
 			return nil
@@ -510,15 +510,4 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 		llms.WithTopP(llmChat.TopP),
 		llms.WithTopK(llmChat.TopK))
 	return resp, err
-}
-
-func (s *Service) sendResponse(responseChan chan<- *schema.AssistantResponse, response schema.AssistantResponse) error {
-	// 使用 select 来尝试写入数据，检测 channel 是否关闭
-	select {
-	case responseChan <- &response:
-		// 正常写入
-		return nil
-	default:
-		return io.EOF
-	}
 }

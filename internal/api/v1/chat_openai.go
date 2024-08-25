@@ -102,6 +102,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 				Created: created,
 				Choices: []schema.OpenAIChatCompletionStreamResponseChoice{},
 				Usage:   nil,
+				Model:   chatRequest.Model,
 			}
 
 			switch msg.State {
@@ -120,7 +121,12 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 				if err != nil {
 					u.logger.Sugar.Error(err)
 				}
-				c.SSEvent(eventName, j)
+
+				_, err = c.Writer.WriteString(eventName + ": " + j + "\n\n")
+				if err != nil {
+					u.logger.Sugar.Error(err)
+					return false
+				}
 
 				c.Writer.Flush()
 
@@ -153,12 +159,18 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 					FinishReason: "stop",
 				},
 			},
+			Model: chatRequest.Model,
 			Usage: nil,
 		})
 		if err != nil {
 			u.logger.Sugar.Error(err)
 		}
-		c.SSEvent(eventName, j)
+		// 直接 write
+		_, err = c.Writer.WriteString(eventName + ": " + "\n\n")
+		if err != nil {
+			u.logger.Sugar.Error(err)
+			return
+		}
 
 		j, err = sonic.MarshalString(schema.OpenAIChatCompletionStreamResponse{
 			ID:      fakeChatId,
@@ -171,9 +183,17 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		if err != nil {
 			u.logger.Sugar.Error(err)
 		}
-		c.SSEvent(eventName, j)
+		_, err = c.Writer.WriteString(eventName + ": " + j + "\n\n")
+		if err != nil {
+			u.logger.Sugar.Error(err)
+			return
+		}
 
-		c.SSEvent(eventName, eventDone)
+		_, err = c.Writer.WriteString(eventName + ": " + eventDone + "\n\n")
+		if err != nil {
+			u.logger.Sugar.Error(err)
+			return
+		}
 		c.Writer.Flush()
 
 		return

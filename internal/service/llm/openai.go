@@ -383,6 +383,7 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
 	var systemPrompts []string
 
+	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn)")
 	systemPrompts = append(systemPrompts, "Image Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 

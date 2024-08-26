@@ -30,10 +30,12 @@ const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the
 func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
 	// 不要从接受侧关闭 channel
 	defer close(llmChat.ResponseChan)
-	historyContent, err := s.processHistory(llmChat, history)
+	h, err := s.processHistory(llmChat, history)
 	if err != nil {
 		return err
 	}
+
+	var historyContent = h.MessageContent
 
 	// 是否再次请求
 	var requestAgain = true
@@ -375,12 +377,13 @@ func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsa
 	return tokenUsage
 }
 
-func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) ([]llms.MessageContent, error) {
+func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
 	var hasHumanMessage = false
 	var hasImageMessage = false
 
 	var historyContent []llms.MessageContent
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
+
 	var systemPrompts []string
 
 	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn)")
@@ -437,7 +440,7 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 
 	// 如果整个对话里面没有 Human 消息，则不能继续
 	if !hasHumanMessage {
-		return historyContent, consts.ErrNoHumanMessage
+		return nil, consts.ErrNoHumanMessage
 	}
 
 	var imagePrompt = `
@@ -455,7 +458,12 @@ The chat has images, you can use built-in image tools.
 
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, strings.Join(systemPrompts, "\n")))
 
-	return historyContent, nil
+	var message = &Message{
+		MessageContent: historyContent,
+		HasImage:       hasImageMessage,
+	}
+
+	return message, nil
 }
 
 func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, llmTools []llms.Tool, historyContent []llms.MessageContent) (response *llms.ContentResponse, err error) {

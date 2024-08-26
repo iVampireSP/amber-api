@@ -39,10 +39,6 @@ func (s *Service) CallFunction(ctx context.Context, functionName string, args sc
 		return nil, errors.New("function not found")
 	}
 
-	if s.config.Debug.Enabled {
-		s.logger.Sugar.Debug("call builtin function", functionName, "response", response)
-	}
-
 	return response, err
 }
 

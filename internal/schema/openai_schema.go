@@ -21,7 +21,13 @@ type OpenAIChatCompletionRequestMessage struct {
 	// Required
 	Role string `json:"role"`
 	// Required
-	Content string `json:"content"`
+	Content  any             `json:"content"`
+	ImageUrl *OpenAIImageUrl `json:"image_url"`
+}
+
+type OpenAIImageUrl struct {
+	Url    string `json:"url"`
+	Detail string `json:"detail"`
 }
 
 type OpenAIChatCompletionResponseChoice struct {

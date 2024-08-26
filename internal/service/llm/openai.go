@@ -140,6 +140,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			if prefix == builtin_tool.NAME {
 				// 是 builtin，则调用内置函数
 				toolRemoteResponse, err = s.BuiltInTools.CallFunction(ctx, functionName, functionCallArgs)
+				s.Logger.Sugar.Infof("Calling Builtin function: %v, args: %v", functionName, functionCallArgs)
 				toolName = builtin_tool.NAME
 				if err != nil {
 					// 也许内置函数不应该报 ToolFailed,不如直接 failed
@@ -298,6 +299,8 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, llmChat *schema.LLMChat,
 		Parameters:   args,
 		Chat:         llmChat.Chat,
 	}
+
+	s.Logger.Sugar.Infof("Calling remote function: %v", toolRequest)
 
 	if llmChat.UserPublicInfo != nil {
 		toolRequest.User = llmChat.UserPublicInfo
@@ -479,27 +482,27 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 			if len(chunk) == 0 {
 				return nil
 			}
-
-			// 取 chunk 中最后一个字
-			var chunkLastWord = string(chunk[len(chunk)-1])
-			// 检测是否是上一个字
-			if lastWord == chunkLastWord {
-				lastWordRepeatCount++
-			} else {
-				lastWordRepeatCount = 0
-				lastWord = chunkLastWord
-			}
-			// 如果上一个字重复次数大于 10，就终止
-			if lastWordRepeatCount >= 10 {
-				return consts.ErrWordRepeatedDetected
-			}
-
 			//fmt.Printf("Received chunk: %s\n", chunk)
 
 			// 检测是否 json，判断是否是工具调用
 			var isJson = sonic.Valid(chunk)
 			if !isJson {
 				var stringChunk = string(chunk)
+
+				// 取 chunk 中最后一个字
+				var chunkLastWord = string(chunk[len(chunk)-1])
+				// 检测是否是上一个字
+				if lastWord == chunkLastWord {
+					lastWordRepeatCount++
+				} else {
+					lastWordRepeatCount = 0
+					lastWord = chunkLastWord
+				}
+				// 如果上一个字重复次数大于 10，就终止
+				if lastWordRepeatCount >= 10 {
+					s.Logger.Sugar.Errorf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
+					return consts.ErrWordRepeatedDetected
+				}
 
 				llmChat.ResponseChan <- &schema.AssistantResponse{
 					State: schema.StateChunk,

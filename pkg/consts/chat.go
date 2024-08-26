@@ -22,4 +22,12 @@ var (
 	ErrExpiredTimeCanNotBeforeNow          = errors.New("过期时间不能早于当前时间")
 	ErrExpiredTimeCanNotAfter2038          = errors.New("过期时间不能晚于或等于 2038 年")
 	HintProvideSameImage                   = "上一条消息的图片和本条消息相同，已忽略本次图片"
+	ErrImageIsRequired                     = errors.New("当 type 是 image_url 时，图片是必须的")
+	ErrImageUrlCannotBeEmpty               = errors.New("当 type 是 image_url 时，图片 URL 是必须的")
+	ErrTextCannotBeEmpty                   = errors.New("当 type 是 text 时，文本是必须的")
+	ErrTextIsTooLong                       = errors.New("当 type 是 text 时，文本太长了")
+	ErrTextRequired                        = errors.New("当 type 是 text 时，文本是必须的")
+	ErrTypeRequired                        = errors.New("type 是必须的")
+	ErrFileUrlNotURL                       = errors.New("当 type 是 file_url 时，文件 URL 是必须的")
+	ErrFileUrlNotValidBase64               = errors.New("文件 URL 不是有效的 base64")
 )

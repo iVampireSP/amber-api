@@ -45,7 +45,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 		{
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
-				llms.ImageURLPart(fileUrl),
+				llms.ImageURLWithDetailPart(fileUrl, "auto"),
 				llms.TextPart(params.Question),
 			},
 		},

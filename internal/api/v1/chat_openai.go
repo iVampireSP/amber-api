@@ -1,6 +1,9 @@
 package v1
 
 import (
+	"bytes"
+	"encoding/base64"
+	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -8,9 +11,13 @@ import (
 	"rag-new/internal/entity"
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
 	"strconv"
+	"strings"
 	"time"
 )
+
+const maxImageSize = 3 * 1024 * 1024 // 3MB
 
 // OpenAIChatCompletion godoc
 // @Summary      OpenAI Chat Completion
@@ -54,10 +61,111 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 	var histories = make([]*entity.ChatMessage, 0)
 	// 转换
 	for _, message := range chatRequest.Messages {
-		histories = append(histories, &entity.ChatMessage{
-			Role:    schema.ChatRole(message.Role),
-			Content: message.Content,
-		})
+		var role = schema.ChatRole(message.Role)
+		var content string
+		var imageUrl string
+
+		// 判断 Content 字段的类型
+		switch contentTyped := message.Content.(type) {
+		case string:
+			content = contentTyped
+		case []interface{}:
+			// 循环每一个
+			if len(contentTyped) > 0 {
+				for _, v := range contentTyped {
+					if textTyped, ok := v.(map[string]interface{}); ok {
+						if textType, ok := textTyped["type"].(string); ok {
+							// 如果是 text
+							if textType == "text" {
+								content = textTyped["text"].(string)
+								if content == "" {
+									response.Error(consts.ErrTextCannotBeEmpty).Send()
+									return
+								}
+							} else if textType == "image_url" {
+								// 读取下面的 image_url
+								if imageUrlTyped, ok := textTyped["image_url"].(map[string]interface{}); ok {
+									if imageUrlValue, ok := imageUrlTyped["url"].(string); ok {
+										if imageUrlValue == "" {
+											response.Error(consts.ErrImageUrlCannotBeEmpty).Send()
+											return
+										}
+
+										imageUrl = imageUrlValue
+									} else {
+										response.Error(consts.ErrImageIsRequired).Send()
+									}
+								}
+							}
+						} else {
+							response.Status(http.StatusBadRequest).Error(consts.ErrTypeRequired).Send()
+							return
+						}
+					}
+				}
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid content type"})
+			}
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid content type"})
+		}
+
+		if imageUrl != "" {
+			var file = &entity.File{}
+
+			// 先检测否是 url(http)
+			// 检测是否是 http 开头
+			if strings.HasPrefix(imageUrl, "http") {
+				file, err = u.fileService.CreateFileFromUrl(c, imageUrl)
+				if err != nil {
+					response.Status(http.StatusInternalServerError).Error(consts.ErrFileUrlNotURL).Send()
+					return
+				}
+			} else {
+				var substr = ";base64,"
+				// 寻找 base64,，如果找到的话，去除前面的以及 base64,
+				base64Index := strings.Index(imageUrl, ";base64,")
+				if base64Index != -1 {
+					imageUrl = imageUrl[base64Index+len(substr):]
+				}
+
+				// 如果 imageUrl 是 base64
+				reader, err := base64ToReader(imageUrl)
+				if err != nil {
+					response.Status(http.StatusInternalServerError).Error(consts.ErrFileUrlNotValidBase64).Send()
+					return
+				}
+
+				// 如果是 nil
+				if reader == nil {
+					response.Status(http.StatusInternalServerError).Error(consts.ErrFileUrlNotValidBase64).Send()
+					return
+				}
+
+				file, err = u.fileService.CreateFile(c, reader)
+				if err != nil {
+					response.Status(http.StatusInternalServerError).Error(err).Send()
+					return
+				}
+			}
+
+			// 如果是图片的话，要新增两次
+			histories = append(histories, &entity.ChatMessage{
+				Role:    schema.RoleImage,
+				Content: file.Id.String(),
+			})
+			histories = append(histories, &entity.ChatMessage{
+				Role:    role,
+				Content: content,
+			})
+
+		} else {
+			histories = append(histories, &entity.ChatMessage{
+				Role:    role,
+				Content: content,
+			})
+		}
+
 	}
 
 	go func() {
@@ -243,4 +351,16 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		},
 		Usage: tokenUsage,
 	}).WithoutWrap().Error(err).Send()
+}
+
+func base64ToReader(s string) (io.ReadSeeker, error) {
+	decoded, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(decoded) > maxImageSize {
+		return nil, fmt.Errorf("image size exceeds maximum allowed size of %d bytes", maxImageSize)
+	}
+	return bytes.NewReader(decoded), nil
 }

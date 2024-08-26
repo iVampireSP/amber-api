@@ -97,7 +97,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 	return fileEntity, nil
 }
 
-func (s *Service) CreateFile(ctx context.Context, file io.ReadSeekCloser) (*entity.File, error) {
+func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.File, error) {
 	fileEntity := &entity.File{
 		Url:     nil,
 		UrlHash: nil,

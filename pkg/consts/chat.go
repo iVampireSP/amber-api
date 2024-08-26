@@ -19,4 +19,6 @@ var (
 	ErrNoHumanMessage                      = errors.New("没有 Human 角色的消息")
 	ErrRoleCanNotBeImage                   = errors.New("角色不能是图片，请使用其他端点上传图片")
 	ErrCreateChatMessage                   = errors.New("无法创建聊天消息")
+	ErrExpiredTimeCanNotBeforeNow          = errors.New("过期时间不能早于当前时间")
+	ErrExpiredTimeCanNotAfter2038          = errors.New("过期时间不能晚于或等于 2038 年")
 )

@@ -189,6 +189,8 @@ definitions:
     properties:
       assistant_id:
         type: integer
+      expired_at:
+        $ref: '#/definitions/rag-new_internal_schema.CustomTime'
       name:
         maxLength: 30
         type: string
@@ -254,6 +256,11 @@ definitions:
         type: string
       valid:
         type: boolean
+    type: object
+  rag-new_internal_schema.CustomTime:
+    properties:
+      time.Time:
+        type: string
     type: object
   rag-new_internal_schema.FunctionsInput:
     properties:

@@ -2321,6 +2321,9 @@ const docTemplate = `{
                 "assistant_id": {
                     "type": "integer"
                 },
+                "expired_at": {
+                    "$ref": "#/definitions/rag-new_internal_schema.CustomTime"
+                },
                 "name": {
                     "type": "string",
                     "maxLength": 30
@@ -2410,6 +2413,14 @@ const docTemplate = `{
                 },
                 "valid": {
                     "type": "boolean"
+                }
+            }
+        },
+        "rag-new_internal_schema.CustomTime": {
+            "type": "object",
+            "properties": {
+                "time.Time": {
+                    "type": "string"
                 }
             }
         },

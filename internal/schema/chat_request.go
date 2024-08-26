@@ -1,15 +1,52 @@
 package schema
 
-import "mime/multipart"
+import (
+	"fmt"
+	"mime/multipart"
+	"strings"
+	"time"
+)
+
+type CustomTime struct {
+	time.Time
+}
+
+const ctLayout = "2006-01-02 15:04:05"
+
+func (ct *CustomTime) UnmarshalJSON(b []byte) (err error) {
+	s := strings.Trim(string(b), "\"")
+	if s == "null" {
+		ct.Time = time.Time{}
+		return
+	}
+
+	// 超过 2038 年后的时间将会失败
+
+	tz, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		return err
+	}
+
+	ct.Time, err = time.ParseInLocation(ctLayout, s, tz)
+	return
+}
+
+func (ct *CustomTime) MarshalJSON() ([]byte, error) {
+	if ct.Time.IsZero() {
+		return []byte("null"), nil
+	}
+	return []byte(fmt.Sprintf("\"%s\"", ct.Time.Format(ctLayout))), nil
+}
 
 type ChatRequest struct {
 	ChatId int64 `uri:"id" binding:"required"`
 }
 
 type ChatCreateRequest struct {
-	Name        string `json:"name" binding:"required" validate:"max=30"`
-	AssistantId int64  `json:"assistant_id" binding:"required"`
-	UserId      UserId `json:"user_id" swaggerignore:"true" binding:"-"`
+	Name        string      `json:"name" binding:"required" validate:"max=30"`
+	AssistantId int64       `json:"assistant_id" binding:"required"`
+	ExpiredAt   *CustomTime `json:"expired_at" time_format:"2006-01-02" time_utc:"1"`
+	UserId      UserId      `json:"user_id" swaggerignore:"true" binding:"-"`
 }
 
 type ChatGuestCreateRequest struct {

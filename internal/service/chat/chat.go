@@ -27,6 +27,20 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 	chat.UserId = createChatRequest.UserId
 	chat.Owner = schema.OwnerUser
 
+	if createChatRequest.ExpiredAt != nil {
+		// 过期时间不能小于当前时间
+		if createChatRequest.ExpiredAt.Before(time.Now()) {
+			return nil, consts.ErrExpiredTimeCanNotBeforeNow
+		}
+
+		// 不能大于 2038 年
+		if createChatRequest.ExpiredAt.After(time.Date(2038, 1, 1, 0, 0, 0, 0, time.UTC)) {
+			return nil, consts.ErrExpiredTimeCanNotAfter2038
+		}
+
+		chat.ExpiredAt = &createChatRequest.ExpiredAt.Time
+	}
+
 	_, err = s.x.Context(ctx).Insert(&chat)
 
 	return &chat, err

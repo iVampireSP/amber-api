@@ -18,7 +18,8 @@ import (
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        schema.ChatRequest  path  schema.ChatRequest true  "Chat ID"
-// @Param        image  formData  file  true  "图片"
+// @Param        schema.ChatDownloadRemoteFileRequest  body  schema.ChatDownloadRemoteFileRequest false  "远程文件"
+// @Param        image  formData  file  false  "图片"
 // @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
 // @Failure      400  {object}  schema.ResponseBody
 // @Failure      404  {object}  schema.ResponseBody
@@ -42,11 +43,31 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 		return
 	}
 
-	var request schema.ChatMessageAddImageRequest
-	err = c.ShouldBind(&request)
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
+	var chatDownloadRemoteFileRequest = &schema.ChatDownloadRemoteFileRequest{}
+
+	var uploaded = true
+	var uploadedFile *multipart.FileHeader
+
+	// 检查 formData 是否有 image，如果没有则尝试绑定结构体
+	if c.ContentType() == "multipart/form-data" {
+		var request = &schema.ChatMessageAddImageRequest{}
+		err = c.ShouldBind(request)
+		if err != nil {
+			response.Status(http.StatusBadRequest).Error(err).Send()
+			return
+		}
+
+		uploadedFile = request.Image
+	} else {
+		uploaded = false
+
+		// 尝试绑定结构体
+		err = c.ShouldBindJSON(chatDownloadRemoteFileRequest)
+		if err != nil {
+			//response.Status(http.StatusBadRequest).Error(err).Send()
+			response.Status(http.StatusBadRequest).Error(consts.ErrFileUrlRequired).Send()
+			return
+		}
 	}
 
 	var chatMessageResponse = &schema.ChatMessageResponse{}
@@ -62,16 +83,44 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 		}
 	}
 
-	f, err := request.Image.Open()
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(consts.ErrUnableOpenFile).Send()
-		return
+	var file = &entity.File{}
+	if uploaded {
+		f, err := uploadedFile.Open()
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(consts.ErrUnableOpenFile).Send()
+			return
+		}
+
+		file, err = u.fileService.CreateFile(c, f)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		defer func(f multipart.File) {
+			err := f.Close()
+			if err != nil {
+				u.logger.Sugar.Error(err)
+				return
+			}
+		}(f)
+	} else {
+		file, err = u.fileService.CreateFileFromUrl(c, chatDownloadRemoteFileRequest.Url)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
 	}
 
-	file, err := u.fileService.CreateFile(c, f)
+	// last chat message
+	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
+	}
+
+	if lastChatMessage.Role == schema.RoleImage && lastChatMessage.Content == file.Id.String() {
+		response.Message(consts.HintProvideSameImage)
 	}
 
 	var chatMessage entity.ChatMessage
@@ -87,11 +136,4 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 
 	response.Status(http.StatusOK).Data(chatMessageResponse).Send()
 
-	defer func(f multipart.File) {
-		err := f.Close()
-		if err != nil {
-			u.logger.Sugar.Error(err)
-			return
-		}
-	}(f)
 }

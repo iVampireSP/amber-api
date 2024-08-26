@@ -21,4 +21,5 @@ var (
 	ErrCreateChatMessage                   = errors.New("无法创建聊天消息")
 	ErrExpiredTimeCanNotBeforeNow          = errors.New("过期时间不能早于当前时间")
 	ErrExpiredTimeCanNotAfter2038          = errors.New("过期时间不能晚于或等于 2038 年")
+	HintProvideSameImage                   = "上一条消息的图片和本条消息相同，已忽略本次图片"
 )

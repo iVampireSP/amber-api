@@ -61,10 +61,14 @@ type ChatMessageAddRequest struct {
 }
 
 type ChatMessageAddImageRequest struct {
-	Image *multipart.FileHeader `form:"image" binding:"required" swaggerignore:"true"`
+	Image *multipart.FileHeader `form:"image" swaggerignore:"true"`
 }
 
 type ChatMessageResponse struct {
 	StreamId string `json:"stream_id"`
 	Stream   bool   `json:"stream"`
+}
+
+type ChatDownloadRemoteFileRequest struct {
+	Url string `json:"url"  binding:"required"`
 }

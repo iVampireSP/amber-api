@@ -9,4 +9,6 @@ var (
 	ErrContentLengthHeaderMissing = errors.New("Content-Length 头信息缺失")
 	ErrMimeTypeNotAllowed         = errors.New("不允许上传的文件类型")
 	ErrFileNotExists              = errors.New("文件不存在")
+	ErrFileRequired               = errors.New("如果你没有传入 URL，那么文件是必须的")
+	ErrFileUrlRequired            = errors.New("如果你没有传入文件，那么文件 URL 是必须的")
 )

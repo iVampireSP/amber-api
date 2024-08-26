@@ -198,6 +198,13 @@ definitions:
     - assistant_id
     - name
     type: object
+  rag-new_internal_schema.ChatDownloadRemoteFileRequest:
+    properties:
+      url:
+        type: string
+    required:
+    - url
+    type: object
   rag-new_internal_schema.ChatMessageAddRequest:
     properties:
       message:
@@ -1231,10 +1238,14 @@ paths:
         name: id
         required: true
         type: integer
+      - description: 远程文件
+        in: body
+        name: schema.ChatDownloadRemoteFileRequest
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ChatDownloadRemoteFileRequest'
       - description: 图片
         in: formData
         name: image
-        required: true
         type: file
       produces:
       - application/json

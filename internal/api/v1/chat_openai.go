@@ -166,7 +166,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 			u.logger.Sugar.Error(err)
 		}
 		// 直接 write
-		_, err = c.Writer.WriteString(eventName + ": " + "\n\n")
+		_, err = c.Writer.WriteString(eventName + ": " + j + "\n\n")
 		if err != nil {
 			u.logger.Sugar.Error(err)
 			return

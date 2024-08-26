@@ -236,7 +236,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	if lastChatMessage.Role == schema.RoleHuman {
 		// 如果两个消息都是 human，则丢弃上一条消息，修改上一条消息的内容
 		lastChatMessage.Content = addPublicChatMessageRequest.Message
-		err := u.cm.UpdateMessageContent(c, lastChatMessage)
+		err = u.cm.UpdateMessageContent(c, lastChatMessage)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return

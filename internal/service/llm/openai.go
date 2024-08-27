@@ -157,9 +157,9 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 					FunctionName: functionName,
 					Args:         functionCallArgs,
 				}
-				builtInResponse, err := s.BuiltInTools.CallFunction(ctx, builtInToolRequest)
+
 				s.Logger.Sugar.Infof("Calling Builtin function: %v, args: %v", functionName, functionCallArgs)
-				toolName = builtin_tool.NAME
+				builtInResponse, err := s.BuiltInTools.CallFunction(ctx, builtInToolRequest)
 				if err != nil {
 					// 也许内置函数不应该报 ToolFailed,不如直接 failed
 					llmChat.ResponseChan <- &schema.AssistantResponse{
@@ -175,8 +175,12 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 					return err
 				}
 
+				s.Logger.Sugar.Infof("Builtin response: %v", builtInResponse.Content)
+
+				toolName = builtin_tool.NAME
+
 				// mapstructure
-				err = mapstructure.Decode(builtInResponse, &toolRemoteResponse)
+				err = mapstructure.Decode(builtInResponse, toolRemoteResponse)
 				if err != nil {
 					return err
 				}

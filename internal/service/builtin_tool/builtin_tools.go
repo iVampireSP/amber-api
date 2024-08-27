@@ -20,7 +20,6 @@ func (s *Service) GetTools() []llms.Tool {
 func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolRequest) (*schema.CallBuiltInResponse, error) {
 	var response = &schema.CallBuiltInResponse{}
 	var err error = nil
-	var textResponse string
 
 	switch req.FunctionName {
 	case "now":
@@ -31,8 +30,6 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 		if err != nil {
 			response.Success = false
 			response.StopGeneration = true
-		} else {
-			response.Content = textResponse
 		}
 	case "download_file":
 		response, err = s.DownloadFile(ctx, req.Args)

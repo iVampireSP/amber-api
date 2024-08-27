@@ -28,13 +28,17 @@ var tools = []llms.Tool{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
 			Name:        prefix("describe_image"),
-			Description: "only used to retrieve the content of images and cannot obtain file information of images",
+			Description: "only used to retrieve the content of images and cannot obtain file information of images.",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
-					"image_id": {
+					"file_id": {
 						Type:        jsonschema.Integer,
-						Description: "The id of the image you want to describe, must get from history.",
+						Description: "The id of the file(with image mimetype, from history) you want to describe",
+					},
+					"url": {
+						Type:        jsonschema.String,
+						Description: "The url of the image you want to describe(URL and file ID must be chosen between two options)",
 					},
 					"question": {
 						Type:        jsonschema.String,
@@ -42,7 +46,6 @@ var tools = []llms.Tool{
 					},
 				},
 				Required: []string{
-					"image_id",
 					"question",
 				},
 			},
@@ -58,7 +61,7 @@ var tools = []llms.Tool{
 				Properties: map[string]jsonschema.Definition{
 					"url": {
 						Type:        jsonschema.Integer,
-						Description: "the url of the file you want to download",
+						Description: "the url of the file you want to download. when downloaded, you can get file id from history",
 					},
 				},
 				Required: []string{

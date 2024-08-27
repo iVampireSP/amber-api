@@ -3,13 +3,15 @@ package builtin_tool
 import (
 	"context"
 	"github.com/tmc/langchaingo/llms"
+	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"strings"
 )
 
 type describeImageParams struct {
 	Question string          `json:"question"`
-	ImageId  schema.EntityId `json:"image_id" mapstructure:"image_id"`
+	Url      string          `json:"url"`
+	FileId   schema.EntityId `json:"file_id" mapstructure:"file_id"`
 }
 
 func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
@@ -21,23 +23,38 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 		return nil, err
 	}
 
-	// 文件必须存在
-	exists, err := s.fileService.ExistsFileById(ctx, params.ImageId)
-	if err != nil {
-		return response, err
-	}
-	if !exists {
-		response.Content = "文件不存在"
-
+	if params.Url == "" && params.FileId == 0 {
+		response.Content = "请提供图片 URL 或者文件 ID"
 		return response, nil
 	}
 
-	// 获取文件
-	file, err := s.fileService.GetFileById(ctx, params.ImageId)
-	if err != nil {
-		response.Content = "此时无法获取文件"
+	var file = &entity.File{}
 
-		return response, nil
+	if params.Url != "" {
+		file, err = s.fileService.CreateFileFromUrl(ctx, params.Url)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// 文件必须存在
+		exists, err := s.fileService.ExistsFileById(ctx, params.FileId)
+		if err != nil {
+			return response, err
+		}
+		if !exists {
+			response.Content = "文件不存在"
+
+			return response, nil
+		}
+
+		// 获取文件
+		file, err = s.fileService.GetFileById(ctx, params.FileId)
+		if err != nil {
+			response.Content = "此时无法获取文件"
+
+			return response, nil
+		}
+
 	}
 
 	// 如果 mimetype 不是 image/ 开头
@@ -71,11 +88,19 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 		return nil, err
 	}
 
+	//fmt.Println(resp.Choices[0].Content)
+
 	var tokenUsage = s.getTokenUsage(resp.Choices[0])
 
 	response.Content = resp.Choices[0].Content
 	response.TokenUsage = tokenUsage
+	response.RememberResponse = true
 	return response, nil
+	//
+	//response.Content = "这张图片来来自于博客"
+	//response.TokenUsage = &schema.TokenUsage{}
+	//response.RememberResponse = true
+	//return response, nil
 
 }
 

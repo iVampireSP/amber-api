@@ -2516,8 +2516,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "content": {
-                    "description": "Required",
-                    "type": "string"
+                    "description": "Required"
+                },
+                "image_url": {
+                    "$ref": "#/definitions/rag-new_internal_schema.OpenAIImageUrl"
                 },
                 "role": {
                     "description": "Required",
@@ -2559,6 +2561,17 @@ const docTemplate = `{
                 },
                 "message": {
                     "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage"
+                }
+            }
+        },
+        "rag-new_internal_schema.OpenAIImageUrl": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
                 }
             }
         },

@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/bytedance/sonic"
+	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/llms"
 	"io"
 	"net/http"
@@ -27,10 +29,10 @@ const warningMessage = "[Warning]You are attempting to call the tool/function re
 const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the tool/function many times, and the chat has been forcibly terminated."
 
 // StreamChat 执行对话
-func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
+func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
 	// 不要从接受侧关闭 channel
 	defer close(llmChat.ResponseChan)
-	h, err := s.processHistory(llmChat, history)
+	h, err := s.processHistory(ctx, llmChat, history)
 	if err != nil {
 		return err
 	}
@@ -41,6 +43,8 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 	var requestAgain = true
 	// 连续的函数调用次数
 	var functionCallCount = 0
+
+	var tokenUsage = &schema.TokenUsage{}
 
 	for {
 		ctx := context.Background()
@@ -74,7 +78,10 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 		}
 
 		respChoice := resp.Choices[0]
-		tokenUsage := s.getTokenUsage(respChoice)
+		tokenUsage2 := s.getTokenUsage(respChoice)
+		tokenUsage.CompletionTokens += tokenUsage2.CompletionTokens
+		tokenUsage.PromptTokens += tokenUsage2.PromptTokens
+		tokenUsage.TotalTokens += tokenUsage2.TotalTokens
 
 		if respChoice.FuncCall != nil {
 			// 检测到工具调用，标记为需要再次请求
@@ -132,14 +139,25 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 					FunctionName: respChoice.FuncCall.Name,
 					Arguments:    functionCallArgs,
 				},
-				TokenUsage: tokenUsage,
 			}
 
 			var toolRemoteResponse = &schema.ToolRemoteResponse{}
 			var toolName = ""
+
+			// Built-in tools
+			if prefix == builtin_tool.NAME {
+				toolCalling.ToolCallMessage.ToolName = "Built-in"
+			}
+
+			llmChat.ResponseChan <- toolCalling
+
 			if prefix == builtin_tool.NAME {
 				// 是 builtin，则调用内置函数
-				toolRemoteResponse, err = s.BuiltInTools.CallFunction(ctx, functionName, functionCallArgs)
+				var builtInToolRequest = &schema.CallBuiltInToolRequest{
+					FunctionName: functionName,
+					Args:         functionCallArgs,
+				}
+				builtInResponse, err := s.BuiltInTools.CallFunction(ctx, builtInToolRequest)
 				s.Logger.Sugar.Infof("Calling Builtin function: %v, args: %v", functionName, functionCallArgs)
 				toolName = builtin_tool.NAME
 				if err != nil {
@@ -155,6 +173,18 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 						TokenUsage: tokenUsage,
 					}
 					return err
+				}
+
+				// mapstructure
+				err = mapstructure.Decode(builtInResponse, &toolRemoteResponse)
+				if err != nil {
+					return err
+				}
+
+				if builtInResponse.TokenUsage != nil {
+					tokenUsage.PromptTokens += builtInResponse.TokenUsage.PromptTokens
+					tokenUsage.CompletionTokens += builtInResponse.TokenUsage.CompletionTokens
+					tokenUsage.TotalTokens += builtInResponse.TokenUsage.TotalTokens
 				}
 
 				//toolCalling.ToolCallMessage.ToolName = builtin_tool.NAME
@@ -195,6 +225,8 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 
 				toolName = selectedTool.Name
 
+				s.Logger.Sugar.Infof("Calling Remote function: %v, args: %v", functionName, functionCallArgs)
+
 				// 调用远程函数
 				toolRemoteResponse, err = s.callRemoteFunction(selectedTool, llmChat, functionName, functionCallArgs)
 				if err != nil {
@@ -213,20 +245,25 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 			}
 
 			// 如果是 builtin ，则不告知
-			if toolName != builtin_tool.NAME {
-				llmChat.ResponseChan <- toolCalling
-				llmChat.ResponseChan <- &schema.AssistantResponse{
-					State: schema.StateToolResponse,
-					ToolResponseMessage: &schema.ToolResponseMessage{
-						ToolName:         toolName,
-						FunctionName:     respChoice.FuncCall.Name,
-						Content:          toolRemoteResponse.Content,
-						RememberResponse: toolRemoteResponse.RememberResponse,
-						StopGeneration:   toolRemoteResponse.StopGeneration,
-					},
-					TokenUsage: tokenUsage,
-				}
+			//if toolName != builtin_tool.NAME {
+			//}
+
+			// 算了，告知吧，好处理点
+			llmChat.ResponseChan <- &schema.AssistantResponse{
+				State: schema.StateToolResponse,
+				ToolResponseMessage: &schema.ToolResponseMessage{
+					ToolName:         toolName,
+					FunctionName:     respChoice.FuncCall.Name,
+					Content:          toolRemoteResponse.Content,
+					RememberResponse: toolRemoteResponse.RememberResponse,
+					StopGeneration:   toolRemoteResponse.StopGeneration,
+					Append:           toolRemoteResponse.Append,
+					Role:             toolRemoteResponse.Role,
+					Text:             toolRemoteResponse.Text,
+				},
 			}
+
+			// End Built-in tools
 
 			historyContent = append(historyContent, llms.MessageContent{
 				Role: llms.ChatMessageTypeTool,
@@ -251,8 +288,7 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 		}
 
 		llmChat.ResponseChan <- &schema.AssistantResponse{
-			State:      schema.StateDone,
-			TokenUsage: tokenUsage,
+			State: schema.StateDone,
 		}
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
@@ -261,7 +297,8 @@ func (s *Service) StreamChat(llmChat *schema.LLMChat, history []*entity.ChatMess
 	}
 
 	llmChat.ResponseChan <- &schema.AssistantResponse{
-		State: schema.StateFinished,
+		State:      schema.StateFinished,
+		TokenUsage: tokenUsage,
 	}
 
 	return nil
@@ -380,9 +417,9 @@ func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsa
 	return tokenUsage
 }
 
-func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
+func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
 	var hasHumanMessage = false
-	var hasImageMessage = false
+	var hasFileMessage = false
 
 	var historyContent []llms.MessageContent
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
@@ -392,6 +429,26 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn)")
 	systemPrompts = append(systemPrompts, "Image Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
+
+	fileIds := make([]schema.EntityId, 0)
+
+	for _, h := range history {
+		// 找出所有的 file Id
+		if h.Role == schema.RoleFile {
+			// string 转 int64
+			id, err := strconv.ParseInt(h.Content, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			fileIds = append(fileIds, schema.EntityId(id))
+		}
+	}
+
+	fileEntities, err := s.FileService.GetFilesByIds(ctx, fileIds)
+	if err != nil {
+		return nil, err
+	}
 
 	for i, h := range history {
 		// 如果第一条消息是 system
@@ -432,12 +489,31 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 				hasHumanMessage = true
 			}
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
-		case schema.RoleImage:
-			if !hasImageMessage {
-				hasImageMessage = true
+		case schema.RoleFile:
+			if !hasFileMessage {
+				hasFileMessage = true
 			}
-			var imageText = "[Image]Image ID: " + h.Content
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, imageText))
+			var found = false
+			var fileText string
+
+			// 将 h.Content 转换为 int64
+			id, err := strconv.ParseInt(h.Content, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			// 检测 fileEntities 是否存在
+			for _, fileEntity := range fileEntities {
+				if fileEntity.Id == schema.EntityId(id) {
+					found = true
+					// 将 fileEntity 的 url 添加到 historyContent
+					fileText = "[File]File ID: \"" + h.Content + "\", MimeType: " + fileEntity.MimeType
+				}
+			}
+
+			if found {
+				fmt.Println(fileText)
+				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
+			}
 		}
 	}
 
@@ -446,24 +522,24 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 		return nil, consts.ErrNoHumanMessage
 	}
 
-	var imagePrompt = `
-The chat does not have images. you can't use built-in image tools. image_id can only get from user's uploaded images.
-`
+	//	var imagePrompt = `
+	//The chat does not have images. you can't use built-in image tools. image_id can only get from user's uploaded images.
+	//`
 
 	// 如果有图片消息
-	if hasImageMessage {
-		imagePrompt = `
-The chat has images, you can use built-in image tools.
-`
-	}
+	//	if hasFileMessage {
+	//		imagePrompt = `
+	//The chat has images, you can use built-in image tools.
+	//`
+	//	}
 
-	systemPrompts = append(systemPrompts, imagePrompt)
+	//systemPrompts = append(systemPrompts, imagePrompt)
 
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, strings.Join(systemPrompts, "\n")))
 
 	var message = &Message{
 		MessageContent: historyContent,
-		HasImage:       hasImageMessage,
+		HasFile:        hasFileMessage,
 	}
 
 	return message, nil

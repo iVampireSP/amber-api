@@ -58,3 +58,23 @@ func (s *Service) GetImageUrl(file *entity.File) (string, error) {
 
 	return url, nil
 }
+
+// GetFilesByIds get file by ids
+func (s *Service) GetFilesByIds(ctx context.Context, ids []schema.EntityId) ([]*entity.File, error) {
+	var files = make([]*entity.File, 0)
+	err := s.x.Context(ctx).In("id", ids).Find(&files)
+	if err != nil {
+		return nil, err
+	}
+
+	// 如果 expired_at 少于 RenewBeforeDAY 天，则延长至当前天 + ExpiredDAY
+	for _, v := range files {
+		if v.ExpiredAt != nil && v.ExpiredAt.Before(time.Now().AddDate(0, 0, RenewBeforeDAY)) {
+			var expired = time.Now().AddDate(0, 0, ExpiredDAY)
+			v.ExpiredAt = &expired
+			_, _ = s.x.Context(ctx).ID(v.Id).Cols("expired_at").Update(v)
+		}
+	}
+
+	return files, err
+}

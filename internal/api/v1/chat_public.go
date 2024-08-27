@@ -163,8 +163,8 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		return
 	}
 
-	if addPublicChatMessageRequest.Role == schema.RoleImage {
-		response.Status(http.StatusBadRequest).Error(consts.ErrRoleCanNotBeImage).Send()
+	if addPublicChatMessageRequest.Role == schema.RoleFile {
+		response.Status(http.StatusBadRequest).Error(consts.ErrRoleCanNotBeFile).Send()
 		return
 	}
 
@@ -422,7 +422,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id
 	chatMessage.Content = file.Id.String()
-	chatMessage.Role = schema.RoleImage
+	chatMessage.Role = schema.RoleFile
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {

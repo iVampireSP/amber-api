@@ -17,16 +17,16 @@ func (s *Service) GetTools() []llms.Tool {
 	return tools
 }
 
-func (s *Service) CallFunction(ctx context.Context, functionName string, args schema.FunctionCallArguments) (*schema.ToolRemoteResponse, error) {
-	var response = &schema.ToolRemoteResponse{}
+func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolRequest) (*schema.CallBuiltInResponse, error) {
+	var response = &schema.CallBuiltInResponse{}
 	var err error = nil
 	var textResponse string
 
-	switch functionName {
+	switch req.FunctionName {
 	case "now":
 		response.Content = s.GetCurrentTime()
 	case "describe_image":
-		textResponse, err = s.DescribeImage(ctx, args)
+		response, err = s.DescribeImage(ctx, req.Args)
 
 		if err != nil {
 			response.Success = false
@@ -34,7 +34,8 @@ func (s *Service) CallFunction(ctx context.Context, functionName string, args sc
 		} else {
 			response.Content = textResponse
 		}
-
+	case "download_file":
+		response, err = s.DownloadFile(ctx, req.Args)
 	default:
 		return nil, errors.New("function not found")
 	}

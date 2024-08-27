@@ -127,9 +127,9 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 
 	var needStream = true
 
-	// 不允许添加图片
-	if request.Role == schema.RoleImage {
-		response.Status(http.StatusBadRequest).Error(consts.ErrRoleCanNotBeImage).Send()
+	// 不允许添加文件
+	if request.Role == schema.RoleFile {
+		response.Status(http.StatusBadRequest).Error(consts.ErrRoleCanNotBeFile).Send()
 		return
 	}
 
@@ -193,8 +193,8 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	// 准备检测 Role
 	chatMessage.Role = request.Role
 
-	// 如果 Role 是 Image
-	if request.Role == schema.RoleImage {
+	// 如果 Role 是 File
+	if request.Role == schema.RoleFile {
 		needStream = false
 	}
 

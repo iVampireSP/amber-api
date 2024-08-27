@@ -159,7 +159,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	c.Writer.Header().Set("Transfer-Encoding", "chunked")
 
 	go func() {
-		err = u.llmService.StreamChat(llmChat, histories)
+		err = u.llmService.StreamChat(c, llmChat, histories)
 		if err != nil {
 			u.logger.Sugar.Error(err)
 			c.AbortWithStatus(http.StatusInternalServerError)
@@ -213,20 +213,33 @@ func (u *ChatController) Stream(c *gin.Context) {
 				toolResponseText += `\nResponse: ` + msg.ToolResponseMessage.Content
 				toolResponseText += `\n\n`
 
-				messageList = append(messageList, entity.ChatMessage{
+				var cm = entity.ChatMessage{
 					Role:    schema.RoleHideSystem,
 					Content: toolResponseText,
 					ChatId:  chatEntity.Id,
-				})
+				}
+
+				messageList = append(messageList, cm)
+			}
+
+			// 如果有新增
+			if msg.ToolResponseMessage.Append {
+				var cm = entity.ChatMessage{
+					Role:    msg.ToolResponseMessage.Role,
+					Content: msg.ToolResponseMessage.Text,
+					ChatId:  chatEntity.Id,
+				}
+
+				messageList = append(messageList, cm)
 			}
 
 			return true
 		case schema.StateDone:
-			tokenUsage = msg.TokenUsage
 			return true
 		case schema.StateFailed:
 			return false
 		case schema.StateFinished:
+			tokenUsage = msg.TokenUsage
 			return false
 		case schema.StateToolFailed:
 			return false

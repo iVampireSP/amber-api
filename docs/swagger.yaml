@@ -322,7 +322,8 @@ definitions:
     properties:
       content:
         description: Required
-        type: string
+      image_url:
+        $ref: '#/definitions/rag-new_internal_schema.OpenAIImageUrl'
       role:
         description: Required
         type: string
@@ -350,6 +351,13 @@ definitions:
         type: integer
       message:
         $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage'
+    type: object
+  rag-new_internal_schema.OpenAIImageUrl:
+    properties:
+      detail:
+        type: string
+      url:
+        type: string
     type: object
   rag-new_internal_schema.ResponseBody:
     properties:

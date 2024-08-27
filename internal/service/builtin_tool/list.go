@@ -28,7 +28,7 @@ var tools = []llms.Tool{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
 			Name:        prefix("describe_image"),
-			Description: "describe image by natural language",
+			Description: "only used to retrieve the content of images and cannot obtain file information of images",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
@@ -44,6 +44,25 @@ var tools = []llms.Tool{
 				Required: []string{
 					"image_id",
 					"question",
+				},
+			},
+		},
+	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        prefix("download_file"),
+			Description: "download file from url",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"url": {
+						Type:        jsonschema.Integer,
+						Description: "the url of the file you want to download",
+					},
+				},
+				Required: []string{
+					"url",
 				},
 			},
 		},

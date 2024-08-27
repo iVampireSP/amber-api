@@ -119,14 +119,14 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 		return
 	}
 
-	if lastChatMessage.Role == schema.RoleImage && lastChatMessage.Content == file.Id.String() {
+	if lastChatMessage.Role == schema.RoleFile && lastChatMessage.Content == file.Id.String() {
 		response.Message(consts.HintProvideSameImage)
 	}
 
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id
 	chatMessage.Content = file.Id.String()
-	chatMessage.Role = schema.RoleImage
+	chatMessage.Role = schema.RoleFile
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {

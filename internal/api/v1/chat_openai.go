@@ -149,9 +149,9 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 				}
 			}
 
-			// 如果是图片的话，要新增两次
+			// 如果是文件的话，要新增两次
 			histories = append(histories, &entity.ChatMessage{
-				Role:    schema.RoleImage,
+				Role:    schema.RoleFile,
 				Content: file.Id.String(),
 			})
 			histories = append(histories, &entity.ChatMessage{
@@ -169,7 +169,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 	}
 
 	go func() {
-		err = u.llmService.StreamChat(llmChat, histories)
+		err = u.llmService.StreamChat(c, llmChat, histories)
 		if err != nil {
 			u.logger.Sugar.Error(err)
 			c.AbortWithStatus(http.StatusInternalServerError)
@@ -240,11 +240,12 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 
 				return true
 			case schema.StateDone:
-				tokenUsage = msg.TokenUsage
 				return true
 			case schema.StateFailed:
+				tokenUsage = msg.TokenUsage
 				return false
 			case schema.StateFinished:
+				tokenUsage = msg.TokenUsage
 				return false
 			case schema.StateToolFailed:
 				return false

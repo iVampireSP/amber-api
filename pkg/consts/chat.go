@@ -17,11 +17,11 @@ var (
 	ErrChatIdNotProvided                   = errors.New("未提供聊天 ID, 这样无法确保聊天记录存在指定的聊天中")
 	ErrChatCanNotDeleteBecauseNotCleared   = errors.New("该聊天还未被清理，无法删除")
 	ErrNoHumanMessage                      = errors.New("没有 Human 角色的消息")
-	ErrRoleCanNotBeImage                   = errors.New("角色不能是图片，请使用其他端点上传图片")
+	ErrRoleCanNotBeFile                    = errors.New("角色不能是文件，请使用其他端点上传文件")
 	ErrCreateChatMessage                   = errors.New("无法创建聊天消息")
 	ErrExpiredTimeCanNotBeforeNow          = errors.New("过期时间不能早于当前时间")
 	ErrExpiredTimeCanNotAfter2038          = errors.New("过期时间不能晚于或等于 2038 年")
-	HintProvideSameImage                   = "上一条消息的图片和本条消息相同，已忽略本次图片"
+	HintProvideSameImage                   = "上一条消息的文件和本条消息相同，已忽略"
 	ErrImageIsRequired                     = errors.New("当 type 是 image_url 时，图片是必须的")
 	ErrImageUrlCannotBeEmpty               = errors.New("当 type 是 image_url 时，图片 URL 是必须的")
 	ErrTextCannotBeEmpty                   = errors.New("当 type 是 text 时，文本是必须的")

@@ -54,7 +54,7 @@ func CreateApp() (*base.Application, error) {
 	s3S3 := s3.NewS3(config)
 	fileService := file.NewService(s3S3, engine, config)
 	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService)
-	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService)
+	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService)
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService)
 	fileController := v1.NewFileController(fileService, loggerLogger)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController, fileController)

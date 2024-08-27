@@ -18,6 +18,7 @@ const (
 	StateFinished     ResponseState = "finished" // finished 为全部完成
 	StateDone         ResponseState = "done"     // done 为一轮请求完成
 	StateFailed       ResponseState = "failed"
+	StateMessage      ResponseState = "message" // message 为一条消息
 )
 
 type ChunkMessage struct {
@@ -37,6 +38,9 @@ type ToolResponseMessage struct {
 	StopGeneration   bool                  `json:"stop_generation"`
 	RememberResponse bool                  `json:"remember_response"`
 	Content          string                `json:"content"`
+	Append           bool                  `json:"-"`
+	Role             ChatRole              `json:"-"`
+	Text             string                `json:"-"`
 }
 
 type AssistantResponse struct {

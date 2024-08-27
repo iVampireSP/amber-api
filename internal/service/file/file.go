@@ -19,9 +19,20 @@ import (
 
 const TMPDIR = ""
 const RootDir = "files"
-const MaxSize = 5 * 1024 * 1024
+const MaxSize = 10 * 1024 * 1024
 const ExpiredDAY = 7
 const RenewBeforeDAY = 5
+
+var allowedMimeTypes = map[string]bool{
+	"application/msword": true, // doc
+	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true, // docx
+	"text/plain":      true, // txt
+	"image/jpeg":      true,
+	"image/png":       true,
+	"image/jpg":       true,
+	"image/webp":      true,
+	"application/pdf": true, // pdf
+}
 
 func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.File, error) {
 	var urlHash = s.sha256String(url)
@@ -65,8 +76,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 	}
 	fileMimeTypeString := fileMimeType.String()
 
-	// 只允许 jpg(jpeg),png,webp
-	if fileMimeTypeString != "image/jpeg" && fileMimeTypeString != "image/png" && fileMimeTypeString != "image/webp" {
+	if !allowedMimeTypes[fileMimeTypeString] {
 		return nil, consts.ErrMimeTypeNotAllowed
 	}
 

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/llms"
@@ -30,7 +29,7 @@ const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the
 
 // StreamChat 执行对话
 func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
-	// 不要从接受侧关闭 channel
+	// 不要从接收侧关闭 channel
 	defer close(llmChat.ResponseChan)
 	h, err := s.processHistory(ctx, llmChat, history)
 	if err != nil {
@@ -514,12 +513,11 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 				if fileEntity.Id == schema.EntityId(id) {
 					found = true
 					// 将 fileEntity 的 url 添加到 historyContent
-					fileText = "[File]File ID: \"" + h.Content + "\", MimeType: " + fileEntity.MimeType
+					fileText = "[File]File ID: " + h.Content + ", MimeType: " + fileEntity.MimeType
 				}
 			}
 
 			if found {
-				fmt.Println(fileText)
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
 			}
 		}

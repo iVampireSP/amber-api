@@ -144,11 +144,50 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 			var toolRemoteResponse = &schema.ToolRemoteResponse{}
 			var toolName = ""
 
+			var selectedTool *entity.Tool
+
 			// Built-in tools
 			if prefix == builtin_tool.NAME {
 				toolCalling.ToolCallMessage.ToolName = "Built-in"
+			} else {
+				// 转换 prefix
+				toolId, err := strconv.Atoi(prefix)
+				if err != nil {
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						// 这里改成 failed 会不会更好？
+						State:   schema.StateToolFailed,
+						Content: err.Error(),
+						ToolResponseMessage: &schema.ToolResponseMessage{
+							ToolName:     builtin_tool.NAME,
+							FunctionName: respChoice.FuncCall.Name,
+							Content:      err.Error(),
+						},
+						TokenUsage: tokenUsage,
+					}
+					return err
+				}
+
+				// 获取 Tool
+				selectedTool, err = s.GetToolById(ctx, int64(toolId))
+				if err != nil {
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						// 这里改成 failed 会不会更好？
+						State:   schema.StateToolFailed,
+						Content: err.Error(),
+						ToolResponseMessage: &schema.ToolResponseMessage{
+							ToolName:     toolName,
+							FunctionName: respChoice.FuncCall.Name,
+							Content:      err.Error(),
+						},
+						TokenUsage: tokenUsage,
+					}
+					return err
+				}
+
+				toolName = selectedTool.Name
 			}
 
+			// 发布工具调用
 			llmChat.ResponseChan <- toolCalling
 
 			if prefix == builtin_tool.NAME {
@@ -193,42 +232,6 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 				//toolCalling.ToolCallMessage.ToolName = builtin_tool.NAME
 			} else {
-				// 转换 prefix
-				toolId, err := strconv.Atoi(prefix)
-				if err != nil {
-					llmChat.ResponseChan <- &schema.AssistantResponse{
-						// 这里改成 failed 会不会更好？
-						State:   schema.StateToolFailed,
-						Content: err.Error(),
-						ToolResponseMessage: &schema.ToolResponseMessage{
-							ToolName:     builtin_tool.NAME,
-							FunctionName: respChoice.FuncCall.Name,
-							Content:      err.Error(),
-						},
-						TokenUsage: tokenUsage,
-					}
-					return err
-				}
-
-				// 获取 Tool
-				selectedTool, err := s.GetToolById(ctx, int64(toolId))
-				if err != nil {
-					llmChat.ResponseChan <- &schema.AssistantResponse{
-						// 这里改成 failed 会不会更好？
-						State:   schema.StateToolFailed,
-						Content: err.Error(),
-						ToolResponseMessage: &schema.ToolResponseMessage{
-							ToolName:     toolName,
-							FunctionName: respChoice.FuncCall.Name,
-							Content:      err.Error(),
-						},
-						TokenUsage: tokenUsage,
-					}
-					return err
-				}
-
-				toolName = selectedTool.Name
-
 				s.Logger.Sugar.Infof("Calling Remote function: %v, args: %v", functionName, functionCallArgs)
 
 				// 调用远程函数

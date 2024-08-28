@@ -15,7 +15,6 @@ type describeImageParams struct {
 }
 
 func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
-	// TODO: 计算 Token 消耗
 	var response = &schema.CallBuiltInResponse{}
 	var params describeImageParams
 	err := args.Unmarshal(&params)
@@ -95,13 +94,8 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	response.Content = resp.Choices[0].Content
 	response.TokenUsage = tokenUsage
 	response.RememberResponse = true
-	return response, nil
-	//
-	//response.Content = "这张图片来来自于博客"
-	//response.TokenUsage = &schema.TokenUsage{}
-	//response.RememberResponse = true
-	//return response, nil
 
+	return response, nil
 }
 
 func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsage {

@@ -90,10 +90,12 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	//fmt.Println(resp.Choices[0].Content)
 
 	var tokenUsage = s.getTokenUsage(resp.Choices[0])
-
 	response.Content = resp.Choices[0].Content
 	response.TokenUsage = tokenUsage
 	response.RememberResponse = true
+	//
+	//fmt.Println(describeImageHistory)
+	//response.Content = "这张图片中的文字内容大致如下：\\n\\n快乐……他们不求回报地陪伴我们学习、成长，用自己的方式让我们感受到的心灵，表达了他们对美好生活的向往和追求。\\n这本书让我明白了很多人生的道理，让我学会了诚信、善良、坚强，让我可以勇敢地面对生活。"
 
 	return response, nil
 }

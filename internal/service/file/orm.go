@@ -2,6 +2,7 @@ package file
 
 import (
 	"context"
+	"errors"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -52,6 +53,10 @@ func (s *Service) ExistsFileById(ctx context.Context, fileId schema.EntityId) (b
 func (s *Service) GetImageUrl(file *entity.File) (string, error) {
 	if file == nil {
 		return "", consts.ErrFileNotExists
+	}
+
+	if s.config.Http.Url == "" {
+		return "", errors.New("http url is empty")
 	}
 
 	var url = s.config.Http.Url + "/api/v1/files/" + file.Id.String() + "/download"

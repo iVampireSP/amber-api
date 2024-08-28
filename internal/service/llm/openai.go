@@ -148,7 +148,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 			// Built-in tools
 			if prefix == builtin_tool.NAME {
-				toolCalling.ToolCallMessage.ToolName = "Built-in"
+				toolName = "Built-in"
 			} else {
 				// 转换 prefix
 				toolId, err := strconv.Atoi(prefix)
@@ -187,6 +187,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 				toolName = selectedTool.Name
 			}
 
+			toolCalling.ToolCallMessage.ToolName = toolName
 			// 发布工具调用
 			llmChat.ResponseChan <- toolCalling
 

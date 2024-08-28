@@ -28,7 +28,7 @@ var tools = []llms.Tool{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
 			Name:        prefix("describe_image"),
-			Description: "only used to retrieve the content of images and cannot obtain file information of images.",
+			Description: "only used to retrieve the content of images and cannot obtain file information of images. only for which mimetype is image",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{

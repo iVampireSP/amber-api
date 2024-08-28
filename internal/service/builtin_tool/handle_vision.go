@@ -19,7 +19,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	var params describeImageParams
 	err := args.Unmarshal(&params)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	if params.Url == "" && params.FileId == 0 {
@@ -32,7 +32,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	if params.Url != "" {
 		file, err = s.fileService.CreateFileFromUrl(ctx, params.Url)
 		if err != nil {
-			return nil, err
+			return response, err
 		}
 	} else {
 		// 文件必须存在

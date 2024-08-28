@@ -27,17 +27,21 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 	case "describe_image":
 		response, err = s.DescribeImage(ctx, req.Args)
 
-		if err != nil {
-			response.Success = false
-			response.StopGeneration = true
-		}
+		//if err != nil {
+		//	response.Success = false
+		//	response.StopGeneration = false
+		//}
 	case "download_file":
 		response, err = s.DownloadFile(ctx, req.Args)
 	default:
 		return nil, errors.New("function not found")
 	}
 
-	return response, err
+	if err != nil {
+		s.logger.Sugar.Error("Built in failed: " + err.Error())
+	}
+
+	return response, nil
 }
 
 // Exists 这里拿到的 functionName 是不带前缀的，如果 withPrefix 为 true，则带前缀传入并判断

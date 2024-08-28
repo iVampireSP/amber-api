@@ -61,7 +61,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	if !strings.HasPrefix(file.MimeType, "image/") {
 		response.Content = "文件不是图片"
 
-		return nil, nil
+		return response, nil
 	}
 
 	// URL
@@ -85,7 +85,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 
 	resp, err := s.OpenAI.GenerateContent(ctx, describeImageHistory)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	//fmt.Println(resp.Choices[0].Content)

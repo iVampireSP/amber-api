@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/llms"
@@ -570,28 +571,40 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 			if len(chunk) == 0 {
 				return nil
 			}
-			//fmt.Printf("Received chunk: %s\n", chunk)
 
-			// 检测是否 json，判断是否是工具调用
-			var isJson = sonic.Valid(chunk)
-			if !isJson {
-				var stringChunk = string(chunk)
+			var stringChunk = string(chunk)
+			fmt.Printf("Chunk: %s\n", stringChunk)
 
-				// 取 chunk 中最后一个字
-				var chunkLastWord = string(chunk[len(chunk)-1])
-				// 检测是否是上一个字
-				if lastWord == chunkLastWord {
-					lastWordRepeatCount++
-				} else {
-					lastWordRepeatCount = 0
-					lastWord = chunkLastWord
+			// 检测是否可以转换为数字或者 float
+			if !s.isNumeric(stringChunk) {
+				// 检测是否 json，判断是否是工具调用
+				var isJson = sonic.Valid(chunk)
+				if !isJson {
+					// 取 chunk 中最后一个字
+					var chunkLastWord = string(chunk[len(chunk)-1])
+					// 检测是否是上一个字
+					if lastWord == chunkLastWord {
+						lastWordRepeatCount++
+					} else {
+						lastWordRepeatCount = 0
+						lastWord = chunkLastWord
+					}
+					// 如果上一个字重复次数大于 10，就终止
+					if lastWordRepeatCount >= 10 {
+						s.Logger.Sugar.Errorf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
+						return consts.ErrWordRepeatedDetected
+					}
+
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						State: schema.StateChunk,
+						ChunkMessage: &schema.ChunkMessage{
+							Content: stringChunk,
+						},
+						Content: stringChunk,
+					}
 				}
-				// 如果上一个字重复次数大于 10，就终止
-				if lastWordRepeatCount >= 10 {
-					s.Logger.Sugar.Errorf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
-					return consts.ErrWordRepeatedDetected
-				}
 
+			} else {
 				llmChat.ResponseChan <- &schema.AssistantResponse{
 					State: schema.StateChunk,
 					ChunkMessage: &schema.ChunkMessage{
@@ -610,4 +623,9 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 		llms.WithTopP(llmChat.TopP),
 		llms.WithTopK(llmChat.TopK))
 	return resp, err
+}
+
+func (s *Service) isNumeric(str string) bool {
+	_, err := strconv.ParseFloat(str, 64)
+	return err == nil
 }

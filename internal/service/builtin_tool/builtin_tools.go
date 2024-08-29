@@ -38,7 +38,11 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 	}
 
 	if err != nil {
-		s.logger.Sugar.Error("Built in failed: " + err.Error())
+		s.logger.Sugar.Error("Built-in failed: " + err.Error())
+		// reset response
+		response = &schema.CallBuiltInResponse{}
+		response.Content = "Built-in tool Error: " + err.Error()
+		return response, nil
 	}
 
 	return response, nil

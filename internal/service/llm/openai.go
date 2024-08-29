@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/llms"
@@ -573,7 +572,6 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 			}
 
 			var stringChunk = string(chunk)
-			fmt.Printf("Chunk: %s\n", stringChunk)
 
 			// 检测是否可以转换为数字或者 float
 			if !s.isNumeric(stringChunk) {

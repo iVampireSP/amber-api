@@ -70,5 +70,5 @@ type ChatMessageResponse struct {
 }
 
 type ChatDownloadRemoteFileRequest struct {
-	Url string `json:"url"  binding:"required"`
+	Url string `form:"url"   binding:"required"`
 }

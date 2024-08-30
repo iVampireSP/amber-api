@@ -856,19 +856,16 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "远程文件",
-                        "name": "schema.ChatDownloadRemoteFileRequest",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatDownloadRemoteFileRequest"
-                        }
+                        "type": "string",
+                        "name": "url",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "file",
                         "description": "图片",
                         "name": "image",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1333,12 +1330,10 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "远程文件",
-                        "name": "schema.ChatDownloadRemoteFileRequest",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatDownloadRemoteFileRequest"
-                        }
+                        "type": "string",
+                        "name": "url",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "file",
@@ -2342,17 +2337,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "maxLength": 30
-                }
-            }
-        },
-        "rag-new_internal_schema.ChatDownloadRemoteFileRequest": {
-            "type": "object",
-            "required": [
-                "url"
-            ],
-            "properties": {
-                "url": {
-                    "type": "string"
                 }
             }
         },

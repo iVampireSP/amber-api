@@ -18,7 +18,7 @@ import (
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        schema.ChatRequest  path  schema.ChatRequest true  "Chat ID"
-// @Param        schema.ChatDownloadRemoteFileRequest  body  schema.ChatDownloadRemoteFileRequest false  "远程文件"
+// @Param        schema.ChatDownloadRemoteFileRequest  formData  schema.ChatDownloadRemoteFileRequest false  "远程文件"
 // @Param        image  formData  file  false  "图片"
 // @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
 // @Failure      400  {object}  schema.ResponseBody
@@ -62,7 +62,7 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 		uploaded = false
 
 		// 尝试绑定结构体
-		err = c.ShouldBindJSON(chatDownloadRemoteFileRequest)
+		err = c.ShouldBind(chatDownloadRemoteFileRequest)
 		if err != nil {
 			//response.Status(http.StatusBadRequest).Error(err).Send()
 			response.Status(http.StatusBadRequest).Error(consts.ErrFileUrlRequired).Send()
@@ -145,9 +145,9 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        schema.GetPublicChatMessageRequestParams  path  schema.GetPublicChatMessageRequestParams  true  "GetPublicChatMessageRequestParams"
-// @Param        schema.GetPublicChatMessageRequest  formData  schema.GetPublicChatMessageRequest false  "GetPublicChatMessageRequest"
-// @Param        schema.ChatDownloadRemoteFileRequest  body  schema.ChatDownloadRemoteFileRequest false  "远程文件"
-// @Param        image  formData  file  true  "图片"
+// @Param        schema.GetPublicChatMessageRequest  formData  schema.GetPublicChatMessageRequest true  "GetPublicChatMessageRequest"
+// @Param        schema.ChatDownloadRemoteFileRequest  formData  schema.ChatDownloadRemoteFileRequest false  "远程文件"
+// @Param        image  formData  file  false  "图片"
 // @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
 // @Failure      400  {object}  schema.ResponseBody
 // @Failure      404  {object}  schema.ResponseBody
@@ -200,7 +200,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 	}
 
 	var chatMessageResponse = &schema.ChatMessageResponse{}
-	var chatDownloadRemoteFileRequest = &schema.ChatDownloadRemoteFileRequest{}
+	var chatDownloadRemoteFileRequest = schema.ChatDownloadRemoteFileRequest{}
 
 	var uploaded = true
 	var uploadedFile *multipart.FileHeader
@@ -220,7 +220,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 		uploaded = false
 
 		// 尝试绑定结构体
-		err = c.ShouldBindJSON(chatDownloadRemoteFileRequest)
+		err = c.ShouldBind(chatDownloadRemoteFileRequest)
 		if err != nil {
 			//response.Status(http.StatusBadRequest).Error(err).Send()
 			response.Status(http.StatusBadRequest).Error(consts.ErrFileUrlRequired).Send()

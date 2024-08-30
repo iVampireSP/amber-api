@@ -5,7 +5,7 @@ import (
 )
 
 type Assistant struct {
-	Base                 `xorm:"extends"`
+	Model
 	Name                 string        `xorm:"varchar(255) notnull" json:"name"`
 	Prompt               string        `xorm:"varchar(255) notnull" json:"prompt"`
 	Description          string        `xorm:"varchar(255) notnull" json:"description"`
@@ -21,13 +21,13 @@ func (a *Assistant) GetUserId() schema.UserId {
 }
 
 type AssistantTool struct {
-	Base        `xorm:"extends"`
+	Base
 	AssistantId int64 `xorm:"int(255) notnull" json:"assistant_id"`
 	ToolId      int64 `xorm:"int(255) notnull" json:"tool_id"`
 }
 
 type AssistantToolType struct {
-	Base        `xorm:"extends"`
+	Base
 	AssistantId int64      `xorm:"int(8) notnull index" json:"assistant_id"`
 	ToolId      int64      `xorm:"int(8) notnull index" json:"tool_id"`
 	Assistant   *Assistant `xorm:"extends" json:"assistant"`

@@ -43,16 +43,17 @@ func CreateApp() (*base.Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	toolService := tool.NewService(engine, config)
+	db := orm.NewGORM(config, loggerLogger)
+	toolService := tool.NewService(engine, config, db)
 	toolController := v1.NewToolController(toolService, authService)
-	assistantService := assistant.NewService(engine)
-	chat_messageService := chat_message.NewService(engine)
-	chatService := chat.NewService(engine, assistantService, chat_messageService)
+	assistantService := assistant.NewService(engine, db)
+	chat_messageService := chat_message.NewService(engine, db)
+	chatService := chat.NewService(engine, db, assistantService, chat_messageService)
 	batchBatch := batch.NewBatch(engine, loggerLogger)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, batchBatch)
 	client := redis.NewRedis(config)
 	s3S3 := s3.NewS3(config)
-	fileService := file.NewService(s3S3, engine, config)
+	fileService := file.NewService(s3S3, engine, config, db)
 	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService)
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService)
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService)
@@ -62,7 +63,6 @@ func CreateApp() (*base.Application, error) {
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
-	db := orm.NewGORM(config, loggerLogger)
 	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db)
 	return application, nil
 }

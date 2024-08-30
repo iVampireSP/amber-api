@@ -6,7 +6,7 @@ import (
 )
 
 type Chat struct {
-	Base        `xorm:"extends"`
+	Model       `xorm:"extends"`
 	Name        string           `xorm:"varchar(255) notnull" json:"name"`
 	AssistantId int64            `xorm:"varchar(255) notnull" json:"assistant_id"`
 	UserId      schema.UserId    `xorm:"user_id int(11)" json:"user_id"`
@@ -16,16 +16,16 @@ type Chat struct {
 }
 
 type ChatWithAssistant struct {
-	Chat      `xorm:"extends"`
+	Model
 	Assistant *Assistant `xorm:"extends" json:"assistant"`
 }
 
-func (a *Base) TableName() string {
+func (a *Model) TableName() string {
 	return "chats"
 }
 
 type ChatMessage struct {
-	Base             `xorm:"extends"`
+	Model            `xorm:"extends"`
 	ChatId           int64           `xorm:"varchar(255) notnull" json:"assistant_id"`
 	Content          string          `xorm:"varchar(255) notnull" json:"content"`
 	Role             schema.ChatRole `xorm:"varchar(255) notnull" json:"role"`

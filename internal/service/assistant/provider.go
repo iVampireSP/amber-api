@@ -1,15 +1,18 @@
 package assistant
 
 import (
+	"gorm.io/gorm"
 	"xorm.io/xorm"
 )
 
 type Service struct {
-	x *xorm.Engine
+	x  *xorm.Engine
+	db *gorm.DB
 }
 
 func NewService(
 	x *xorm.Engine,
+	db *gorm.DB,
 ) *Service {
-	return &Service{x}
+	return &Service{x, db}
 }

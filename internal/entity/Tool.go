@@ -5,7 +5,7 @@ import (
 )
 
 type Tool struct {
-	Base         `xorm:"extends"`
+	Model
 	Name         string                     `xorm:"varchar(255) notnull" json:"name"`
 	Description  string                     `xorm:"varchar(255) notnull" json:"description"`
 	DiscoveryUrl string                     `xorm:"varchar(255) notnull" json:"discovery_url"`

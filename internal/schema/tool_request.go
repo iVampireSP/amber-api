@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"database/sql/driver"
 	"github.com/bytedance/sonic"
 	"strconv"
 )
@@ -94,4 +95,14 @@ func (td *ToolDiscoveryOutput) FromDB(data []byte) error {
 
 func (td *ToolDiscoveryOutput) ToDB() ([]byte, error) {
 	return sonic.Marshal(&td)
+}
+
+// scan
+
+func (td *ToolDiscoveryOutput) Scan(value interface{}) error {
+	return sonic.Unmarshal(value.([]byte), &td)
+}
+
+func (td *ToolDiscoveryOutput) Value() (driver.Value, error) {
+	return sonic.Marshal(td)
 }

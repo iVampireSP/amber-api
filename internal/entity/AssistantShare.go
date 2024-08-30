@@ -3,8 +3,7 @@ package entity
 import "rag-new/internal/schema"
 
 type AssistantShare struct {
-	Model `xorm:"extends"`
-
+	Model       `xorm:"extends"`
 	AssistantId schema.EntityId `xorm:"varchar(255) notnull" json:"assistant_id"`
 	Token       string          `xorm:"varchar(255) notnull" json:"token"`
 }

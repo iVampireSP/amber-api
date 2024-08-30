@@ -16,34 +16,54 @@ import (
 )
 
 var (
-	Q    = new(Query)
-	Chat *chat
+	Q              = new(Query)
+	Assistant      *assistant
+	AssistantShare *assistantShare
+	Chat           *chat
+	File           *file
+	Tool           *tool
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	Assistant = &Q.Assistant
+	AssistantShare = &Q.AssistantShare
 	Chat = &Q.Chat
+	File = &Q.File
+	Tool = &Q.Tool
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:   db,
-		Chat: newChat(db, opts...),
+		db:             db,
+		Assistant:      newAssistant(db, opts...),
+		AssistantShare: newAssistantShare(db, opts...),
+		Chat:           newChat(db, opts...),
+		File:           newFile(db, opts...),
+		Tool:           newTool(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Chat chat
+	Assistant      assistant
+	AssistantShare assistantShare
+	Chat           chat
+	File           file
+	Tool           tool
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:   db,
-		Chat: q.Chat.clone(db),
+		db:             db,
+		Assistant:      q.Assistant.clone(db),
+		AssistantShare: q.AssistantShare.clone(db),
+		Chat:           q.Chat.clone(db),
+		File:           q.File.clone(db),
+		Tool:           q.Tool.clone(db),
 	}
 }
 
@@ -57,18 +77,30 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:   db,
-		Chat: q.Chat.replaceDB(db),
+		db:             db,
+		Assistant:      q.Assistant.replaceDB(db),
+		AssistantShare: q.AssistantShare.replaceDB(db),
+		Chat:           q.Chat.replaceDB(db),
+		File:           q.File.replaceDB(db),
+		Tool:           q.Tool.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Chat IChatDo
+	Assistant      IAssistantDo
+	AssistantShare IAssistantShareDo
+	Chat           IChatDo
+	File           IFileDo
+	Tool           IToolDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Chat: q.Chat.WithContext(ctx),
+		Assistant:      q.Assistant.WithContext(ctx),
+		AssistantShare: q.AssistantShare.WithContext(ctx),
+		Chat:           q.Chat.WithContext(ctx),
+		File:           q.File.WithContext(ctx),
+		Tool:           q.Tool.WithContext(ctx),
 	}
 }
 

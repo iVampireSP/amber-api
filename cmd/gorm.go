@@ -35,7 +35,7 @@ func gormGen() {
 
 	g.UseDB(app.GORM)
 
-	g.ApplyBasic(entity.Chat{})
+	g.ApplyBasic(entity.Chat{}, entity.Assistant{}, entity.AssistantShare{}, entity.File{}, entity.Tool{})
 
 	// Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`
 	//g.ApplyInterface(func(Querier) {}, model.User{}, model.Company{})

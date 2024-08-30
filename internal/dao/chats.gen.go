@@ -30,7 +30,6 @@ func newChat(db *gorm.DB, opts ...gen.DOOption) chat {
 	_chat.Id = field.NewUint(tableName, "id")
 	_chat.CreatedAt = field.NewTime(tableName, "created_at")
 	_chat.UpdatedAt = field.NewTime(tableName, "updated_at")
-	_chat.DeletedAt = field.NewField(tableName, "deleted_at")
 	_chat.Name = field.NewString(tableName, "name")
 	_chat.AssistantId = field.NewUint(tableName, "assistant_id")
 	_chat.UserId = field.NewInt64(tableName, "user_id")
@@ -50,7 +49,6 @@ type chat struct {
 	Id          field.Uint
 	CreatedAt   field.Time
 	UpdatedAt   field.Time
-	DeletedAt   field.Field
 	Name        field.String
 	AssistantId field.Uint
 	UserId      field.Int64
@@ -76,7 +74,6 @@ func (c *chat) updateTableName(table string) *chat {
 	c.Id = field.NewUint(table, "id")
 	c.CreatedAt = field.NewTime(table, "created_at")
 	c.UpdatedAt = field.NewTime(table, "updated_at")
-	c.DeletedAt = field.NewField(table, "deleted_at")
 	c.Name = field.NewString(table, "name")
 	c.AssistantId = field.NewUint(table, "assistant_id")
 	c.UserId = field.NewInt64(table, "user_id")
@@ -99,11 +96,10 @@ func (c *chat) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *chat) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 10)
+	c.fieldMap = make(map[string]field.Expr, 9)
 	c.fieldMap["id"] = c.Id
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
-	c.fieldMap["deleted_at"] = c.DeletedAt
 	c.fieldMap["name"] = c.Name
 	c.fieldMap["assistant_id"] = c.AssistantId
 	c.fieldMap["user_id"] = c.UserId

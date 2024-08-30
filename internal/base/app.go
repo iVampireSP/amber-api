@@ -8,6 +8,7 @@ import (
 	"rag-new/internal/base/s3"
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
+	"rag-new/internal/dao"
 	"rag-new/internal/middleware"
 	"rag-new/internal/service"
 	"xorm.io/xorm"
@@ -19,6 +20,7 @@ type Application struct {
 	Logger     *logger.Logger
 	X          *xorm.Engine
 	GORM       *gorm.DB
+	DAO        *dao.Query
 	Service    *service.Service
 	Middleware *middleware.Middleware
 	Redis      *redis.Client
@@ -37,6 +39,7 @@ func NewApplication(
 	batch *batch.Batch,
 	S3 *s3.S3,
 	GORM *gorm.DB,
+	DAO *dao.Query,
 ) *Application {
 	return &Application{
 		Config:     config,
@@ -49,5 +52,6 @@ func NewApplication(
 		Batch:      batch,
 		S3:         S3,
 		GORM:       GORM,
+		DAO:        DAO,
 	}
 }

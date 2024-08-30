@@ -17,6 +17,7 @@ import (
 	"rag-new/internal/base/s3"
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
+	"rag-new/internal/dao"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
@@ -46,7 +47,8 @@ func CreateApp() (*base.Application, error) {
 	db := orm.NewGORM(config, loggerLogger)
 	toolService := tool.NewService(engine, config, db)
 	toolController := v1.NewToolController(toolService, authService)
-	assistantService := assistant.NewService(engine, db)
+	query := dao.NewQuery(db)
+	assistantService := assistant.NewService(engine, db, query)
 	chat_messageService := chat_message.NewService(engine, db)
 	chatService := chat.NewService(engine, db, assistantService, chat_messageService)
 	batchBatch := batch.NewBatch(engine, loggerLogger)
@@ -63,10 +65,10 @@ func CreateApp() (*base.Application, error) {
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
-	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db)
+	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, orm.NewGORM, redis.NewRedis, s3.NewS3, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

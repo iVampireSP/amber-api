@@ -14,6 +14,7 @@ import (
 	"rag-new/internal/base/s3"
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
+	"rag-new/internal/dao"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
@@ -24,6 +25,7 @@ var ProviderSet = wire.NewSet(
 	logger.NewZapLogger,
 	orm.NewXORM,
 	orm.NewGORM,
+	dao.NewQuery,
 	redis.NewRedis,
 	s3.NewS3,
 	middleware.Provider,

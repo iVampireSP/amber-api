@@ -2,6 +2,7 @@ package base
 
 import (
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
 	"rag-new/internal/base/s3"
@@ -17,6 +18,7 @@ type Application struct {
 	HttpServer *server.HttpServer
 	Logger     *logger.Logger
 	X          *xorm.Engine
+	GORM       *gorm.DB
 	Service    *service.Service
 	Middleware *middleware.Middleware
 	Redis      *redis.Client
@@ -34,6 +36,7 @@ func NewApplication(
 	redis *redis.Client,
 	batch *batch.Batch,
 	S3 *s3.S3,
+	GORM *gorm.DB,
 ) *Application {
 	return &Application{
 		Config:     config,
@@ -45,5 +48,6 @@ func NewApplication(
 		Redis:      redis,
 		Batch:      batch,
 		S3:         S3,
+		GORM:       GORM,
 	}
 }

@@ -62,10 +62,11 @@ func CreateApp() (*base.Application, error) {
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
-	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, s3S3)
+	db := orm.NewGORM(config, loggerLogger)
+	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, redis.NewRedis, s3.NewS3, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, orm.NewGORM, redis.NewRedis, s3.NewS3, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

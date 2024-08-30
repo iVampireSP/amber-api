@@ -23,6 +23,7 @@ var ProviderSet = wire.NewSet(
 	conf.ProviderConfig,
 	logger.NewZapLogger,
 	orm.NewXORM,
+	orm.NewGORM,
 	redis.NewRedis,
 	s3.NewS3,
 	middleware.Provider,

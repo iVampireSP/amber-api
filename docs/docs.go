@@ -856,6 +856,14 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "description": "远程文件",
+                        "name": "schema.ChatDownloadRemoteFileRequest",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/rag-new_internal_schema.ChatDownloadRemoteFileRequest"
+                        }
+                    },
+                    {
                         "type": "file",
                         "description": "图片",
                         "name": "image",

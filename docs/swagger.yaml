@@ -967,6 +967,11 @@ paths:
         name: guest_id
         required: true
         type: string
+      - description: 远程文件
+        in: body
+        name: schema.ChatDownloadRemoteFileRequest
+        schema:
+          $ref: '#/definitions/rag-new_internal_schema.ChatDownloadRemoteFileRequest'
       - description: 图片
         in: formData
         name: image

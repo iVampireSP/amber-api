@@ -58,9 +58,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	var chatIdStreamKey = u.getChatIdStreamingKey(int64(chatId))
+	var chatIdStreamKey = u.getChatIdStreamingKey(schema.EntityId(chatId))
 	// 检查状态是否是回复中
-	isStreaming := u.isStreaming(c, int64(chatId))
+	isStreaming := u.isStreaming(c, schema.EntityId(chatId))
 	if isStreaming {
 		response.Status(http.StatusConflict).Error(consts.ErrChatStreamingPleaseWait).Send()
 		return
@@ -73,7 +73,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}
 
-	chatEntity, err := u.chatService.GetChat(c, int64(chatId))
+	chatEntity, err := u.chatService.GetChat(c, schema.EntityId(chatId))
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return

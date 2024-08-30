@@ -20,7 +20,7 @@ func (s *Service) ListAssistantFromUserId(ctx context.Context, userId schema.Use
 	return assistants, err
 }
 
-func (s *Service) GetAssistant(ctx context.Context, id int64) (*entity.Assistant, error) {
+func (s *Service) GetAssistant(ctx context.Context, id schema.EntityId) (*entity.Assistant, error) {
 	assistant := new(entity.Assistant)
 	_, err := s.x.Context(ctx).ID(id).Get(assistant)
 	if assistant.Id == consts.NoRecord {
@@ -46,7 +46,7 @@ func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assista
 	return err
 }
 
-func (s *Service) DeleteAssistant(ctx context.Context, id int64) error {
+func (s *Service) DeleteAssistant(ctx context.Context, id schema.EntityId) error {
 	// assistant
 	assistant, err := s.GetAssistant(ctx, id)
 	if err != nil {

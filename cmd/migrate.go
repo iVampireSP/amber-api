@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/spf13/cobra"
@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(migrateUpCmd, migrateDownCmd)
+	RootCmd.AddCommand(migrateUpCmd, migrateDownCmd)
 }
 
 var migrateUpCmd = &cobra.Command{

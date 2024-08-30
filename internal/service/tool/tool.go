@@ -145,7 +145,7 @@ func (s *Service) getToolData(url string) (*schema.ToolDiscoveryInput, error) {
 	return &toolData, err
 }
 
-func (s *Service) DeleteTool(ctx context.Context, id int64) error {
+func (s *Service) DeleteTool(ctx context.Context, id schema.EntityId) error {
 	// 做检查，不能删除已经绑定的 tool
 	count, err := s.x.Context(ctx).Where("tool_id = ?", id).Count(&entity.AssistantTool{})
 	if err != nil {
@@ -164,7 +164,7 @@ func (s *Service) DeleteTool(ctx context.Context, id int64) error {
 //	return err
 //}
 
-func (s *Service) GetTool(ctx context.Context, id int64) (*entity.Tool, error) {
+func (s *Service) GetTool(ctx context.Context, id schema.EntityId) (*entity.Tool, error) {
 	var tool = entity.Tool{}
 	_, err := s.x.Context(ctx).Where("id = ?", id).Get(&tool)
 	return &tool, err
@@ -175,7 +175,7 @@ func (s *Service) CheckTool(ctx context.Context, url string, userId schema.UserI
 	return count > 0, err
 }
 
-func (s *Service) Exists(ctx context.Context, id int64) (bool, error) {
+func (s *Service) Exists(ctx context.Context, id schema.EntityId) (bool, error) {
 	count, err := s.x.Context(ctx).Where("id = ?", id).Count(&entity.Tool{})
 	return count > 0, err
 }

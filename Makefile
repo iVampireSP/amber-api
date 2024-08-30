@@ -8,4 +8,4 @@ generate:
 	go generate ./...
 
 swag:
-	swag init -g ./cmd/http.go --parseDependency
+	swag init -g amber.go --parseDependency

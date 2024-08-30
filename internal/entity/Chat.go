@@ -8,7 +8,7 @@ import (
 type Chat struct {
 	Model       `xorm:"extends"`
 	Name        string           `xorm:"varchar(255) notnull" json:"name"`
-	AssistantId int64            `xorm:"varchar(255) notnull" json:"assistant_id"`
+	AssistantId schema.EntityId  `xorm:"varchar(255) notnull" json:"assistant_id"`
 	UserId      schema.UserId    `xorm:"user_id int(11)" json:"user_id"`
 	ExpiredAt   *time.Time       `xorm:"TIMESTAMP null" json:"expired_at"`
 	Owner       schema.ChatOwner `xorm:"varchar(255) notnull" json:"owner"`
@@ -26,7 +26,7 @@ func (a *Model) TableName() string {
 
 type ChatMessage struct {
 	Model            `xorm:"extends"`
-	ChatId           int64           `xorm:"varchar(255) notnull" json:"assistant_id"`
+	ChatId           schema.EntityId `xorm:"varchar(255) notnull" json:"assistant_id"`
 	Content          string          `xorm:"varchar(255) notnull" json:"content"`
 	Role             schema.ChatRole `xorm:"varchar(255) notnull" json:"role"`
 	Hidden           bool            `xorm:"bool notnull" json:"hidden"`

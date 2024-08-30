@@ -74,7 +74,7 @@ func (u *AssistantController) GetAssistant(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -147,7 +147,7 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -204,7 +204,7 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -266,7 +266,7 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -315,8 +315,8 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 		return
 	}
 
-	assistantId := int64(assistantIdInt)
-	toolId := int64(toolIdInt)
+	assistantId := schema.EntityId(assistantIdInt)
+	toolId := schema.EntityId(toolIdInt)
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, assistantId)
 	if err != nil {
@@ -378,8 +378,8 @@ func (u *AssistantController) UnbindTool(c *gin.Context) {
 		return
 	}
 
-	assistantId := int64(assistantIdInt)
-	toolId := int64(toolIdInt)
+	assistantId := schema.EntityId(assistantIdInt)
+	toolId := schema.EntityId(toolIdInt)
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, assistantId)
 	if err != nil {

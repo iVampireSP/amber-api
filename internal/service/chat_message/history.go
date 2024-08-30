@@ -36,9 +36,9 @@ func (s *Service) DeleteChatMessage(ctx context.Context, ChatMessage *entity.Cha
 
 func (s *Service) DeleteChatMessageByChats(ctx context.Context, chat ...*entity.Chat) error {
 	// build wherein
-	var ids = make([]int64, 0)
+	var ids = make([]uint, 0)
 	for _, v := range chat {
-		ids = append(ids, v.Id)
+		ids = append(ids, uint(v.Id))
 	}
 
 	if len(ids) == 0 {

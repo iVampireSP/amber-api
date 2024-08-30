@@ -170,7 +170,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 					}
 
 					// 获取 Tool
-					selectedTool, err = s.GetToolById(ctx, int64(toolId))
+					selectedTool, err = s.GetToolById(ctx, schema.EntityId(toolId))
 					if err != nil {
 						llmChat.ResponseChan <- &schema.AssistantResponse{
 							// 这里改成 failed 会不会更好？
@@ -328,7 +328,7 @@ func (s *Service) spiltFunctionName(functionName string) (prefix string, realFun
 	return functionNames[0], toolName
 }
 
-func (s *Service) GetToolById(ctx context.Context, id int64) (*entity.Tool, error) {
+func (s *Service) GetToolById(ctx context.Context, id schema.EntityId) (*entity.Tool, error) {
 	return s.ToolService.GetTool(ctx, id)
 }
 

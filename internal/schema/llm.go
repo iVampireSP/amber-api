@@ -1,10 +1,11 @@
 package schema
 
 import (
+	"time"
+
 	"github.com/bytedance/sonic"
 	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/llms"
-	"time"
 )
 
 type ResponseState string
@@ -94,7 +95,7 @@ type LLMChat struct {
 
 type ChatPublicModel struct {
 	Name        string     `json:"name"`
-	AssistantId int64      `json:"assistant_id"`
+	AssistantId EntityId   `json:"assistant_id"`
 	ExpiredAt   *time.Time `json:"expired_at"`
 	Owner       ChatOwner  `json:"owner"`
 	GuestId     *string    `json:"guest_id"`

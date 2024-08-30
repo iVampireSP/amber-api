@@ -20,7 +20,7 @@ type ToolDiscoveryInput struct {
 	Description string            `json:"description"  validate:"required"`
 	HomepageUrl string            `json:"homepage_url" validate:"url"`
 	CallbackUrl string            `json:"callback_url" validate:"url"`
-	ToolId      int64             `json:"-"`
+	ToolId      EntityId          `json:"-"`
 	Functions   []*FunctionsInput `json:"functions"`
 }
 

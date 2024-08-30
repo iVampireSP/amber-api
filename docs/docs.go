@@ -46,7 +46,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequest"
+                            "$ref": "#/definitions/schema.OpenAIChatCompletionRequest"
                         }
                     }
                 ],
@@ -54,19 +54,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse"
+                            "$ref": "#/definitions/schema.OpenAIChatCompletionResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -95,7 +95,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -103,7 +103,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                                "$ref": "#/definitions/entity.Assistant"
                                             }
                                         }
                                     }
@@ -114,7 +114,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -142,7 +142,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.AssistantCreateRequest"
+                            "$ref": "#/definitions/schema.AssistantCreateRequest"
                         }
                     }
                 ],
@@ -152,13 +152,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                            "$ref": "#/definitions/entity.Assistant"
                                         }
                                     }
                                 }
@@ -168,7 +168,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -206,13 +206,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                            "$ref": "#/definitions/entity.Assistant"
                                         }
                                     }
                                 }
@@ -222,7 +222,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -259,13 +259,13 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -300,7 +300,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.AssistantUpdateRequest"
+                            "$ref": "#/definitions/schema.AssistantUpdateRequest"
                         }
                     }
                 ],
@@ -310,13 +310,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                            "$ref": "#/definitions/entity.Assistant"
                                         }
                                     }
                                 }
@@ -326,7 +326,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -364,7 +364,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -372,7 +372,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantShare"
+                                                "$ref": "#/definitions/entity.AssistantShare"
                                             }
                                         }
                                     }
@@ -383,7 +383,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -419,13 +419,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantShare"
+                                            "$ref": "#/definitions/entity.AssistantShare"
                                         }
                                     }
                                 }
@@ -435,7 +435,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -477,13 +477,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -521,7 +521,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -529,7 +529,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantToolType"
+                                                "$ref": "#/definitions/entity.AssistantToolType"
                                             }
                                         }
                                     }
@@ -540,7 +540,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -585,13 +585,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                            "$ref": "#/definitions/entity.AssistantTool"
                                         }
                                     }
                                 }
@@ -601,7 +601,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -644,13 +644,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                            "$ref": "#/definitions/entity.AssistantTool"
                                         }
                                     }
                                 }
@@ -660,7 +660,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -685,7 +685,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatPublicListRequest"
+                            "$ref": "#/definitions/schema.ChatPublicListRequest"
                         }
                     }
                 ],
@@ -695,7 +695,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -703,7 +703,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                                "$ref": "#/definitions/entity.Chat"
                                             }
                                         }
                                     }
@@ -714,7 +714,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -737,7 +737,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatPublicRequest"
+                            "$ref": "#/definitions/schema.ChatPublicRequest"
                         }
                     }
                 ],
@@ -747,13 +747,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                            "$ref": "#/definitions/entity.Chat"
                                         }
                                     }
                                 }
@@ -763,7 +763,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -794,7 +794,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.GetPublicChatMessageRequest"
+                            "$ref": "#/definitions/schema.GetPublicChatMessageRequest"
                         }
                     }
                 ],
@@ -805,19 +805,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -874,13 +874,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -890,13 +890,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -904,13 +904,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -920,7 +920,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -964,7 +964,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -972,7 +972,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.ChatMessage"
+                                                "$ref": "#/definitions/entity.ChatMessage"
                                             }
                                         }
                                     }
@@ -983,7 +983,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1012,7 +1012,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.AddPublicChatMessageRequest"
+                            "$ref": "#/definitions/schema.AddPublicChatMessageRequest"
                         }
                     }
                 ],
@@ -1022,13 +1022,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1038,13 +1038,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -1052,13 +1052,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1068,7 +1068,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1106,7 +1106,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -1114,7 +1114,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                                "$ref": "#/definitions/entity.Chat"
                                             }
                                         }
                                     }
@@ -1125,7 +1125,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1154,7 +1154,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatCreateRequest"
+                            "$ref": "#/definitions/schema.ChatCreateRequest"
                         }
                     }
                 ],
@@ -1164,13 +1164,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                            "$ref": "#/definitions/entity.Chat"
                                         }
                                     }
                                 }
@@ -1180,13 +1180,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1223,25 +1223,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1280,25 +1280,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1348,13 +1348,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1364,13 +1364,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -1378,13 +1378,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1394,7 +1394,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1432,7 +1432,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -1440,7 +1440,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.ChatMessage"
+                                                "$ref": "#/definitions/entity.ChatMessage"
                                             }
                                         }
                                     }
@@ -1451,19 +1451,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1498,7 +1498,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageAddRequest"
+                            "$ref": "#/definitions/schema.ChatMessageAddRequest"
                         }
                     }
                 ],
@@ -1508,13 +1508,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1524,13 +1524,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -1538,13 +1538,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1554,7 +1554,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1615,13 +1615,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.CurrentUserResponse"
+                                            "$ref": "#/definitions/schema.CurrentUserResponse"
                                         }
                                     }
                                 }
@@ -1631,7 +1631,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1676,13 +1676,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1692,13 +1692,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -1706,13 +1706,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1722,7 +1722,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1752,7 +1752,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -1760,7 +1760,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                                "$ref": "#/definitions/entity.Tool"
                                             }
                                         }
                                     }
@@ -1771,7 +1771,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1800,7 +1800,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ToolCreateRequest"
+                            "$ref": "#/definitions/schema.ToolCreateRequest"
                         }
                     }
                 ],
@@ -1810,13 +1810,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            "$ref": "#/definitions/entity.Tool"
                                         }
                                     }
                                 }
@@ -1826,7 +1826,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1857,7 +1857,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryInput"
+                            "$ref": "#/definitions/schema.ToolDiscoveryInput"
                         }
                     }
                 ],
@@ -1865,13 +1865,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1910,13 +1910,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            "$ref": "#/definitions/entity.Tool"
                                         }
                                     }
                                 }
@@ -1926,13 +1926,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1970,13 +1970,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -2015,13 +2015,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            "$ref": "#/definitions/entity.Tool"
                                         }
                                     }
                                 }
@@ -2031,13 +2031,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -2045,11 +2045,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "rag-new_internal_entity.Assistant": {
+        "entity.Assistant": {
             "type": "object",
             "properties": {
                 "created_at": {
                     "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "description": {
                     "type": "string"
@@ -2057,14 +2060,14 @@ const docTemplate = `{
                 "disable_default_prompt": {
                     "type": "boolean"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
                 "prompt": {
                     "type": "string"
+                },
+                "string": {
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -2074,7 +2077,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_entity.AssistantShare": {
+        "entity.AssistantShare": {
             "type": "object",
             "properties": {
                 "assistant_id": {
@@ -2083,7 +2086,10 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "string": {
                     "type": "integer"
                 },
                 "token": {
@@ -2094,7 +2100,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_entity.AssistantTool": {
+        "entity.AssistantTool": {
             "type": "object",
             "properties": {
                 "assistant_id": {
@@ -2103,7 +2109,10 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "string": {
                     "type": "integer"
                 },
                 "tool_id": {
@@ -2114,11 +2123,11 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_entity.AssistantToolType": {
+        "entity.AssistantToolType": {
             "type": "object",
             "properties": {
                 "assistant": {
-                    "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                    "$ref": "#/definitions/entity.Assistant"
                 },
                 "assistant_id": {
                     "type": "integer"
@@ -2126,11 +2135,14 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "id": {
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "string": {
                     "type": "integer"
                 },
                 "tool": {
-                    "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                    "$ref": "#/definitions/entity.Tool"
                 },
                 "tool_id": {
                     "type": "integer"
@@ -2140,7 +2152,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_entity.Chat": {
+        "entity.Chat": {
             "type": "object",
             "properties": {
                 "assistant_id": {
@@ -2148,6 +2160,9 @@ const docTemplate = `{
                 },
                 "created_at": {
                     "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "expired_at": {
                     "type": "string"
@@ -2155,14 +2170,14 @@ const docTemplate = `{
                 "guest_id": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
                 "owner": {
                     "type": "string"
+                },
+                "string": {
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -2172,7 +2187,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_entity.ChatMessage": {
+        "entity.ChatMessage": {
             "type": "object",
             "properties": {
                 "assistant_id": {
@@ -2187,17 +2202,20 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
                 "hidden": {
                     "type": "boolean"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "prompt_tokens": {
                     "type": "integer"
                 },
                 "role": {
                     "type": "string"
+                },
+                "string": {
+                    "type": "integer"
                 },
                 "total_tokens": {
                     "type": "integer"
@@ -2207,7 +2225,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_entity.Tool": {
+        "entity.Tool": {
             "type": "object",
             "properties": {
                 "api_key": {
@@ -2217,7 +2235,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutput"
+                    "$ref": "#/definitions/schema.ToolDiscoveryOutput"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "description": {
                     "type": "string"
@@ -2225,11 +2246,11 @@ const docTemplate = `{
                 "discovery_url": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
+                },
+                "string": {
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -2239,7 +2260,19 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.AddPublicChatMessageRequest": {
+        "gorm.DeletedAt": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
+        "schema.AddPublicChatMessageRequest": {
             "type": "object",
             "required": [
                 "assistant_token",
@@ -2269,7 +2302,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.AssistantCreateRequest": {
+        "schema.AssistantCreateRequest": {
             "type": "object",
             "required": [
                 "description",
@@ -2297,7 +2330,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.AssistantUpdateRequest": {
+        "schema.AssistantUpdateRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2321,7 +2354,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ChatCreateRequest": {
+        "schema.ChatCreateRequest": {
             "type": "object",
             "required": [
                 "assistant_id",
@@ -2332,7 +2365,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "expired_at": {
-                    "$ref": "#/definitions/rag-new_internal_schema.CustomTime"
+                    "$ref": "#/definitions/schema.CustomTime"
                 },
                 "name": {
                     "type": "string",
@@ -2340,7 +2373,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ChatMessageAddRequest": {
+        "schema.ChatMessageAddRequest": {
             "type": "object",
             "required": [
                 "message",
@@ -2364,7 +2397,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ChatMessageResponse": {
+        "schema.ChatMessageResponse": {
             "type": "object",
             "properties": {
                 "stream": {
@@ -2375,7 +2408,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ChatPublicListRequest": {
+        "schema.ChatPublicListRequest": {
             "type": "object",
             "required": [
                 "guest_id"
@@ -2386,7 +2419,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ChatPublicRequest": {
+        "schema.ChatPublicRequest": {
             "type": "object",
             "required": [
                 "assistant_token",
@@ -2406,7 +2439,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.CurrentUserResponse": {
+        "schema.CurrentUserResponse": {
             "type": "object",
             "properties": {
                 "ip": {
@@ -2426,7 +2459,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.CustomTime": {
+        "schema.CustomTime": {
             "type": "object",
             "properties": {
                 "time.Time": {
@@ -2434,7 +2467,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.FunctionsInput": {
+        "schema.FunctionsInput": {
             "type": "object",
             "required": [
                 "description",
@@ -2449,11 +2482,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parameters": {
-                    "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters"
+                    "$ref": "#/definitions/schema.ToolDiscoveryOutputFunctionParameters"
                 }
             }
         },
-        "rag-new_internal_schema.GetPublicChatMessageRequest": {
+        "schema.GetPublicChatMessageRequest": {
             "type": "object",
             "required": [
                 "assistant_token",
@@ -2468,7 +2501,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIChatCompletionRequest": {
+        "schema.OpenAIChatCompletionRequest": {
             "type": "object",
             "properties": {
                 "max_tokens": {
@@ -2479,7 +2512,7 @@ const docTemplate = `{
                     "description": "Required",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage"
+                        "$ref": "#/definitions/schema.OpenAIChatCompletionRequestMessage"
                     }
                 },
                 "model": {
@@ -2504,14 +2537,14 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIChatCompletionRequestMessage": {
+        "schema.OpenAIChatCompletionRequestMessage": {
             "type": "object",
             "properties": {
                 "content": {
                     "description": "Required"
                 },
                 "image_url": {
-                    "$ref": "#/definitions/rag-new_internal_schema.OpenAIImageUrl"
+                    "$ref": "#/definitions/schema.OpenAIImageUrl"
                 },
                 "role": {
                     "description": "Required",
@@ -2519,13 +2552,13 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIChatCompletionResponse": {
+        "schema.OpenAIChatCompletionResponse": {
             "type": "object",
             "properties": {
                 "choices": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponseChoice"
+                        "$ref": "#/definitions/schema.OpenAIChatCompletionResponseChoice"
                     }
                 },
                 "created": {
@@ -2541,22 +2574,22 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "usage": {
-                    "$ref": "#/definitions/rag-new_internal_schema.TokenUsage"
+                    "$ref": "#/definitions/schema.TokenUsage"
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIChatCompletionResponseChoice": {
+        "schema.OpenAIChatCompletionResponseChoice": {
             "type": "object",
             "properties": {
                 "index": {
                     "type": "integer"
                 },
                 "message": {
-                    "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage"
+                    "$ref": "#/definitions/schema.OpenAIChatCompletionRequestMessage"
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIImageUrl": {
+        "schema.OpenAIImageUrl": {
             "type": "object",
             "properties": {
                 "detail": {
@@ -2567,7 +2600,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ResponseBody": {
+        "schema.ResponseBody": {
             "type": "object",
             "properties": {
                 "data": {},
@@ -2582,7 +2615,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.TokenUsage": {
+        "schema.TokenUsage": {
             "type": "object",
             "properties": {
                 "completion_tokens": {
@@ -2596,7 +2629,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ToolCreateRequest": {
+        "schema.ToolCreateRequest": {
             "type": "object",
             "required": [
                 "description",
@@ -2622,7 +2655,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryInput": {
+        "schema.ToolDiscoveryInput": {
             "type": "object",
             "required": [
                 "description",
@@ -2638,7 +2671,7 @@ const docTemplate = `{
                 "functions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.FunctionsInput"
+                        "$ref": "#/definitions/schema.FunctionsInput"
                     }
                 },
                 "homepage_url": {
@@ -2649,7 +2682,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryOutput": {
+        "schema.ToolDiscoveryOutput": {
             "type": "object",
             "properties": {
                 "callback_url": {
@@ -2661,7 +2694,7 @@ const docTemplate = `{
                 "function": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctions"
+                        "$ref": "#/definitions/schema.ToolDiscoveryOutputFunctions"
                     }
                 },
                 "homepage_url": {
@@ -2672,7 +2705,7 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryOutputFunction": {
+        "schema.ToolDiscoveryOutputFunction": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2682,11 +2715,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parameters": {
-                    "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters"
+                    "$ref": "#/definitions/schema.ToolDiscoveryOutputFunctionParameters"
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters": {
+        "schema.ToolDiscoveryOutputFunctionParameters": {
             "type": "object",
             "required": [
                 "properties",
@@ -2706,13 +2739,13 @@ const docTemplate = `{
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryOutputFunctions": {
+        "schema.ToolDiscoveryOutputFunctions": {
             "type": "object",
             "properties": {
                 "functions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunction"
+                        "$ref": "#/definitions/schema.ToolDiscoveryOutputFunction"
                     }
                 },
                 "type": {

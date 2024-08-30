@@ -39,20 +39,20 @@ func (ct *CustomTime) MarshalJSON() ([]byte, error) {
 }
 
 type ChatRequest struct {
-	ChatId int64 `uri:"id" binding:"required"`
+	ChatId EntityId `uri:"id" binding:"required"`
 }
 
 type ChatCreateRequest struct {
 	Name        string      `json:"name" binding:"required" validate:"max=30"`
-	AssistantId int64       `json:"assistant_id" binding:"required"`
+	AssistantId EntityId    `json:"assistant_id" binding:"required"`
 	ExpiredAt   *CustomTime `json:"expired_at" time_format:"2006-01-02" time_utc:"1"`
 	UserId      UserId      `json:"user_id" swaggerignore:"true" binding:"-"`
 }
 
 type ChatGuestCreateRequest struct {
-	Name        string `json:"name" binding:"required" validate:"max=30"`
-	AssistantId int64  `json:"assistant_id" binding:"required"`
-	GuestID     string `json:"guest_id" binding:"required" validate:"max=32"`
+	Name        string   `json:"name" binding:"required" validate:"max=30"`
+	AssistantId EntityId `json:"assistant_id" binding:"required"`
+	GuestID     string   `json:"guest_id" binding:"required" validate:"max=32"`
 }
 
 type ChatMessageAddRequest struct {

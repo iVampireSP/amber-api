@@ -64,7 +64,7 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 	return &chat, err
 }
 
-func (s *Service) GetChat(ctx context.Context, id int64) (*entity.Chat, error) {
+func (s *Service) GetChat(ctx context.Context, id schema.EntityId) (*entity.Chat, error) {
 	var chat entity.Chat
 	_, err := s.x.Context(ctx).
 		ID(id).
@@ -122,7 +122,7 @@ func (s *Service) DeleteChats(ctx context.Context, chat ...*entity.Chat) error {
 	return nil
 }
 
-func (s *Service) DeleteChatFromUserId(ctx context.Context, id int64, userId schema.UserId) error {
+func (s *Service) DeleteChatFromUserId(ctx context.Context, id schema.EntityId, userId schema.UserId) error {
 	count, err := s.x.Context(ctx).Where("id = ?", id).Where("user_id = ?", userId).Delete(&entity.Chat{})
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func (s *Service) DeleteChatFromUserId(ctx context.Context, id int64, userId sch
 	return nil
 }
 
-func (s *Service) Exists(ctx context.Context, id int64) (bool, error) {
+func (s *Service) Exists(ctx context.Context, id schema.EntityId) (bool, error) {
 	count, err := s.x.Context(ctx).Where("id = ?", id).Count(&entity.Chat{})
 	return count > 0, err
 }

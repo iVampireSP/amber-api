@@ -63,7 +63,7 @@ func (u *ChatController) List(c *gin.Context) {
 			return
 		}
 
-		assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantIdInt))
+		assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantIdInt))
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -145,13 +145,13 @@ func (u *ChatController) Delete(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	isStreaming := u.isStreaming(c, int64(chatId))
+	isStreaming := u.isStreaming(c, schema.EntityId(chatId))
 	if isStreaming {
 		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
 		return
 	}
 
-	err = u.chatService.DeleteChatFromUserId(c, int64(chatId), u.authService.GetUserId(c))
+	err = u.chatService.DeleteChatFromUserId(c, schema.EntityId(chatId), u.authService.GetUserId(c))
 	if err != nil {
 		if errors.Is(err, consts.ErrChatNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -165,11 +165,11 @@ func (u *ChatController) Delete(c *gin.Context) {
 	response.Status(http.StatusOK).Send()
 }
 
-func (u *ChatController) getChatIdStreamingKey(chatId int64) string {
+func (u *ChatController) getChatIdStreamingKey(chatId schema.EntityId) string {
 	return u.getCacheKey("entity:" + strconv.Itoa(int(chatId)) + ":streaming")
 }
 
-func (u *ChatController) isStreaming(ctx context.Context, chatId int64) bool {
+func (u *ChatController) isStreaming(ctx context.Context, chatId schema.EntityId) bool {
 	// 检查状态是否是回复中
 	chatIdStreamingKey := u.getChatIdStreamingKey(chatId)
 	i, err := u.redis.Exists(ctx, chatIdStreamingKey).Result()

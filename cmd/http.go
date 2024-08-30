@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"github.com/spf13/cobra"
@@ -7,13 +7,8 @@ import (
 	"sync"
 )
 
-// @title           Leaflow Amber
-// @version         1.0
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
 func init() {
-	rootCmd.AddCommand(httpCmd)
+	RootCmd.AddCommand(httpCmd)
 }
 
 var httpCmd = &cobra.Command{

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(toolCmd)
+	RootCmd.AddCommand(toolCmd)
 }
 
 var toolCmd = &cobra.Command{

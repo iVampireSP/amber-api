@@ -3,6 +3,7 @@ package assistant
 import (
 	"context"
 	"rag-new/internal/entity"
+	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
 	"rag-new/pkg/random"
 )
@@ -27,7 +28,7 @@ func (s *Service) CrateShare(ctx context.Context, assistant *entity.Assistant) (
 	return assistantShare, err
 }
 
-func (s *Service) GetShare(ctx context.Context, assistantShareId int64) (*entity.AssistantShareType, error) {
+func (s *Service) GetShare(ctx context.Context, assistantShareId schema.EntityId) (*entity.AssistantShareType, error) {
 	var assistantShareType = entity.AssistantShareType{}
 	b, err := s.x.Context(ctx).
 		Where("assistant_shares.id = ?", assistantShareId).

@@ -5,7 +5,8 @@ import (
 )
 
 type File struct {
-	Model
+	Model `xorm:"extends"`
+
 	Url       *string    `xorm:"varchar(255) notnull" json:"url"`
 	UrlHash   *string    `xorm:"varchar(255) notnull" json:"url_hash"`
 	FileHash  string     `xorm:"varchar(255) notnull" json:"file_hash"`

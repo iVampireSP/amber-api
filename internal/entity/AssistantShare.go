@@ -1,16 +1,20 @@
 package entity
 
+import "rag-new/internal/schema"
+
 type AssistantShare struct {
-	Model
-	AssistantId int64  `xorm:"varchar(255) notnull" json:"assistant_id"`
-	Token       string `xorm:"varchar(255) notnull" json:"token"`
+	Model `xorm:"extends"`
+
+	AssistantId schema.EntityId `xorm:"varchar(255) notnull" json:"assistant_id"`
+	Token       string          `xorm:"varchar(255) notnull" json:"token"`
 }
 
 type AssistantShareType struct {
-	Model
-	Token       string     `xorm:"varchar(255) notnull" json:"token"`
-	AssistantId int64      `xorm:"int(8) notnull index" json:"assistant_id"`
-	Assistant   *Assistant `xorm:"extends" json:"assistant"`
+	Model `xorm:"extends"`
+
+	Token       string          `xorm:"varchar(255) notnull" json:"token"`
+	AssistantId schema.EntityId `xorm:"int(8) notnull index" json:"assistant_id"`
+	Assistant   *Assistant      `xorm:"extends" json:"assistant"`
 }
 
 func (a *AssistantShare) TableName() string {

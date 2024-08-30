@@ -16,7 +16,7 @@ type ChatPublicListRequest struct {
 }
 
 type GetPublicChatMessageRequestParams struct {
-	ChatId int64 `uri:"chat_id" binding:"required"`
+	ChatId EntityId `uri:"chat_id" binding:"required"`
 }
 
 type GetPublicChatMessageRequest struct {

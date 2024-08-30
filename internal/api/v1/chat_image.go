@@ -3,6 +3,7 @@ package v1
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"mime/multipart"
 	"net/http"
 	"rag-new/internal/entity"
@@ -114,13 +115,14 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 
 	// last chat message
 	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
-
-	if lastChatMessage.Role == schema.RoleFile && lastChatMessage.Content == file.Id.String() {
-		response.Message(consts.HintProvideSameImage)
+	if lastChatMessage != nil {
+		if lastChatMessage.Role == schema.RoleFile && lastChatMessage.Content == file.Id.String() {
+			response.Message(consts.HintProvideSameImage)
+		}
 	}
 
 	var chatMessage entity.ChatMessage

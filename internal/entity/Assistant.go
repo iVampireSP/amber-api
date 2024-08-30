@@ -21,9 +21,11 @@ func (a *Assistant) GetUserId() schema.UserId {
 }
 
 type AssistantTool struct {
-	Model       `xorm:"extends"`
-	AssistantId schema.EntityId `xorm:"int(255) notnull" json:"assistant_id"`
-	ToolId      schema.EntityId `xorm:"int(255) notnull" json:"tool_id"`
+	Model
+	AssistantId schema.EntityId `json:"assistant_id"`
+	ToolId      schema.EntityId `json:"tool_id"`
+	Assistant   Assistant       `json:"assistant"`
+	Tool        Tool            `json:"tool"`
 }
 
 type AssistantToolType struct {

@@ -5,80 +5,75 @@ import (
 	"errors"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	"rag-new/pkg/consts"
 )
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
-	var chatMessage = make([]*entity.ChatMessage, 0)
-	err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).And("role != ?", schema.RoleHideSystem.String()).And("role != ?", schema.RoleHideHuman.String()).OrderBy("created_at asc").Find(&chatMessage)
+	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.
+		Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).
+		Where(s.dao.ChatMessage.Role.Neq(schema.RoleHideSystem.String())).
+		Where(s.dao.ChatMessage.Role.Neq(schema.RoleHideHuman.String())).
+		Order(s.dao.ChatMessage.CreatedAt.Asc()).
+		Find()
+
 	return chatMessage, err
 }
 
 func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
-	var chatMessage = make([]*entity.ChatMessage, 0)
-	err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).OrderBy("created_at asc").Find(&chatMessage)
+	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.
+		Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).
+		Order(s.dao.ChatMessage.CreatedAt.Asc()).
+		Find()
+
 	return chatMessage, err
 }
 
-func (s *Service) CreateChatMessage(ctx context.Context, ChatMessage *entity.ChatMessage) error {
-	if ChatMessage.ChatId == consts.NoRecord {
-		return consts.ErrChatIdNotProvided
-	}
+func (s *Service) CreateChatMessage(ctx context.Context, chatMessage *entity.ChatMessage) error {
+	err := s.dao.WithContext(ctx).ChatMessage.Create(chatMessage)
 
-	_, err := s.x.Context(ctx).Insert(ChatMessage)
 	return err
 }
 
 func (s *Service) DeleteChatMessage(ctx context.Context, ChatMessage *entity.ChatMessage) error {
-	_, err := s.x.Context(ctx).ID(ChatMessage.Id).Delete(ChatMessage)
+	_, err := s.dao.WithContext(ctx).ChatMessage.Delete(ChatMessage)
+
 	return err
 }
 
 func (s *Service) DeleteChatMessageByChats(ctx context.Context, chat ...*entity.Chat) error {
-	// build wherein
-	var ids = make([]uint, 0)
-	for _, v := range chat {
-		ids = append(ids, uint(v.Id))
-	}
-
-	if len(ids) == 0 {
+	if len(chat) == 0 {
 		return errors.New("no chat provided")
 	}
 
-	_, err := s.x.Context(ctx).In("chat_id", ids).Delete(&entity.ChatMessage{})
+	_, err := s.dao.WithContext(ctx).Chat.Delete(chat...)
+
 	return err
 }
 
 // CountChatMessage count messages
 func (s *Service) CountChatMessage(ctx context.Context, chat *entity.Chat) (int64, error) {
-	count, err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).Count(&entity.ChatMessage{})
+	count, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Count()
+
 	return count, err
-}
-
-func (s *Service) DeleteChatMessageByAssistantId(ctx context.Context, assistantId int64) error {
-	_, err := s.x.Context(ctx).Where("assistant_id = ?", assistantId).Delete(&entity.ChatMessage{})
-	return err
-}
-
-func (s *Service) DeleteChatMessageByUserId(ctx context.Context, userId schema.UserId) error {
-	_, err := s.x.Context(ctx).Where("user_id = ?", userId).Delete(&entity.ChatMessage{})
-	return err
 }
 
 // GetLatestMessage get latest chat message
 func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*entity.ChatMessage, error) {
-	var chatMessage entity.ChatMessage
-	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).Limit(1).OrderBy("id desc").Get(&chatMessage)
-	return &chatMessage, err
+	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Order(s.dao.ChatMessage.CreatedAt.Desc()).First()
+
+	return chatMessage, err
 }
 
 // UpdateMessageContent update message content
 func (s *Service) UpdateMessageContent(ctx context.Context, chatMessage *entity.ChatMessage) error {
-	_, err := s.x.Context(ctx).ID(chatMessage.Id).Cols("content").Update(chatMessage)
+	_, err := s.dao.WithContext(ctx).ChatMessage.
+		Where(s.dao.ChatMessage.Id.Eq(uint(chatMessage.ChatId))).
+		Update(s.dao.ChatMessage.Content, chatMessage.Content)
+
 	return err
 }
 
 func (s *Service) ClearChatMessage(ctx context.Context, chat *entity.Chat) error {
-	_, err := s.x.Context(ctx).Where("chat_id = ?", chat.Id).Delete(&entity.ChatMessage{})
+	_, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Delete()
+
 	return err
 }

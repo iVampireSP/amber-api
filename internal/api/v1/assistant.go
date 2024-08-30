@@ -280,7 +280,7 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 		return
 	}
 
-	toolList, err := u.assistantService.ListAssistantToolWithType(c, assistantEntity)
+	toolList, err := u.assistantService.GetAssistantTool(c, assistantEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return

@@ -2,6 +2,7 @@ package schema
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"github.com/bytedance/sonic"
 	"strconv"
 )
@@ -89,20 +90,11 @@ type ToolDiscoveryOutputFunctionParameters struct {
 	Required   []string    `json:"required" validate:"required"`
 }
 
-func (td *ToolDiscoveryOutput) FromDB(data []byte) error {
-	return sonic.Unmarshal(data, &td)
-}
-
-func (td *ToolDiscoveryOutput) ToDB() ([]byte, error) {
-	return sonic.Marshal(&td)
-}
-
-// scan
-
 func (td *ToolDiscoveryOutput) Scan(value interface{}) error {
 	return sonic.Unmarshal(value.([]byte), &td)
 }
 
-func (td *ToolDiscoveryOutput) Value() (driver.Value, error) {
-	return sonic.Marshal(td)
+func (td ToolDiscoveryOutput) Value() (driver.Value, error) {
+	fmt.Println("value!!!!!!!!!!")
+	return sonic.Marshal(&td)
 }

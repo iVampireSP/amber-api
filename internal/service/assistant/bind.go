@@ -7,14 +7,13 @@ import (
 )
 
 func (s *Service) BindTool(ctx context.Context, assistant *entity.Assistant, tool *entity.Tool) (*entity.AssistantTool, error) {
-	var toolBind = &entity.AssistantTool{}
-	_, err := s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Where("tool_id = ?", tool.Id).Get(toolBind)
+	// 检测是否绑定
+	count, err := s.dao.WithContext(ctx).AssistantTool.Where(s.dao.AssistantTool.AssistantId.Eq(uint(assistant.Id))).Where(s.dao.AssistantTool.ToolId.Eq(uint(tool.Id))).Count()
 	if err != nil {
 		return nil, err
 	}
 
-	// 检测是否被 bind（记录是否存在）
-	if toolBind.Id != consts.NoRecord {
+	if count > 0 {
 		return nil, consts.ErrAssistantAlreadyBindTheTool
 	}
 
@@ -36,55 +35,64 @@ func (s *Service) BindTool(ctx context.Context, assistant *entity.Assistant, too
 		return nil, consts.ErrAssistantNotFound
 	}
 
+	// 检测是否绑定
+	var toolBind = &entity.AssistantTool{}
+
 	toolBind.ToolId = tool.Id
 	toolBind.AssistantId = assistant.Id
 
-	_, err = s.x.Context(ctx).Cols("tool_id", "assistant_id").Insert(toolBind)
-	//_, err = s.x.Context(ctx).Cols("tool_id", "assistant_id").Insert(toolBind)
+	// 保存
+	err = s.dao.WithContext(ctx).AssistantTool.Save(toolBind)
 
 	return toolBind, err
 }
 
 func (s *Service) UnbindTool(ctx context.Context, assistant *entity.Assistant, tool *entity.Tool) error {
-	var assistantTool = &entity.AssistantTool{}
-
 	// 检测是否被 bind（记录是否存在）
-	_, err := s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Where("tool_id = ?", tool.Id).Get(assistantTool)
+	assistantTool, err := s.dao.WithContext(ctx).
+		AssistantTool.Where(s.dao.AssistantTool.AssistantId.Eq(uint(assistant.Id))).
+		Where(s.dao.AssistantTool.ToolId.Eq(uint(tool.Id))).
+		First()
 	if err != nil {
 		return err
 	}
 
-	if assistantTool.Id == consts.NoRecord {
-		return consts.ErrAssistantNotFound
+	count, err := s.dao.WithContext(ctx).AssistantTool.Where(s.dao.AssistantTool.AssistantId.Eq(uint(assistant.Id))).
+		Where(s.dao.AssistantTool.ToolId.Eq(uint(tool.Id))).Count()
+	if err != nil {
+		return err
 	}
 
-	_, err = s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Where("tool_id = ?", tool.Id).Delete(&entity.AssistantTool{})
+	if count == 0 {
+		return consts.ErrToolNotBind
+	}
+
+	_, err = s.dao.WithContext(ctx).AssistantTool.Where(s.dao.AssistantTool.AssistantId.Eq(uint(assistant.Id))).Where(s.dao.AssistantTool.ToolId.Eq(uint(tool.Id))).Delete(assistantTool)
 
 	return err
 }
 
 func (s *Service) ToolExists(ctx context.Context, tool *entity.Tool) (bool, error) {
-	count, err := s.x.Context(ctx).Where("id = ?", tool.Id).Count(&entity.Tool{})
+	count, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.Id.Eq(uint(tool.Id))).Count()
 	return count > 0, err
 }
 
 func (s *Service) AssistantExists(ctx context.Context, assistant *entity.Assistant) (bool, error) {
-	count, err := s.x.Context(ctx).Where("id = ?", assistant.Id).Count(&entity.Assistant{})
+	count, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).Count()
 	return count > 0, err
 }
 
 func (s *Service) ListAssistantTool(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantTool, error) {
-	var assistantTools []*entity.AssistantTool
-	err := s.x.Context(ctx).
-		Where("assistant_id = ?", assistant.Id).Find(&assistantTools)
+	assistantTools, err := s.dao.WithContext(ctx).AssistantTool.Where(s.dao.AssistantTool.AssistantId.Eq(uint(assistant.Id))).Preload(s.dao.AssistantTool.Tool).Find()
+
 	return assistantTools, err
 }
 
-func (s *Service) ListAssistantToolWithType(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantToolType, error) {
-	var assistantToolType = make([]*entity.AssistantToolType, 0)
-	err := s.x.Context(ctx).
-		Join("INNER", "assistants", "assistants.id = assistant_tools.assistant_id").
-		Join("INNER", "tools", "tools.id = assistant_tools.tool_id").
-		Where("assistant_id = ?", assistant.Id).Find(&assistantToolType)
-	return assistantToolType, err
-}
+//func (s *Service) ListAssistantToolWithType(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantToolType, error) {
+//	var assistantToolType = make([]*entity.AssistantToolType, 0)
+//	err := s.x.Context(ctx).
+//		Join("INNER", "assistants", "assistants.id = assistant_tools.assistant_id").
+//		Join("INNER", "tools", "tools.id = assistant_tools.tool_id").
+//		Where("assistant_id = ?", assistant.Id).Find(&assistantToolType)
+//	return assistantToolType, err
+//}

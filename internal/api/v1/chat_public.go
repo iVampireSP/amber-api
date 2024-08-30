@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/entity"
 	_ "rag-new/internal/entity"
@@ -213,13 +214,6 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		return
 	}
 
-	// 用户打开了会话且没有正在输出的情况，获取最后一条消息
-	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
 	// 生成访客信息
 	var publicUser = &schema.UserPublicInfo{
 		Name:      "Guest",
@@ -227,26 +221,36 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		ChatOwner: schema.OwnerUser,
 	}
 
-	// 检测角色是否是 human
-	if lastChatMessage.Role == schema.RoleHuman {
-		// 如果两个消息都是 human，则丢弃上一条消息，修改上一条消息的内容
-		lastChatMessage.Content = addPublicChatMessageRequest.Message
-		err = u.cm.UpdateMessageContent(c, lastChatMessage)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-
-		// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
-		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-		chatMessageResponse.StreamId = randomStreamId
-
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpenAndOverrideMessage).Data(chatMessageResponse).Send()
+	// 用户打开了会话且没有正在输出的情况，获取最后一条消息
+	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
+	}
+
+	if lastChatMessage != nil {
+
+		// 检测角色是否是 human
+		if lastChatMessage.Role == schema.RoleHuman {
+			// 如果两个消息都是 human，则丢弃上一条消息，修改上一条消息的内容
+			lastChatMessage.Content = addPublicChatMessageRequest.Message
+			err = u.cm.UpdateMessageContent(c, lastChatMessage)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+
+			// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
+			randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+			chatMessageResponse.StreamId = randomStreamId
+
+			response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpenAndOverrideMessage).Data(chatMessageResponse).Send()
+			return
+		}
 	}
 
 	var chatMessage entity.ChatMessage

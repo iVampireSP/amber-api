@@ -41,7 +41,7 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 		chat.ExpiredAt = &createChatRequest.ExpiredAt.Time
 	}
 
-	_, err = s.x.Context(ctx).Insert(&chat)
+	err = s.dao.WithContext(ctx).Chat.Create(&chat)
 
 	return &chat, err
 }
@@ -59,44 +59,15 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 
 	chat.ExpiredAt = &t
 
-	_, err := s.x.Context(ctx).Insert(&chat)
+	err := s.dao.WithContext(ctx).Chat.Create(&chat)
 
 	return &chat, err
 }
 
 func (s *Service) GetChat(ctx context.Context, id schema.EntityId) (*entity.Chat, error) {
-	var chat entity.Chat
-	_, err := s.x.Context(ctx).
-		ID(id).
-		Get(&chat)
-	return &chat, err
-}
+	chat, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(id))).First()
 
-func (s *Service) GetChatWithAssistant(ctx context.Context, chatId int64) (*entity.ChatWithAssistant, error) {
-	var chat entity.ChatWithAssistant
-	_, err := s.x.Context(ctx).
-		Join("INNER", "assistants", "assistants.id = chats.assistant_id").
-		ID(chatId).
-		Get(&chat)
-	return &chat, err
-}
-
-func (s *Service) ListChat(ctx context.Context) ([]*entity.Chat, error) {
-	var chats []*entity.Chat
-	err := s.x.Context(ctx).Find(&chats)
-	return chats, err
-}
-
-func (s *Service) DeleteChat(ctx context.Context, chat *entity.Chat) error {
-	// 确保所有的 message 已被删除
-	count, err := s.cm.CountChatMessage(ctx, chat)
-
-	if count > 0 {
-		return consts.ErrChatCanNotDeleteBecauseNotCleared
-	}
-
-	_, err = s.x.Context(ctx).ID(chat.Id).Delete(&entity.Chat{})
-	return err
+	return chat, err
 }
 
 func (s *Service) DeleteChats(ctx context.Context, chat ...*entity.Chat) error {
@@ -116,64 +87,56 @@ func (s *Service) DeleteChats(ctx context.Context, chat ...*entity.Chat) error {
 			return consts.ErrChatCanNotDeleteBecauseNotCleared
 		}
 
-		_, err = s.x.Context(ctx).ID(v.Id).Delete(&entity.Chat{})
+		_, err = s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(v.Id))).Delete()
+		if err != nil {
+			return err
+		}
+
 	}
 
 	return nil
 }
 
 func (s *Service) DeleteChatFromUserId(ctx context.Context, id schema.EntityId, userId schema.UserId) error {
-	count, err := s.x.Context(ctx).Where("id = ?", id).Where("user_id = ?", userId).Delete(&entity.Chat{})
-	if err != nil {
-		return err
-	}
-	if count == 0 {
-		return consts.ErrChatNotFound
-	}
+	_, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(id))).Where(s.dao.Chat.UserId.Eq(int64(userId))).Delete()
 
-	return nil
-}
-
-func (s *Service) Exists(ctx context.Context, id schema.EntityId) (bool, error) {
-	count, err := s.x.Context(ctx).Where("id = ?", id).Count(&entity.Chat{})
-	return count > 0, err
+	return err
 }
 
 func (s *Service) ListChatFromUserId(ctx context.Context, userId schema.UserId) ([]*entity.Chat, error) {
-	var chats []*entity.Chat
-	err := s.x.Context(ctx).Where("user_id = ?", userId).Find(&chats)
+	chats, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.UserId.Eq(int64(userId))).Find()
+
 	return chats, err
 }
 
 func (s *Service) ListChatFromAssistantIdWithAssistant(ctx context.Context, assistant *entity.Assistant) ([]*entity.Chat, error) {
-	var chats []*entity.Chat
-	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Find(&chats)
+	chats, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.AssistantId.Eq(uint(assistant.Id))).Find()
+
 	return chats, err
 }
 
 func (s *Service) ListChatFromAssistantByPage(ctx context.Context, assistant *entity.Assistant, page int) ([]*entity.Chat, error) {
-	var chats []*entity.Chat
 	var limit = 20
-	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Limit(limit, (page-1)*limit).Find(&chats)
+
+	chats, _, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.AssistantId.Eq(uint(assistant.Id))).FindByPage((page-1)*limit, limit)
+
 	return chats, err
 }
 
 func (s *Service) ListChatFromGuestId(ctx context.Context, guestId string) ([]*entity.Chat, error) {
-	var chats []*entity.Chat
-	err := s.x.Context(ctx).Where("owner = ?", schema.OwnerGuest.String()).Where("guest_id = ?", guestId).Find(&chats)
-	return chats, err
-}
+	chats, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Owner.Eq(schema.OwnerGuest.String())).Where(s.dao.Chat.GuestId.Eq(guestId)).Find()
 
-func (s *Service) ListChatFromGuestByPage(ctx context.Context, guestId string, page int) ([]*entity.Chat, error) {
-	var chats []*entity.Chat
-	var limit = 20
-	err := s.x.Context(ctx).Where("owner", schema.OwnerGuest.String()).Where("guest_id = ?", guestId).Limit(limit, (page-1)*limit).Find(&chats)
 	return chats, err
 }
 
 func (s *Service) DeleteExpiredChats(ctx context.Context, beforeTime time.Time) error {
 	// 防止瞬时压力过大，一次删除固定数量
 	var num = 1000
-	_, err := s.x.Context(ctx).Where("expired_at < ?", beforeTime).Limit(num).Delete(&entity.Chat{})
+
+	_, err := s.dao.Chat.WithContext(ctx).Where(s.dao.Chat.ExpiredAt.Lt(beforeTime)).Limit(num).Delete()
+	if err != nil {
+		return err
+	}
+
 	return err
 }

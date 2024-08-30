@@ -1,15 +1,13 @@
 package chat_message
 
 import (
-	"gorm.io/gorm"
-	"xorm.io/xorm"
+	"rag-new/internal/dao"
 )
 
 type Service struct {
-	x  *xorm.Engine
-	db *gorm.DB
+	dao *dao.Query
 }
 
-func NewService(x *xorm.Engine, db *gorm.DB) *Service {
-	return &Service{x, db}
+func NewService(dao *dao.Query) *Service {
+	return &Service{dao}
 }

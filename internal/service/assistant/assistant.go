@@ -23,6 +23,12 @@ func (s *Service) GetAssistant(ctx context.Context, id schema.EntityId) (*entity
 
 	return assistant, err
 }
+func (s *Service) GetAssistantTool(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantTool, error) {
+	assistantTool, err := s.dao.WithContext(ctx).AssistantTool.Where(s.dao.AssistantTool.AssistantId.Eq(uint(assistant.Id))).
+		Preload(s.dao.AssistantTool.Tool).Find()
+
+	return assistantTool, err
+}
 
 func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.AssistantCreateRequest) (*entity.Assistant, error) {
 	var assistant entity.Assistant
@@ -75,10 +81,15 @@ func (s *Service) DeleteAssistant(ctx context.Context, id schema.EntityId) error
 func (s *Service) ToLLMTool(ctx context.Context, assistant *entity.Assistant) ([]llms.Tool, error) {
 	var toolList []llms.Tool
 
-	toolEntity, err := s.ListAssistantToolWithType(ctx, assistant)
+	toolEntity, err := s.dao.WithContext(ctx).AssistantTool.Where(s.dao.AssistantTool.AssistantId.Eq(uint(assistant.Id))).Preload(s.dao.AssistantTool.Tool).Find()
 	if err != nil {
 		return nil, err
 	}
+
+	//toolEntity, err := s.ListAssistantToolWithType(ctx, assistant)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	// 转换格式
 	for _, v := range toolEntity {

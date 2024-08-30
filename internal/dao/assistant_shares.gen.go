@@ -32,6 +32,11 @@ func newAssistantShare(db *gorm.DB, opts ...gen.DOOption) assistantShare {
 	_assistantShare.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_assistantShare.AssistantId = field.NewUint(tableName, "assistant_id")
 	_assistantShare.Token = field.NewString(tableName, "token")
+	_assistantShare.Assistant = assistantShareBelongsToAssistant{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Assistant", "entity.Assistant"),
+	}
 
 	_assistantShare.fillFieldMap()
 
@@ -47,6 +52,7 @@ type assistantShare struct {
 	UpdatedAt   field.Time
 	AssistantId field.Uint
 	Token       field.String
+	Assistant   assistantShareBelongsToAssistant
 
 	fieldMap map[string]field.Expr
 }
@@ -84,12 +90,13 @@ func (a *assistantShare) GetFieldByName(fieldName string) (field.OrderExpr, bool
 }
 
 func (a *assistantShare) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 5)
+	a.fieldMap = make(map[string]field.Expr, 6)
 	a.fieldMap["id"] = a.Id
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["assistant_id"] = a.AssistantId
 	a.fieldMap["token"] = a.Token
+
 }
 
 func (a assistantShare) clone(db *gorm.DB) assistantShare {
@@ -100,6 +107,77 @@ func (a assistantShare) clone(db *gorm.DB) assistantShare {
 func (a assistantShare) replaceDB(db *gorm.DB) assistantShare {
 	a.assistantShareDo.ReplaceDB(db)
 	return a
+}
+
+type assistantShareBelongsToAssistant struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a assistantShareBelongsToAssistant) Where(conds ...field.Expr) *assistantShareBelongsToAssistant {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a assistantShareBelongsToAssistant) WithContext(ctx context.Context) *assistantShareBelongsToAssistant {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a assistantShareBelongsToAssistant) Session(session *gorm.Session) *assistantShareBelongsToAssistant {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a assistantShareBelongsToAssistant) Model(m *entity.AssistantShare) *assistantShareBelongsToAssistantTx {
+	return &assistantShareBelongsToAssistantTx{a.db.Model(m).Association(a.Name())}
+}
+
+type assistantShareBelongsToAssistantTx struct{ tx *gorm.Association }
+
+func (a assistantShareBelongsToAssistantTx) Find() (result *entity.Assistant, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a assistantShareBelongsToAssistantTx) Append(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a assistantShareBelongsToAssistantTx) Replace(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a assistantShareBelongsToAssistantTx) Delete(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a assistantShareBelongsToAssistantTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a assistantShareBelongsToAssistantTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type assistantShareDo struct{ gen.DO }

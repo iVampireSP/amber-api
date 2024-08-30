@@ -7,12 +7,13 @@ import (
 
 type Chat struct {
 	Model       `xorm:"extends"`
-	Name        string           `xorm:"varchar(255) notnull" json:"name"`
-	AssistantId schema.EntityId  `xorm:"varchar(255) notnull" json:"assistant_id"`
-	UserId      schema.UserId    `xorm:"user_id int(11)" json:"user_id"`
-	ExpiredAt   *time.Time       `xorm:"TIMESTAMP null" json:"expired_at"`
-	Owner       schema.ChatOwner `xorm:"varchar(255) notnull" json:"owner"`
-	GuestId     *string          `xorm:"varchar(255)" json:"guest_id"`
+	Name        string          `xorm:"varchar(255) notnull" json:"name"`
+	AssistantId schema.EntityId `xorm:"varchar(255) notnull" json:"assistant_id"`
+	//Assistant   Assistant        `xorm:"extends" json:"assistant"`
+	UserId    schema.UserId    `xorm:"user_id int(11)" json:"user_id"`
+	ExpiredAt *time.Time       `xorm:"TIMESTAMP null" json:"expired_at"`
+	Owner     schema.ChatOwner `xorm:"varchar(255) notnull" json:"owner"`
+	GuestId   *string          `xorm:"varchar(255)" json:"guest_id"`
 }
 
 type ChatWithAssistant struct {

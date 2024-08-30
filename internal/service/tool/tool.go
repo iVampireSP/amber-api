@@ -17,8 +17,8 @@ import (
 )
 
 func (s *Service) ListToolFromUserId(ctx context.Context, userId schema.UserId) ([]*entity.Tool, error) {
-	var tools []*entity.Tool
-	err := s.x.Context(ctx).Where("user_id = ?", userId).Find(&tools)
+	tools, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.UserId.Eq(int64(userId))).Find()
+
 	if err != nil {
 		return nil, err
 	}
@@ -66,11 +66,14 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 		}
 	}
 
-	_, err = s.x.Context(ctx).Insert(&toolEntity)
-	toolData.ToolId = toolEntity.Id
-	toolEntity.Data = *toolData.Output()
+	err = s.dao.WithContext(ctx).Tool.Create(&toolEntity)
+	if err != nil {
+		return nil, err
+	}
 
-	_, err = s.x.Context(ctx).ID(toolEntity.Id).Cols("data").Update(&toolEntity)
+	toolData.ToolId = toolEntity.Id
+
+	_, err = s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.Id.Eq(uint(toolEntity.Id))).Update(s.dao.Tool.Data, *toolData.Output())
 
 	return &toolEntity, err
 }
@@ -107,9 +110,7 @@ func (s *Service) UpdateToolData(ctx context.Context, tool *entity.Tool) error {
 		return err
 	}
 
-	tool.Data = *toolData.Output()
-
-	_, err = s.x.Context(ctx).ID(tool.Id).Cols("data").Update(tool)
+	_, err = s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.Id.Eq(uint(tool.Id))).Update(s.dao.Tool.Data, *toolData.Output())
 
 	return err
 }
@@ -147,7 +148,7 @@ func (s *Service) getToolData(url string) (*schema.ToolDiscoveryInput, error) {
 
 func (s *Service) DeleteTool(ctx context.Context, id schema.EntityId) error {
 	// 做检查，不能删除已经绑定的 tool
-	count, err := s.x.Context(ctx).Where("tool_id = ?", id).Count(&entity.AssistantTool{})
+	count, err := s.dao.WithContext(ctx).AssistantTool.Where(s.dao.AssistantTool.ToolId.Eq(uint(id))).Count()
 	if err != nil {
 		return err
 	}
@@ -155,7 +156,8 @@ func (s *Service) DeleteTool(ctx context.Context, id schema.EntityId) error {
 		return consts.ErrToolFailedDeleteBecauseHasBindAssistant
 	}
 
-	_, err = s.x.Context(ctx).ID(id).Delete(&entity.Tool{})
+	_, err = s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.Id.Eq(uint(id))).Delete()
+
 	return err
 }
 
@@ -165,18 +167,20 @@ func (s *Service) DeleteTool(ctx context.Context, id schema.EntityId) error {
 //}
 
 func (s *Service) GetTool(ctx context.Context, id schema.EntityId) (*entity.Tool, error) {
-	var tool = entity.Tool{}
-	_, err := s.x.Context(ctx).Where("id = ?", id).Get(&tool)
-	return &tool, err
+	tool, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.Id.Eq(uint(id))).First()
+
+	return tool, err
 }
 
 func (s *Service) CheckTool(ctx context.Context, url string, userId schema.UserId) (bool, error) {
-	count, err := s.x.Context(ctx).Where("user_id = ?", userId).Where("discovery_url = ?", url).Count(&entity.Tool{})
+	count, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.UserId.Eq(int64(userId))).Where(s.dao.Tool.DiscoveryUrl.Eq(url)).Count()
+
 	return count > 0, err
 }
 
 func (s *Service) Exists(ctx context.Context, id schema.EntityId) (bool, error) {
-	count, err := s.x.Context(ctx).Where("id = ?", id).Count(&entity.Tool{})
+	count, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.Id.Eq(uint(id))).Count()
+
 	return count > 0, err
 }
 

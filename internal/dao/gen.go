@@ -19,7 +19,9 @@ var (
 	Q              = new(Query)
 	Assistant      *assistant
 	AssistantShare *assistantShare
+	AssistantTool  *assistantTool
 	Chat           *chat
+	ChatMessage    *chatMessage
 	File           *file
 	Tool           *tool
 )
@@ -28,7 +30,9 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Assistant = &Q.Assistant
 	AssistantShare = &Q.AssistantShare
+	AssistantTool = &Q.AssistantTool
 	Chat = &Q.Chat
+	ChatMessage = &Q.ChatMessage
 	File = &Q.File
 	Tool = &Q.Tool
 }
@@ -38,7 +42,9 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		db:             db,
 		Assistant:      newAssistant(db, opts...),
 		AssistantShare: newAssistantShare(db, opts...),
+		AssistantTool:  newAssistantTool(db, opts...),
 		Chat:           newChat(db, opts...),
+		ChatMessage:    newChatMessage(db, opts...),
 		File:           newFile(db, opts...),
 		Tool:           newTool(db, opts...),
 	}
@@ -49,7 +55,9 @@ type Query struct {
 
 	Assistant      assistant
 	AssistantShare assistantShare
+	AssistantTool  assistantTool
 	Chat           chat
+	ChatMessage    chatMessage
 	File           file
 	Tool           tool
 }
@@ -61,7 +69,9 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		db:             db,
 		Assistant:      q.Assistant.clone(db),
 		AssistantShare: q.AssistantShare.clone(db),
+		AssistantTool:  q.AssistantTool.clone(db),
 		Chat:           q.Chat.clone(db),
+		ChatMessage:    q.ChatMessage.clone(db),
 		File:           q.File.clone(db),
 		Tool:           q.Tool.clone(db),
 	}
@@ -80,7 +90,9 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		db:             db,
 		Assistant:      q.Assistant.replaceDB(db),
 		AssistantShare: q.AssistantShare.replaceDB(db),
+		AssistantTool:  q.AssistantTool.replaceDB(db),
 		Chat:           q.Chat.replaceDB(db),
+		ChatMessage:    q.ChatMessage.replaceDB(db),
 		File:           q.File.replaceDB(db),
 		Tool:           q.Tool.replaceDB(db),
 	}
@@ -89,7 +101,9 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 type queryCtx struct {
 	Assistant      IAssistantDo
 	AssistantShare IAssistantShareDo
+	AssistantTool  IAssistantToolDo
 	Chat           IChatDo
+	ChatMessage    IChatMessageDo
 	File           IFileDo
 	Tool           IToolDo
 }
@@ -98,7 +112,9 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		Assistant:      q.Assistant.WithContext(ctx),
 		AssistantShare: q.AssistantShare.WithContext(ctx),
+		AssistantTool:  q.AssistantTool.WithContext(ctx),
 		Chat:           q.Chat.WithContext(ctx),
+		ChatMessage:    q.ChatMessage.WithContext(ctx),
 		File:           q.File.WithContext(ctx),
 		Tool:           q.Tool.WithContext(ctx),
 	}

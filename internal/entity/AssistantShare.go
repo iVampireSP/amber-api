@@ -5,6 +5,7 @@ import "rag-new/internal/schema"
 type AssistantShare struct {
 	Model       `xorm:"extends"`
 	AssistantId schema.EntityId `xorm:"varchar(255) notnull" json:"assistant_id"`
+	Assistant   Assistant       `xorm:"extends" json:"assistant"`
 	Token       string          `xorm:"varchar(255) notnull" json:"token"`
 }
 

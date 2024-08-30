@@ -4,7 +4,6 @@ import (
 	"context"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	"rag-new/pkg/consts"
 	"rag-new/pkg/random"
 )
 
@@ -24,40 +23,28 @@ func (s *Service) CrateShare(ctx context.Context, assistant *entity.Assistant) (
 	//	return nil, consts.ErrAssistantNotFound
 	//}
 
-	_, err := s.x.Context(ctx).Insert(assistantShare)
+	err := s.dao.WithContext(ctx).AssistantShare.Create(assistantShare)
+
 	return assistantShare, err
 }
 
-func (s *Service) GetShare(ctx context.Context, assistantShareId schema.EntityId) (*entity.AssistantShareType, error) {
-	var assistantShareType = entity.AssistantShareType{}
-	b, err := s.x.Context(ctx).
-		Where("assistant_shares.id = ?", assistantShareId).
-		Join("INNER", "assistants", "assistants.id = assistant_shares.assistant_id").
-		Get(&assistantShareType)
+func (s *Service) GetShare(ctx context.Context, assistantShareId schema.EntityId) (*entity.AssistantShare, error) {
+	assistantShare, err := s.dao.WithContext(ctx).AssistantShare.Where(s.dao.AssistantShare.Id.Eq(uint(assistantShareId))).Preload(s.dao.AssistantShare.Assistant).
+		First()
 
 	if err != nil {
 		return nil, err
 	}
 
-	if !b {
-		return nil, consts.ErrShareNotFound
-	}
-
-	return &assistantShareType, err
+	return assistantShare, err
 }
 
-func (s *Service) GetShareByToken(ctx context.Context, assistantShareToken string) (*entity.AssistantShareType, error) {
-	var assistantShare = &entity.AssistantShareType{}
-	b, err := s.x.Context(ctx).Where("token = ?", assistantShareToken).
-		Join("INNER", "assistants", "assistants.id = assistant_shares.assistant_id").
-		Get(assistantShare)
+func (s *Service) GetShareByToken(ctx context.Context, assistantShareToken string) (*entity.AssistantShare, error) {
+	assistantShare, err := s.dao.WithContext(ctx).AssistantShare.Where(s.dao.AssistantShare.Token.Eq(assistantShareToken)).Preload(s.dao.AssistantShare.Assistant).
+		First()
 
 	if err != nil {
 		return nil, err
-	}
-
-	if !b {
-		return nil, consts.ErrShareNotFound
 	}
 
 	return assistantShare, err
@@ -65,13 +52,14 @@ func (s *Service) GetShareByToken(ctx context.Context, assistantShareToken strin
 
 // ListShare 获取当前助理的所有分享
 func (s *Service) ListShare(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantShare, error) {
-	var assistantShares = make([]*entity.AssistantShare, 0)
-	err := s.x.Context(ctx).Where("assistant_id = ?", assistant.Id).Find(&assistantShares)
+	assistantShares, err := s.dao.WithContext(ctx).AssistantShare.Where(s.dao.AssistantShare.AssistantId.Eq(uint(assistant.Id))).Find()
+
 	return assistantShares, err
 }
 
 func (s *Service) DeleteShare(ctx context.Context, assistantShare *entity.AssistantShare) error {
-	_, err := s.x.Context(ctx).ID(assistantShare.Id).Delete(&entity.AssistantShare{})
+	_, err := s.dao.WithContext(ctx).AssistantShare.Delete(assistantShare)
+
 	return err
 }
 

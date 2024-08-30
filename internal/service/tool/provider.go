@@ -1,21 +1,18 @@
 package tool
 
 import (
-	"gorm.io/gorm"
 	"rag-new/internal/base/conf"
-	"xorm.io/xorm"
+	"rag-new/internal/dao"
 )
 
 type Service struct {
-	x      *xorm.Engine
-	db     *gorm.DB
+	dao    *dao.Query
 	config *conf.Config
 }
 
-func NewService(x *xorm.Engine, config *conf.Config, db *gorm.DB) *Service {
+func NewService(config *conf.Config, dao *dao.Query) *Service {
 	return &Service{
-		x,
-		db,
+		dao,
 		config,
 	}
 }

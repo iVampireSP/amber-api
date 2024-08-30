@@ -23,7 +23,6 @@ jobs:
           go mod download
       - name: Build
         run: |
-          cd cmd
           CGO_ENABLED=0 go build -ldflags "-w -s" -gcflags "-N -l" -o main .
       - name: 'Login to Container Registry'
         uses: docker/login-action@v3

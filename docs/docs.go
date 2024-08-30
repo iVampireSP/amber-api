@@ -2051,23 +2051,21 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
                 "description": {
                     "type": "string"
                 },
                 "disable_default_prompt": {
                     "type": "boolean"
                 },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
                 "name": {
                     "type": "string"
                 },
                 "prompt": {
                     "type": "string"
-                },
-                "string": {
-                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -2080,17 +2078,18 @@ const docTemplate = `{
         "entity.AssistantShare": {
             "type": "object",
             "properties": {
+                "assistant": {
+                    "$ref": "#/definitions/entity.Assistant"
+                },
                 "assistant_id": {
                     "type": "integer"
                 },
                 "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "string": {
-                    "type": "integer"
+                "id": {
+                    "type": "string",
+                    "example": "0"
                 },
                 "token": {
                     "type": "string"
@@ -2103,17 +2102,21 @@ const docTemplate = `{
         "entity.AssistantTool": {
             "type": "object",
             "properties": {
+                "assistant": {
+                    "$ref": "#/definitions/entity.Assistant"
+                },
                 "assistant_id": {
                     "type": "integer"
                 },
                 "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
+                "id": {
+                    "type": "string",
+                    "example": "0"
                 },
-                "string": {
-                    "type": "integer"
+                "tool": {
+                    "$ref": "#/definitions/entity.Tool"
                 },
                 "tool_id": {
                     "type": "integer"
@@ -2135,11 +2138,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "string": {
-                    "type": "integer"
+                "id": {
+                    "type": "string",
+                    "example": "0"
                 },
                 "tool": {
                     "$ref": "#/definitions/entity.Tool"
@@ -2161,14 +2162,15 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
                 "expired_at": {
                     "type": "string"
                 },
                 "guest_id": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"
@@ -2176,13 +2178,11 @@ const docTemplate = `{
                 "owner": {
                     "type": "string"
                 },
-                "string": {
-                    "type": "integer"
-                },
                 "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
+                    "description": "Assistant   Assistant        ` + "`" + `xorm:\"extends\" json:\"assistant\"` + "`" + `",
                     "type": "integer"
                 }
             }
@@ -2202,20 +2202,18 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
                 "hidden": {
                     "type": "boolean"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
                 },
                 "prompt_tokens": {
                     "type": "integer"
                 },
                 "role": {
                     "type": "string"
-                },
-                "string": {
-                    "type": "integer"
                 },
                 "total_tokens": {
                     "type": "integer"
@@ -2237,38 +2235,24 @@ const docTemplate = `{
                 "data": {
                     "$ref": "#/definitions/schema.ToolDiscoveryOutput"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
                 "description": {
                     "type": "string"
                 },
                 "discovery_url": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
                 "name": {
                     "type": "string"
-                },
-                "string": {
-                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
                     "type": "integer"
-                }
-            }
-        },
-        "gorm.DeletedAt": {
-            "type": "object",
-            "properties": {
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
                 }
             }
         },

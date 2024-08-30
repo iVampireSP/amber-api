@@ -3,18 +3,17 @@ definitions:
     properties:
       created_at:
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
       description:
         type: string
       disable_default_prompt:
         type: boolean
+      id:
+        example: "0"
+        type: string
       name:
         type: string
       prompt:
         type: string
-      string:
-        type: integer
       updated_at:
         type: string
       user_id:
@@ -22,14 +21,15 @@ definitions:
     type: object
   entity.AssistantShare:
     properties:
+      assistant:
+        $ref: '#/definitions/entity.Assistant'
       assistant_id:
         type: integer
       created_at:
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      string:
-        type: integer
+      id:
+        example: "0"
+        type: string
       token:
         type: string
       updated_at:
@@ -37,14 +37,17 @@ definitions:
     type: object
   entity.AssistantTool:
     properties:
+      assistant:
+        $ref: '#/definitions/entity.Assistant'
       assistant_id:
         type: integer
       created_at:
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      string:
-        type: integer
+      id:
+        example: "0"
+        type: string
+      tool:
+        $ref: '#/definitions/entity.Tool'
       tool_id:
         type: integer
       updated_at:
@@ -58,10 +61,9 @@ definitions:
         type: integer
       created_at:
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      string:
-        type: integer
+      id:
+        example: "0"
+        type: string
       tool:
         $ref: '#/definitions/entity.Tool'
       tool_id:
@@ -75,21 +77,21 @@ definitions:
         type: integer
       created_at:
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
       expired_at:
         type: string
       guest_id:
+        type: string
+      id:
+        example: "0"
         type: string
       name:
         type: string
       owner:
         type: string
-      string:
-        type: integer
       updated_at:
         type: string
       user_id:
+        description: Assistant   Assistant        `xorm:"extends" json:"assistant"`
         type: integer
     type: object
   entity.ChatMessage:
@@ -102,16 +104,15 @@ definitions:
         type: string
       created_at:
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
       hidden:
         type: boolean
+      id:
+        example: "0"
+        type: string
       prompt_tokens:
         type: integer
       role:
         type: string
-      string:
-        type: integer
       total_tokens:
         type: integer
       updated_at:
@@ -125,28 +126,19 @@ definitions:
         type: string
       data:
         $ref: '#/definitions/schema.ToolDiscoveryOutput'
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
       description:
         type: string
       discovery_url:
         type: string
+      id:
+        example: "0"
+        type: string
       name:
         type: string
-      string:
-        type: integer
       updated_at:
         type: string
       user_id:
         type: integer
-    type: object
-  gorm.DeletedAt:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
     type: object
   schema.AddPublicChatMessageRequest:
     properties:

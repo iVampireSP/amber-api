@@ -145,7 +145,7 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        schema.GetPublicChatMessageRequestParams  path  schema.GetPublicChatMessageRequestParams  true  "GetPublicChatMessageRequestParams"
-// @Param        schema.GetPublicChatMessageRequest  formData  schema.GetPublicChatMessageRequest true  "GetPublicChatMessageRequest"
+// @Param        schema.GetPublicChatMessageRequest  formData  schema.GetPublicChatMessageRequest false  "GetPublicChatMessageRequest"
 // @Param        schema.ChatDownloadRemoteFileRequest  body  schema.ChatDownloadRemoteFileRequest false  "远程文件"
 // @Param        image  formData  file  true  "图片"
 // @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}

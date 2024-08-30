@@ -111,6 +111,11 @@ func (u *ChatController) GetPublicChatMessages(c *gin.Context) {
 
 	chatEntity, err := u.chatService.GetChat(c, getPublicChatMessageRequestParams.ChatId)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		}
+
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
 	}
@@ -128,6 +133,10 @@ func (u *ChatController) GetPublicChatMessages(c *gin.Context) {
 
 	messagesEntity, err := u.cm.GetChatMessage(c, chatEntity)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		}
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
 	}

@@ -99,11 +99,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	var chatMessageResponse = &schema.ChatMessageResponse{}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatRequest.ChatId)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	isStreaming := u.isStreaming(c, chatRequest.ChatId)
 	if isStreaming {
 		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
 		return
@@ -288,11 +284,7 @@ func (u *ChatController) ClearChatMessage(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.Id)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	isStreaming := u.isStreaming(c, chatEntity.Id)
 	if isStreaming {
 		response.Status(http.StatusConflict).Error(consts.ErrChatStreaming).Send()
 		return

@@ -179,11 +179,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.Id)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	isStreaming := u.isStreaming(c, chatEntity.Id)
 	if isStreaming {
 		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
 		return

@@ -60,11 +60,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	var chatIdStreamKey = u.getChatIdStreamingKey(int64(chatId))
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, int64(chatId))
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	isStreaming := u.isStreaming(c, int64(chatId))
 	if isStreaming {
 		response.Status(http.StatusConflict).Error(consts.ErrChatStreamingPleaseWait).Send()
 		return

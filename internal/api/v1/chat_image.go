@@ -37,8 +37,8 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatRequest.ChatId)
-	if err != nil || isStreaming {
+	isStreaming := u.isStreaming(c, chatRequest.ChatId)
+	if isStreaming {
 		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
 		return
 	}
@@ -168,34 +168,10 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
 	}
+
 	// get assistant by token
-	assistantShare, err := u.assistantService.GetShareByToken(c, getPublicChatMessageRequest.AssistantToken)
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	chatEntity, err := u.chatService.GetChat(c, getPublicChatMessageRequestParams.ChatId)
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	// 检查 assistant id 是否一致
-	if chatEntity.AssistantId != assistantShare.AssistantId {
-		response.Status(http.StatusForbidden).Error(err).Send()
-		return
-	}
-
-	if chatEntity.Owner != schema.OwnerGuest || (chatEntity.GuestId != nil && *chatEntity.GuestId != getPublicChatMessageRequest.GuestId) {
-		response.Status(http.StatusForbidden).Error(err).Send()
-		return
-	}
-
-	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.Id)
-	if err != nil || isStreaming {
-		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
+	next, chatEntity := u.canPublicChatNext(c, response, &getPublicChatMessageRequest, &getPublicChatMessageRequestParams)
+	if !next {
 		return
 	}
 
@@ -204,12 +180,11 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 
 	var uploaded = true
 	var uploadedFile *multipart.FileHeader
-	var file *entity.File
 
 	// 检查 formData 是否有 image，如果没有则尝试绑定结构体
 	if c.ContentType() == "multipart/form-data" {
 		var request = &schema.ChatMessageAddImageRequest{}
-		err = c.ShouldBind(request)
+		err := c.ShouldBind(request)
 		if err != nil {
 			response.Status(http.StatusBadRequest).Error(err).Send()
 			return
@@ -220,7 +195,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 		uploaded = false
 
 		// 尝试绑定结构体
-		err = c.ShouldBind(chatDownloadRemoteFileRequest)
+		err := c.ShouldBind(chatDownloadRemoteFileRequest)
 		if err != nil {
 			//response.Status(http.StatusBadRequest).Error(err).Send()
 			response.Status(http.StatusBadRequest).Error(consts.ErrFileUrlRequired).Send()
@@ -228,6 +203,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 		}
 	}
 
+	var file *entity.File
 	if uploaded {
 		f, err := uploadedFile.Open()
 		if err != nil {
@@ -249,6 +225,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 			}
 		}(f)
 	} else {
+		var err error
 		file, err = u.fileService.CreateFileFromUrl(c, chatDownloadRemoteFileRequest.Url)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
@@ -279,4 +256,38 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 	}
 
 	response.Status(http.StatusOK).Data(chatMessageResponse).Send()
+}
+
+func (u *ChatController) canPublicChatNext(c *gin.Context, response *schema.HttpResponse, getPublicChatMessageRequest *schema.GetPublicChatMessageRequest, getPublicChatMessageRequestParams *schema.GetPublicChatMessageRequestParams) (bool, *entity.Chat) {
+	assistantShare, err := u.assistantService.GetShareByToken(c, getPublicChatMessageRequest.AssistantToken)
+	if err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return false, nil
+	}
+
+	chatEntity, err := u.chatService.GetChat(c, getPublicChatMessageRequestParams.ChatId)
+	if err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return false, nil
+	}
+
+	// 检查 assistant id 是否一致
+	if chatEntity.AssistantId != assistantShare.AssistantId {
+		response.Status(http.StatusForbidden).Error(err).Send()
+		return false, nil
+	}
+
+	if chatEntity.Owner != schema.OwnerGuest || (chatEntity.GuestId != nil && *chatEntity.GuestId != getPublicChatMessageRequest.GuestId) {
+		response.Status(http.StatusForbidden).Error(err).Send()
+		return false, nil
+	}
+
+	// 检查状态是否是回复中
+	isStreaming := u.isStreaming(c, chatEntity.Id)
+	if isStreaming {
+		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
+		return false, nil
+	}
+
+	return true, chatEntity
 }

@@ -63,6 +63,12 @@ func (s *Service) DeleteShare(ctx context.Context, assistantShare *entity.Assist
 	return err
 }
 
+func (s *Service) DeleteAllShare(ctx context.Context, assistant *entity.Assistant) error {
+	_, err := s.dao.WithContext(ctx).AssistantShare.Where(s.dao.AssistantShare.AssistantId.Eq(uint(assistant.Id))).Delete()
+
+	return err
+}
+
 //func (s *Service) UpdateShare(ctx context.Context, assistant *entity.Assistant) error {
 //	_, err := s.x.Context(ctx).ID(assistant.Id).AllCols().Update(assistant)
 //	return err

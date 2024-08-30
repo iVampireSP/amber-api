@@ -11,14 +11,12 @@ import (
 	"rag-new/internal/dao"
 	"rag-new/internal/middleware"
 	"rag-new/internal/service"
-	"xorm.io/xorm"
 )
 
 type Application struct {
 	Config     *conf.Config
 	HttpServer *server.HttpServer
 	Logger     *logger.Logger
-	X          *xorm.Engine
 	GORM       *gorm.DB
 	DAO        *dao.Query
 	Service    *service.Service
@@ -32,7 +30,6 @@ func NewApplication(
 	config *conf.Config,
 	httpServer *server.HttpServer,
 	logger *logger.Logger,
-	x *xorm.Engine,
 	services *service.Service,
 	middleware *middleware.Middleware,
 	redis *redis.Client,
@@ -45,7 +42,6 @@ func NewApplication(
 		Config:     config,
 		HttpServer: httpServer,
 		Logger:     logger,
-		X:          x,
 		Service:    services,
 		Middleware: middleware,
 		Redis:      redis,

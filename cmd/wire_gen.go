@@ -47,11 +47,7 @@ func CreateApp() (*base.Application, error) {
 	assistantService := assistant.NewService(query)
 	chat_messageService := chat_message.NewService(query)
 	chatService := chat.NewService(query, assistantService, chat_messageService)
-	engine, err := orm.NewXORM(config, loggerLogger)
-	if err != nil {
-		return nil, err
-	}
-	batchBatch := batch.NewBatch(engine, loggerLogger)
+	batchBatch := batch.NewBatch(loggerLogger)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, batchBatch)
 	client := redis.NewRedis(config)
 	s3S3 := s3.NewS3(config)
@@ -65,10 +61,10 @@ func CreateApp() (*base.Application, error) {
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
-	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query)
+	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

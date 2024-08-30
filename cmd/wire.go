@@ -23,7 +23,6 @@ import (
 var ProviderSet = wire.NewSet(
 	conf.ProviderConfig,
 	logger.NewZapLogger,
-	orm.NewXORM,
 	orm.NewGORM,
 	dao.NewQuery,
 	redis.NewRedis,

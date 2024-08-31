@@ -17,9 +17,6 @@ import (
 	"strings"
 )
 
-// 自动选择模型
-const autoModel = "auto"
-
 // 强制停止（如果连续函数调用超过 4 次，则强制停止输出）
 const forceStopCount = 4
 
@@ -541,10 +538,10 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 
 	// 如果 model 为空
 	if llmChat.Model == "" || !s.config.OpenAI.CanUse(llmChat.Model) {
-		llmChat.Model = autoModel
+		llmChat.Model = consts.AutoModel
 	}
 
-	if llmChat.Model == autoModel {
+	if llmChat.Model == consts.AutoModel {
 		// 设置自动模式下的默认模型
 		llmChat.Model = s.config.OpenAI.Model
 

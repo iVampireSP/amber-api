@@ -56,6 +56,14 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		SystemPrompt:   prompt,
 		UserPublicInfo: nil,
 		Tools:          tools,
+		Model:          chatRequest.Model,
+	}
+
+	if !u.config.OpenAI.CanUse(chatRequest.Model) {
+		var allowedModelResponse = &schema.AllowedModelResponse{}
+		allowedModelResponse.Model = u.config.OpenAI.AllowedModels
+		response.Status(http.StatusBadRequest).Error(consts.ErrModelNotAllowed).Data(allowedModelResponse).Send()
+		return
 	}
 
 	var histories = make([]*entity.ChatMessage, 0)

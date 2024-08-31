@@ -33,15 +33,14 @@ type ToolCallMessage struct {
 }
 
 type ToolResponseMessage struct {
-	ToolName         string                `json:"tool_name"`
-	FunctionName     string                `json:"function_name"`
-	Arguments        FunctionCallArguments `json:"arguments"`
-	StopGeneration   bool                  `json:"stop_generation"`
-	RememberResponse bool                  `json:"remember_response"`
-	Content          string                `json:"content"`
-	Append           bool                  `json:"-"`
-	Role             ChatRole              `json:"-"`
-	Text             string                `json:"-"`
+	ToolName       string                `json:"tool_name"`
+	FunctionName   string                `json:"function_name"`
+	Arguments      FunctionCallArguments `json:"arguments"`
+	StopGeneration bool                  `json:"stop_generation"`
+	Content        string                `json:"content"`
+	Append         bool                  `json:"-"`
+	Role           ChatRole              `json:"-"`
+	Text           string                `json:"-"`
 }
 
 type AssistantResponse struct {
@@ -51,6 +50,12 @@ type AssistantResponse struct {
 	ToolResponseMessage *ToolResponseMessage `json:"tool_response_message"`
 	Content             string               `json:"content"`
 	TokenUsage          *TokenUsage          `json:"token_usage"`
+	Internal            *AssistantInternal   `json:"-"`
+}
+
+type AssistantInternal struct {
+	ToolCall   *llms.ToolCall
+	ToolCallId string
 }
 
 type TokenUsage struct {
@@ -92,6 +97,7 @@ type LLMChat struct {
 	TopP           float64 `json:"top_p,omitempty"`
 	N              int     `json:"n,omitempty"`
 	Model          string  `json:"model"`
+	WithoutImage   bool    `json:"-"`
 }
 
 type ChatPublicModel struct {

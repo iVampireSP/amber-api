@@ -195,32 +195,30 @@ func (u *ChatController) Stream(c *gin.Context) {
 			return true
 		case schema.StateToolSuccess:
 			return true
+		case schema.StateToolCalling:
+			var cm = entity.ChatMessage{
+				Role:     schema.RoleToolCall,
+				Content:  "",
+				ChatId:   chatEntity.Id,
+				ToolCall: (*schema.ToolCall)(msg.Internal.ToolCall),
+			}
+
+			messageList = append(messageList, cm)
+
+			return true
 		case schema.StateToolResponse:
-			args, err := msg.ToolResponseMessage.Arguments.String()
-			if err != nil {
-				u.logger.Sugar.Error(err)
-				args = ""
+			var cm = entity.ChatMessage{
+				Role:     schema.RoleTool,
+				Content:  msg.ToolResponseMessage.Content,
+				ChatId:   chatEntity.Id,
+				ToolCall: (*schema.ToolCall)(msg.Internal.ToolCall),
 			}
 
-			// 如果记住响应，则保存至数据库
-			if msg.ToolResponseMessage.RememberResponse {
-				var toolResponseText = `Tool/Function Call Response\nTool Name: ` + msg.ToolResponseMessage.ToolName + `\nFunction Name: ` + msg.ToolResponseMessage.FunctionName
-				toolResponseText += `\nArguments: ` + args
-				toolResponseText += `\nResponse: ` + msg.ToolResponseMessage.Content
-				toolResponseText += `\n\n`
-
-				var cm = entity.ChatMessage{
-					Role:    schema.RoleHideSystem,
-					Content: toolResponseText,
-					ChatId:  chatEntity.Id,
-				}
-
-				messageList = append(messageList, cm)
-			}
+			messageList = append(messageList, cm)
 
 			// 如果有新增
 			if msg.ToolResponseMessage.Append {
-				var cm = entity.ChatMessage{
+				cm = entity.ChatMessage{
 					Role:    msg.ToolResponseMessage.Role,
 					Content: msg.ToolResponseMessage.Text,
 					ChatId:  chatEntity.Id,

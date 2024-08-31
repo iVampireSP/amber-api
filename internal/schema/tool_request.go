@@ -3,6 +3,7 @@ package schema
 import (
 	"database/sql/driver"
 	"github.com/bytedance/sonic"
+	"github.com/tmc/langchaingo/llms"
 	"strconv"
 )
 
@@ -95,4 +96,25 @@ func (td *ToolDiscoveryOutput) Scan(value interface{}) error {
 
 func (td ToolDiscoveryOutput) Value() (driver.Value, error) {
 	return sonic.Marshal(&td)
+}
+
+// ToolCall is a call to a tool (as requested by the model) that should be executed.
+type ToolCall struct {
+	// ID is the unique identifier of the tool call.
+	ID string `json:"id"`
+	// Type is the type of the tool call. Typically, this would be "function".
+	Type string `json:"type"`
+	// FunctionCall is the function call to be executed.
+	FunctionCall *llms.FunctionCall `json:"function,omitempty"`
+}
+
+func (tc *ToolCall) Scan(value interface{}) error {
+	if value == nil || len(value.([]byte)) == 0 {
+		return nil
+	}
+	return sonic.Unmarshal(value.([]byte), &tc)
+}
+
+func (tc ToolCall) Value() (driver.Value, error) {
+	return sonic.Marshal(&tc)
 }

@@ -12,6 +12,10 @@ var (
 	RoleHideSystem ChatRole = "system_hide"
 	// RoleFile 处理用于上传的文件，content 为 files 中的 id
 	RoleFile ChatRole = "file"
+	// RoleToolCall 是工具调用信息，需要携带 Tool Call Info
+	RoleToolCall ChatRole = "assistant_call"
+	// RoleTool 是工具的响应，需要携带 Tool ID
+	RoleTool ChatRole = "tool"
 )
 
 type ChatOwner string

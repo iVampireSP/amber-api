@@ -21,6 +21,7 @@ func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*ent
 func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
 	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.
 		Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).
+		Preload(s.dao.ChatMessage.File).
 		Order(s.dao.ChatMessage.CreatedAt.Asc()).
 		Find()
 

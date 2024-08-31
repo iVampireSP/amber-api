@@ -31,7 +31,7 @@ const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the
 func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
 	// 不要从接收侧关闭 channel
 	defer close(llmChat.ResponseChan)
-	h, err := s.processHistory(ctx, llmChat, history)
+	h, err := s.processHistory(llmChat, history)
 	if err != nil {
 		return err
 	}
@@ -46,8 +46,6 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 	var tokenUsage = &schema.TokenUsage{}
 
 	for {
-		ctx := context.Background()
-
 		//fmt.Println("再次请求吗?" + fmt.Sprint(requestAgain))
 		if !requestAgain {
 			break
@@ -65,7 +63,11 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, warningMessage))
 		}
 
-		var llmTools = append(s.BuiltInTools.GetTools(), llmChat.Tools...)
+		var without = &builtin_tool.WithoutOptions{
+			Image: llmChat.WithoutImage,
+		}
+
+		var llmTools = append(s.BuiltInTools.GetTools(without), llmChat.Tools...)
 
 		resp, err := s.GenerateContent(ctx, llmChat, llmTools, historyContent)
 		if err != nil {
@@ -99,12 +101,8 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 			// 处理 ToolCall
 			for _, tc := range respChoice.ToolCalls {
-				// 拼接参数
-				var currentToolCall = tc
-
-				currentToolCall.FunctionCall.Arguments = tc.FunctionCall.Arguments
 				assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, respChoice.Content)
-				assistantResponse.Parts = append(assistantResponse.Parts, currentToolCall)
+				assistantResponse.Parts = append(assistantResponse.Parts, tc)
 				historyContent = append(historyContent, assistantResponse)
 
 				// 去除 fullArgs 的首尾 \n（一直检测）
@@ -140,6 +138,9 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 					ToolCallMessage: &schema.ToolCallMessage{
 						FunctionName: tc.FunctionCall.Name,
 						Arguments:    functionCallArgs,
+					},
+					Internal: &schema.AssistantInternal{
+						ToolCall: &tc,
 					},
 				}
 
@@ -262,14 +263,17 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 				llmChat.ResponseChan <- &schema.AssistantResponse{
 					State: schema.StateToolResponse,
 					ToolResponseMessage: &schema.ToolResponseMessage{
-						ToolName:         toolName,
-						FunctionName:     tc.FunctionCall.Name,
-						Content:          toolRemoteResponse.Content,
-						RememberResponse: toolRemoteResponse.RememberResponse,
-						StopGeneration:   toolRemoteResponse.StopGeneration,
-						Append:           toolRemoteResponse.Append,
-						Role:             toolRemoteResponse.Role,
-						Text:             toolRemoteResponse.Text,
+						ToolName:       toolName,
+						FunctionName:   tc.FunctionCall.Name,
+						Content:        toolRemoteResponse.Content,
+						StopGeneration: toolRemoteResponse.StopGeneration,
+						Append:         toolRemoteResponse.Append,
+						Role:           toolRemoteResponse.Role,
+						Text:           toolRemoteResponse.Text,
+					},
+					Internal: &schema.AssistantInternal{
+						ToolCallId: tc.ID,
+						ToolCall:   &tc,
 					},
 				}
 
@@ -430,7 +434,7 @@ func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsa
 	return tokenUsage
 }
 
-func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
+func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
 	var hasHumanMessage = false
 	var hasFileMessage = false
 
@@ -446,26 +450,33 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 	systemPrompts = append(systemPrompts, "Image Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 
-	fileIds := make([]schema.EntityId, 0)
-
 	for _, h := range history {
-		// 找出所有的 file Id
-		if h.Role == schema.RoleFile {
-			// string 转 int64
-			id, err := strconv.ParseInt(h.Content, 10, 64)
-			if err != nil {
-				return nil, err
-			}
+		// 粗略统计
+		if h.Content != "" && h.Content != "\n" {
+			count += len(h.Content)
+		}
+	}
+	// 如果 model 为空
+	if llmChat.Model == "" || !s.config.OpenAI.CanUse(llmChat.Model) {
+		llmChat.Model = consts.AutoModel
+	}
 
-			fileIds = append(fileIds, schema.EntityId(id))
+	if llmChat.Model == consts.AutoModel {
+		// 设置自动模式下的默认模型
+		llmChat.Model = s.config.OpenAI.Model
+
+		// 如果统计超过了 10000
+		if count > 10000 {
+			llmChat.Model = s.config.OpenAI.LongContextModel
 		}
 	}
 
-	fileEntities, err := s.FileService.GetFilesByIds(ctx, fileIds)
-	if err != nil {
-		return nil, err
+	// 如果统计超过了 1亿 - 1 万字符（粗略统计 token）
+	if count > consts.MaxTokenCount {
+		return nil, consts.ErrTooManyTokens
 	}
 
+	// 处理历史消息
 	for i, h := range history {
 		// 如果第一条消息是 system
 		if i == 0 && h.Role == schema.RoleSystem {
@@ -486,11 +497,6 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 			//}
 		}
 
-		// 粗嘞统计
-		if h.Content != "" && h.Content != "\n" {
-			count += len(h.Content)
-		}
-
 		switch h.Role {
 		case schema.RoleHuman:
 			//content := "[User says] " + h.Content
@@ -501,6 +507,31 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 			}
 		case schema.RoleAssistant:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
+		case schema.RoleToolCall:
+			if h.ToolCall != nil {
+				assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, h.Content)
+				var toolCall = llms.ToolCall{}
+				toolCall.FunctionCall = h.ToolCall.FunctionCall
+				toolCall.ID = h.ToolCall.ID
+				toolCall.Type = h.ToolCall.Type
+				assistantResponse.Parts = append(assistantResponse.Parts, toolCall)
+
+				historyContent = append(historyContent, assistantResponse)
+			}
+		case schema.RoleTool:
+			if h.ToolCall != nil {
+				historyContent = append(historyContent, llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							ToolCallID: h.ToolCall.ID,
+							Name:       h.ToolCall.FunctionCall.Name,
+							Content:    h.Content,
+						},
+					},
+				})
+			}
+
 		case schema.RoleSystem:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideSystem:
@@ -514,47 +545,71 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 			if !hasFileMessage {
 				hasFileMessage = true
 			}
-			var found = false
-			var fileText string
 
-			// 将 h.Content 转换为 int64
-			id, err := strconv.ParseInt(h.Content, 10, 64)
-			if err != nil {
-				return nil, err
+			// 如果长度没有超过最大长度且模型是 auto，并且模型不是 VisionModel
+			if (count < consts.MaxTokenCount && llmChat.Model == consts.AutoModel) && (llmChat.Model != s.config.OpenAI.VisionModel) {
+				// 切换模型
+				llmChat.Model = s.config.OpenAI.VisionModel
 			}
-			// 检测 fileEntities 是否存在
-			for _, fileEntity := range fileEntities {
-				if fileEntity.Id == schema.EntityId(id) {
-					found = true
-					// 将 fileEntity 的 url 添加到 historyContent
-					fileText = "[File]File ID: " + h.Content + ", MimeType: " + fileEntity.MimeType
-				}
-			}
+			// 如果文件存在
+			if h.File != nil {
+				// 如果不是，则普通处理
 
-			if found {
+				// 不能忽略 image 工具
+				llmChat.WithoutImage = false
+
+				// 将 fileEntity 的 url 添加到 historyContent
+				fileText := "[File]File ID: " + h.File.Id.String() + ", MimeType: " + h.File.MimeType
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
+
+				// hint: 不能这么玩，因为上下文的 image 也要很多 token
+				// 如果当前模型是 Vision Model
+				//if llmChat.Model == s.config.OpenAI.VisionModel {
+				//	// 如果是 image/ 开头
+				//	if strings.HasPrefix(h.File.MimeType, "image/") && llmChat.Model == s.config.OpenAI.VisionModel {
+				//
+				//		// 由于能够切换模型，所以不需要设置为 false
+				//		llmChat.WithoutImage = true
+				//
+				//		// 不当做是 file，而是 image
+				//		url, err := s.FileService.GetImageUrl(h.File)
+				//		if err != nil {
+				//			return nil, err
+				//		}
+				//		historyContent = append(historyContent,
+				//			llms.MessageContent{
+				//				Role: llms.ChatMessageTypeHuman,
+				//				Parts: []llms.ContentPart{
+				//					llms.ImageURLWithDetailPart(url, "auto"),
+				//					llms.TextPart("[File ID: " + h.Content + "]"),
+				//				}},
+				//		)
+				//	}
+				//}
 			}
+
+			//var found = false
+			//var fileText string
+
+			//// 将 h.Content 转换为 int64
+			//id, err := strconv.ParseInt(h.Content, 10, 64)
+			//if err != nil {
+			//	return nil, err
+			//}
+			//// 检测 fileEntities 是否存在
+			//for _, fileEntity := range fileEntities {
+			//	if fileEntity.Id == schema.EntityId(id) {
+			//		found = true
+			//
+			//
+			//	}
+			//}
+
+			// 如果找到了并且模型不是 Vision Model
+			//if found && llmChat.Model != s.config.OpenAI.VisionModel {
+			//	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
+			//}
 		}
-	}
-
-	// 如果 model 为空
-	if llmChat.Model == "" || !s.config.OpenAI.CanUse(llmChat.Model) {
-		llmChat.Model = consts.AutoModel
-	}
-
-	if llmChat.Model == consts.AutoModel {
-		// 设置自动模式下的默认模型
-		llmChat.Model = s.config.OpenAI.Model
-
-		// 如果统计超过了 10000
-		if count > 10000 {
-			llmChat.Model = s.config.OpenAI.LongContextModel
-		}
-	}
-
-	// 如果统计超过了 1亿 - 1 万字符（粗略统计 token）
-	if count > consts.MaxTokenCount {
-		return nil, consts.ErrTooManyTokens
 	}
 
 	// 如果整个对话里面没有 Human 消息，则不能继续
@@ -617,7 +672,7 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 					}
 					// 如果上一个字重复次数大于 10，就终止
 					if lastWordRepeatCount >= 10 {
-						s.Logger.Sugar.Errorf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
+						s.Logger.Sugar.Warnf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
 						return consts.ErrWordRepeatedDetected
 					}
 

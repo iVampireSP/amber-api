@@ -12,11 +12,9 @@ type ToolRemoteRequest struct {
 }
 
 type ToolRemoteResponse struct {
-	Success        bool `json:"success"`
-	StopGeneration bool `json:"stop_generation"`
-	// 记住响应。如果记住了响应，LLM 将会知道上一次工具的输出
-	RememberResponse bool   `json:"remember_response"`
-	Content          string `json:"content"`
+	Success        bool   `json:"success"`
+	StopGeneration bool   `json:"stop_generation"`
+	Content        string `json:"content"`
 	// 以下为隐藏字段，暂未开放给 API 调用的工具
 	// 增加的聊天记录
 	Append bool     `json:"-"`

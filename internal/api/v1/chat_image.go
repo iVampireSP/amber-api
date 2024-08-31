@@ -127,8 +127,9 @@ func (u *ChatController) AddChatImage(c *gin.Context) {
 
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id
-	chatMessage.Content = file.Id.String()
+	//chatMessage.Content = file.Id.String()
 	chatMessage.Role = schema.RoleFile
+	chatMessage.FileId = &file.Id
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {
@@ -248,8 +249,9 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id
-	chatMessage.Content = file.Id.String()
+	//chatMessage.Content = file.Id.String()
 	chatMessage.Role = schema.RoleFile
+	chatMessage.FileId = &file.Id
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {

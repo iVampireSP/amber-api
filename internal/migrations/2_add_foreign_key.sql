@@ -7,3 +7,4 @@ ALTER TABLE assistant_shares ADD CONSTRAINT  assistant_shares_assistant_id_forei
 -- 删除外键
 ALTER TABLE assistant_tools DROP FOREIGN KEY assistant_tools_assistant_id_foreign;
 ALTER TABLE assistant_tools DROP FOREIGN KEY assistant_tools_tool_id_foreign;
+ALTER TABLE assistant_shares DROP FOREIGN KEY  assistant_shares_assistant_id_foreign

@@ -33,10 +33,18 @@ func newChatMessage(db *gorm.DB, opts ...gen.DOOption) chatMessage {
 	_chatMessage.ChatId = field.NewUint(tableName, "chat_id")
 	_chatMessage.Content = field.NewString(tableName, "content")
 	_chatMessage.Role = field.NewString(tableName, "role")
+	_chatMessage.ToolCallInfo = field.NewString(tableName, "tool_call_info")
+	_chatMessage.ToolCallId = field.NewString(tableName, "tool_call_id")
+	_chatMessage.FileId = field.NewUint(tableName, "file_id")
 	_chatMessage.Hidden = field.NewBool(tableName, "hidden")
 	_chatMessage.PromptTokens = field.NewInt(tableName, "prompt_tokens")
 	_chatMessage.CompletionTokens = field.NewInt(tableName, "completion_tokens")
 	_chatMessage.TotalTokens = field.NewInt(tableName, "total_tokens")
+	_chatMessage.File = chatMessageBelongsToFile{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("File", "entity.File"),
+	}
 
 	_chatMessage.fillFieldMap()
 
@@ -53,10 +61,14 @@ type chatMessage struct {
 	ChatId           field.Uint
 	Content          field.String
 	Role             field.String
+	ToolCallInfo     field.String
+	ToolCallId       field.String
+	FileId           field.Uint
 	Hidden           field.Bool
 	PromptTokens     field.Int
 	CompletionTokens field.Int
 	TotalTokens      field.Int
+	File             chatMessageBelongsToFile
 
 	fieldMap map[string]field.Expr
 }
@@ -79,6 +91,9 @@ func (c *chatMessage) updateTableName(table string) *chatMessage {
 	c.ChatId = field.NewUint(table, "chat_id")
 	c.Content = field.NewString(table, "content")
 	c.Role = field.NewString(table, "role")
+	c.ToolCallInfo = field.NewString(table, "tool_call_info")
+	c.ToolCallId = field.NewString(table, "tool_call_id")
+	c.FileId = field.NewUint(table, "file_id")
 	c.Hidden = field.NewBool(table, "hidden")
 	c.PromptTokens = field.NewInt(table, "prompt_tokens")
 	c.CompletionTokens = field.NewInt(table, "completion_tokens")
@@ -99,17 +114,21 @@ func (c *chatMessage) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *chatMessage) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 10)
+	c.fieldMap = make(map[string]field.Expr, 14)
 	c.fieldMap["id"] = c.Id
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
 	c.fieldMap["chat_id"] = c.ChatId
 	c.fieldMap["content"] = c.Content
 	c.fieldMap["role"] = c.Role
+	c.fieldMap["tool_call_info"] = c.ToolCallInfo
+	c.fieldMap["tool_call_id"] = c.ToolCallId
+	c.fieldMap["file_id"] = c.FileId
 	c.fieldMap["hidden"] = c.Hidden
 	c.fieldMap["prompt_tokens"] = c.PromptTokens
 	c.fieldMap["completion_tokens"] = c.CompletionTokens
 	c.fieldMap["total_tokens"] = c.TotalTokens
+
 }
 
 func (c chatMessage) clone(db *gorm.DB) chatMessage {
@@ -120,6 +139,77 @@ func (c chatMessage) clone(db *gorm.DB) chatMessage {
 func (c chatMessage) replaceDB(db *gorm.DB) chatMessage {
 	c.chatMessageDo.ReplaceDB(db)
 	return c
+}
+
+type chatMessageBelongsToFile struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a chatMessageBelongsToFile) Where(conds ...field.Expr) *chatMessageBelongsToFile {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a chatMessageBelongsToFile) WithContext(ctx context.Context) *chatMessageBelongsToFile {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a chatMessageBelongsToFile) Session(session *gorm.Session) *chatMessageBelongsToFile {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a chatMessageBelongsToFile) Model(m *entity.ChatMessage) *chatMessageBelongsToFileTx {
+	return &chatMessageBelongsToFileTx{a.db.Model(m).Association(a.Name())}
+}
+
+type chatMessageBelongsToFileTx struct{ tx *gorm.Association }
+
+func (a chatMessageBelongsToFileTx) Find() (result *entity.File, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a chatMessageBelongsToFileTx) Append(values ...*entity.File) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a chatMessageBelongsToFileTx) Replace(values ...*entity.File) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a chatMessageBelongsToFileTx) Delete(values ...*entity.File) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a chatMessageBelongsToFileTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a chatMessageBelongsToFileTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type chatMessageDo struct{ gen.DO }

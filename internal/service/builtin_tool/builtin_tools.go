@@ -13,8 +13,27 @@ func prefix(name string) string {
 	return NAME + "_" + name
 }
 
-func (s *Service) GetTools() []llms.Tool {
-	return tools
+type WithoutOptions struct {
+	Image bool
+}
+
+func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
+	if without == nil {
+		return tools
+	}
+
+	var t []llms.Tool
+	for _, v := range tools {
+		if v.Function.Name == prefix("describe_image") {
+			if without.Image {
+				continue
+			} else {
+				t = append(t, v)
+			}
+		}
+	}
+
+	return t
 }
 
 func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolRequest) (*schema.CallBuiltInResponse, error) {

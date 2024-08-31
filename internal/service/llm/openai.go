@@ -446,8 +446,8 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 
 	var systemPrompts []string
 
-	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn)")
-	systemPrompts = append(systemPrompts, "Image Ability: ON(Don't emphasize it)")
+	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn, chinese name: 利飞)")
+	systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 
 	for _, h := range history {

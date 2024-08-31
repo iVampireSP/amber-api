@@ -12,6 +12,7 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/openai"
 	"rag-new/internal/base/orm"
 	"rag-new/internal/base/redis"
 	"rag-new/internal/base/s3"
@@ -52,7 +53,8 @@ func CreateApp() (*base.Application, error) {
 	client := redis.NewRedis(config)
 	s3S3 := s3.NewS3(config)
 	fileService := file.NewService(s3S3, config, query)
-	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService)
+	openaiClient := openai.NewOpenAI(config)
+	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService, openaiClient)
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService)
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService)
 	fileController := v1.NewFileController(fileService, loggerLogger)
@@ -61,10 +63,10 @@ func CreateApp() (*base.Application, error) {
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
-	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query)
+	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query, openaiClient)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, openai.NewOpenAI, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

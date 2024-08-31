@@ -70,4 +70,28 @@ var tools = []llms.Tool{
 			},
 		},
 	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        prefix("generate_image"),
+			Description: "It's useful for generating/drawing images",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"prompt": {
+						Type:        jsonschema.String,
+						Description: "prompt to generate image",
+					},
+					"size": {
+						Type:        jsonschema.String,
+						Description: "size of image",
+						Enum:        dallEAllowedSizes,
+					},
+				},
+				Required: []string{
+					"prompt", "size",
+				},
+			},
+		},
+	},
 }

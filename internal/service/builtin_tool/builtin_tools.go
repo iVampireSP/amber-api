@@ -27,10 +27,10 @@ func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
 		if v.Function.Name == prefix("describe_image") {
 			if without.Image {
 				continue
-			} else {
-				t = append(t, v)
 			}
 		}
+
+		t = append(t, v)
 	}
 
 	return t
@@ -45,11 +45,8 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 		response.Content = s.GetCurrentTime()
 	case "describe_image":
 		response, err = s.DescribeImage(ctx, req.Args)
-
-		//if err != nil {
-		//	response.Success = false
-		//	response.StopGeneration = false
-		//}
+	case "generate_image":
+		response, err = s.GenerateImage(ctx, req.Args)
 	case "download_file":
 		response, err = s.DownloadFile(ctx, req.Args)
 	default:

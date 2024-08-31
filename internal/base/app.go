@@ -2,6 +2,7 @@ package base
 
 import (
 	"github.com/redis/go-redis/v9"
+	"github.com/sashabaranov/go-openai"
 	"gorm.io/gorm"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
@@ -24,6 +25,7 @@ type Application struct {
 	Redis      *redis.Client
 	Batch      *batch.Batch
 	S3         *s3.S3
+	OpenAI     *openai.Client
 }
 
 func NewApplication(
@@ -37,6 +39,7 @@ func NewApplication(
 	S3 *s3.S3,
 	GORM *gorm.DB,
 	DAO *dao.Query,
+	OpenAI *openai.Client,
 ) *Application {
 	return &Application{
 		Config:     config,
@@ -49,5 +52,6 @@ func NewApplication(
 		S3:         S3,
 		GORM:       GORM,
 		DAO:        DAO,
+		OpenAI:     OpenAI,
 	}
 }

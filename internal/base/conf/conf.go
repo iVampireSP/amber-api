@@ -66,6 +66,7 @@ type OpenAI struct {
 	Model            string   `yaml:"model" mapstructure:"model"`
 	VisionModel      string   `yaml:"vision_model" mapstructure:"vision_model"`
 	LongContextModel string   `yaml:"long_context_model" mapstructure:"long_context_model"`
+	DallEModel       string   `yaml:"dall_e_model" mapstructure:"dall_e_model"`
 	AllowedModels    []string `yaml:"allowed_models" mapstructure:"allowed_models"`
 }
 

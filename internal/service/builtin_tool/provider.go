@@ -1,6 +1,7 @@
 package builtin_tool
 
 import (
+	openai2 "github.com/sashabaranov/go-openai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
@@ -8,13 +9,14 @@ import (
 )
 
 type Service struct {
-	OpenAI      *openai.LLM
+	LLM         *openai.LLM
 	config      *conf.Config
 	logger      *logger.Logger
 	fileService *file.Service
+	OpenAI      *openai2.Client
 }
 
-func NewService(config *conf.Config, logger *logger.Logger, fileService *file.Service) *Service {
+func NewService(config *conf.Config, logger *logger.Logger, fileService *file.Service, openAI *openai2.Client) *Service {
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.BaseUrl),
@@ -26,6 +28,6 @@ func NewService(config *conf.Config, logger *logger.Logger, fileService *file.Se
 	}
 
 	return &Service{
-		llm, config, logger, fileService,
+		llm, config, logger, fileService, openAI,
 	}
 }

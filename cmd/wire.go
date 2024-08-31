@@ -9,6 +9,7 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/openai"
 	"rag-new/internal/base/orm"
 	"rag-new/internal/base/redis"
 	"rag-new/internal/base/s3"
@@ -27,6 +28,7 @@ var ProviderSet = wire.NewSet(
 	dao.NewQuery,
 	redis.NewRedis,
 	s3.NewS3,
+	openai.NewOpenAI,
 	middleware.Provider,
 	batch.NewBatch,
 	service.Provider,

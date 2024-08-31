@@ -350,7 +350,7 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, llmChat *schema.LLMChat,
 		Chat:         llmChat.Chat,
 	}
 
-	s.Logger.Sugar.Infof("Calling remote function: %v", toolRequest)
+	//s.Logger.Sugar.Infof("Calling remote function: %v", toolRequest)
 
 	if llmChat.UserPublicInfo != nil {
 		toolRequest.User = llmChat.UserPublicInfo

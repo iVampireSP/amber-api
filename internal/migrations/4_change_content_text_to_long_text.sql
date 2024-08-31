@@ -4,4 +4,4 @@ ALTER TABLE chat_messages MODIFY COLUMN content longtext;
 
 
 -- +goose Down
-ALTER TABLE chat_messages MODIFY COLUMN content text
+ALTER TABLE chat_messages MODIFY COLUMN content text;

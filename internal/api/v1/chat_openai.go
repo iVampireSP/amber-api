@@ -18,7 +18,6 @@ import (
 )
 
 const maxImageSize = 3 * 1024 * 1024 // 3MB
-const aliasModel = "gpt-4-turbo"
 
 // OpenAIChatCompletion godoc
 // @Summary      OpenAI Chat Completion
@@ -60,16 +59,9 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		Model:          chatRequest.Model,
 	}
 
-	// 如果是 alias 模型，则自动设置为 auto
-	if chatRequest.Model == aliasModel {
-		llmChat.Model = consts.AutoModel
-	}
-
+	// 如果不能使用，则用 auto
 	if !u.config.OpenAI.CanUse(chatRequest.Model) {
-		var allowedModelResponse = &schema.AllowedModelResponse{}
-		allowedModelResponse.Model = u.config.OpenAI.AllowedModels
-		response.Status(http.StatusBadRequest).Error(consts.ErrModelNotAllowed).Data(allowedModelResponse).Send()
-		return
+		chatRequest.Model = consts.AutoModel
 	}
 
 	var histories = make([]*entity.ChatMessage, 0)

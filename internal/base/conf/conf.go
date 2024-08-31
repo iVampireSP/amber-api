@@ -61,10 +61,12 @@ type Metrics struct {
 }
 
 type OpenAI struct {
-	ApiKey      string `yaml:"api_key" mapstructure:"api_key"`
-	BaseUrl     string `yaml:"api_base" mapstructure:"base_url"`
-	Model       string `yaml:"model" mapstructure:"model"`
-	VisionModel string `yaml:"vision_model" mapstructure:"vision_model"`
+	ApiKey           string   `yaml:"api_key" mapstructure:"api_key"`
+	BaseUrl          string   `yaml:"api_base" mapstructure:"base_url"`
+	Model            string   `yaml:"model" mapstructure:"model"`
+	VisionModel      string   `yaml:"vision_model" mapstructure:"vision_model"`
+	LongContextModel string   `yaml:"long_context_model" mapstructure:"long_context_model"`
+	AllowedModels    []string `yaml:"allowed_models" mapstructure:"allowed_models"`
 }
 
 type S3 struct {

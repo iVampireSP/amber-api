@@ -91,6 +91,7 @@ type LLMChat struct {
 	TopK           int     `json:"top_k,omitempty"`
 	TopP           float64 `json:"top_p,omitempty"`
 	N              int     `json:"n,omitempty"`
+	Model          string  `json:"model"`
 }
 
 type ChatPublicModel struct {

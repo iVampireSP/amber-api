@@ -24,7 +24,6 @@ func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assist
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.BaseUrl),
-		openai.WithModel(config.OpenAI.Model),
 	)
 
 	if err != nil {

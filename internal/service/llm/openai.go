@@ -17,6 +17,9 @@ import (
 	"strings"
 )
 
+// 自动选择模型
+const autoModel = "auto"
+
 // 强制停止（如果连续函数调用超过 4 次，则强制停止输出）
 const forceStopCount = 4
 
@@ -434,6 +437,9 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 	var hasHumanMessage = false
 	var hasFileMessage = false
 
+	// 粗略字数统计，用于切换模型
+	var count = 0
+
 	var historyContent []llms.MessageContent
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
 
@@ -483,6 +489,10 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 			//}
 		}
 
+		if h.Content != "" && h.Content != "\n" {
+			count += len(h.Content)
+		}
+
 		switch h.Role {
 		case schema.RoleHuman:
 			//content := "[User says] " + h.Content
@@ -526,6 +536,21 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 			if found {
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
 			}
+		}
+	}
+
+	// 如果 model 为空
+	if llmChat.Model == "" || !s.config.OpenAI.CanUse(llmChat.Model) {
+		llmChat.Model = autoModel
+	}
+
+	if llmChat.Model == autoModel {
+		// 设置自动模式下的默认模型
+		llmChat.Model = s.config.OpenAI.Model
+
+		// 如果统计超过了 10000
+		if count > 10000 {
+			llmChat.Model = s.config.OpenAI.LongContextModel
 		}
 	}
 
@@ -619,6 +644,7 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 		llms.WithMaxTokens(llmChat.MaxTokens),
 		llms.WithTemperature(llmChat.Temperature),
 		llms.WithTopP(llmChat.TopP),
+		llms.WithModel(llmChat.Model),
 		llms.WithTopK(llmChat.TopK))
 	return resp, err
 }

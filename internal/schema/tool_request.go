@@ -2,7 +2,6 @@ package schema
 
 import (
 	"database/sql/driver"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"strconv"
 )
@@ -95,6 +94,5 @@ func (td *ToolDiscoveryOutput) Scan(value interface{}) error {
 }
 
 func (td ToolDiscoveryOutput) Value() (driver.Value, error) {
-	fmt.Println("value!!!!!!!!!!")
 	return sonic.Marshal(&td)
 }

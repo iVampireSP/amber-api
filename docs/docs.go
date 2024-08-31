@@ -2182,7 +2182,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
-                    "description": "Assistant   Assistant        ` + "`" + `xorm:\"extends\" json:\"assistant\"` + "`" + `",
+                    "description": "Assistant   Assistant        ` + "`" + `json:\"assistant\"` + "`" + `",
                     "type": "integer"
                 }
             }
@@ -2202,6 +2202,12 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "file": {
+                    "$ref": "#/definitions/entity.File"
+                },
+                "file_id": {
+                    "type": "integer"
+                },
                 "hidden": {
                     "type": "boolean"
                 },
@@ -2219,6 +2225,40 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.File": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "expired_at": {
+                    "description": "TODO: 移除 file 的到期时间，如果当 file 没有任何引用的时候再删除\n因为有外键，所以直接删除是删不掉的，必须删除消息",
+                    "type": "string"
+                },
+                "file_hash": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "mime_type": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "url_hash": {
                     "type": "string"
                 }
             }

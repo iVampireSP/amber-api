@@ -67,7 +67,7 @@ func (a *AssistantTokenValidateMiddleware) AssistantTokenValidate(c *gin.Context
 		return
 	}
 
-	c.Set(consts.AuthAssistantShareMiddlewareKey, assistantEntity.Assistant)
+	c.Set(consts.AuthAssistantShareMiddlewareKey, &assistantEntity.Assistant)
 
 	c.Next()
 }

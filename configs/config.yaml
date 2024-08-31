@@ -31,10 +31,11 @@ metrics:
 openai:
   api_key:
   base_url: https://api.leaflow.net/v1
-  model: gpt-3.5-turbo
-  vision_model: gpt-4-vision-compatible
+  model: gpt-4o-mini
+  vision_model: gpt-4o-mini
   # 超长上下文
-  long_context_model: gpt-3.5-turbo
+  long_context_model: gpt-3.5-turbo‘
+  # 允许自己指定的模型
   allowed_models:
     - gpt-4
 

@@ -30,6 +30,8 @@ type ChatMessage struct {
 	ChatId           schema.EntityId `xorm:"varchar(255) notnull" json:"assistant_id"`
 	Content          string          `xorm:"varchar(255) notnull" json:"content"`
 	Role             schema.ChatRole `xorm:"varchar(255) notnull" json:"role"`
+	ToolCallInfo     string          `xorm:"varchar(255)" json:"tool_call_info"`
+	ToolCallId       *string         `xorm:"varchar(255)" json:"tool_call_id"`
 	Hidden           bool            `xorm:"bool notnull" json:"hidden"`
 	PromptTokens     int             `xorm:"INTEGER" json:"prompt_tokens"`
 	CompletionTokens int             `xorm:"INTEGER" json:"completion_tokens"`

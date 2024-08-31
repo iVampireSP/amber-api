@@ -486,6 +486,7 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 			//}
 		}
 
+		// 粗嘞统计
 		if h.Content != "" && h.Content != "\n" {
 			count += len(h.Content)
 		}
@@ -549,6 +550,11 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 		if count > 10000 {
 			llmChat.Model = s.config.OpenAI.LongContextModel
 		}
+	}
+
+	// 如果统计超过了 1亿 - 1 万字符（粗略统计 token）
+	if count > consts.MaxTokenCount {
+		return nil, consts.ErrTooManyTokens
 	}
 
 	// 如果整个对话里面没有 Human 消息，则不能继续

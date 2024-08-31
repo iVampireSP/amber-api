@@ -9,6 +9,7 @@ import (
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
 	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.
+		Preload(s.dao.ChatMessage.File).
 		Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).
 		Where(s.dao.ChatMessage.Role.Neq(schema.RoleHideSystem.String())).
 		Where(s.dao.ChatMessage.Role.Neq(schema.RoleHideHuman.String())).
@@ -29,7 +30,7 @@ func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat)
 }
 
 func (s *Service) CreateChatMessage(ctx context.Context, chatMessage *entity.ChatMessage) error {
-	err := s.dao.WithContext(ctx).ChatMessage.Create(chatMessage)
+	err := s.dao.WithContext(ctx).ChatMessage.Preload(s.dao.ChatMessage.File).Create(chatMessage)
 
 	return err
 }
@@ -59,7 +60,17 @@ func (s *Service) CountChatMessage(ctx context.Context, chat *entity.Chat) (int6
 
 // GetLatestMessage get latest chat message
 func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*entity.ChatMessage, error) {
-	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Order(s.dao.ChatMessage.CreatedAt.Desc()).First()
+	count, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Count()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if count == 0 {
+		return nil, nil
+	}
+
+	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.Preload(s.dao.ChatMessage.File).Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Order(s.dao.ChatMessage.CreatedAt.Desc()).First()
 
 	return chatMessage, err
 }

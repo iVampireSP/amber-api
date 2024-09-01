@@ -163,10 +163,19 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	if lastChatMessage != nil {
-		// 如果上一条消息是 Human 消息，则说明消息没有成功发送，覆盖上一条消息
-		if lastChatMessage.Role == schema.RoleHuman {
+		// 如果有悬垂工具调用（要调用 tool，但是没有找到 tool response 的场景）
+		if lastChatMessage.Role == schema.RoleToolCall {
+			// 一般这种情况，肯定是工具调用失败了，或者是程序错误，所以这里补一个 tool role, 表明工具失败
+			// 那么删掉最后一条消息即可
+			err = u.cm.DeleteChatMessage(c, lastChatMessage)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+		} else if lastChatMessage.Role == schema.RoleHuman {
+			// 如果上一条消息是 Human 消息，则说明消息没有成功发送，覆盖上一条消息
 			lastChatMessage.Content = request.Message
-			err := u.cm.UpdateMessageContent(c, lastChatMessage)
+			err = u.cm.UpdateMessageContent(c, lastChatMessage)
 			if err != nil {
 				response.Status(http.StatusInternalServerError).Error(err).Send()
 				return

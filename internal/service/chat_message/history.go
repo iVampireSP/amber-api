@@ -89,3 +89,10 @@ func (s *Service) ClearChatMessage(ctx context.Context, chat *entity.Chat) error
 
 	return err
 }
+
+func (s *Service) ClearToolCall(ctx context.Context, cm *entity.ChatMessage) error {
+	// 将此条 cm 的 tool_call 设置为 null
+	_, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.Id.Eq(uint(cm.Id))).Update(s.dao.ChatMessage.ToolCall, nil)
+
+	return err
+}

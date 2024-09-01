@@ -49,6 +49,8 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 		response, err = s.GenerateImage(ctx, req.Args)
 	case "download_file":
 		response, err = s.DownloadFile(ctx, req.Args)
+	case "calculator":
+		response, err = s.Calculator(ctx, req.Args)
 	default:
 		return nil, errors.New("function not found")
 	}

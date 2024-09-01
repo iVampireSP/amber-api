@@ -94,4 +94,32 @@ var tools = []llms.Tool{
 			},
 		},
 	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        prefix("calculator"),
+			Description: "It's useful for mathematical calculations",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"A": {
+						Type:        jsonschema.String,
+						Description: "Number A",
+					},
+					"B": {
+						Type:        jsonschema.String,
+						Description: "Number B",
+					},
+					"Method": {
+						Type:        jsonschema.String,
+						Description: "Method",
+						Enum:        calculatorAllowedMethods,
+					},
+				},
+				Required: []string{
+					"A", "B", "Method",
+				},
+			},
+		},
+	},
 }

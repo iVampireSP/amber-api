@@ -101,6 +101,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 			// 处理 ToolCall
 			for _, tc := range respChoice.ToolCalls {
+				// 设置 AI 消息，里面加入 tool call
 				assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, respChoice.Content)
 				assistantResponse.Parts = append(assistantResponse.Parts, tc)
 				historyContent = append(historyContent, assistantResponse)
@@ -279,6 +280,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 				// End Built-in tools
 
+				// ToolCall 处理完成，放入 History
 				historyContent = append(historyContent, llms.MessageContent{
 					Role: llms.ChatMessageTypeTool,
 					Parts: []llms.ContentPart{
@@ -508,6 +510,7 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 		case schema.RoleAssistant:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
 		case schema.RoleToolCall:
+			// ToolCall 消息
 			if h.ToolCall != nil {
 				assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, h.Content)
 				var toolCall = llms.ToolCall{}
@@ -519,6 +522,7 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 				historyContent = append(historyContent, assistantResponse)
 			}
 		case schema.RoleTool:
+			// Tool Call 响应
 			if h.ToolCall != nil {
 				historyContent = append(historyContent, llms.MessageContent{
 					Role: llms.ChatMessageTypeTool,

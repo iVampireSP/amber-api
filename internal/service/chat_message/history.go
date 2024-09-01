@@ -70,7 +70,7 @@ func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*ent
 		return nil, nil
 	}
 
-	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.Preload(s.dao.ChatMessage.File).Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Order(s.dao.ChatMessage.CreatedAt.Desc()).First()
+	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.Preload(s.dao.ChatMessage.File).Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Order(s.dao.ChatMessage.CreatedAt.Desc()).Order(s.dao.ChatMessage.Id.Desc()).First()
 
 	return chatMessage, err
 }

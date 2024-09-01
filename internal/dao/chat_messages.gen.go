@@ -33,8 +33,7 @@ func newChatMessage(db *gorm.DB, opts ...gen.DOOption) chatMessage {
 	_chatMessage.ChatId = field.NewUint(tableName, "chat_id")
 	_chatMessage.Content = field.NewString(tableName, "content")
 	_chatMessage.Role = field.NewString(tableName, "role")
-	_chatMessage.ToolCallInfo = field.NewString(tableName, "tool_call_info")
-	_chatMessage.ToolCallId = field.NewString(tableName, "tool_call_id")
+	_chatMessage.ToolCall = field.NewField(tableName, "tool_call")
 	_chatMessage.FileId = field.NewUint(tableName, "file_id")
 	_chatMessage.Hidden = field.NewBool(tableName, "hidden")
 	_chatMessage.PromptTokens = field.NewInt(tableName, "prompt_tokens")
@@ -61,8 +60,7 @@ type chatMessage struct {
 	ChatId           field.Uint
 	Content          field.String
 	Role             field.String
-	ToolCallInfo     field.String
-	ToolCallId       field.String
+	ToolCall         field.Field
 	FileId           field.Uint
 	Hidden           field.Bool
 	PromptTokens     field.Int
@@ -91,8 +89,7 @@ func (c *chatMessage) updateTableName(table string) *chatMessage {
 	c.ChatId = field.NewUint(table, "chat_id")
 	c.Content = field.NewString(table, "content")
 	c.Role = field.NewString(table, "role")
-	c.ToolCallInfo = field.NewString(table, "tool_call_info")
-	c.ToolCallId = field.NewString(table, "tool_call_id")
+	c.ToolCall = field.NewField(table, "tool_call")
 	c.FileId = field.NewUint(table, "file_id")
 	c.Hidden = field.NewBool(table, "hidden")
 	c.PromptTokens = field.NewInt(table, "prompt_tokens")
@@ -114,15 +111,14 @@ func (c *chatMessage) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *chatMessage) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 14)
+	c.fieldMap = make(map[string]field.Expr, 13)
 	c.fieldMap["id"] = c.Id
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
 	c.fieldMap["chat_id"] = c.ChatId
 	c.fieldMap["content"] = c.Content
 	c.fieldMap["role"] = c.Role
-	c.fieldMap["tool_call_info"] = c.ToolCallInfo
-	c.fieldMap["tool_call_id"] = c.ToolCallId
+	c.fieldMap["tool_call"] = c.ToolCall
 	c.fieldMap["file_id"] = c.FileId
 	c.fieldMap["hidden"] = c.Hidden
 	c.fieldMap["prompt_tokens"] = c.PromptTokens

@@ -3,6 +3,7 @@ package builtin_tool
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 	"rag-new/internal/schema"
 )
@@ -56,6 +57,6 @@ func (s *Service) Calculator(_ context.Context, args schema.FunctionCallArgument
 		return response, errors.New(response.Content)
 	}
 
-	response.Content = result.String()
+	response.Content = fmt.Sprintf("%.f", result)
 	return response, nil
 }

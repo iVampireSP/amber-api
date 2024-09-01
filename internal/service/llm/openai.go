@@ -18,10 +18,10 @@ import (
 )
 
 // 强制停止（如果连续函数调用超过 4 次，则强制停止输出）
-const forceStopCount = 4
+const forceStopCount = 6
 
 // 警告次数（如果 LLM 连续调用超过 3 次，则警告输出）
-const warningCount = 3
+const warningCount = 4
 
 // 警告 LLM 调用太多次工具， 要求停止
 const warningMessage = "[Warning]You are attempting to call the tool/function repeatedly, please use the tool/function properly and stop response. If you continue to call repeatedly, the chat will be forcibly terminated."
@@ -568,53 +568,8 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 				fileText := "[File]File ID: " + h.File.Id.String() + ", MimeType: " + h.File.MimeType
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
 
-				// hint: 不能这么玩，因为上下文的 image 也要很多 token
-				// 如果当前模型是 Vision Model
-				//if llmChat.Model == s.config.OpenAI.VisionModel {
-				//	// 如果是 image/ 开头
-				//	if strings.HasPrefix(h.File.MimeType, "image/") && llmChat.Model == s.config.OpenAI.VisionModel {
-				//
-				//		// 由于能够切换模型，所以不需要设置为 false
-				//		llmChat.WithoutImage = true
-				//
-				//		// 不当做是 file，而是 image
-				//		url, err := s.FileService.GetImageUrl(h.File)
-				//		if err != nil {
-				//			return nil, err
-				//		}
-				//		historyContent = append(historyContent,
-				//			llms.MessageContent{
-				//				Role: llms.ChatMessageTypeHuman,
-				//				Parts: []llms.ContentPart{
-				//					llms.ImageURLWithDetailPart(url, "auto"),
-				//					llms.TextPart("[File ID: " + h.Content + "]"),
-				//				}},
-				//		)
-				//	}
-				//}
 			}
 
-			//var found = false
-			//var fileText string
-
-			//// 将 h.Content 转换为 int64
-			//id, err := strconv.ParseInt(h.Content, 10, 64)
-			//if err != nil {
-			//	return nil, err
-			//}
-			//// 检测 fileEntities 是否存在
-			//for _, fileEntity := range fileEntities {
-			//	if fileEntity.Id == schema.EntityId(id) {
-			//		found = true
-			//
-			//
-			//	}
-			//}
-
-			// 如果找到了并且模型不是 Vision Model
-			//if found && llmChat.Model != s.config.OpenAI.VisionModel {
-			//	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
-			//}
 		}
 	}
 
@@ -622,19 +577,6 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 	if !hasHumanMessage {
 		return nil, consts.ErrNoHumanMessage
 	}
-
-	//	var imagePrompt = `
-	//The chat does not have images. you can't use built-in image tools. image_id can only get from user's uploaded images.
-	//`
-
-	// 如果有图片消息
-	//	if hasFileMessage {
-	//		imagePrompt = `
-	//The chat has images, you can use built-in image tools.
-	//`
-	//	}
-
-	//systemPrompts = append(systemPrompts, imagePrompt)
 
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, strings.Join(systemPrompts, "\n")))
 

@@ -550,11 +550,13 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 				hasFileMessage = true
 			}
 
-			// 如果长度没有超过最大长度且模型是 auto，并且模型不是 VisionModel
-			if (count < consts.MaxTokenCount && llmChat.Model == consts.AutoModel) && (llmChat.Model != s.config.OpenAI.VisionModel) {
-				// 切换模型
-				llmChat.Model = s.config.OpenAI.VisionModel
-			}
+			// 不自动切换到 Vision 模型
+			// 如果长度没有超过最大长度且模型是 auto，并且模型不是 VisionModel ( 不自动切换到 Vision 模型）
+			//if (count < consts.MaxTokenCount && llmChat.Model == consts.AutoModel) && (llmChat.Model != s.config.OpenAI.VisionModel) {
+			//	// 切换模型
+			//	llmChat.Model = s.config.OpenAI.VisionModel
+			//}
+
 			// 如果文件存在
 			if h.File != nil {
 				// 如果不是，则普通处理

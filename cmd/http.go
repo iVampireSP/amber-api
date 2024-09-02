@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"rag-new/internal/base/conf"
 	"strconv"
 	"sync"
 )
@@ -14,7 +13,6 @@ func init() {
 var httpCmd = &cobra.Command{
 	Use: "http",
 	Run: func(cmd *cobra.Command, args []string) {
-		conf.CreateConfigIfNotExists()
 		initHttpServer()
 	},
 }

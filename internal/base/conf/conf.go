@@ -87,7 +87,11 @@ type LLM struct {
 	//N int `yaml:"n"`
 }
 
-func CreateConfigIfNotExists() {
+func CreateConfigIfNotExists(path string) {
+	if path != "" {
+		return
+	}
+
 	// create if not exists
 	var configName = "config.yaml"
 

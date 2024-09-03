@@ -5,12 +5,12 @@ import (
 )
 
 type Assistant struct {
-	Model                `xorm:"extends"`
-	Name                 string        `xorm:"varchar(255) notnull" json:"name"`
-	Prompt               string        `xorm:"varchar(255) notnull" json:"prompt"`
-	Description          string        `xorm:"varchar(255) notnull" json:"description"`
-	UserId               schema.UserId `xorm:"user_id int(11) notnull" json:"user_id"`
-	DisableDefaultPrompt bool          `xorm:"disable_default_prompt bool notnull" json:"disable_default_prompt"`
+	Model
+	Name                 string        `json:"name"`
+	Prompt               string        `json:"prompt"`
+	Description          string        `json:"description"`
+	UserId               schema.UserId `json:"user_id"`
+	DisableDefaultPrompt bool          `json:"disable_default_prompt"`
 }
 
 func (a *Assistant) TableName() string {
@@ -28,17 +28,6 @@ type AssistantTool struct {
 	Tool        Tool            `json:"tool"`
 }
 
-type AssistantToolType struct {
-	Model       `xorm:"extends"`
-	AssistantId schema.EntityId `xorm:"int(8) notnull index" json:"assistant_id"`
-	ToolId      schema.EntityId `xorm:"int(8) notnull index" json:"tool_id"`
-	Assistant   *Assistant      `xorm:"extends" json:"assistant"`
-	Tool        *Tool           `xorm:"extends" json:"tool"`
-}
-
 func (at *AssistantTool) TableName() string {
-	return "assistant_tools"
-}
-func (att *AssistantToolType) TableName() string {
 	return "assistant_tools"
 }

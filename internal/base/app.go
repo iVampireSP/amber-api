@@ -1,6 +1,7 @@
 package base
 
 import (
+	milvusClient "github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/redis/go-redis/v9"
 	"github.com/sashabaranov/go-openai"
 	"gorm.io/gorm"
@@ -26,6 +27,7 @@ type Application struct {
 	Batch      *batch.Batch
 	S3         *s3.S3
 	OpenAI     *openai.Client
+	Milvus     milvusClient.Client
 }
 
 func NewApplication(
@@ -40,6 +42,7 @@ func NewApplication(
 	GORM *gorm.DB,
 	DAO *dao.Query,
 	OpenAI *openai.Client,
+	Milvus milvusClient.Client,
 ) *Application {
 	return &Application{
 		Config:     config,
@@ -53,5 +56,6 @@ func NewApplication(
 		GORM:       GORM,
 		DAO:        DAO,
 		OpenAI:     OpenAI,
+		Milvus:     Milvus,
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/milvus"
 	"rag-new/internal/base/openai"
 	"rag-new/internal/base/orm"
 	"rag-new/internal/base/redis"
@@ -24,6 +25,7 @@ import (
 var ProviderSet = wire.NewSet(
 	conf.ProviderConfig,
 	logger.NewZapLogger,
+	milvus.NewMilvus,
 	orm.NewGORM,
 	dao.NewQuery,
 	redis.NewRedis,

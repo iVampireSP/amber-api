@@ -248,13 +248,13 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 }
 
 // ListTool godoc
-// @Summary      获取 Assistant 所绑定的 Tool
+// @Summary	     获取 Assistant 所绑定的 Tool
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Assistant ID"
-// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantToolType}
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantTool}
 // @Failure      500  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants/{id}/tools [get]
 func (u *AssistantController) ListTool(c *gin.Context) {

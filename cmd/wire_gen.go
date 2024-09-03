@@ -12,6 +12,7 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/milvus"
 	"rag-new/internal/base/openai"
 	"rag-new/internal/base/orm"
 	"rag-new/internal/base/redis"
@@ -63,10 +64,11 @@ func CreateApp() (*base.Application, error) {
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
-	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query, openaiClient)
+	clientClient := milvus.NewMilvus(config)
+	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query, openaiClient, clientClient)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, openai.NewOpenAI, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, milvus.NewMilvus, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, openai.NewOpenAI, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

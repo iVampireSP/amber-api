@@ -47,7 +47,7 @@ func getConfigPath() string {
 
 func ProviderConfig(logger *logger.Logger) *Config {
 	var path = getConfigPath()
-	CreateConfigIfNotExists(path)
+	createConfigIfNotExists(path)
 
 	if path == "" {
 		logger.Sugar.Fatal("config file not found, created.")

@@ -43,6 +43,8 @@ func gormGen() {
 		entity.File{},
 		entity.Tool{},
 		entity.AssistantTool{},
+		entity.Embedding{},
+		entity.Memory{},
 	)
 
 	// Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`

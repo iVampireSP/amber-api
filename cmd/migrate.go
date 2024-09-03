@@ -52,6 +52,10 @@ func RunMigrate(args []string) {
 		panic(err)
 	}
 
+	// setup config
+	migrations.Config = app.Config
+	migrations.Milvus = app.Milvus
+
 	// dic
 	goose.SetBaseFS(migrations.MigrationFS)
 
@@ -63,7 +67,7 @@ func RunMigrate(args []string) {
 
 	db, err := app.GORM.DB()
 	if err != nil {
-		log.Fatalf("goose: failed to open DB: %v\n", err)
+		log.Fatalf("goose: %v\n", err)
 	}
 
 	command := args[0]
@@ -76,7 +80,7 @@ func RunMigrate(args []string) {
 	err = goose.RunContext(context.Background(), command, db, ".", arguments...)
 
 	if err != nil {
-		log.Fatalf("goose: failed to open DB: %v\n", err)
+		log.Fatalf("goose: %v\n", err)
 	}
 
 	defer func() {

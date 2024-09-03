@@ -5,14 +5,14 @@ import (
 )
 
 type Tool struct {
-	Model `xorm:"extends"`
+	Model
 
-	Name         string                     `xorm:"varchar(255) notnull" json:"name"`
-	Description  string                     `xorm:"varchar(255) notnull" json:"description"`
-	DiscoveryUrl string                     `xorm:"varchar(255) notnull" json:"discovery_url"`
-	ApiKey       string                     `xorm:"varchar(255) notnull" json:"api_key"`
-	Data         schema.ToolDiscoveryOutput `xorm:"json" json:"data"`
-	UserId       schema.UserId              `xorm:"user_id int(11) notnull" json:"user_id"`
+	Name         string                     `json:"name"`
+	Description  string                     `json:"description"`
+	DiscoveryUrl string                     `json:"discovery_url"`
+	ApiKey       string                     `json:"api_key"`
+	Data         schema.ToolDiscoveryOutput `json:"data"`
+	UserId       schema.UserId              `json:"user_id"`
 }
 
 func (t *Tool) TableName() string {

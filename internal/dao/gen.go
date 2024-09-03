@@ -22,7 +22,9 @@ var (
 	AssistantTool  *assistantTool
 	Chat           *chat
 	ChatMessage    *chatMessage
+	Embedding      *embedding
 	File           *file
+	Memory         *memory
 	Tool           *tool
 )
 
@@ -33,7 +35,9 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	AssistantTool = &Q.AssistantTool
 	Chat = &Q.Chat
 	ChatMessage = &Q.ChatMessage
+	Embedding = &Q.Embedding
 	File = &Q.File
+	Memory = &Q.Memory
 	Tool = &Q.Tool
 }
 
@@ -45,7 +49,9 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		AssistantTool:  newAssistantTool(db, opts...),
 		Chat:           newChat(db, opts...),
 		ChatMessage:    newChatMessage(db, opts...),
+		Embedding:      newEmbedding(db, opts...),
 		File:           newFile(db, opts...),
+		Memory:         newMemory(db, opts...),
 		Tool:           newTool(db, opts...),
 	}
 }
@@ -58,7 +64,9 @@ type Query struct {
 	AssistantTool  assistantTool
 	Chat           chat
 	ChatMessage    chatMessage
+	Embedding      embedding
 	File           file
+	Memory         memory
 	Tool           tool
 }
 
@@ -72,7 +80,9 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		AssistantTool:  q.AssistantTool.clone(db),
 		Chat:           q.Chat.clone(db),
 		ChatMessage:    q.ChatMessage.clone(db),
+		Embedding:      q.Embedding.clone(db),
 		File:           q.File.clone(db),
+		Memory:         q.Memory.clone(db),
 		Tool:           q.Tool.clone(db),
 	}
 }
@@ -93,7 +103,9 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		AssistantTool:  q.AssistantTool.replaceDB(db),
 		Chat:           q.Chat.replaceDB(db),
 		ChatMessage:    q.ChatMessage.replaceDB(db),
+		Embedding:      q.Embedding.replaceDB(db),
 		File:           q.File.replaceDB(db),
+		Memory:         q.Memory.replaceDB(db),
 		Tool:           q.Tool.replaceDB(db),
 	}
 }
@@ -104,7 +116,9 @@ type queryCtx struct {
 	AssistantTool  IAssistantToolDo
 	Chat           IChatDo
 	ChatMessage    IChatMessageDo
+	Embedding      IEmbeddingDo
 	File           IFileDo
+	Memory         IMemoryDo
 	Tool           IToolDo
 }
 
@@ -115,7 +129,9 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		AssistantTool:  q.AssistantTool.WithContext(ctx),
 		Chat:           q.Chat.WithContext(ctx),
 		ChatMessage:    q.ChatMessage.WithContext(ctx),
+		Embedding:      q.Embedding.WithContext(ctx),
 		File:           q.File.WithContext(ctx),
+		Memory:         q.Memory.WithContext(ctx),
 		Tool:           q.Tool.WithContext(ctx),
 	}
 }

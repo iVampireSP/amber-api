@@ -12,6 +12,7 @@ Guidelines:
 - If the new memory is a variation or extension of an existing memory, update the existing memory to reflect the new information.
 - If there are duplicates in the existing memories, only the more specific one needs to be retained. For example: Like reading and Like reading book are duplicates.
 - If there are more than 5 existing memories, some memories need to be merged.
+- Save memories in Simplified Chinese
 
 Here are the details of the task:
 - Existing Memories:
@@ -31,6 +32,7 @@ Constraint for deducing facts, preferences, and memories:
 - The facts, preferences, and memories should be concise and informative.
 - Don't start by "The person likes Pizza". Instead, start with "Likes Pizza".
 - Don't remember the user/agent details provided. Only remember the facts, preferences, and memories.
+- Save memories in Simplified Chinese
 
 Deduced facts, preferences, and memories:`
 }
@@ -42,6 +44,7 @@ Guidelines:
 - Extract relevant information from the memories based on the question.
 - If no relevant information is found, make sure you don't say no information is found. Instead, accept the question and provide a general response.
 - Ensure that the answers are clear, concise, and directly address the question.
+- Save memories in Simplified Chinese
 
 Here are the details of the task:`
 }

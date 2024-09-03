@@ -11,6 +11,7 @@ type Api struct {
 	Assistant *v1.AssistantController
 	Chat      *v1.ChatController
 	File      *v1.FileController
+	Memory    *v1.MemoryController
 }
 
 func NewApiRoute(
@@ -19,9 +20,10 @@ func NewApiRoute(
 	Assistant *v1.AssistantController,
 	Chat *v1.ChatController,
 	File *v1.FileController,
+	Memory *v1.MemoryController,
 ) *Api {
 	return &Api{
-		User, Tool, Assistant, Chat, File,
+		User, Tool, Assistant, Chat, File, Memory,
 	}
 }
 
@@ -56,6 +58,10 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.GET("/chats/:id/messages", a.Chat.ListChatMessage)
 	r.POST("/chats/:id/messages", a.Chat.AddChatMessage)
 	r.POST("/chats/:id/images", a.Chat.AddChatImage)
+
+	r.GET("/memories", a.Memory.List)
+	r.POST("/memories/purge", a.Memory.Purge)
+	r.DELETE("/memories/:id", a.Memory.Delete)
 }
 
 func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {

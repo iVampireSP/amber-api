@@ -53,24 +53,6 @@ definitions:
       updated_at:
         type: string
     type: object
-  entity.AssistantToolType:
-    properties:
-      assistant:
-        $ref: '#/definitions/entity.Assistant'
-      assistant_id:
-        type: integer
-      created_at:
-        type: string
-      id:
-        example: "0"
-        type: string
-      tool:
-        $ref: '#/definitions/entity.Tool'
-      tool_id:
-        type: integer
-      updated_at:
-        type: string
-    type: object
   entity.Chat:
     properties:
       assistant_id:
@@ -146,6 +128,20 @@ definitions:
         type: string
       url_hash:
         type: string
+    type: object
+  entity.Memory:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        example: "0"
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
     type: object
   entity.Tool:
     properties:
@@ -806,7 +802,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/entity.AssistantToolType'
+                    $ref: '#/definitions/entity.AssistantTool'
                   type: array
               type: object
         "500":
@@ -1445,6 +1441,72 @@ paths:
       summary: 下载文件
       tags:
       - file
+  /api/v1/memories:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.Memory'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有的记忆
+      tags:
+      - memoires
+  /api/v1/memories/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除指定的记忆
+      tags:
+      - memoires
+  /api/v1/memories/purge:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除全部记忆
+      tags:
+      - memoires
   /api/v1/ping:
     get:
       consumes:

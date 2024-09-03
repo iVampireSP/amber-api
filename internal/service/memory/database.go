@@ -16,12 +16,14 @@ func (s *Service) addMemory(ctx context.Context, data string, userId schema.User
 	}
 
 	// check if memory exists
-	count, err := s.dao.Memory.Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(int64(userId))).Count()
+	count, err := s.dao.Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
+		Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(int64(userId))).Count()
 	if err != nil {
 		return 0, err
 	}
 	if count > 0 {
-		mem, err := s.dao.Memory.Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(int64(userId))).First()
+		mem, err := s.dao.Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
+			Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(int64(userId))).First()
 		if err != nil {
 			return 0, err
 		}
@@ -70,7 +72,8 @@ func (s *Service) updateMemory(ctx context.Context, memoryId schema.EntityId, da
 	}
 
 	// 检查 memId 是否存在
-	count, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.Id.Eq(uint(memoryId))).Count()
+	count, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
+		Where(s.dao.Memory.Id.Eq(uint(memoryId))).Count()
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +83,8 @@ func (s *Service) updateMemory(ctx context.Context, memoryId schema.EntityId, da
 		return nil, fmt.Errorf("memory id not exists")
 	}
 
-	mem, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.Id.Eq(uint(memoryId))).First()
+	mem, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
+		Where(s.dao.Memory.Id.Eq(uint(memoryId))).First()
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +97,8 @@ func (s *Service) updateMemory(ctx context.Context, memoryId schema.EntityId, da
 
 	mem.Vector = embed[0]
 	// update
-	_, err = s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.Id.Eq(uint(memoryId))).Updates(mem)
+	_, err = s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
+		Where(s.dao.Memory.Id.Eq(uint(memoryId))).Updates(mem)
 
 	if err != nil {
 		return nil, err
@@ -118,14 +123,10 @@ func (s *Service) updateMemory(ctx context.Context, memoryId schema.EntityId, da
 
 }
 
-func (s *Service) getMemory(ctx context.Context, memoryId schema.EntityId, data string) error {
-
-	return nil
-}
-
 func (s *Service) deleteMemory(ctx context.Context, memoryId schema.EntityId) error {
 	// 检查 memId 是否存在
-	count, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.Id.Eq(uint(memoryId))).Count()
+	count, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
+		Where(s.dao.Memory.Id.Eq(uint(memoryId))).Count()
 	if err != nil {
 		return err
 	}
@@ -135,7 +136,8 @@ func (s *Service) deleteMemory(ctx context.Context, memoryId schema.EntityId) er
 		return fmt.Errorf("delete failed, memory id not exists")
 	}
 
-	mem, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.Id.Eq(uint(memoryId))).First()
+	mem, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
+		Where(s.dao.Memory.Id.Eq(uint(memoryId))).First()
 	if err != nil {
 		return err
 	}

@@ -32,6 +32,7 @@ func newMemory(db *gorm.DB, opts ...gen.DOOption) memory {
 	_memory.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_memory.Content = field.NewString(tableName, "content")
 	_memory.ContentMd5 = field.NewString(tableName, "content_md5")
+	_memory.EmbeddingModel = field.NewString(tableName, "model")
 	_memory.Vector = field.NewField(tableName, "vector")
 	_memory.UserId = field.NewInt64(tableName, "user_id")
 
@@ -43,14 +44,15 @@ func newMemory(db *gorm.DB, opts ...gen.DOOption) memory {
 type memory struct {
 	memoryDo
 
-	ALL        field.Asterisk
-	Id         field.Uint
-	CreatedAt  field.Time
-	UpdatedAt  field.Time
-	Content    field.String
-	ContentMd5 field.String
-	Vector     field.Field
-	UserId     field.Int64
+	ALL            field.Asterisk
+	Id             field.Uint
+	CreatedAt      field.Time
+	UpdatedAt      field.Time
+	Content        field.String
+	ContentMd5     field.String
+	EmbeddingModel field.String
+	Vector         field.Field
+	UserId         field.Int64
 
 	fieldMap map[string]field.Expr
 }
@@ -72,6 +74,7 @@ func (m *memory) updateTableName(table string) *memory {
 	m.UpdatedAt = field.NewTime(table, "updated_at")
 	m.Content = field.NewString(table, "content")
 	m.ContentMd5 = field.NewString(table, "content_md5")
+	m.EmbeddingModel = field.NewString(table, "model")
 	m.Vector = field.NewField(table, "vector")
 	m.UserId = field.NewInt64(table, "user_id")
 
@@ -90,12 +93,13 @@ func (m *memory) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (m *memory) fillFieldMap() {
-	m.fieldMap = make(map[string]field.Expr, 7)
+	m.fieldMap = make(map[string]field.Expr, 8)
 	m.fieldMap["id"] = m.Id
 	m.fieldMap["created_at"] = m.CreatedAt
 	m.fieldMap["updated_at"] = m.UpdatedAt
 	m.fieldMap["content"] = m.Content
 	m.fieldMap["content_md5"] = m.ContentMd5
+	m.fieldMap["model"] = m.EmbeddingModel
 	m.fieldMap["vector"] = m.Vector
 	m.fieldMap["user_id"] = m.UserId
 }

@@ -8,7 +8,6 @@ import (
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/builtin_tool"
 	"rag-new/internal/service/file"
-	"rag-new/internal/service/memory"
 	"rag-new/internal/service/stream"
 	"rag-new/internal/service/tool"
 )
@@ -21,7 +20,6 @@ type Service struct {
 	BuiltInTools     *builtin_tool.Service
 	FileService      *file.Service
 	streamService    *stream.Service
-	MemoryService    *memory.Service
 	// 也许要把所有的名字改成小写，所以就从接下来的开始改成小写
 	// 然后再慢慢改原来的吧
 	message *message.Message
@@ -35,7 +33,6 @@ func NewLLM(config *conf.Config,
 	builtinTools *builtin_tool.Service,
 	fileService *file.Service,
 	streamService *stream.Service,
-	memoryService *memory.Service,
 	message *message.Message,
 ) *Service {
 	llm, err := openai.New(
@@ -54,7 +51,6 @@ func NewLLM(config *conf.Config,
 		builtinTools,
 		fileService,
 		streamService,
-		memoryService,
 		message,
 		config,
 	}

@@ -38,6 +38,7 @@ openai:
   long_context_model: gemini-pro
   dall_e_model: dall-e-3
   embedding_model: jina-embeddings-v2-base-zh
+  embedding_dim: 768
   # 允许自己指定的模型
   allowed_models:
     - gpt-4

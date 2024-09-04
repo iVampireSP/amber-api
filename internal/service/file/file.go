@@ -140,8 +140,8 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.F
 	}
 	fileMimeTypeString := fileMimeType.String()
 
-	// 只允许 jpg(jpeg),png,webp
-	if fileMimeTypeString != "image/jpeg" && fileMimeTypeString != "image/png" && fileMimeTypeString != "image/webp" {
+	// 只允许指定的 Mimetype
+	if !allowedMimeTypes[fileMimeTypeString] {
 		return nil, consts.ErrMimeTypeNotAllowed
 	}
 

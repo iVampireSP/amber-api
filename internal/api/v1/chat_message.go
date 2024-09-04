@@ -187,6 +187,12 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		return
 	}
 
+	// TODO: 如果 request.Message 的大小超过了 1mb
+	//if len(request.Message) > 1024*1024 {
+	//	// 转换为 file
+	//
+	//}
+
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id
 	chatMessage.Content = request.Message

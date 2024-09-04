@@ -75,3 +75,6 @@ kafka:
     - 127.0.0.1:9092
   topic: "amber"
   group_id: ""
+  # Plain
+  username: ""
+  password: ""

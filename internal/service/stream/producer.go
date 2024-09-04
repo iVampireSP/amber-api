@@ -55,7 +55,7 @@ import (
 //}
 
 func (s *Service) Producer(topic string) *kafka.Writer {
-	return &kafka.Writer{
+	var w = &kafka.Writer{
 		Addr:            kafka.TCP(s.config.Kafka.BootstrapServers...),
 		Topic:           topic,
 		Balancer:        &kafka.Hash{}, // 用于对key进行hash，决定消息发送到哪个分区
@@ -76,6 +76,14 @@ func (s *Service) Producer(topic string) *kafka.Writer {
 		Transport:              nil,
 		AllowAutoTopicCreation: false, // 第一次发消息的时候，如果topic不存在，就自动创建topic，工作中禁止使用
 	}
+
+	if s.config.Kafka.Username != "" && s.config.Kafka.Password != "" {
+		w.Transport = &kafka.Transport{
+			SASL: s.auth(),
+		}
+	}
+
+	return w
 }
 
 func (s *Service) SendMessage(ctx context.Context, key []byte, data []byte) error {

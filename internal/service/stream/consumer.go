@@ -26,7 +26,7 @@ import (
 //}
 
 func (s *Service) Consumer(topic string, groupId string) *kafka.Reader {
-	return kafka.NewReader(kafka.ReaderConfig{
+	var r = kafka.ReaderConfig{
 		Brokers:                s.config.Kafka.BootstrapServers,
 		GroupID:                groupId,
 		GroupTopics:            nil,
@@ -56,7 +56,18 @@ func (s *Service) Consumer(topic string, groupId string) *kafka.Reader {
 		IsolationLevel:         0,
 		MaxAttempts:            0,
 		OffsetOutOfRangeError:  false,
-	})
+	}
+
+	if s.config.Kafka.Username != "" && s.config.Kafka.Password != "" {
+		r.Dialer = &kafka.Dialer{
+			Timeout:       10 * time.Second,
+			DualStack:     true,
+			SASLMechanism: s.auth(),
+		}
+	}
+
+	return kafka.NewReader(r)
+
 }
 
 type HandlerFunc func([]byte)

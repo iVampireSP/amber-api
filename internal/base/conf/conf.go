@@ -103,6 +103,8 @@ type Kafka struct {
 	BootstrapServers KafkaBootstrapServers `yaml:"bootstrap_servers" mapstructure:"bootstrap_servers"`
 	Topic            string                `yaml:"topic" mapstructure:"topic"`
 	GroupId          string                `yaml:"group_id" mapstructure:"group_id"`
+	Username         string                `yaml:"username" mapstructure:"username"`
+	Password         string                `yaml:"password" mapstructure:"password"`
 }
 
 type KafkaBootstrapServers []string

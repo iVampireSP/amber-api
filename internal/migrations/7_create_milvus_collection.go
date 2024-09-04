@@ -64,6 +64,9 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	}
 
 	err := Milvus.CreateCollection(ctx, schema, 2)
+	if err != nil {
+		return errors.Join(errors.New("failed to create collection"), err)
+	}
 
 	marisaTrie := entity.NewGenericIndex("idx_model", entity.Trie, map[string]string{})
 	err = Milvus.CreateIndex(ctx, Config.Milvus.Collection, "model", marisaTrie, false)

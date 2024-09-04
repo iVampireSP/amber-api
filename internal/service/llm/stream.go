@@ -15,6 +15,9 @@ import (
 func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
 	// 不要从接收侧关闭 channel
 	defer close(llmChat.ResponseChan)
+	// 处理事件
+	go s.event(ctx, llmChat)
+	// 处理历史
 	h, err := s.processHistory(llmChat, history)
 	if err != nil {
 		return err

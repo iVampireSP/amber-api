@@ -226,7 +226,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	// 生成访客信息
 	var publicUser = &schema.UserPublicInfo{
 		Name:      "Guest",
-		Id:        addPublicChatMessageRequest.GuestId,
+		GuestId:   &addPublicChatMessageRequest.GuestId,
 		ChatOwner: schema.OwnerUser,
 	}
 

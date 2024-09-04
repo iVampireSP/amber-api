@@ -23,7 +23,7 @@ Your description: ` + assistant.Description + "(current user given)"
 		if user != nil {
 			prompt += `
 Username: ` + user.Name + `(system hint you)` + `
-UserId: ` + user.Id + "(system hint you, user can't change it)"
+UserId: ` + user.Id.String() + "(system hint you, user can't change it)"
 		}
 
 		var clientIP = ""

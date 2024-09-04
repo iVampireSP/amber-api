@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"strconv"
 	"time"
 )
 
@@ -30,6 +31,10 @@ type User struct {
 
 type UserId int64
 
+func (u UserId) String() string {
+	return strconv.FormatInt(int64(u), 10)
+}
+
 type JWTTokenTypes string
 
 const (
@@ -39,7 +44,8 @@ const (
 
 type UserPublicInfo struct {
 	Name      string    `json:"name"`
-	Id        string    `json:"id"`
+	Id        *UserId   `json:"id"`
+	GuestId   *string   `json:"guest_id"`
 	ChatOwner ChatOwner `json:"chat_owner"`
 }
 

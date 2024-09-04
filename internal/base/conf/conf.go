@@ -21,6 +21,8 @@ type Config struct {
 	S3 *S3 `yaml:"s3"`
 
 	Milvus *Milvus `yaml:"milvus"`
+
+	Kafka *Kafka `yaml:"kafka"`
 }
 
 type Http struct {
@@ -96,3 +98,11 @@ type Milvus struct {
 	User       string `yaml:"user" mapstructure:"user"`
 	Password   string `yaml:"password" mapstructure:"password"`
 }
+
+type Kafka struct {
+	BootstrapServers KafkaBootstrapServers `yaml:"bootstrap_servers" mapstructure:"bootstrap_servers"`
+	Topic            string                `yaml:"topic" mapstructure:"topic"`
+	GroupId          string                `yaml:"group_id" mapstructure:"group_id"`
+}
+
+type KafkaBootstrapServers []string

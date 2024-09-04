@@ -13,7 +13,6 @@ import (
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
 	"rag-new/pkg/random"
-	"strconv"
 )
 
 // ListChatMessage godoc
@@ -147,12 +146,10 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		}
 	}
 
-	var userIdStr = strconv.Itoa(int(u.authService.GetUserId(c)))
-
 	var userInfo = u.authService.GetUser(c)
 	var publicUser = &schema.UserPublicInfo{
 		Name:      userInfo.Token.Name,
-		Id:        userIdStr,
+		Id:        &userInfo.Token.Sub,
 		ChatOwner: schema.OwnerUser,
 	}
 

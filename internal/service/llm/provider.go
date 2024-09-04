@@ -4,6 +4,7 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/message"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/builtin_tool"
 	"rag-new/internal/service/file"
@@ -21,10 +22,19 @@ type Service struct {
 	StreamService    *stream.Service
 	// 也许要把所有的名字改成小写，所以就从接下来的开始改成小写
 	// 然后再慢慢改原来的吧
-	config *conf.Config
+	message *message.Message
+	config  *conf.Config
 }
 
-func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assistant.Service, toolService *tool.Service, builtinTools *builtin_tool.Service, fileService *file.Service, StreamService *stream.Service) *Service {
+func NewLLM(config *conf.Config,
+	logger *logger.Logger,
+	assistantService *assistant.Service,
+	toolService *tool.Service,
+	builtinTools *builtin_tool.Service,
+	fileService *file.Service,
+	StreamService *stream.Service,
+	message *message.Message,
+) *Service {
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.BaseUrl),
@@ -34,5 +44,14 @@ func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assist
 		panic(err)
 	}
 
-	return &Service{llm, logger, assistantService, toolService, builtinTools, fileService, StreamService, config}
+	return &Service{llm,
+		logger,
+		assistantService,
+		toolService,
+		builtinTools,
+		fileService,
+		StreamService,
+		message,
+		config,
+	}
 }

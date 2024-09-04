@@ -7,18 +7,20 @@ import (
 	"rag-new/internal/base/logger"
 	"rag-new/internal/dao"
 	"rag-new/internal/service/embedding"
+	"rag-new/internal/service/stream"
 )
 
 type Service struct {
 	OpenAI    *openai.LLM
 	Logger    *logger.Logger
-	config    *conf.Config
 	Embedding *embedding.Service
 	Milvus    client.Client
+	Stream    *stream.Service
+	config    *conf.Config
 	dao       *dao.Query
 }
 
-func NewMemory(config *conf.Config, logger *logger.Logger, embedding *embedding.Service, milvus client.Client, dao *dao.Query) *Service {
+func NewMemory(config *conf.Config, logger *logger.Logger, embedding *embedding.Service, milvus client.Client, dao *dao.Query, stream *stream.Service) *Service {
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.BaseUrl),
@@ -28,5 +30,5 @@ func NewMemory(config *conf.Config, logger *logger.Logger, embedding *embedding.
 		panic(err)
 	}
 
-	return &Service{llm, logger, config, embedding, milvus, dao}
+	return &Service{llm, logger, embedding, milvus, stream, config, dao}
 }

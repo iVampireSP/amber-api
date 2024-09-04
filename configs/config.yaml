@@ -69,3 +69,9 @@ milvus:
   collection: amber
   user:
   password:
+
+kafka:
+  bootstrap_servers:
+    - 127.0.0.1:9092
+  topic: "amber"
+  group_id: ""

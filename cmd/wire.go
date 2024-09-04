@@ -17,6 +17,7 @@ import (
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
 	"rag-new/internal/dao"
+	"rag-new/internal/message"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
@@ -25,6 +26,7 @@ import (
 var ProviderSet = wire.NewSet(
 	conf.ProviderConfig,
 	logger.NewZapLogger,
+	message.NewMessage,
 	milvus.NewMilvus,
 	orm.NewGORM,
 	dao.NewQuery,

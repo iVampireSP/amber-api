@@ -20,6 +20,7 @@ import (
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
 	"rag-new/internal/dao"
+	"rag-new/internal/message"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
@@ -33,6 +34,7 @@ import (
 	"rag-new/internal/service/jwks"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/memory"
+	"rag-new/internal/service/stream"
 	"rag-new/internal/service/tool"
 )
 
@@ -58,22 +60,24 @@ func CreateApp() (*base.Application, error) {
 	fileService := file.NewService(s3S3, config, query)
 	openaiClient := openai.NewOpenAI(config)
 	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService, openaiClient)
-	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService)
+	streamService := stream.NewService(config)
+	messageMessage := message.NewMessage()
+	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService, streamService, messageMessage)
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService)
 	fileController := v1.NewFileController(fileService, loggerLogger)
 	embeddingService := embedding.NewEmbedding(config, loggerLogger, query)
 	clientClient := milvus.NewMilvus(config)
-	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, clientClient, query)
+	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, clientClient, query, streamService)
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController, fileController, memoryController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService)
 	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query, openaiClient, clientClient)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, milvus.NewMilvus, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, openai.NewOpenAI, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, message.NewMessage, milvus.NewMilvus, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, openai.NewOpenAI, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

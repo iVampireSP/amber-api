@@ -16,6 +16,7 @@ import (
 	"rag-new/internal/service/chat_message"
 	"rag-new/internal/service/file"
 	"rag-new/internal/service/llm"
+	"rag-new/internal/service/memory"
 	"rag-new/pkg/consts"
 	"strconv"
 )
@@ -32,12 +33,34 @@ type ChatController struct {
 	assistantService *assistant.Service
 	cm               *chat_message.Service
 	fileService      *file.Service
+	memoryService    *memory.Service
 	config           *conf.Config
 }
 
-func NewChatController(authService *auth.Service,
-	chatService *chat.Service, redis *redis.Client, llmService *llm.Service, logger *logger.Logger, assistantService *assistant.Service, chatMessageService *chat_message.Service, config *conf.Config, fileService *file.Service) *ChatController {
-	return &ChatController{authService, chatService, redis, llmService, logger, assistantService, chatMessageService, fileService, config}
+func NewChatController(
+	authService *auth.Service,
+	chatService *chat.Service,
+	redis *redis.Client,
+	llmService *llm.Service,
+	logger *logger.Logger,
+	assistantService *assistant.Service,
+	chatMessageService *chat_message.Service,
+	config *conf.Config,
+	fileService *file.Service,
+	memoryService *memory.Service,
+) *ChatController {
+	return &ChatController{
+		authService,
+		chatService,
+		redis,
+		llmService,
+		logger,
+		assistantService,
+		chatMessageService,
+		fileService,
+		memoryService,
+		config,
+	}
 }
 
 // List godoc

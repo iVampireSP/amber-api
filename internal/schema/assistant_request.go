@@ -9,10 +9,12 @@ type AssistantCreateRequest struct {
 }
 
 type AssistantUpdateRequest struct {
-	Name                 string `json:"name" validate:"max=255"`
-	Description          string `json:"description" validate:"max=255"`
-	Prompt               string `json:"prompt" validate:"max=512"`
-	DisableDefaultPrompt bool   `json:"disable_default_prompt" validate:"oneof=true false"`
+	Name                          string `json:"name" validate:"max=255"`
+	Description                   string `json:"description" validate:"max=255"`
+	Prompt                        string `json:"prompt" validate:"max=512"`
+	DisableDefaultPrompt          bool   `json:"disable_default_prompt" validate:"oneof=true false"`
+	DisableMemory                 bool   `json:"disable_memory" validate:"oneof=true false"`
+	EnableMemoryForAssistantShare bool   `json:"enable_memory_for_assistant_share" validate:"oneof=true false"`
 }
 
 type AssistantToolBindRequest struct {

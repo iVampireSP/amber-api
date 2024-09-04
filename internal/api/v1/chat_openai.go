@@ -48,7 +48,12 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		return
 	}
 
-	var prompt = u.getPrompt(c, assistantEntity, nil)
+	prompt, err := u.getPrompt(c, assistantEntity, nil, schema.OwnerGuest)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
 	var llmResponseChan = make(chan *schema.AssistantResponse)
 
 	var llmChat = &schema.LLMChat{

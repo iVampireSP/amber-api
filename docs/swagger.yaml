@@ -7,6 +7,10 @@ definitions:
         type: string
       disable_default_prompt:
         type: boolean
+      disable_memory:
+        type: boolean
+      enable_memory_for_assistant_share:
+        type: boolean
       id:
         example: "0"
         type: string
@@ -73,7 +77,6 @@ definitions:
       updated_at:
         type: string
       user_id:
-        description: Assistant   Assistant        `json:"assistant"`
         type: integer
     type: object
   entity.ChatMessage:
@@ -213,6 +216,16 @@ definitions:
         maxLength: 255
         type: string
       disable_default_prompt:
+        enum:
+        - true
+        - false
+        type: boolean
+      disable_memory:
+        enum:
+        - true
+        - false
+        type: boolean
+      enable_memory_for_assistant_share:
         enum:
         - true
         - false

@@ -35,6 +35,8 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 	_assistant.Description = field.NewString(tableName, "description")
 	_assistant.UserId = field.NewInt64(tableName, "user_id")
 	_assistant.DisableDefaultPrompt = field.NewBool(tableName, "disable_default_prompt")
+	_assistant.DisableMemory = field.NewBool(tableName, "disable_memory")
+	_assistant.EnableMemoryForAssistantShare = field.NewBool(tableName, "enable_memory_for_assistant_share")
 
 	_assistant.fillFieldMap()
 
@@ -44,15 +46,17 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 type assistant struct {
 	assistantDo
 
-	ALL                  field.Asterisk
-	Id                   field.Uint
-	CreatedAt            field.Time
-	UpdatedAt            field.Time
-	Name                 field.String
-	Prompt               field.String
-	Description          field.String
-	UserId               field.Int64
-	DisableDefaultPrompt field.Bool
+	ALL                           field.Asterisk
+	Id                            field.Uint
+	CreatedAt                     field.Time
+	UpdatedAt                     field.Time
+	Name                          field.String
+	Prompt                        field.String
+	Description                   field.String
+	UserId                        field.Int64
+	DisableDefaultPrompt          field.Bool
+	DisableMemory                 field.Bool
+	EnableMemoryForAssistantShare field.Bool
 
 	fieldMap map[string]field.Expr
 }
@@ -77,6 +81,8 @@ func (a *assistant) updateTableName(table string) *assistant {
 	a.Description = field.NewString(table, "description")
 	a.UserId = field.NewInt64(table, "user_id")
 	a.DisableDefaultPrompt = field.NewBool(table, "disable_default_prompt")
+	a.DisableMemory = field.NewBool(table, "disable_memory")
+	a.EnableMemoryForAssistantShare = field.NewBool(table, "enable_memory_for_assistant_share")
 
 	a.fillFieldMap()
 
@@ -93,7 +99,7 @@ func (a *assistant) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *assistant) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 8)
+	a.fieldMap = make(map[string]field.Expr, 10)
 	a.fieldMap["id"] = a.Id
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -102,6 +108,8 @@ func (a *assistant) fillFieldMap() {
 	a.fieldMap["description"] = a.Description
 	a.fieldMap["user_id"] = a.UserId
 	a.fieldMap["disable_default_prompt"] = a.DisableDefaultPrompt
+	a.fieldMap["disable_memory"] = a.DisableMemory
+	a.fieldMap["enable_memory_for_assistant_share"] = a.EnableMemoryForAssistantShare
 }
 
 func (a assistant) clone(db *gorm.DB) assistant {

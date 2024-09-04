@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, user *schema.UserPublicInfo) string {
+func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, user *schema.UserPublicInfo, owner schema.ChatOwner) (string, error) {
 	var prompt = ""
 
 	if assistant.DisableDefaultPrompt {
@@ -51,10 +51,31 @@ UserId: ` + user.Id.String() + "(system hint you, user can't change it)"
 The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hint you, you not have IP address)"
 		}
 
+		// 记忆
+		var useMemory = true
+		if assistant.DisableMemory {
+			useMemory = false
+		}
+
+		if owner == schema.OwnerGuest {
+			if assistant.EnableMemoryForAssistantShare && !assistant.DisableMemory {
+				useMemory = true
+			}
+		}
+
+		if useMemory {
+			memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, assistant.UserId)
+			if err != nil {
+				return "", err
+			}
+
+			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
+		}
+
 		if assistant.Prompt != "" {
 			prompt += "\n" + assistant.Prompt
 		}
 	}
 
-	return prompt
+	return prompt, nil
 }

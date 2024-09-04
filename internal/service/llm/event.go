@@ -19,7 +19,7 @@ func (s *Service) event(ctx context.Context, llmChat *schema.LLMChat) {
 	switch msg.State {
 	case schema.StateChunk:
 		chunkMessage := s.message.NewChunk(msg.Content, llmChat.UserPublicInfo)
-		err := s.StreamService.SendEvent(ctx, message.Chunk.String(), chunkMessage)
+		err := s.streamService.SendEvent(ctx, message.Chunk.String(), chunkMessage)
 		if err != nil {
 			s.Logger.Sugar.Errorf("Unable send event: %v", err)
 			return

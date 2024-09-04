@@ -36,6 +36,11 @@ func newChat(db *gorm.DB, opts ...gen.DOOption) chat {
 	_chat.ExpiredAt = field.NewTime(tableName, "expired_at")
 	_chat.Owner = field.NewString(tableName, "owner")
 	_chat.GuestId = field.NewString(tableName, "guest_id")
+	_chat.Assistant = chatBelongsToAssistant{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Assistant", "entity.Assistant"),
+	}
 
 	_chat.fillFieldMap()
 
@@ -55,6 +60,7 @@ type chat struct {
 	ExpiredAt   field.Time
 	Owner       field.String
 	GuestId     field.String
+	Assistant   chatBelongsToAssistant
 
 	fieldMap map[string]field.Expr
 }
@@ -96,7 +102,7 @@ func (c *chat) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *chat) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 9)
+	c.fieldMap = make(map[string]field.Expr, 10)
 	c.fieldMap["id"] = c.Id
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
@@ -106,6 +112,7 @@ func (c *chat) fillFieldMap() {
 	c.fieldMap["expired_at"] = c.ExpiredAt
 	c.fieldMap["owner"] = c.Owner
 	c.fieldMap["guest_id"] = c.GuestId
+
 }
 
 func (c chat) clone(db *gorm.DB) chat {
@@ -116,6 +123,77 @@ func (c chat) clone(db *gorm.DB) chat {
 func (c chat) replaceDB(db *gorm.DB) chat {
 	c.chatDo.ReplaceDB(db)
 	return c
+}
+
+type chatBelongsToAssistant struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a chatBelongsToAssistant) Where(conds ...field.Expr) *chatBelongsToAssistant {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a chatBelongsToAssistant) WithContext(ctx context.Context) *chatBelongsToAssistant {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a chatBelongsToAssistant) Session(session *gorm.Session) *chatBelongsToAssistant {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a chatBelongsToAssistant) Model(m *entity.Chat) *chatBelongsToAssistantTx {
+	return &chatBelongsToAssistantTx{a.db.Model(m).Association(a.Name())}
+}
+
+type chatBelongsToAssistantTx struct{ tx *gorm.Association }
+
+func (a chatBelongsToAssistantTx) Find() (result *entity.Assistant, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a chatBelongsToAssistantTx) Append(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a chatBelongsToAssistantTx) Replace(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a chatBelongsToAssistantTx) Delete(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a chatBelongsToAssistantTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a chatBelongsToAssistantTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type chatDo struct{ gen.DO }

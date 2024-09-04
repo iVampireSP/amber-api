@@ -44,7 +44,7 @@ const (
 
 type UserPublicInfo struct {
 	Name      string    `json:"name"`
-	Id        *UserId   `json:"id"`
+	Id        UserId    `json:"id"`
 	GuestId   *string   `json:"guest_id"`
 	ChatOwner ChatOwner `json:"chat_owner"`
 }

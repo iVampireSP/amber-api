@@ -149,7 +149,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	var userInfo = u.authService.GetUser(c)
 	var publicUser = &schema.UserPublicInfo{
 		Name:      userInfo.Token.Name,
-		Id:        &userInfo.Token.Sub,
+		Id:        userInfo.Token.Sub,
 		ChatOwner: schema.OwnerUser,
 	}
 
@@ -189,6 +189,18 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 
 			response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpenAndOverrideMessage).Data(chatMessageResponse).Send()
 			return
+		} else if lastChatMessage.Role == schema.RoleAssistant {
+			// 如果是 Assistant 消息，则开始采样记忆
+			if request.Role == schema.RoleHuman && !chatEntity.Assistant.DisableDefaultPrompt {
+				go func() {
+					u.logger.Sugar.Info("memory service adding: ", request.Message)
+
+					err = u.memoryService.Add(c, request.Message, userInfo.Token.Sub)
+					if err != nil {
+						u.logger.Sugar.Error("memory service add error: ", err)
+					}
+				}()
+			}
 		}
 	}
 

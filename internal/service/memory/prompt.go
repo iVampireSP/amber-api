@@ -1,5 +1,26 @@
 package memory
 
+import (
+	"context"
+	"rag-new/internal/schema"
+)
+
+func (s *Service) GenerateMemoryPrompt(ctx context.Context, userId schema.UserId) (string, error) {
+	memories, err := s.GetMemories(ctx, userId)
+	if err != nil {
+		return "", err
+	}
+
+	var m = ""
+
+	for _, memory := range memories {
+		m += memory.Content
+		m += "\n"
+	}
+
+	return m, nil
+}
+
 func (s *Service) updateMemoryPrompt(existingMemories string, memory string) string {
 	return `You are an expert at merging, updating, and organizing memories. When provided with existing memories and new information, your task is to merge and update the memory list to reflect the most accurate and current information. You are also provided with the matching score for each existing memory to the new information. Make sure to leverage this information to make informed decisions about which memories to update or merge.
 

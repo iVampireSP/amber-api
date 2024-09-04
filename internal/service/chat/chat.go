@@ -65,7 +65,7 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 }
 
 func (s *Service) GetChat(ctx context.Context, id schema.EntityId) (*entity.Chat, error) {
-	chat, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(id))).First()
+	chat, err := s.dao.WithContext(ctx).Chat.Preload(s.dao.Chat.Assistant).Where(s.dao.Chat.Id.Eq(uint(id))).First()
 
 	return chat, err
 }

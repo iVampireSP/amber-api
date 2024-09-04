@@ -48,6 +48,8 @@ func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assista
 		s.dao.Assistant.Description.Value(assistant.Description),
 		s.dao.Assistant.Prompt.Value(assistant.Prompt),
 		s.dao.Assistant.DisableDefaultPrompt.Value(assistant.DisableDefaultPrompt),
+		s.dao.Assistant.DisableMemory.Value(assistant.DisableMemory),
+		s.dao.Assistant.EnableMemoryForAssistantShare.Value(assistant.EnableMemoryForAssistantShare),
 	)
 	if err != nil {
 		return err

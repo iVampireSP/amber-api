@@ -26,6 +26,7 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 	extractedMemories, err := s.OpenAI.GenerateContent(ctx, history, llms.WithMaxTokens(1024))
 	if err != nil {
 		s.Logger.Sugar.Error("Unable to generate memory response, err: " + err.Error())
+		return err
 	}
 	extractedMemoriesText := extractedMemories.Choices[0].Content
 
@@ -59,6 +60,10 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 			}
 		}
 
+		if idColumn == nil {
+			return fmt.Errorf("id column not found")
+		}
+
 		for i := 0; i < res.ResultCount; i++ {
 			id, err := idColumn.ValueByIdx(i)
 			if err != nil {
@@ -66,6 +71,9 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 			}
 
 			mem, err := s.dao.Memory.Where(s.dao.Memory.Id.Eq(uint(id))).First()
+			if err != nil {
+				return err
+			}
 
 			LLMMemories = append(LLMMemories, &LLMMemory{
 				ResultId: i,
@@ -101,7 +109,7 @@ func (s *Service) GetMemories(ctx context.Context, userId schema.UserId) ([]*ent
 		Where(s.dao.Memory.UserId.Eq(int64(userId))).Find()
 
 	if err != nil {
-		s.Logger.Sugar.Error("Unable to get memories, err: " + err.Error())
+		return nil, err
 	}
 
 	return m, err
@@ -140,6 +148,9 @@ func (s *Service) Delete(ctx context.Context, memory *entity.Memory) error {
 	m, err := s.dao.WithContext(ctx).Memory.
 		Where(s.dao.Memory.Id.Eq(uint(memory.Id))).
 		Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).First()
+	if err != nil {
+		return err
+	}
 
 	err = s.deleteMemory(ctx, m.Id)
 	if err != nil {

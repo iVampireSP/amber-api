@@ -131,7 +131,11 @@ func (u *ChatController) Stream(c *gin.Context) {
 	// MessageList
 	var messageList = make([]entity.ChatMessage, 0)
 
-	var prompt = u.getPrompt(c, assistantEntity, user)
+	prompt, err := u.getPrompt(c, assistantEntity, user, chatEntity.Owner)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
 
 	var llmChat = &schema.LLMChat{
 		ResponseChan:   llmResponseChan,

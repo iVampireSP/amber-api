@@ -9,43 +9,44 @@ import (
 	"rag-new/pkg/md5"
 )
 
-func (s *Service) addMemory(ctx context.Context, data string, userId schema.UserId) (schema.EntityId, error) {
+func (s *Service) addMemory(ctx context.Context, data string, userId schema.UserId) (*entity.Memory, error) {
 	dataMd5, err := md5.Md5(data)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	// check if memory exists
 	count, err := s.dao.Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
 		Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(int64(userId))).Count()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	if count > 0 {
 		mem, err := s.dao.Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
 			Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(int64(userId))).First()
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
 
-		return mem.Id, err
+		return mem, err
 	}
 
 	emb, err := s.Embedding.TextEmbedding(ctx, []string{data})
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	var mem = &entity.Memory{
-		Content:    data,
-		ContentMd5: dataMd5,
-		Vector:     emb[0],
-		UserId:     userId,
+		Content:        data,
+		ContentMd5:     dataMd5,
+		Vector:         emb[0],
+		UserId:         userId,
+		EmbeddingModel: s.config.OpenAI.EmbeddingModel,
 	}
 
 	err = s.dao.Memory.Create(mem)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	var entityCols = []entity2.Column{
@@ -59,10 +60,10 @@ func (s *Service) addMemory(ctx context.Context, data string, userId schema.User
 	// insert to milvus
 	_, err = s.Milvus.Upsert(ctx, s.config.Milvus.Collection, "", entityCols...)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return mem.Id, err
+	return mem, err
 }
 
 func (s *Service) updateMemory(ctx context.Context, memoryId schema.EntityId, data string) (*entity.Memory, error) {

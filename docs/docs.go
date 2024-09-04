@@ -2170,6 +2170,12 @@ const docTemplate = `{
                 "disable_default_prompt": {
                     "type": "boolean"
                 },
+                "disable_memory": {
+                    "type": "boolean"
+                },
+                "enable_memory_for_assistant_share": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "string",
                     "example": "0"
@@ -2268,7 +2274,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
-                    "description": "Assistant   Assistant        ` + "`" + `json:\"assistant\"` + "`" + `",
                     "type": "integer"
                 }
             }
@@ -2469,6 +2474,20 @@ const docTemplate = `{
                     "maxLength": 255
                 },
                 "disable_default_prompt": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
+                },
+                "disable_memory": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
+                },
+                "enable_memory_for_assistant_share": {
                     "type": "boolean",
                     "enum": [
                         true,

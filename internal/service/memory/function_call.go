@@ -22,10 +22,12 @@ func (s *Service) executeToolCalls(ctx context.Context, userId schema.UserId, me
 				return nil, err
 			}
 
-			_, err := s.addMemory(ctx, args.Data, userId)
+			memEntity, err := s.addMemory(ctx, args.Data, userId)
 			if err != nil {
 				return nil, err
 			}
+
+			s.Logger.Sugar.Infof("Memory added, id: %d, content: %s", memEntity.Id, memEntity.Content)
 
 		case "update_memory":
 			var args struct {

@@ -7,6 +7,7 @@ import (
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/builtin_tool"
 	"rag-new/internal/service/file"
+	"rag-new/internal/service/stream"
 	"rag-new/internal/service/tool"
 )
 
@@ -17,10 +18,13 @@ type Service struct {
 	ToolService      *tool.Service
 	BuiltInTools     *builtin_tool.Service
 	FileService      *file.Service
-	config           *conf.Config
+	StreamService    *stream.Service
+	// 也许要把所有的名字改成小写，所以就从接下来的开始改成小写
+	// 然后再慢慢改原来的吧
+	config *conf.Config
 }
 
-func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assistant.Service, toolService *tool.Service, builtinTools *builtin_tool.Service, fileService *file.Service) *Service {
+func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assistant.Service, toolService *tool.Service, builtinTools *builtin_tool.Service, fileService *file.Service, StreamService *stream.Service) *Service {
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.BaseUrl),
@@ -30,5 +34,5 @@ func NewLLM(config *conf.Config, logger *logger.Logger, assistantService *assist
 		panic(err)
 	}
 
-	return &Service{llm, logger, assistantService, toolService, builtinTools, fileService, config}
+	return &Service{llm, logger, assistantService, toolService, builtinTools, fileService, StreamService, config}
 }

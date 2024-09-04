@@ -13,8 +13,27 @@ func prefix(name string) string {
 	return NAME + "_" + name
 }
 
-func (s *Service) GetTools() []llms.Tool {
-	return tools
+type WithoutOptions struct {
+	Image bool
+}
+
+func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
+	if without == nil {
+		return tools
+	}
+
+	var t []llms.Tool
+	for _, v := range tools {
+		if v.Function.Name == prefix("describe_image") {
+			if without.Image {
+				continue
+			}
+		}
+
+		t = append(t, v)
+	}
+
+	return t
 }
 
 func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolRequest) (*schema.CallBuiltInResponse, error) {
@@ -26,18 +45,25 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 		response.Content = s.GetCurrentTime()
 	case "describe_image":
 		response, err = s.DescribeImage(ctx, req.Args)
-
-		if err != nil {
-			response.Success = false
-			response.StopGeneration = true
-		}
+	case "generate_image":
+		response, err = s.GenerateImage(ctx, req.Args)
 	case "download_file":
 		response, err = s.DownloadFile(ctx, req.Args)
+	case "calculator":
+		response, err = s.Calculator(ctx, req.Args)
 	default:
 		return nil, errors.New("function not found")
 	}
 
-	return response, err
+	if err != nil {
+		s.logger.Sugar.Error("Built-in failed: " + err.Error())
+		// reset response
+		response = &schema.CallBuiltInResponse{}
+		response.Content = "Built-in tool Error: " + err.Error()
+		return response, nil
+	}
+
+	return response, nil
 }
 
 // Exists 这里拿到的 functionName 是不带前缀的，如果 withPrefix 为 true，则带前缀传入并判断

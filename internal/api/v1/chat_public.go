@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
-	"mime/multipart"
+	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/entity"
 	_ "rag-new/internal/entity"
@@ -111,6 +111,11 @@ func (u *ChatController) GetPublicChatMessages(c *gin.Context) {
 
 	chatEntity, err := u.chatService.GetChat(c, getPublicChatMessageRequestParams.ChatId)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		}
+
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
 	}
@@ -128,6 +133,10 @@ func (u *ChatController) GetPublicChatMessages(c *gin.Context) {
 
 	messagesEntity, err := u.cm.GetChatMessage(c, chatEntity)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		}
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
 	}
@@ -180,11 +189,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.Id)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	isStreaming := u.isStreaming(c, chatEntity.Id)
 	if isStreaming {
 		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
 		return
@@ -218,13 +223,6 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		return
 	}
 
-	// 用户打开了会话且没有正在输出的情况，获取最后一条消息
-	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
 	// 生成访客信息
 	var publicUser = &schema.UserPublicInfo{
 		Name:      "Guest",
@@ -232,26 +230,44 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		ChatOwner: schema.OwnerUser,
 	}
 
-	// 检测角色是否是 human
-	if lastChatMessage.Role == schema.RoleHuman {
-		// 如果两个消息都是 human，则丢弃上一条消息，修改上一条消息的内容
-		lastChatMessage.Content = addPublicChatMessageRequest.Message
-		err = u.cm.UpdateMessageContent(c, lastChatMessage)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-
-		// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
-		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-		chatMessageResponse.StreamId = randomStreamId
-
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpenAndOverrideMessage).Data(chatMessageResponse).Send()
+	// 用户打开了会话且没有正在输出的情况，获取最后一条消息
+	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
+	}
+
+	if lastChatMessage != nil {
+		// 如果有悬垂工具调用（要调用 tool，但是没有找到 tool response 的场景）
+		if lastChatMessage.Role == schema.RoleToolCall {
+			// 一般这种情况，肯定是工具调用失败了，或者是程序错误，所以这里补一个 tool role, 表明工具失败
+			// 那么删掉最后一条消息即可
+			err = u.cm.DeleteChatMessage(c, lastChatMessage)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+		} else if lastChatMessage.Role == schema.RoleHuman {
+			// 检测角色是否是 human
+			// 如果两个消息都是 human，则丢弃上一条消息，修改上一条消息的内容
+			lastChatMessage.Content = addPublicChatMessageRequest.Message
+			err = u.cm.UpdateMessageContent(c, lastChatMessage)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+
+			// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
+			randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+			chatMessageResponse.StreamId = randomStreamId
+
+			response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpenAndOverrideMessage).Data(chatMessageResponse).Send()
+			return
+		}
 	}
 
 	var chatMessage entity.ChatMessage
@@ -336,107 +352,4 @@ func (u *ChatController) ClearPublicChatMessages(c *gin.Context) {
 	}
 
 	response.Status(http.StatusNoContent).Send()
-}
-
-// AddPublicChatImage godoc
-// @Summary      添加图片
-// @Description  将一个图片添加到聊天记录中
-// @Tags         chat_public
-// @Accept       json
-// @Produce      json
-// @Param        schema.GetPublicChatMessageRequestParams  path  schema.GetPublicChatMessageRequestParams  true  "GetPublicChatMessageRequestParams"
-// @Param        schema.GetPublicChatMessageRequest  formData  schema.GetPublicChatMessageRequest true  "GetPublicChatMessageRequest"
-// @Param        image  formData  file  true  "图片"
-// @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
-// @Failure      400  {object}  schema.ResponseBody
-// @Failure      404  {object}  schema.ResponseBody
-// @Failure      409  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
-// @Failure      500  {object}  schema.ResponseBody
-// @Router       /api/v1/chat_public/{chat_id}/images [post]
-func (u *ChatController) AddPublicChatImage(c *gin.Context) {
-	var response = schema.NewResponse(c)
-
-	var getPublicChatMessageRequestParams schema.GetPublicChatMessageRequestParams
-	if err := c.ShouldBindUri(&getPublicChatMessageRequestParams); err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	var getPublicChatMessageRequest schema.GetPublicChatMessageRequest
-	if err := c.ShouldBind(&getPublicChatMessageRequest); err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-	// get assistant by token
-	assistantShare, err := u.assistantService.GetShareByToken(c, getPublicChatMessageRequest.AssistantToken)
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	chatEntity, err := u.chatService.GetChat(c, getPublicChatMessageRequestParams.ChatId)
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	// 检查 assistant id 是否一致
-	if chatEntity.AssistantId != assistantShare.AssistantId {
-		response.Status(http.StatusForbidden).Error(err).Send()
-		return
-	}
-
-	if chatEntity.Owner != schema.OwnerGuest || (chatEntity.GuestId != nil && *chatEntity.GuestId != getPublicChatMessageRequest.GuestId) {
-		response.Status(http.StatusForbidden).Error(err).Send()
-		return
-	}
-
-	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.Id)
-	if err != nil || isStreaming {
-		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
-		return
-	}
-
-	var request schema.ChatMessageAddImageRequest
-	err = c.ShouldBind(&request)
-	if err != nil {
-		response.Status(http.StatusBadRequest).Error(err).Send()
-		return
-	}
-
-	var chatMessageResponse = &schema.ChatMessageResponse{}
-
-	f, err := request.Image.Open()
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(consts.ErrUnableOpenFile).Send()
-		return
-	}
-
-	file, err := u.fileService.CreateFile(c, f)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
-	var chatMessage entity.ChatMessage
-	chatMessage.ChatId = chatEntity.Id
-	chatMessage.Content = file.Id.String()
-	chatMessage.Role = schema.RoleFile
-
-	err = u.cm.CreateChatMessage(c, &chatMessage)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
-	response.Status(http.StatusOK).Data(chatMessageResponse).Send()
-
-	defer func(f multipart.File) {
-		err := f.Close()
-		if err != nil {
-			u.logger.Sugar.Error(err)
-			return
-		}
-	}(f)
 }

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(scheduleCmd)
+	RootCmd.AddCommand(scheduleCmd)
 }
 
 var scheduleCmd = &cobra.Command{

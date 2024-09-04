@@ -1,7 +1,7 @@
 //go:build wireinject
 // +build wireinject
 
-package main
+package cmd
 
 import (
 	"github.com/google/wire"
@@ -9,11 +9,14 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/milvus"
+	"rag-new/internal/base/openai"
 	"rag-new/internal/base/orm"
 	"rag-new/internal/base/redis"
 	"rag-new/internal/base/s3"
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
+	"rag-new/internal/dao"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
@@ -22,9 +25,12 @@ import (
 var ProviderSet = wire.NewSet(
 	conf.ProviderConfig,
 	logger.NewZapLogger,
-	orm.NewXORM,
+	milvus.NewMilvus,
+	orm.NewGORM,
+	dao.NewQuery,
 	redis.NewRedis,
 	s3.NewS3,
+	openai.NewOpenAI,
 	middleware.Provider,
 	batch.NewBatch,
 	service.Provider,

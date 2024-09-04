@@ -56,6 +56,12 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		SystemPrompt:   prompt,
 		UserPublicInfo: nil,
 		Tools:          tools,
+		Model:          chatRequest.Model,
+	}
+
+	// 如果不能使用，则用 auto
+	if !u.config.OpenAI.CanUse(chatRequest.Model) {
+		chatRequest.Model = consts.AutoModel
 	}
 
 	var histories = make([]*entity.ChatMessage, 0)
@@ -172,7 +178,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		err = u.llmService.StreamChat(c, llmChat, histories)
 		if err != nil {
 			u.logger.Sugar.Error(err)
-			c.AbortWithStatus(http.StatusInternalServerError)
+			response.Status(http.StatusBadRequest).Error(err).Send()
 			return
 		}
 	}()

@@ -99,7 +99,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 	// 删除临时文件
 	defer s.deleteTmpFile(path)
 
-	_, err = s.x.Insert(fileEntity)
+	err = s.dao.WithContext(ctx).File.Create(fileEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.F
 	var expiredAt = time.Now().AddDate(0, 0, ExpiredDAY)
 	fileEntity.ExpiredAt = &expiredAt
 
-	_, err = s.x.Insert(fileEntity)
+	err = s.dao.WithContext(ctx).File.Create(fileEntity)
 	if err != nil {
 		return nil, err
 	}

@@ -106,7 +106,7 @@ func (t *ToolController) GetTool(c *gin.Context) {
 		return
 	}
 
-	getTool, err := t.toolService.GetTool(c, int64(toolId))
+	getTool, err := t.toolService.GetTool(c, schema.EntityId(toolId))
 	if err != nil {
 		response.Error(err).Send()
 		return
@@ -145,7 +145,7 @@ func (t *ToolController) DeleteTool(c *gin.Context) {
 		return
 	}
 
-	getTool, err := t.toolService.GetTool(c, int64(toolId))
+	getTool, err := t.toolService.GetTool(c, schema.EntityId(toolId))
 	if err != nil {
 		response.Error(err).Send()
 		return
@@ -156,7 +156,7 @@ func (t *ToolController) DeleteTool(c *gin.Context) {
 		return
 	}
 
-	err = t.toolService.DeleteTool(c, int64(toolId))
+	err = t.toolService.DeleteTool(c, schema.EntityId(toolId))
 	if err != nil {
 		response.Error(err).Send()
 		return
@@ -185,7 +185,7 @@ func (t *ToolController) UpdateToolData(c *gin.Context) {
 		return
 	}
 
-	getTool, err := t.toolService.GetTool(c, int64(toolId))
+	getTool, err := t.toolService.GetTool(c, schema.EntityId(toolId))
 	if err != nil {
 		response.Error(err).Send()
 		return

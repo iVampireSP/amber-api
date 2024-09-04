@@ -7,6 +7,7 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
@@ -99,11 +100,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	var chatMessageResponse = &schema.ChatMessageResponse{}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatRequest.ChatId)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	isStreaming := u.isStreaming(c, chatRequest.ChatId)
 	if isStreaming {
 		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
 		return
@@ -150,13 +147,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		}
 	}
 
-	// last chat message
-	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
-
 	var userIdStr = strconv.Itoa(int(u.authService.GetUserId(c)))
 
 	var userInfo = u.authService.GetUser(c)
@@ -166,25 +156,43 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		ChatOwner: schema.OwnerUser,
 	}
 
-	// 如果上一条消息是 Human 消息，则说明消息没有成功发送，覆盖上一条消息
-	if lastChatMessage.Role == schema.RoleHuman {
-		lastChatMessage.Content = request.Message
-		err := u.cm.UpdateMessageContent(c, lastChatMessage)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-
-		// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
-		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-		chatMessageResponse.StreamId = randomStreamId
-
-		response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpenAndOverrideMessage).Data(chatMessageResponse).Send()
+	// last chat message
+	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
+	}
+
+	if lastChatMessage != nil {
+		// 如果有悬垂工具调用（要调用 tool，但是没有找到 tool response 的场景）
+		if lastChatMessage.Role == schema.RoleToolCall {
+			// 一般这种情况，肯定是工具调用失败了，或者是程序错误，所以这里补一个 tool role, 表明工具失败
+			// 那么删掉最后一条消息即可
+			err = u.cm.DeleteChatMessage(c, lastChatMessage)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+		} else if lastChatMessage.Role == schema.RoleHuman {
+			// 如果上一条消息是 Human 消息，则说明消息没有成功发送，覆盖上一条消息
+			lastChatMessage.Content = request.Message
+			err = u.cm.UpdateMessageContent(c, lastChatMessage)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+
+			// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
+			randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+			chatMessageResponse.StreamId = randomStreamId
+
+			response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpenAndOverrideMessage).Data(chatMessageResponse).Send()
+			return
+		}
 	}
 
 	// TODO: 如果 request.Message 的大小超过了 1mb
@@ -294,11 +302,7 @@ func (u *ChatController) ClearChatMessage(c *gin.Context) {
 	}
 
 	// 检查状态是否是回复中
-	isStreaming, err := u.isStreaming(c, chatEntity.Id)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	isStreaming := u.isStreaming(c, chatEntity.Id)
 	if isStreaming {
 		response.Status(http.StatusConflict).Error(consts.ErrChatStreaming).Send()
 		return

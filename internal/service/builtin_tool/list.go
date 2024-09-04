@@ -28,7 +28,7 @@ var tools = []llms.Tool{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
 			Name:        prefix("describe_image"),
-			Description: "only used to retrieve the content of images and cannot obtain file information of images.",
+			Description: "only used to retrieve the content of images and cannot obtain file information of images. only for which mimetype is image",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
@@ -66,6 +66,58 @@ var tools = []llms.Tool{
 				},
 				Required: []string{
 					"url",
+				},
+			},
+		},
+	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        prefix("generate_image"),
+			Description: "It's useful for generating/drawing images",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"prompt": {
+						Type:        jsonschema.String,
+						Description: "prompt to generate image",
+					},
+					"size": {
+						Type:        jsonschema.String,
+						Description: "size of image",
+						Enum:        dallEAllowedSizes,
+					},
+				},
+				Required: []string{
+					"prompt", "size",
+				},
+			},
+		},
+	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        prefix("calculator"),
+			Description: "It's useful for mathematical calculations",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"A": {
+						Type:        jsonschema.String,
+						Description: "Number A",
+					},
+					"B": {
+						Type:        jsonschema.String,
+						Description: "Number B",
+					},
+					"Method": {
+						Type:        jsonschema.String,
+						Description: "Method",
+						Enum:        calculatorAllowedMethods,
+					},
+				},
+				Required: []string{
+					"A", "B", "Method",
 				},
 			},
 		},

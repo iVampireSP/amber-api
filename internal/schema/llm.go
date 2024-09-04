@@ -1,10 +1,11 @@
 package schema
 
 import (
+	"time"
+
 	"github.com/bytedance/sonic"
 	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/llms"
-	"time"
 )
 
 type ResponseState string
@@ -32,15 +33,14 @@ type ToolCallMessage struct {
 }
 
 type ToolResponseMessage struct {
-	ToolName         string                `json:"tool_name"`
-	FunctionName     string                `json:"function_name"`
-	Arguments        FunctionCallArguments `json:"arguments"`
-	StopGeneration   bool                  `json:"stop_generation"`
-	RememberResponse bool                  `json:"remember_response"`
-	Content          string                `json:"content"`
-	Append           bool                  `json:"-"`
-	Role             ChatRole              `json:"-"`
-	Text             string                `json:"-"`
+	ToolName       string                `json:"tool_name"`
+	FunctionName   string                `json:"function_name"`
+	Arguments      FunctionCallArguments `json:"arguments"`
+	StopGeneration bool                  `json:"stop_generation"`
+	Content        string                `json:"content"`
+	Append         bool                  `json:"-"`
+	Role           ChatRole              `json:"-"`
+	Text           string                `json:"-"`
 }
 
 type AssistantResponse struct {
@@ -50,6 +50,12 @@ type AssistantResponse struct {
 	ToolResponseMessage *ToolResponseMessage `json:"tool_response_message"`
 	Content             string               `json:"content"`
 	TokenUsage          *TokenUsage          `json:"token_usage"`
+	Internal            *AssistantInternal   `json:"-"`
+}
+
+type AssistantInternal struct {
+	ToolCall   *llms.ToolCall
+	ToolCallId string
 }
 
 type TokenUsage struct {
@@ -90,11 +96,13 @@ type LLMChat struct {
 	TopK           int     `json:"top_k,omitempty"`
 	TopP           float64 `json:"top_p,omitempty"`
 	N              int     `json:"n,omitempty"`
+	Model          string  `json:"model"`
+	WithoutImage   bool    `json:"-"`
 }
 
 type ChatPublicModel struct {
 	Name        string     `json:"name"`
-	AssistantId int64      `json:"assistant_id"`
+	AssistantId EntityId   `json:"assistant_id"`
 	ExpiredAt   *time.Time `json:"expired_at"`
 	Owner       ChatOwner  `json:"owner"`
 	GuestId     *string    `json:"guest_id"`

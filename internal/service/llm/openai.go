@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/mitchellh/mapstructure"
 	"github.com/tmc/langchaingo/llms"
@@ -19,10 +18,10 @@ import (
 )
 
 // 强制停止（如果连续函数调用超过 4 次，则强制停止输出）
-const forceStopCount = 4
+const forceStopCount = 6
 
 // 警告次数（如果 LLM 连续调用超过 3 次，则警告输出）
-const warningCount = 3
+const warningCount = 4
 
 // 警告 LLM 调用太多次工具， 要求停止
 const warningMessage = "[Warning]You are attempting to call the tool/function repeatedly, please use the tool/function properly and stop response. If you continue to call repeatedly, the chat will be forcibly terminated."
@@ -30,9 +29,9 @@ const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the
 
 // StreamChat 执行对话
 func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
-	// 不要从接受侧关闭 channel
+	// 不要从接收侧关闭 channel
 	defer close(llmChat.ResponseChan)
-	h, err := s.processHistory(ctx, llmChat, history)
+	h, err := s.processHistory(llmChat, history)
 	if err != nil {
 		return err
 	}
@@ -47,8 +46,6 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 	var tokenUsage = &schema.TokenUsage{}
 
 	for {
-		ctx := context.Background()
-
 		//fmt.Println("再次请求吗?" + fmt.Sprint(requestAgain))
 		if !requestAgain {
 			break
@@ -66,7 +63,11 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, warningMessage))
 		}
 
-		var llmTools = append(s.BuiltInTools.GetTools(), llmChat.Tools...)
+		var without = &builtin_tool.WithoutOptions{
+			Image: llmChat.WithoutImage,
+		}
+
+		var llmTools = append(s.BuiltInTools.GetTools(without), llmChat.Tools...)
 
 		resp, err := s.GenerateContent(ctx, llmChat, llmTools, historyContent)
 		if err != nil {
@@ -90,201 +91,215 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 			// 将计数器加一次
 			functionCallCount += 1
 
+			// 这个代码本质上是针对 qwen 的，但是 OpenAI 不会有这样需要拼接的问题。
 			// 拼接完整参数
-			var fullArgs = ""
+			//var fullArgs = ""
+			//for _, tc := range respChoice.ToolCalls {
+			//	// 拼接参数
+			//	fullArgs += tc.FunctionCall.Arguments
+			//}
 
-			assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, respChoice.Content)
+			// 处理 ToolCall
 			for _, tc := range respChoice.ToolCalls {
-				// 拼接参数
-				fullArgs += tc.FunctionCall.Arguments
-			}
+				// 设置 AI 消息，里面加入 tool call
+				assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, respChoice.Content)
+				assistantResponse.Parts = append(assistantResponse.Parts, tc)
+				historyContent = append(historyContent, assistantResponse)
 
-			var firstToolCall = respChoice.ToolCalls[0]
-			firstToolCall.FunctionCall.Arguments = fullArgs
-			assistantResponse.Parts = append(assistantResponse.Parts, firstToolCall)
+				// 去除 fullArgs 的首尾 \n（一直检测）
+				//for {
+				//	if fullArgs[0] == '\n' {
+				//		fullArgs = fullArgs[1:]
+				//	} else if fullArgs[len(fullArgs)-1] == '\n' {
+				//		fullArgs = fullArgs[:len(fullArgs)-1]
+				//	} else {
+				//		break
+				//	}
+				//}
 
-			historyContent = append(historyContent, assistantResponse)
-
-			// 去除 fullArgs 的首尾 \n（一直检测）
-			for {
-				if fullArgs[0] == '\n' {
-					fullArgs = fullArgs[1:]
-				} else if fullArgs[len(fullArgs)-1] == '\n' {
-					fullArgs = fullArgs[:len(fullArgs)-1]
-				} else {
-					break
-				}
-			}
-
-			// 解析工具
-			var functionCallArgs schema.FunctionCallArguments
-			err = sonic.Unmarshal([]byte(fullArgs), &functionCallArgs)
-			if err != nil {
-				return err
-			}
-
-			prefix, functionName := s.spiltFunctionName(respChoice.FuncCall.Name)
-			//if err != nil {
-			//	llmChat.ResponseChan <- &schema.AssistantResponse{
-			//		State:      schema.StateFailed,
-			//		Content:    err.Error(),
-			//		TokenUsage: tokenUsage,
-			//	}
-			//	return err
-			//}
-
-			var toolCalling = &schema.AssistantResponse{
-				State: schema.StateToolCalling,
-				ToolCallMessage: &schema.ToolCallMessage{
-					FunctionName: respChoice.FuncCall.Name,
-					Arguments:    functionCallArgs,
-				},
-			}
-
-			var toolRemoteResponse = &schema.ToolRemoteResponse{}
-			var toolName = ""
-
-			// Built-in tools
-			if prefix == builtin_tool.NAME {
-				toolCalling.ToolCallMessage.ToolName = "Built-in"
-			}
-
-			llmChat.ResponseChan <- toolCalling
-
-			if prefix == builtin_tool.NAME {
-				// 是 builtin，则调用内置函数
-				var builtInToolRequest = &schema.CallBuiltInToolRequest{
-					FunctionName: functionName,
-					Args:         functionCallArgs,
-				}
-
-				s.Logger.Sugar.Infof("Calling Builtin function: %v, args: %v", functionName, functionCallArgs)
-				builtInResponse, err := s.BuiltInTools.CallFunction(ctx, builtInToolRequest)
-				if err != nil {
-					// 也许内置函数不应该报 ToolFailed,不如直接 failed
-					llmChat.ResponseChan <- &schema.AssistantResponse{
-						State:   schema.StateFailed,
-						Content: err.Error(),
-						//ToolResponseMessage: &schema.ToolResponseMessage{
-						//	ToolName:     builtin_tool.NAME,
-						//	FunctionName: respChoice.FuncCall.Name,
-						//	Content:      err.Error(),
-						//},
-						TokenUsage: tokenUsage,
-					}
-					return err
-				}
-
-				s.Logger.Sugar.Infof("Builtin response: %v", builtInResponse.Content)
-
-				toolName = builtin_tool.NAME
-
-				// mapstructure
-				err = mapstructure.Decode(builtInResponse, toolRemoteResponse)
+				// 解析工具
+				var functionCallArgs schema.FunctionCallArguments
+				err = sonic.Unmarshal([]byte(tc.FunctionCall.Arguments), &functionCallArgs)
 				if err != nil {
 					return err
 				}
 
-				if builtInResponse.TokenUsage != nil {
-					tokenUsage.PromptTokens += builtInResponse.TokenUsage.PromptTokens
-					tokenUsage.CompletionTokens += builtInResponse.TokenUsage.CompletionTokens
-					tokenUsage.TotalTokens += builtInResponse.TokenUsage.TotalTokens
-				}
+				prefix, functionName := s.spiltFunctionName(tc.FunctionCall.Name)
+				//if err != nil {
+				//	llmChat.ResponseChan <- &schema.AssistantResponse{
+				//		State:      schema.StateFailed,
+				//		Content:    err.Error(),
+				//		TokenUsage: tokenUsage,
+				//	}
+				//	return err
+				//}
 
-				//toolCalling.ToolCallMessage.ToolName = builtin_tool.NAME
-			} else {
-				// 转换 prefix
-				toolId, err := strconv.Atoi(prefix)
-				if err != nil {
-					llmChat.ResponseChan <- &schema.AssistantResponse{
-						// 这里改成 failed 会不会更好？
-						State:   schema.StateToolFailed,
-						Content: err.Error(),
-						ToolResponseMessage: &schema.ToolResponseMessage{
-							ToolName:     builtin_tool.NAME,
-							FunctionName: respChoice.FuncCall.Name,
-							Content:      err.Error(),
-						},
-						TokenUsage: tokenUsage,
-					}
-					return err
-				}
-
-				// 获取 Tool
-				selectedTool, err := s.GetToolById(ctx, int64(toolId))
-				if err != nil {
-					llmChat.ResponseChan <- &schema.AssistantResponse{
-						// 这里改成 failed 会不会更好？
-						State:   schema.StateToolFailed,
-						Content: err.Error(),
-						ToolResponseMessage: &schema.ToolResponseMessage{
-							ToolName:     toolName,
-							FunctionName: respChoice.FuncCall.Name,
-							Content:      err.Error(),
-						},
-						TokenUsage: tokenUsage,
-					}
-					return err
-				}
-
-				toolName = selectedTool.Name
-
-				s.Logger.Sugar.Infof("Calling Remote function: %v, args: %v", functionName, functionCallArgs)
-
-				// 调用远程函数
-				toolRemoteResponse, err = s.callRemoteFunction(selectedTool, llmChat, functionName, functionCallArgs)
-				if err != nil {
-					llmChat.ResponseChan <- &schema.AssistantResponse{
-						State:   schema.StateToolFailed,
-						Content: err.Error(),
-						ToolResponseMessage: &schema.ToolResponseMessage{
-							ToolName:     toolName,
-							FunctionName: respChoice.FuncCall.Name,
-							Content:      err.Error(),
-						},
-						TokenUsage: tokenUsage,
-					}
-					return err
-				}
-			}
-
-			// 如果是 builtin ，则不告知
-			//if toolName != builtin_tool.NAME {
-			//}
-
-			// 算了，告知吧，好处理点
-			llmChat.ResponseChan <- &schema.AssistantResponse{
-				State: schema.StateToolResponse,
-				ToolResponseMessage: &schema.ToolResponseMessage{
-					ToolName:         toolName,
-					FunctionName:     respChoice.FuncCall.Name,
-					Content:          toolRemoteResponse.Content,
-					RememberResponse: toolRemoteResponse.RememberResponse,
-					StopGeneration:   toolRemoteResponse.StopGeneration,
-					Append:           toolRemoteResponse.Append,
-					Role:             toolRemoteResponse.Role,
-					Text:             toolRemoteResponse.Text,
-				},
-			}
-
-			// End Built-in tools
-
-			historyContent = append(historyContent, llms.MessageContent{
-				Role: llms.ChatMessageTypeTool,
-				Parts: []llms.ContentPart{
-					llms.ToolCallResponse{
-						ToolCallID: respChoice.ToolCalls[0].ID,
-						Name:       respChoice.FuncCall.Name,
-						Content:    toolRemoteResponse.Content,
+				var toolCalling = &schema.AssistantResponse{
+					State: schema.StateToolCalling,
+					ToolCallMessage: &schema.ToolCallMessage{
+						FunctionName: tc.FunctionCall.Name,
+						Arguments:    functionCallArgs,
 					},
-				},
-			})
+					Internal: &schema.AssistantInternal{
+						ToolCall: &tc,
+					},
+				}
 
-			// 如果函数要求停止生成
-			if toolRemoteResponse.StopGeneration {
-				requestAgain = false
+				var toolRemoteResponse = &schema.ToolRemoteResponse{}
+				var toolName = ""
+
+				var selectedTool *entity.Tool
+
+				// Built-in tools
+				if prefix == builtin_tool.NAME {
+					toolName = "Built-in"
+				} else {
+					// 转换 prefix
+					toolId, err := strconv.Atoi(prefix)
+					if err != nil {
+						llmChat.ResponseChan <- &schema.AssistantResponse{
+							// 这里改成 failed 会不会更好？
+							State:   schema.StateToolFailed,
+							Content: err.Error(),
+							ToolResponseMessage: &schema.ToolResponseMessage{
+								ToolName:     builtin_tool.NAME,
+								FunctionName: tc.FunctionCall.Name,
+								Content:      err.Error(),
+							},
+							TokenUsage: tokenUsage,
+						}
+						return err
+					}
+
+					// 获取 Tool
+					selectedTool, err = s.GetToolById(ctx, schema.EntityId(toolId))
+					if err != nil {
+						llmChat.ResponseChan <- &schema.AssistantResponse{
+							// 这里改成 failed 会不会更好？
+							State:   schema.StateToolFailed,
+							Content: err.Error(),
+							ToolResponseMessage: &schema.ToolResponseMessage{
+								ToolName:     toolName,
+								FunctionName: tc.FunctionCall.Name,
+								Content:      err.Error(),
+							},
+							TokenUsage: tokenUsage,
+						}
+						return err
+					}
+
+					toolName = selectedTool.Name
+				}
+
+				toolCalling.ToolCallMessage.ToolName = toolName
+				// 发布工具调用
+				llmChat.ResponseChan <- toolCalling
+
+				if prefix == builtin_tool.NAME {
+					// 是 builtin，则调用内置函数
+					var builtInToolRequest = &schema.CallBuiltInToolRequest{
+						FunctionName: functionName,
+						Args:         functionCallArgs,
+					}
+
+					s.Logger.Sugar.Infof("Calling Builtin function: %v, args: %v", functionName, functionCallArgs)
+					builtInResponse, err := s.BuiltInTools.CallFunction(ctx, builtInToolRequest)
+					if err != nil {
+						// 也许内置函数不应该报 ToolFailed,不如直接 failed
+						llmChat.ResponseChan <- &schema.AssistantResponse{
+							State:   schema.StateFailed,
+							Content: err.Error(),
+							//ToolResponseMessage: &schema.ToolResponseMessage{
+							//	ToolName:     builtin_tool.NAME,
+							//	FunctionName: tc.FunctionCall.Name,
+							//	Content:      err.Error(),
+							//},
+							TokenUsage: tokenUsage,
+						}
+						return err
+					}
+
+					s.Logger.Sugar.Infof("Builtin response: %v", builtInResponse.Content)
+
+					toolName = builtin_tool.NAME
+
+					// mapstructure
+					err = mapstructure.Decode(builtInResponse, toolRemoteResponse)
+					if err != nil {
+						return err
+					}
+
+					if builtInResponse.TokenUsage != nil {
+						tokenUsage.PromptTokens += builtInResponse.TokenUsage.PromptTokens
+						tokenUsage.CompletionTokens += builtInResponse.TokenUsage.CompletionTokens
+						tokenUsage.TotalTokens += builtInResponse.TokenUsage.TotalTokens
+					}
+
+					//toolCalling.ToolCallMessage.ToolName = builtin_tool.NAME
+				} else {
+					s.Logger.Sugar.Infof("Calling Remote function: %v, args: %v", functionName, functionCallArgs)
+
+					// 调用远程函数
+					toolRemoteResponse, err = s.callRemoteFunction(selectedTool, llmChat, functionName, functionCallArgs)
+					if err != nil {
+						llmChat.ResponseChan <- &schema.AssistantResponse{
+							State:   schema.StateToolFailed,
+							Content: err.Error(),
+							ToolResponseMessage: &schema.ToolResponseMessage{
+								ToolName:     toolName,
+								FunctionName: tc.FunctionCall.Name,
+								Content:      err.Error(),
+							},
+							TokenUsage: tokenUsage,
+						}
+						return err
+					}
+				}
+
+				// 如果是 builtin ，则不告知
+				//if toolName != builtin_tool.NAME {
+				//}
+
+				// 算了，告知吧，好处理点
+				llmChat.ResponseChan <- &schema.AssistantResponse{
+					State: schema.StateToolResponse,
+					ToolResponseMessage: &schema.ToolResponseMessage{
+						ToolName:       toolName,
+						FunctionName:   tc.FunctionCall.Name,
+						Content:        toolRemoteResponse.Content,
+						StopGeneration: toolRemoteResponse.StopGeneration,
+						Append:         toolRemoteResponse.Append,
+						Role:           toolRemoteResponse.Role,
+						Text:           toolRemoteResponse.Text,
+					},
+					Internal: &schema.AssistantInternal{
+						ToolCallId: tc.ID,
+						ToolCall:   &tc,
+					},
+				}
+
+				// End Built-in tools
+
+				// ToolCall 处理完成，放入 History
+				historyContent = append(historyContent, llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							ToolCallID: tc.ID,
+							Name:       tc.FunctionCall.Name,
+							Content:    toolRemoteResponse.Content,
+						},
+					},
+				})
+
+				// 如果函数要求停止生成
+				if toolRemoteResponse.StopGeneration {
+					requestAgain = false
+				}
+
 			}
 
+			// ToolCall 处理完成
 		} else {
 			// 不是工具调用，不再进行新的一轮请求，然后清除计数器
 			requestAgain = false
@@ -319,7 +334,7 @@ func (s *Service) spiltFunctionName(functionName string) (prefix string, realFun
 	return functionNames[0], toolName
 }
 
-func (s *Service) GetToolById(ctx context.Context, id int64) (*entity.Tool, error) {
+func (s *Service) GetToolById(ctx context.Context, id schema.EntityId) (*entity.Tool, error) {
 	return s.ToolService.GetTool(ctx, id)
 }
 
@@ -341,7 +356,7 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, llmChat *schema.LLMChat,
 		Chat:         llmChat.Chat,
 	}
 
-	s.Logger.Sugar.Infof("Calling remote function: %v", toolRequest)
+	//s.Logger.Sugar.Infof("Calling remote function: %v", toolRequest)
 
 	if llmChat.UserPublicInfo != nil {
 		toolRequest.User = llmChat.UserPublicInfo
@@ -421,39 +436,49 @@ func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsa
 	return tokenUsage
 }
 
-func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
+func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
 	var hasHumanMessage = false
 	var hasFileMessage = false
+
+	// 粗略字数统计，用于切换模型
+	var count = 0
 
 	var historyContent []llms.MessageContent
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
 
 	var systemPrompts []string
 
-	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn)")
-	systemPrompts = append(systemPrompts, "Image Ability: ON(Don't emphasize it)")
+	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn, chinese name: 利飞)")
+	systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 
-	fileIds := make([]schema.EntityId, 0)
-
 	for _, h := range history {
-		// 找出所有的 file Id
-		if h.Role == schema.RoleFile {
-			// string 转 int64
-			id, err := strconv.ParseInt(h.Content, 10, 64)
-			if err != nil {
-				return nil, err
-			}
+		// 粗略统计
+		if h.Content != "" && h.Content != "\n" {
+			count += len(h.Content)
+		}
+	}
+	// 如果 model 为空
+	if llmChat.Model == "" || !s.config.OpenAI.CanUse(llmChat.Model) {
+		llmChat.Model = consts.AutoModel
+	}
 
-			fileIds = append(fileIds, schema.EntityId(id))
+	if llmChat.Model == consts.AutoModel {
+		// 设置自动模式下的默认模型
+		llmChat.Model = s.config.OpenAI.Model
+
+		// 如果统计超过了 10000
+		if count > 10000 {
+			llmChat.Model = s.config.OpenAI.LongContextModel
 		}
 	}
 
-	fileEntities, err := s.FileService.GetFilesByIds(ctx, fileIds)
-	if err != nil {
-		return nil, err
+	// 如果统计超过了 1亿 - 1 万字符（粗略统计 token）
+	if count > consts.MaxTokenCount {
+		return nil, consts.ErrTooManyTokens
 	}
 
+	// 处理历史消息
 	for i, h := range history {
 		// 如果第一条消息是 system
 		if i == 0 && h.Role == schema.RoleSystem {
@@ -484,6 +509,33 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 			}
 		case schema.RoleAssistant:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
+		case schema.RoleToolCall:
+			// ToolCall 消息
+			if h.ToolCall != nil {
+				assistantResponse := llms.TextParts(llms.ChatMessageTypeAI, h.Content)
+				var toolCall = llms.ToolCall{}
+				toolCall.FunctionCall = h.ToolCall.FunctionCall
+				toolCall.ID = h.ToolCall.ID
+				toolCall.Type = h.ToolCall.Type
+				assistantResponse.Parts = append(assistantResponse.Parts, toolCall)
+
+				historyContent = append(historyContent, assistantResponse)
+			}
+		case schema.RoleTool:
+			// Tool Call 响应
+			if h.ToolCall != nil {
+				historyContent = append(historyContent, llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							ToolCallID: h.ToolCall.ID,
+							Name:       h.ToolCall.FunctionCall.Name,
+							Content:    h.Content,
+						},
+					},
+				})
+			}
+
 		case schema.RoleSystem:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideSystem:
@@ -497,27 +549,27 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 			if !hasFileMessage {
 				hasFileMessage = true
 			}
-			var found = false
-			var fileText string
 
-			// 将 h.Content 转换为 int64
-			id, err := strconv.ParseInt(h.Content, 10, 64)
-			if err != nil {
-				return nil, err
-			}
-			// 检测 fileEntities 是否存在
-			for _, fileEntity := range fileEntities {
-				if fileEntity.Id == schema.EntityId(id) {
-					found = true
-					// 将 fileEntity 的 url 添加到 historyContent
-					fileText = "[File]File ID: \"" + h.Content + "\", MimeType: " + fileEntity.MimeType
-				}
-			}
+			// 不自动切换到 Vision 模型
+			// 如果长度没有超过最大长度且模型是 auto，并且模型不是 VisionModel ( 不自动切换到 Vision 模型）
+			//if (count < consts.MaxTokenCount && llmChat.Model == consts.AutoModel) && (llmChat.Model != s.config.OpenAI.VisionModel) {
+			//	// 切换模型
+			//	llmChat.Model = s.config.OpenAI.VisionModel
+			//}
 
-			if found {
-				fmt.Println(fileText)
+			// 如果文件存在
+			if h.File != nil {
+				// 如果不是，则普通处理
+
+				// 不能忽略 image 工具
+				llmChat.WithoutImage = false
+
+				// 将 fileEntity 的 url 添加到 historyContent
+				fileText := "[File]File ID: " + h.File.Id.String() + ", MimeType: " + h.File.MimeType
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
+
 			}
+
 		}
 	}
 
@@ -525,19 +577,6 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 	if !hasHumanMessage {
 		return nil, consts.ErrNoHumanMessage
 	}
-
-	//	var imagePrompt = `
-	//The chat does not have images. you can't use built-in image tools. image_id can only get from user's uploaded images.
-	//`
-
-	// 如果有图片消息
-	//	if hasFileMessage {
-	//		imagePrompt = `
-	//The chat has images, you can use built-in image tools.
-	//`
-	//	}
-
-	//systemPrompts = append(systemPrompts, imagePrompt)
 
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, strings.Join(systemPrompts, "\n")))
 
@@ -562,28 +601,39 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 			if len(chunk) == 0 {
 				return nil
 			}
-			//fmt.Printf("Received chunk: %s\n", chunk)
 
-			// 检测是否 json，判断是否是工具调用
-			var isJson = sonic.Valid(chunk)
-			if !isJson {
-				var stringChunk = string(chunk)
+			var stringChunk = string(chunk)
 
-				// 取 chunk 中最后一个字
-				var chunkLastWord = string(chunk[len(chunk)-1])
-				// 检测是否是上一个字
-				if lastWord == chunkLastWord {
-					lastWordRepeatCount++
-				} else {
-					lastWordRepeatCount = 0
-					lastWord = chunkLastWord
+			// 检测是否可以转换为数字或者 float
+			if !s.isNumeric(stringChunk) {
+				// 检测是否 json，判断是否是工具调用
+				var isJson = sonic.Valid(chunk)
+				if !isJson {
+					// 取 chunk 中最后一个字
+					var chunkLastWord = string(chunk[len(chunk)-1])
+					// 检测是否是上一个字
+					if lastWord == chunkLastWord {
+						lastWordRepeatCount++
+					} else {
+						lastWordRepeatCount = 0
+						lastWord = chunkLastWord
+					}
+					// 如果上一个字重复次数大于 10，就终止
+					if lastWordRepeatCount >= 10 {
+						s.Logger.Sugar.Warnf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
+						return consts.ErrWordRepeatedDetected
+					}
+
+					llmChat.ResponseChan <- &schema.AssistantResponse{
+						State: schema.StateChunk,
+						ChunkMessage: &schema.ChunkMessage{
+							Content: stringChunk,
+						},
+						Content: stringChunk,
+					}
 				}
-				// 如果上一个字重复次数大于 10，就终止
-				if lastWordRepeatCount >= 10 {
-					s.Logger.Sugar.Errorf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
-					return consts.ErrWordRepeatedDetected
-				}
 
+			} else {
 				llmChat.ResponseChan <- &schema.AssistantResponse{
 					State: schema.StateChunk,
 					ChunkMessage: &schema.ChunkMessage{
@@ -600,6 +650,12 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 		llms.WithMaxTokens(llmChat.MaxTokens),
 		llms.WithTemperature(llmChat.Temperature),
 		llms.WithTopP(llmChat.TopP),
+		llms.WithModel(llmChat.Model),
 		llms.WithTopK(llmChat.TopK))
 	return resp, err
+}
+
+func (s *Service) isNumeric(str string) bool {
+	_, err := strconv.ParseFloat(str, 64)
+	return err == nil
 }

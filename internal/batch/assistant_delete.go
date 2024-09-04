@@ -47,7 +47,14 @@ func (b *Batch) AssistantDelete(ctx context.Context, adb *AssistantDeleteBatch) 
 			chatPage++
 		}
 
-		err := adb.AssistantService.DeleteAssistant(ctx, adb.AssistantEntity.Id)
+		// 删除 shares
+		err := adb.AssistantService.DeleteAllShare(ctx, adb.AssistantEntity)
+		if err != nil {
+			b.logger.Sugar.Errorf("Batch AssistantShareDelete: %v", err)
+			return
+		}
+
+		err = adb.AssistantService.DeleteAssistant(ctx, adb.AssistantEntity.Id)
 		if err != nil {
 			b.logger.Sugar.Errorf("Batch AssistantDelete: %v", err)
 			return

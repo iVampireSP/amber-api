@@ -15,12 +15,11 @@ type describeImageParams struct {
 }
 
 func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
-	// TODO: 计算 Token 消耗
 	var response = &schema.CallBuiltInResponse{}
 	var params describeImageParams
 	err := args.Unmarshal(&params)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	if params.Url == "" && params.FileId == 0 {
@@ -33,7 +32,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	if params.Url != "" {
 		file, err = s.fileService.CreateFileFromUrl(ctx, params.Url)
 		if err != nil {
-			return nil, err
+			return response, err
 		}
 	} else {
 		// 文件必须存在
@@ -61,7 +60,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	if !strings.HasPrefix(file.MimeType, "image/") {
 		response.Content = "文件不是图片"
 
-		return nil, nil
+		return response, nil
 	}
 
 	// URL
@@ -83,25 +82,15 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 		},
 	}
 
-	resp, err := s.OpenAI.GenerateContent(ctx, describeImageHistory)
+	resp, err := s.LLM.GenerateContent(ctx, describeImageHistory)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
-	//fmt.Println(resp.Choices[0].Content)
-
 	var tokenUsage = s.getTokenUsage(resp.Choices[0])
-
 	response.Content = resp.Choices[0].Content
 	response.TokenUsage = tokenUsage
-	response.RememberResponse = true
 	return response, nil
-	//
-	//response.Content = "这张图片来来自于博客"
-	//response.TokenUsage = &schema.TokenUsage{}
-	//response.RememberResponse = true
-	//return response, nil
-
 }
 
 func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsage {

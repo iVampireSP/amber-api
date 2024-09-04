@@ -1,5 +1,9 @@
 package schema
 
+type AllowedModelResponse struct {
+	Model []string `json:"model"`
+}
+
 type OpenAIChatCompletionRequest struct {
 	// Required
 	Model string `json:"model"`

@@ -23,9 +23,7 @@ func (s *Service) DownloadFile(ctx context.Context, args schema.FunctionCallArgu
 		return nil, err
 	}
 
-	response.Text = fileEntity.Id.String()
-	response.Append = true
-	response.Role = schema.RoleFile
+	response.Content = "Download Success, file id: " + fileEntity.Id.String()
 
 	return response, nil
 }

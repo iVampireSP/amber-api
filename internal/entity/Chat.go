@@ -6,33 +6,37 @@ import (
 )
 
 type Chat struct {
-	Base        `xorm:"extends"`
-	Name        string           `xorm:"varchar(255) notnull" json:"name"`
-	AssistantId int64            `xorm:"varchar(255) notnull" json:"assistant_id"`
-	UserId      schema.UserId    `xorm:"user_id int(11)" json:"user_id"`
-	ExpiredAt   *time.Time       `xorm:"TIMESTAMP null" json:"expired_at"`
-	Owner       schema.ChatOwner `xorm:"varchar(255) notnull" json:"owner"`
-	GuestId     *string          `xorm:"varchar(255)" json:"guest_id"`
+	Model
+	Name        string          `json:"name"`
+	AssistantId schema.EntityId `json:"assistant_id"`
+	// Assistant   Assistant        `json:"assistant"`
+	UserId    schema.UserId    ` json:"user_id"`
+	ExpiredAt *time.Time       `json:"expired_at"`
+	Owner     schema.ChatOwner `json:"owner"`
+	GuestId   *string          `json:"guest_id"`
 }
 
 type ChatWithAssistant struct {
-	Chat      `xorm:"extends"`
-	Assistant *Assistant `xorm:"extends" json:"assistant"`
+	Model
+	Assistant *Assistant ` json:"assistant"`
 }
 
-func (a *Base) TableName() string {
+func (a *Model) TableName() string {
 	return "chats"
 }
 
 type ChatMessage struct {
-	Base             `xorm:"extends"`
-	ChatId           int64           `xorm:"varchar(255) notnull" json:"assistant_id"`
-	Content          string          `xorm:"varchar(255) notnull" json:"content"`
-	Role             schema.ChatRole `xorm:"varchar(255) notnull" json:"role"`
-	Hidden           bool            `xorm:"bool notnull" json:"hidden"`
-	PromptTokens     int             `xorm:"INTEGER" json:"prompt_tokens"`
-	CompletionTokens int             `xorm:"INTEGER" json:"completion_tokens"`
-	TotalTokens      int             `xorm:"INTEGER" json:"total_tokens"`
+	Model
+	ChatId           schema.EntityId  `json:"assistant_id"`
+	Content          string           `json:"content"`
+	Role             schema.ChatRole  `json:"role"`
+	ToolCall         *schema.ToolCall `json:"-"`
+	FileId           *schema.EntityId `json:"file_id"`
+	File             *File            `json:"file"`
+	Hidden           bool             `json:"hidden"`
+	PromptTokens     int              `json:"prompt_tokens"`
+	CompletionTokens int              `json:"completion_tokens"`
+	TotalTokens      int              `json:"total_tokens"`
 }
 
 func (at *ChatMessage) TableName() string {

@@ -3,15 +3,15 @@ package file
 import (
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/s3"
-	"xorm.io/xorm"
+	"rag-new/internal/dao"
 )
 
 type Service struct {
 	s3     *s3.S3
-	x      *xorm.Engine
 	config *conf.Config
+	dao    *dao.Query
 }
 
-func NewService(s3 *s3.S3, x *xorm.Engine, config *conf.Config) *Service {
-	return &Service{s3, x, config}
+func NewService(s3 *s3.S3, config *conf.Config, dao *dao.Query) *Service {
+	return &Service{s3, config, dao}
 }

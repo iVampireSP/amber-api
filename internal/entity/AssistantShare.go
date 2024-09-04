@@ -1,34 +1,30 @@
 package entity
 
-type AssistantShare struct {
-	Base        `xorm:"extends"`
-	AssistantId int64  `xorm:"varchar(255) notnull" json:"assistant_id"`
-	Token       string `xorm:"varchar(255) notnull" json:"token"`
-}
+import "rag-new/internal/schema"
 
-type AssistantShareType struct {
-	Base        `xorm:"extends"`
-	Token       string     `xorm:"varchar(255) notnull" json:"token"`
-	AssistantId int64      `xorm:"int(8) notnull index" json:"assistant_id"`
-	Assistant   *Assistant `xorm:"extends" json:"assistant"`
+type AssistantShare struct {
+	Model
+	AssistantId schema.EntityId `json:"assistant_id"`
+	Assistant   Assistant       `json:"assistant"`
+	Token       string          `json:"token"`
 }
 
 func (a *AssistantShare) TableName() string {
 	return "assistant_shares"
 }
 
-func (a *AssistantShareType) TableName() string {
-	return "assistant_shares"
-}
-
-func (a *AssistantShareType) ToAssistantShare() *AssistantShare {
-	var assistantShare = &AssistantShare{}
-	assistantShare.Id = a.Id
-	assistantShare.AssistantId = a.AssistantId
-	assistantShare.Token = a.Token
-	assistantShare.CreatedAt = a.Assistant.CreatedAt
-	assistantShare.UpdatedAt = a.Assistant.UpdatedAt
-
-	return assistantShare
-
-}
+//func (a *AssistantShareType) TableName() string {
+//	return "assistant_shares"
+//}
+//
+//func (a *AssistantShareType) ToAssistantShare() *AssistantShare {
+//	var assistantShare = &AssistantShare{}
+//	assistantShare.Id = a.Id
+//	assistantShare.AssistantId = a.AssistantId
+//	assistantShare.Token = a.Token
+//	assistantShare.CreatedAt = a.Assistant.CreatedAt
+//	assistantShare.UpdatedAt = a.Assistant.UpdatedAt
+//
+//	return assistantShare
+//
+//}

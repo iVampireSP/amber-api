@@ -4,7 +4,7 @@
 //go:build !wireinject
 // +build !wireinject
 
-package main
+package cmd
 
 import (
 	"github.com/google/wire"
@@ -12,11 +12,14 @@ import (
 	"rag-new/internal/base"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/milvus"
+	"rag-new/internal/base/openai"
 	"rag-new/internal/base/orm"
 	"rag-new/internal/base/redis"
 	"rag-new/internal/base/s3"
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
+	"rag-new/internal/dao"
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
@@ -25,9 +28,11 @@ import (
 	"rag-new/internal/service/builtin_tool"
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/chat_message"
+	"rag-new/internal/service/embedding"
 	"rag-new/internal/service/file"
 	"rag-new/internal/service/jwks"
 	"rag-new/internal/service/llm"
+	"rag-new/internal/service/memory"
 	"rag-new/internal/service/tool"
 )
 
@@ -39,33 +44,36 @@ func CreateApp() (*base.Application, error) {
 	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
 	authService := auth.NewAuthService(config, jwksJWKS, loggerLogger)
 	userController := v1.NewUserController(authService)
-	engine, err := orm.NewXORM(config, loggerLogger)
-	if err != nil {
-		return nil, err
-	}
-	toolService := tool.NewService(engine, config)
+	db := orm.NewGORM(config, loggerLogger)
+	query := dao.NewQuery(db)
+	toolService := tool.NewService(config, query)
 	toolController := v1.NewToolController(toolService, authService)
-	assistantService := assistant.NewService(engine)
-	chat_messageService := chat_message.NewService(engine)
-	chatService := chat.NewService(engine, assistantService, chat_messageService)
-	batchBatch := batch.NewBatch(engine, loggerLogger)
+	assistantService := assistant.NewService(query)
+	chat_messageService := chat_message.NewService(query)
+	chatService := chat.NewService(query, assistantService, chat_messageService)
+	batchBatch := batch.NewBatch(loggerLogger)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, batchBatch)
 	client := redis.NewRedis(config)
 	s3S3 := s3.NewS3(config)
-	fileService := file.NewService(s3S3, engine, config)
-	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService)
+	fileService := file.NewService(s3S3, config, query)
+	openaiClient := openai.NewOpenAI(config)
+	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService, openaiClient)
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService)
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService)
 	fileController := v1.NewFileController(fileService, loggerLogger)
-	api := router.NewApiRoute(userController, toolController, assistantController, chatController, fileController)
+	embeddingService := embedding.NewEmbedding(config, loggerLogger, query)
+	clientClient := milvus.NewMilvus(config)
+	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, clientClient, query)
+	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
+	api := router.NewApiRoute(userController, toolController, assistantController, chatController, fileController, memoryController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService)
-	application := base.NewApplication(config, httpServer, loggerLogger, engine, serviceService, middlewareMiddleware, client, batchBatch, s3S3)
+	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query, openaiClient, clientClient)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, orm.NewXORM, redis.NewRedis, s3.NewS3, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, milvus.NewMilvus, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, openai.NewOpenAI, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)

@@ -74,7 +74,7 @@ func (u *AssistantController) GetAssistant(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -147,7 +147,7 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -204,7 +204,7 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -248,13 +248,13 @@ func (u *AssistantController) DeleteAssistant(c *gin.Context) {
 }
 
 // ListTool godoc
-// @Summary      获取 Assistant 所绑定的 Tool
+// @Summary	     获取 Assistant 所绑定的 Tool
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        id  path  int  true  "Assistant ID"
-// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantToolType}
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantTool}
 // @Failure      500  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants/{id}/tools [get]
 func (u *AssistantController) ListTool(c *gin.Context) {
@@ -266,7 +266,7 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, int64(assistantId))
+	assistantEntity, err := u.assistantService.GetAssistant(c, schema.EntityId(assistantId))
 	if err != nil {
 		if errors.Is(err, consts.ErrAssistantNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
@@ -280,7 +280,7 @@ func (u *AssistantController) ListTool(c *gin.Context) {
 		return
 	}
 
-	toolList, err := u.assistantService.ListAssistantToolWithType(c, assistantEntity)
+	toolList, err := u.assistantService.GetAssistantTool(c, assistantEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -315,8 +315,8 @@ func (u *AssistantController) BindTool(c *gin.Context) {
 		return
 	}
 
-	assistantId := int64(assistantIdInt)
-	toolId := int64(toolIdInt)
+	assistantId := schema.EntityId(assistantIdInt)
+	toolId := schema.EntityId(toolIdInt)
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, assistantId)
 	if err != nil {
@@ -378,8 +378,8 @@ func (u *AssistantController) UnbindTool(c *gin.Context) {
 		return
 	}
 
-	assistantId := int64(assistantIdInt)
-	toolId := int64(toolIdInt)
+	assistantId := schema.EntityId(assistantIdInt)
+	toolId := schema.EntityId(toolIdInt)
 
 	assistantEntity, err := u.assistantService.GetAssistant(c, assistantId)
 	if err != nil {

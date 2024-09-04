@@ -37,7 +37,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequest"
+                            "$ref": "#/definitions/schema.OpenAIChatCompletionRequest"
                         }
                     }
                 ],
@@ -45,19 +45,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse"
+                            "$ref": "#/definitions/schema.OpenAIChatCompletionResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -86,7 +86,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -94,7 +94,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                                "$ref": "#/definitions/entity.Assistant"
                                             }
                                         }
                                     }
@@ -105,7 +105,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -133,7 +133,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.AssistantCreateRequest"
+                            "$ref": "#/definitions/schema.AssistantCreateRequest"
                         }
                     }
                 ],
@@ -143,13 +143,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                            "$ref": "#/definitions/entity.Assistant"
                                         }
                                     }
                                 }
@@ -159,7 +159,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -197,13 +197,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                            "$ref": "#/definitions/entity.Assistant"
                                         }
                                     }
                                 }
@@ -213,7 +213,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -250,13 +250,13 @@
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -291,7 +291,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.AssistantUpdateRequest"
+                            "$ref": "#/definitions/schema.AssistantUpdateRequest"
                         }
                     }
                 ],
@@ -301,13 +301,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                                            "$ref": "#/definitions/entity.Assistant"
                                         }
                                     }
                                 }
@@ -317,7 +317,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -355,7 +355,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -363,7 +363,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantShare"
+                                                "$ref": "#/definitions/entity.AssistantShare"
                                             }
                                         }
                                     }
@@ -374,7 +374,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -410,13 +410,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantShare"
+                                            "$ref": "#/definitions/entity.AssistantShare"
                                         }
                                     }
                                 }
@@ -426,7 +426,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -468,13 +468,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -512,7 +512,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -520,7 +520,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.AssistantToolType"
+                                                "$ref": "#/definitions/entity.AssistantTool"
                                             }
                                         }
                                     }
@@ -531,7 +531,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -576,13 +576,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                            "$ref": "#/definitions/entity.AssistantTool"
                                         }
                                     }
                                 }
@@ -592,7 +592,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -635,13 +635,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.AssistantTool"
+                                            "$ref": "#/definitions/entity.AssistantTool"
                                         }
                                     }
                                 }
@@ -651,7 +651,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -676,7 +676,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatPublicListRequest"
+                            "$ref": "#/definitions/schema.ChatPublicListRequest"
                         }
                     }
                 ],
@@ -686,7 +686,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -694,7 +694,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                                "$ref": "#/definitions/entity.Chat"
                                             }
                                         }
                                     }
@@ -705,7 +705,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -728,7 +728,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatPublicRequest"
+                            "$ref": "#/definitions/schema.ChatPublicRequest"
                         }
                     }
                 ],
@@ -738,13 +738,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                            "$ref": "#/definitions/entity.Chat"
                                         }
                                     }
                                 }
@@ -754,7 +754,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -785,7 +785,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.GetPublicChatMessageRequest"
+                            "$ref": "#/definitions/schema.GetPublicChatMessageRequest"
                         }
                     }
                 ],
@@ -796,19 +796,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -847,11 +847,16 @@
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "name": "url",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
                         "type": "file",
                         "description": "图片",
                         "name": "image",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -860,13 +865,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -876,13 +881,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -890,13 +895,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -906,7 +911,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -950,7 +955,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -958,7 +963,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.ChatMessage"
+                                                "$ref": "#/definitions/entity.ChatMessage"
                                             }
                                         }
                                     }
@@ -969,7 +974,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -998,7 +1003,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.AddPublicChatMessageRequest"
+                            "$ref": "#/definitions/schema.AddPublicChatMessageRequest"
                         }
                     }
                 ],
@@ -1008,13 +1013,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1024,13 +1029,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -1038,13 +1043,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1054,7 +1059,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1092,7 +1097,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -1100,7 +1105,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                                "$ref": "#/definitions/entity.Chat"
                                             }
                                         }
                                     }
@@ -1111,7 +1116,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1140,7 +1145,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatCreateRequest"
+                            "$ref": "#/definitions/schema.ChatCreateRequest"
                         }
                     }
                 ],
@@ -1150,13 +1155,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Chat"
+                                            "$ref": "#/definitions/entity.Chat"
                                         }
                                     }
                                 }
@@ -1166,13 +1171,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1209,25 +1214,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1266,25 +1271,25 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1316,12 +1321,10 @@
                         "required": true
                     },
                     {
-                        "description": "远程文件",
-                        "name": "schema.ChatDownloadRemoteFileRequest",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatDownloadRemoteFileRequest"
-                        }
+                        "type": "string",
+                        "name": "url",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "file",
@@ -1336,13 +1339,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1352,13 +1355,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -1366,13 +1369,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1382,7 +1385,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1420,7 +1423,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -1428,7 +1431,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.ChatMessage"
+                                                "$ref": "#/definitions/entity.ChatMessage"
                                             }
                                         }
                                     }
@@ -1439,19 +1442,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1486,7 +1489,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageAddRequest"
+                            "$ref": "#/definitions/schema.ChatMessageAddRequest"
                         }
                     }
                 ],
@@ -1496,13 +1499,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1512,13 +1515,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -1526,13 +1529,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1542,7 +1545,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1579,6 +1582,119 @@
                 }
             }
         },
+        "/api/v1/memories": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "memoires"
+                ],
+                "summary": "获取所有的记忆",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.Memory"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/purge": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "memoires"
+                ],
+                "summary": "删除全部记忆",
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/memories/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "memoires"
+                ],
+                "summary": "删除指定的记忆",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/ping": {
             "get": {
                 "security": [
@@ -1603,13 +1719,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.CurrentUserResponse"
+                                            "$ref": "#/definitions/schema.CurrentUserResponse"
                                         }
                                     }
                                 }
@@ -1619,7 +1735,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1664,13 +1780,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1680,13 +1796,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "409": {
@@ -1694,13 +1810,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_schema.ChatMessageResponse"
+                                            "$ref": "#/definitions/schema.ChatMessageResponse"
                                         }
                                     }
                                 }
@@ -1710,7 +1826,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1740,7 +1856,7 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
@@ -1748,7 +1864,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                                "$ref": "#/definitions/entity.Tool"
                                             }
                                         }
                                     }
@@ -1759,7 +1875,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1788,7 +1904,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ToolCreateRequest"
+                            "$ref": "#/definitions/schema.ToolCreateRequest"
                         }
                     }
                 ],
@@ -1798,13 +1914,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            "$ref": "#/definitions/entity.Tool"
                                         }
                                     }
                                 }
@@ -1814,7 +1930,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1845,7 +1961,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryInput"
+                            "$ref": "#/definitions/schema.ToolDiscoveryInput"
                         }
                     }
                 ],
@@ -1853,13 +1969,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1898,13 +2014,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            "$ref": "#/definitions/entity.Tool"
                                         }
                                     }
                                 }
@@ -1914,13 +2030,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -1958,13 +2074,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -2003,13 +2119,13 @@
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                                    "$ref": "#/definitions/schema.ResponseBody"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                                            "$ref": "#/definitions/entity.Tool"
                                         }
                                     }
                                 }
@@ -2019,13 +2135,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/rag-new_internal_schema.ResponseBody"
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -2033,7 +2149,7 @@
         }
     },
     "definitions": {
-        "rag-new_internal_entity.Assistant": {
+        "entity.Assistant": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -2046,7 +2162,8 @@
                     "type": "boolean"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"
@@ -2062,9 +2179,12 @@
                 }
             }
         },
-        "rag-new_internal_entity.AssistantShare": {
+        "entity.AssistantShare": {
             "type": "object",
             "properties": {
+                "assistant": {
+                    "$ref": "#/definitions/entity.Assistant"
+                },
                 "assistant_id": {
                     "type": "integer"
                 },
@@ -2072,7 +2192,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "token": {
                     "type": "string"
@@ -2082,31 +2203,11 @@
                 }
             }
         },
-        "rag-new_internal_entity.AssistantTool": {
-            "type": "object",
-            "properties": {
-                "assistant_id": {
-                    "type": "integer"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "tool_id": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "rag-new_internal_entity.AssistantToolType": {
+        "entity.AssistantTool": {
             "type": "object",
             "properties": {
                 "assistant": {
-                    "$ref": "#/definitions/rag-new_internal_entity.Assistant"
+                    "$ref": "#/definitions/entity.Assistant"
                 },
                 "assistant_id": {
                     "type": "integer"
@@ -2115,10 +2216,11 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "tool": {
-                    "$ref": "#/definitions/rag-new_internal_entity.Tool"
+                    "$ref": "#/definitions/entity.Tool"
                 },
                 "tool_id": {
                     "type": "integer"
@@ -2128,7 +2230,7 @@
                 }
             }
         },
-        "rag-new_internal_entity.Chat": {
+        "entity.Chat": {
             "type": "object",
             "properties": {
                 "assistant_id": {
@@ -2144,7 +2246,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"
@@ -2156,11 +2259,12 @@
                     "type": "string"
                 },
                 "user_id": {
+                    "description": "Assistant   Assistant        `json:\"assistant\"`",
                     "type": "integer"
                 }
             }
         },
-        "rag-new_internal_entity.ChatMessage": {
+        "entity.ChatMessage": {
             "type": "object",
             "properties": {
                 "assistant_id": {
@@ -2175,11 +2279,18 @@
                 "created_at": {
                     "type": "string"
                 },
+                "file": {
+                    "$ref": "#/definitions/entity.File"
+                },
+                "file_id": {
+                    "type": "integer"
+                },
                 "hidden": {
                     "type": "boolean"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "prompt_tokens": {
                     "type": "integer"
@@ -2195,7 +2306,62 @@
                 }
             }
         },
-        "rag-new_internal_entity.Tool": {
+        "entity.File": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "expired_at": {
+                    "description": "TODO: 移除 file 的到期时间，如果当 file 没有任何引用的时候再删除\n因为有外键，所以直接删除是删不掉的，必须删除消息",
+                    "type": "string"
+                },
+                "file_hash": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "mime_type": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "url_hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.Memory": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.Tool": {
             "type": "object",
             "properties": {
                 "api_key": {
@@ -2205,7 +2371,7 @@
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutput"
+                    "$ref": "#/definitions/schema.ToolDiscoveryOutput"
                 },
                 "description": {
                     "type": "string"
@@ -2214,7 +2380,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"
@@ -2227,7 +2394,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.AddPublicChatMessageRequest": {
+        "schema.AddPublicChatMessageRequest": {
             "type": "object",
             "required": [
                 "assistant_token",
@@ -2257,7 +2424,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.AssistantCreateRequest": {
+        "schema.AssistantCreateRequest": {
             "type": "object",
             "required": [
                 "description",
@@ -2285,7 +2452,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.AssistantUpdateRequest": {
+        "schema.AssistantUpdateRequest": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2309,7 +2476,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ChatCreateRequest": {
+        "schema.ChatCreateRequest": {
             "type": "object",
             "required": [
                 "assistant_id",
@@ -2320,7 +2487,7 @@
                     "type": "integer"
                 },
                 "expired_at": {
-                    "$ref": "#/definitions/rag-new_internal_schema.CustomTime"
+                    "$ref": "#/definitions/schema.CustomTime"
                 },
                 "name": {
                     "type": "string",
@@ -2328,18 +2495,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ChatDownloadRemoteFileRequest": {
-            "type": "object",
-            "required": [
-                "url"
-            ],
-            "properties": {
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "rag-new_internal_schema.ChatMessageAddRequest": {
+        "schema.ChatMessageAddRequest": {
             "type": "object",
             "required": [
                 "message",
@@ -2363,7 +2519,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ChatMessageResponse": {
+        "schema.ChatMessageResponse": {
             "type": "object",
             "properties": {
                 "stream": {
@@ -2374,7 +2530,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ChatPublicListRequest": {
+        "schema.ChatPublicListRequest": {
             "type": "object",
             "required": [
                 "guest_id"
@@ -2385,7 +2541,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ChatPublicRequest": {
+        "schema.ChatPublicRequest": {
             "type": "object",
             "required": [
                 "assistant_token",
@@ -2405,7 +2561,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.CurrentUserResponse": {
+        "schema.CurrentUserResponse": {
             "type": "object",
             "properties": {
                 "ip": {
@@ -2425,7 +2581,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.CustomTime": {
+        "schema.CustomTime": {
             "type": "object",
             "properties": {
                 "time.Time": {
@@ -2433,7 +2589,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.FunctionsInput": {
+        "schema.FunctionsInput": {
             "type": "object",
             "required": [
                 "description",
@@ -2448,11 +2604,11 @@
                     "type": "string"
                 },
                 "parameters": {
-                    "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters"
+                    "$ref": "#/definitions/schema.ToolDiscoveryOutputFunctionParameters"
                 }
             }
         },
-        "rag-new_internal_schema.GetPublicChatMessageRequest": {
+        "schema.GetPublicChatMessageRequest": {
             "type": "object",
             "required": [
                 "assistant_token",
@@ -2467,7 +2623,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIChatCompletionRequest": {
+        "schema.OpenAIChatCompletionRequest": {
             "type": "object",
             "properties": {
                 "max_tokens": {
@@ -2478,7 +2634,7 @@
                     "description": "Required",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage"
+                        "$ref": "#/definitions/schema.OpenAIChatCompletionRequestMessage"
                     }
                 },
                 "model": {
@@ -2503,14 +2659,14 @@
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIChatCompletionRequestMessage": {
+        "schema.OpenAIChatCompletionRequestMessage": {
             "type": "object",
             "properties": {
                 "content": {
                     "description": "Required"
                 },
                 "image_url": {
-                    "$ref": "#/definitions/rag-new_internal_schema.OpenAIImageUrl"
+                    "$ref": "#/definitions/schema.OpenAIImageUrl"
                 },
                 "role": {
                     "description": "Required",
@@ -2518,13 +2674,13 @@
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIChatCompletionResponse": {
+        "schema.OpenAIChatCompletionResponse": {
             "type": "object",
             "properties": {
                 "choices": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponseChoice"
+                        "$ref": "#/definitions/schema.OpenAIChatCompletionResponseChoice"
                     }
                 },
                 "created": {
@@ -2540,22 +2696,22 @@
                     "type": "string"
                 },
                 "usage": {
-                    "$ref": "#/definitions/rag-new_internal_schema.TokenUsage"
+                    "$ref": "#/definitions/schema.TokenUsage"
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIChatCompletionResponseChoice": {
+        "schema.OpenAIChatCompletionResponseChoice": {
             "type": "object",
             "properties": {
                 "index": {
                     "type": "integer"
                 },
                 "message": {
-                    "$ref": "#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage"
+                    "$ref": "#/definitions/schema.OpenAIChatCompletionRequestMessage"
                 }
             }
         },
-        "rag-new_internal_schema.OpenAIImageUrl": {
+        "schema.OpenAIImageUrl": {
             "type": "object",
             "properties": {
                 "detail": {
@@ -2566,7 +2722,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ResponseBody": {
+        "schema.ResponseBody": {
             "type": "object",
             "properties": {
                 "data": {},
@@ -2581,7 +2737,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.TokenUsage": {
+        "schema.TokenUsage": {
             "type": "object",
             "properties": {
                 "completion_tokens": {
@@ -2595,7 +2751,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ToolCreateRequest": {
+        "schema.ToolCreateRequest": {
             "type": "object",
             "required": [
                 "description",
@@ -2621,7 +2777,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryInput": {
+        "schema.ToolDiscoveryInput": {
             "type": "object",
             "required": [
                 "description",
@@ -2637,7 +2793,7 @@
                 "functions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.FunctionsInput"
+                        "$ref": "#/definitions/schema.FunctionsInput"
                     }
                 },
                 "homepage_url": {
@@ -2648,7 +2804,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryOutput": {
+        "schema.ToolDiscoveryOutput": {
             "type": "object",
             "properties": {
                 "callback_url": {
@@ -2660,7 +2816,7 @@
                 "function": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctions"
+                        "$ref": "#/definitions/schema.ToolDiscoveryOutputFunctions"
                     }
                 },
                 "homepage_url": {
@@ -2671,7 +2827,7 @@
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryOutputFunction": {
+        "schema.ToolDiscoveryOutputFunction": {
             "type": "object",
             "properties": {
                 "description": {
@@ -2681,11 +2837,11 @@
                     "type": "string"
                 },
                 "parameters": {
-                    "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters"
+                    "$ref": "#/definitions/schema.ToolDiscoveryOutputFunctionParameters"
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters": {
+        "schema.ToolDiscoveryOutputFunctionParameters": {
             "type": "object",
             "required": [
                 "properties",
@@ -2705,13 +2861,13 @@
                 }
             }
         },
-        "rag-new_internal_schema.ToolDiscoveryOutputFunctions": {
+        "schema.ToolDiscoveryOutputFunctions": {
             "type": "object",
             "properties": {
                 "functions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunction"
+                        "$ref": "#/definitions/schema.ToolDiscoveryOutputFunction"
                     }
                 },
                 "type": {

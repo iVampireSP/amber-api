@@ -4,5 +4,5 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY ./cmd/main /app/main
+COPY ./main /app/main
 ENTRYPOINT ["/app/main"]

@@ -2,7 +2,6 @@ package v1
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	_ "rag-new/internal/entity"
@@ -133,7 +132,6 @@ func (u *AssistantController) DeleteAssistantShare(c *gin.Context) {
 	}
 
 	share, err := u.assistantService.GetShare(c, assistantShareDeleteRequest.ShareId)
-	fmt.Println(err)
 
 	if err != nil {
 		if errors.Is(err, consts.ErrShareNotFound) {
@@ -144,7 +142,7 @@ func (u *AssistantController) DeleteAssistantShare(c *gin.Context) {
 		return
 	}
 
-	err = u.assistantService.DeleteShare(c, share.ToAssistantShare())
+	err = u.assistantService.DeleteShare(c, share)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return

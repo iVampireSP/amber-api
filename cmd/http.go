@@ -1,25 +1,18 @@
-package main
+package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"rag-new/internal/base/conf"
 	"strconv"
 	"sync"
 )
 
-// @title           Leaflow Amber
-// @version         1.0
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
 func init() {
-	rootCmd.AddCommand(httpCmd)
+	RootCmd.AddCommand(httpCmd)
 }
 
 var httpCmd = &cobra.Command{
 	Use: "http",
 	Run: func(cmd *cobra.Command, args []string) {
-		conf.CreateConfigIfNotExists()
 		initHttpServer()
 	},
 }

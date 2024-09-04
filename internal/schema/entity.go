@@ -4,8 +4,11 @@ import (
 	"strconv"
 )
 
-type EntityId int64
+type EntityId uint
+
+//type EntityId int64
 
 func (i EntityId) String() string {
-	return strconv.FormatInt(int64(i), 10)
+	return strconv.FormatUint(uint64(i), 10)
+	//return strconv.FormatInt(int64(i), 10)
 }

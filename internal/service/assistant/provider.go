@@ -1,15 +1,15 @@
 package assistant
 
 import (
-	"xorm.io/xorm"
+	"rag-new/internal/dao"
 )
 
 type Service struct {
-	x *xorm.Engine
+	dao *dao.Query
 }
 
 func NewService(
-	x *xorm.Engine,
+	dao *dao.Query,
 ) *Service {
-	return &Service{x}
+	return &Service{dao}
 }

@@ -1,10 +1,6 @@
 package conf
 
-import (
-	"os"
-	"rag-new/configs"
-)
-
+// Config 配置文件不能有下划线或横线，否则不能解析
 type Config struct {
 	Http *Http `yaml:"http"`
 
@@ -23,6 +19,8 @@ type Config struct {
 	LLM *LLM `yaml:"llm"`
 
 	S3 *S3 `yaml:"s3"`
+
+	Milvus *Milvus `yaml:"milvus"`
 }
 
 type Http struct {
@@ -61,10 +59,16 @@ type Metrics struct {
 }
 
 type OpenAI struct {
-	ApiKey      string `yaml:"api_key" mapstructure:"api_key"`
-	BaseUrl     string `yaml:"api_base" mapstructure:"base_url"`
-	Model       string `yaml:"model" mapstructure:"model"`
-	VisionModel string `yaml:"vision_model" mapstructure:"vision_model"`
+	ApiKey           string   `yaml:"api_key" mapstructure:"api_key"`
+	BaseUrl          string   `yaml:"base_url" mapstructure:"base_url"`
+	InternalBaseUrl  string   `yaml:"internal_base_url" mapstructure:"internal_base_url"`
+	Model            string   `yaml:"model" mapstructure:"model"`
+	VisionModel      string   `yaml:"vision_model" mapstructure:"vision_model"`
+	LongContextModel string   `yaml:"long_context_model" mapstructure:"long_context_model"`
+	EmbeddingModel   string   `yaml:"embedding_model" mapstructure:"embedding_model"`
+	EmbeddingDim     int      `yaml:"embedding_dim" mapstructure:"embedding_dim"`
+	DallEModel       string   `yaml:"dall_e_model" mapstructure:"dall_e_model"`
+	AllowedModels    []string `yaml:"allowed_models" mapstructure:"allowed_models"`
 }
 
 type S3 struct {
@@ -84,27 +88,11 @@ type LLM struct {
 	//N int `yaml:"n"`
 }
 
-func CreateConfigIfNotExists() {
-	// create if not exists
-	var configName = "config.yaml"
-
-	if _, err := os.Stat(configName); os.IsNotExist(err) {
-		f, err := os.Create(configName)
-		if err != nil {
-			panic(err)
-		}
-
-		// write default from embed
-		_, err = f.Write(configs.Config)
-		if err != nil {
-			panic(err)
-		}
-
-		defer func(f *os.File) {
-			err := f.Close()
-			if err != nil {
-				panic(err)
-			}
-		}(f)
-	}
+type Milvus struct {
+	Host       string `yaml:"host" mapstructure:"host"`
+	Port       int    `yaml:"port" mapstructure:"port"`
+	DBName     string `yaml:"db_name" mapstructure:"db_name"`
+	Collection string `yaml:"collection" mapstructure:"collection"`
+	User       string `yaml:"user" mapstructure:"user"`
+	Password   string `yaml:"password" mapstructure:"password"`
 }

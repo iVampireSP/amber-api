@@ -16,11 +16,11 @@ type AssistantUpdateRequest struct {
 }
 
 type AssistantToolBindRequest struct {
-	ToolId      int64 `json:"tool_id" binding:"required"`
-	AssistantId int64 `json:"assistant_id" binding:"required"`
+	ToolId      EntityId `json:"tool_id" binding:"required"`
+	AssistantId EntityId `json:"assistant_id" binding:"required"`
 }
 
 type AssistantToolUnbindRequest struct {
-	ToolId      int64 `json:"tool_id" binding:"required"`
-	AssistantId int64 `json:"assistant_id" binding:"required"`
+	ToolId      EntityId `json:"tool_id" binding:"required"`
+	AssistantId EntityId `json:"assistant_id" binding:"required"`
 }

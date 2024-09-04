@@ -1,5 +1,5 @@
 definitions:
-  rag-new_internal_entity.Assistant:
+  entity.Assistant:
     properties:
       created_at:
         type: string
@@ -8,7 +8,8 @@ definitions:
       disable_default_prompt:
         type: boolean
       id:
-        type: integer
+        example: "0"
+        type: string
       name:
         type: string
       prompt:
@@ -18,50 +19,41 @@ definitions:
       user_id:
         type: integer
     type: object
-  rag-new_internal_entity.AssistantShare:
+  entity.AssistantShare:
     properties:
+      assistant:
+        $ref: '#/definitions/entity.Assistant'
       assistant_id:
         type: integer
       created_at:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       token:
         type: string
       updated_at:
         type: string
     type: object
-  rag-new_internal_entity.AssistantTool:
-    properties:
-      assistant_id:
-        type: integer
-      created_at:
-        type: string
-      id:
-        type: integer
-      tool_id:
-        type: integer
-      updated_at:
-        type: string
-    type: object
-  rag-new_internal_entity.AssistantToolType:
+  entity.AssistantTool:
     properties:
       assistant:
-        $ref: '#/definitions/rag-new_internal_entity.Assistant'
+        $ref: '#/definitions/entity.Assistant'
       assistant_id:
         type: integer
       created_at:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       tool:
-        $ref: '#/definitions/rag-new_internal_entity.Tool'
+        $ref: '#/definitions/entity.Tool'
       tool_id:
         type: integer
       updated_at:
         type: string
     type: object
-  rag-new_internal_entity.Chat:
+  entity.Chat:
     properties:
       assistant_id:
         type: integer
@@ -72,7 +64,8 @@ definitions:
       guest_id:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       name:
         type: string
       owner:
@@ -80,9 +73,10 @@ definitions:
       updated_at:
         type: string
       user_id:
+        description: Assistant   Assistant        `json:"assistant"`
         type: integer
     type: object
-  rag-new_internal_entity.ChatMessage:
+  entity.ChatMessage:
     properties:
       assistant_id:
         type: integer
@@ -92,10 +86,15 @@ definitions:
         type: string
       created_at:
         type: string
+      file:
+        $ref: '#/definitions/entity.File'
+      file_id:
+        type: integer
       hidden:
         type: boolean
       id:
-        type: integer
+        example: "0"
+        type: string
       prompt_tokens:
         type: integer
       role:
@@ -105,20 +104,60 @@ definitions:
       updated_at:
         type: string
     type: object
-  rag-new_internal_entity.Tool:
+  entity.File:
+    properties:
+      created_at:
+        type: string
+      expired_at:
+        description: |-
+          TODO: 移除 file 的到期时间，如果当 file 没有任何引用的时候再删除
+          因为有外键，所以直接删除是删不掉的，必须删除消息
+        type: string
+      file_hash:
+        type: string
+      id:
+        example: "0"
+        type: string
+      mime_type:
+        type: string
+      path:
+        type: string
+      updated_at:
+        type: string
+      url:
+        type: string
+      url_hash:
+        type: string
+    type: object
+  entity.Memory:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        example: "0"
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  entity.Tool:
     properties:
       api_key:
         type: string
       created_at:
         type: string
       data:
-        $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutput'
+        $ref: '#/definitions/schema.ToolDiscoveryOutput'
       description:
         type: string
       discovery_url:
         type: string
       id:
-        type: integer
+        example: "0"
+        type: string
       name:
         type: string
       updated_at:
@@ -126,7 +165,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  rag-new_internal_schema.AddPublicChatMessageRequest:
+  schema.AddPublicChatMessageRequest:
     properties:
       assistant_token:
         type: string
@@ -148,7 +187,7 @@ definitions:
     - message
     - role
     type: object
-  rag-new_internal_schema.AssistantCreateRequest:
+  schema.AssistantCreateRequest:
     properties:
       description:
         maxLength: 255
@@ -168,7 +207,7 @@ definitions:
     - description
     - name
     type: object
-  rag-new_internal_schema.AssistantUpdateRequest:
+  schema.AssistantUpdateRequest:
     properties:
       description:
         maxLength: 255
@@ -185,12 +224,12 @@ definitions:
         maxLength: 512
         type: string
     type: object
-  rag-new_internal_schema.ChatCreateRequest:
+  schema.ChatCreateRequest:
     properties:
       assistant_id:
         type: integer
       expired_at:
-        $ref: '#/definitions/rag-new_internal_schema.CustomTime'
+        $ref: '#/definitions/schema.CustomTime'
       name:
         maxLength: 30
         type: string
@@ -198,14 +237,7 @@ definitions:
     - assistant_id
     - name
     type: object
-  rag-new_internal_schema.ChatDownloadRemoteFileRequest:
-    properties:
-      url:
-        type: string
-    required:
-    - url
-    type: object
-  rag-new_internal_schema.ChatMessageAddRequest:
+  schema.ChatMessageAddRequest:
     properties:
       message:
         maxLength: 255
@@ -223,21 +255,21 @@ definitions:
     - message
     - role
     type: object
-  rag-new_internal_schema.ChatMessageResponse:
+  schema.ChatMessageResponse:
     properties:
       stream:
         type: boolean
       stream_id:
         type: string
     type: object
-  rag-new_internal_schema.ChatPublicListRequest:
+  schema.ChatPublicListRequest:
     properties:
       guest_id:
         type: string
     required:
     - guest_id
     type: object
-  rag-new_internal_schema.ChatPublicRequest:
+  schema.ChatPublicRequest:
     properties:
       assistant_token:
         type: string
@@ -251,7 +283,7 @@ definitions:
     - guest_id
     - name
     type: object
-  rag-new_internal_schema.CurrentUserResponse:
+  schema.CurrentUserResponse:
     properties:
       ip:
         type: string
@@ -264,25 +296,25 @@ definitions:
       valid:
         type: boolean
     type: object
-  rag-new_internal_schema.CustomTime:
+  schema.CustomTime:
     properties:
       time.Time:
         type: string
     type: object
-  rag-new_internal_schema.FunctionsInput:
+  schema.FunctionsInput:
     properties:
       description:
         type: string
       name:
         type: string
       parameters:
-        $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters'
+        $ref: '#/definitions/schema.ToolDiscoveryOutputFunctionParameters'
     required:
     - description
     - name
     - parameters
     type: object
-  rag-new_internal_schema.GetPublicChatMessageRequest:
+  schema.GetPublicChatMessageRequest:
     properties:
       assistant_token:
         type: string
@@ -292,7 +324,7 @@ definitions:
     - assistant_token
     - guest_id
     type: object
-  rag-new_internal_schema.OpenAIChatCompletionRequest:
+  schema.OpenAIChatCompletionRequest:
     properties:
       max_tokens:
         description: Optional
@@ -300,7 +332,7 @@ definitions:
       messages:
         description: Required
         items:
-          $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage'
+          $ref: '#/definitions/schema.OpenAIChatCompletionRequestMessage'
         type: array
       model:
         description: Required
@@ -318,21 +350,21 @@ definitions:
         description: Optional
         type: number
     type: object
-  rag-new_internal_schema.OpenAIChatCompletionRequestMessage:
+  schema.OpenAIChatCompletionRequestMessage:
     properties:
       content:
         description: Required
       image_url:
-        $ref: '#/definitions/rag-new_internal_schema.OpenAIImageUrl'
+        $ref: '#/definitions/schema.OpenAIImageUrl'
       role:
         description: Required
         type: string
     type: object
-  rag-new_internal_schema.OpenAIChatCompletionResponse:
+  schema.OpenAIChatCompletionResponse:
     properties:
       choices:
         items:
-          $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponseChoice'
+          $ref: '#/definitions/schema.OpenAIChatCompletionResponseChoice'
         type: array
       created:
         type: integer
@@ -343,23 +375,23 @@ definitions:
       object:
         type: string
       usage:
-        $ref: '#/definitions/rag-new_internal_schema.TokenUsage'
+        $ref: '#/definitions/schema.TokenUsage'
     type: object
-  rag-new_internal_schema.OpenAIChatCompletionResponseChoice:
+  schema.OpenAIChatCompletionResponseChoice:
     properties:
       index:
         type: integer
       message:
-        $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequestMessage'
+        $ref: '#/definitions/schema.OpenAIChatCompletionRequestMessage'
     type: object
-  rag-new_internal_schema.OpenAIImageUrl:
+  schema.OpenAIImageUrl:
     properties:
       detail:
         type: string
       url:
         type: string
     type: object
-  rag-new_internal_schema.ResponseBody:
+  schema.ResponseBody:
     properties:
       data: {}
       error:
@@ -369,7 +401,7 @@ definitions:
       success:
         type: boolean
     type: object
-  rag-new_internal_schema.TokenUsage:
+  schema.TokenUsage:
     properties:
       completion_tokens:
         type: integer
@@ -378,7 +410,7 @@ definitions:
       total_tokens:
         type: integer
     type: object
-  rag-new_internal_schema.ToolCreateRequest:
+  schema.ToolCreateRequest:
     properties:
       api_key:
         maxLength: 255
@@ -397,7 +429,7 @@ definitions:
     - name
     - url
     type: object
-  rag-new_internal_schema.ToolDiscoveryInput:
+  schema.ToolDiscoveryInput:
     properties:
       callback_url:
         type: string
@@ -405,7 +437,7 @@ definitions:
         type: string
       functions:
         items:
-          $ref: '#/definitions/rag-new_internal_schema.FunctionsInput'
+          $ref: '#/definitions/schema.FunctionsInput'
         type: array
       homepage_url:
         type: string
@@ -415,7 +447,7 @@ definitions:
     - description
     - name
     type: object
-  rag-new_internal_schema.ToolDiscoveryOutput:
+  schema.ToolDiscoveryOutput:
     properties:
       callback_url:
         type: string
@@ -423,23 +455,23 @@ definitions:
         type: string
       function:
         items:
-          $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctions'
+          $ref: '#/definitions/schema.ToolDiscoveryOutputFunctions'
         type: array
       homepage_url:
         type: string
       name:
         type: string
     type: object
-  rag-new_internal_schema.ToolDiscoveryOutputFunction:
+  schema.ToolDiscoveryOutputFunction:
     properties:
       description:
         type: string
       name:
         type: string
       parameters:
-        $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters'
+        $ref: '#/definitions/schema.ToolDiscoveryOutputFunctionParameters'
     type: object
-  rag-new_internal_schema.ToolDiscoveryOutputFunctionParameters:
+  schema.ToolDiscoveryOutputFunctionParameters:
     properties:
       properties: {}
       required:
@@ -453,11 +485,11 @@ definitions:
     - required
     - type
     type: object
-  rag-new_internal_schema.ToolDiscoveryOutputFunctions:
+  schema.ToolDiscoveryOutputFunctions:
     properties:
       functions:
         items:
-          $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryOutputFunction'
+          $ref: '#/definitions/schema.ToolDiscoveryOutputFunction'
         type: array
       type:
         type: string
@@ -483,22 +515,22 @@ paths:
         name: chat
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionRequest'
+          $ref: '#/definitions/schema.OpenAIChatCompletionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.OpenAIChatCompletionResponse'
+            $ref: '#/definitions/schema.OpenAIChatCompletionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: OpenAI Chat Completion
@@ -515,17 +547,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.Assistant'
+                    $ref: '#/definitions/entity.Assistant'
                   type: array
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 获取 Assistant 列表
@@ -540,7 +572,7 @@ paths:
         name: assistant
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.AssistantCreateRequest'
+          $ref: '#/definitions/schema.AssistantCreateRequest'
       produces:
       - application/json
       responses:
@@ -548,15 +580,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Assistant'
+                  $ref: '#/definitions/entity.Assistant'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 创建 Assistant
@@ -580,11 +612,11 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 删除 Assistant
@@ -606,15 +638,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Assistant'
+                  $ref: '#/definitions/entity.Assistant'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 获取指定的 Assistant
@@ -634,7 +666,7 @@ paths:
         name: assistantUpdateRequest
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.AssistantUpdateRequest'
+          $ref: '#/definitions/schema.AssistantUpdateRequest'
       produces:
       - application/json
       responses:
@@ -642,15 +674,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Assistant'
+                  $ref: '#/definitions/entity.Assistant'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 更新 Assistant
@@ -673,17 +705,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.AssistantShare'
+                    $ref: '#/definitions/entity.AssistantShare'
                   type: array
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 获取 Assistant 共享列表
@@ -705,15 +737,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.AssistantShare'
+                  $ref: '#/definitions/entity.AssistantShare'
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 创建 Assistant 共享
@@ -739,11 +771,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 删除 Assistant 共享
@@ -766,17 +798,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.AssistantToolType'
+                    $ref: '#/definitions/entity.AssistantTool'
                   type: array
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 获取 Assistant 所绑定的 Tool
@@ -804,15 +836,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.AssistantTool'
+                  $ref: '#/definitions/entity.AssistantTool'
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 解绑 Tool
@@ -839,15 +871,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.AssistantTool'
+                  $ref: '#/definitions/entity.AssistantTool'
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 绑定 Tool
@@ -863,7 +895,7 @@ paths:
         name: schema.ChatPublicListRequest
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.ChatPublicListRequest'
+          $ref: '#/definitions/schema.ChatPublicListRequest'
       produces:
       - application/json
       responses:
@@ -871,17 +903,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.Chat'
+                    $ref: '#/definitions/entity.Chat'
                   type: array
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       summary: 获取公开对话
       tags:
       - chat_public
@@ -894,7 +926,7 @@ paths:
         name: schema.ChatPublicRequest
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.ChatPublicRequest'
+          $ref: '#/definitions/schema.ChatPublicRequest'
       produces:
       - application/json
       responses:
@@ -902,15 +934,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Chat'
+                  $ref: '#/definitions/entity.Chat'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       summary: 通过 API 创建一个公开的对话记录
       tags:
       - chat_public
@@ -928,7 +960,7 @@ paths:
         name: schema.GetPublicChatMessageRequest
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.GetPublicChatMessageRequest'
+          $ref: '#/definitions/schema.GetPublicChatMessageRequest'
       produces:
       - application/json
       responses:
@@ -937,15 +969,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       summary: 清空公开对话的聊天记录
       tags:
       - chat_public
@@ -967,10 +999,13 @@ paths:
         name: guest_id
         required: true
         type: string
+      - in: formData
+        name: url
+        required: true
+        type: string
       - description: 图片
         in: formData
         name: image
-        required: true
         type: file
       produces:
       - application/json
@@ -979,32 +1014,32 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "409":
           description: Conflict
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       summary: 添加图片
       tags:
       - chat_public
@@ -1032,17 +1067,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.ChatMessage'
+                    $ref: '#/definitions/entity.ChatMessage'
                   type: array
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       summary: 获取公开对话的聊天记录
       tags:
       - chat_public
@@ -1059,7 +1094,7 @@ paths:
         name: schema.AddPublicChatMessageRequest
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.AddPublicChatMessageRequest'
+          $ref: '#/definitions/schema.AddPublicChatMessageRequest'
       produces:
       - application/json
       responses:
@@ -1067,32 +1102,32 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "409":
           description: Conflict
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       summary: 增加公开对话的聊天记录
       tags:
       - chat_public
@@ -1113,17 +1148,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.Chat'
+                    $ref: '#/definitions/entity.Chat'
                   type: array
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 获取所有 Chat
@@ -1139,7 +1174,7 @@ paths:
         name: chat
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.ChatCreateRequest'
+          $ref: '#/definitions/schema.ChatCreateRequest'
       produces:
       - application/json
       responses:
@@ -1147,19 +1182,19 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Chat'
+                  $ref: '#/definitions/entity.Chat'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: Create Chat
@@ -1182,19 +1217,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: Delete Chat
@@ -1218,19 +1253,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 清空聊天记录
@@ -1246,11 +1281,10 @@ paths:
         name: id
         required: true
         type: integer
-      - description: 远程文件
-        in: body
-        name: schema.ChatDownloadRemoteFileRequest
-        schema:
-          $ref: '#/definitions/rag-new_internal_schema.ChatDownloadRemoteFileRequest'
+      - in: formData
+        name: url
+        required: true
+        type: string
       - description: 图片
         in: formData
         name: image
@@ -1262,32 +1296,32 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "409":
           description: Conflict
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 添加图片
@@ -1310,25 +1344,25 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.ChatMessage'
+                    $ref: '#/definitions/entity.ChatMessage'
                   type: array
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 查看聊天记录
@@ -1348,7 +1382,7 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.ChatMessageAddRequest'
+          $ref: '#/definitions/schema.ChatMessageAddRequest'
       produces:
       - application/json
       responses:
@@ -1356,32 +1390,32 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "409":
           description: Conflict
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 添加聊天记录
@@ -1407,6 +1441,72 @@ paths:
       summary: 下载文件
       tags:
       - file
+  /api/v1/memories:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.Memory'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有的记忆
+      tags:
+      - memoires
+  /api/v1/memories/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除指定的记忆
+      tags:
+      - memoires
+  /api/v1/memories/purge:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除全部记忆
+      tags:
+      - memoires
   /api/v1/ping:
     get:
       consumes:
@@ -1419,15 +1519,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.CurrentUserResponse'
+                  $ref: '#/definitions/schema.CurrentUserResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: Greet
@@ -1456,32 +1556,32 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "409":
           description: Conflict
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_schema.ChatMessageResponse'
+                  $ref: '#/definitions/schema.ChatMessageResponse'
               type: object
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - none: []
       summary: 流式传输聊天内容
@@ -1499,17 +1599,17 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/rag-new_internal_entity.Tool'
+                    $ref: '#/definitions/entity.Tool'
                   type: array
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: List Tool
@@ -1525,7 +1625,7 @@ paths:
         name: tool
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.ToolCreateRequest'
+          $ref: '#/definitions/schema.ToolCreateRequest'
       produces:
       - application/json
       responses:
@@ -1533,15 +1633,15 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Tool'
+                  $ref: '#/definitions/entity.Tool'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: Create Tool
@@ -1566,11 +1666,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: DeleteTool
@@ -1593,19 +1693,19 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Tool'
+                  $ref: '#/definitions/entity.Tool'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: Get Tool
@@ -1629,19 +1729,19 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/rag-new_internal_entity.Tool'
+                  $ref: '#/definitions/entity.Tool'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 更新 Tool 的数据
@@ -1658,18 +1758,18 @@ paths:
         name: toolDiscoveryInput
         required: true
         schema:
-          $ref: '#/definitions/rag-new_internal_schema.ToolDiscoveryInput'
+          $ref: '#/definitions/schema.ToolDiscoveryInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/rag-new_internal_schema.ResponseBody'
+            $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
       summary: 校验 Discovery 语法

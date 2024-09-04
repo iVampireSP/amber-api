@@ -31,8 +31,23 @@ metrics:
 openai:
   api_key:
   base_url: https://api.leaflow.net/v1
-  model: gpt-3.5-turbo
-  vision_model: gpt-4-vision-compatible
+  internal_base_url: http://192.168.81.108:9997/v1
+  model: gpt-4o
+  vision_model: gpt-4o-mini
+  # 超长上下文
+  long_context_model: gemini-pro
+  dall_e_model: dall-e-3
+  embedding_model: jina-embeddings-v2-base-zh
+  # 允许自己指定的模型
+  allowed_models:
+    - gpt-4
+
+# 内部的 OpenAI API
+internalOpenai:
+  api_key:
+  base_url: http://192.168.81.100:9997
+  model: jina-embeddings-v2-base-zh
+
 
 llm:
   max_tokens: 2048
@@ -45,3 +60,11 @@ s3:
   bucket: amber
   use_ssl: false
   region:
+
+milvus:
+  host: 127.0.0.1
+  port: 19530
+  db_name: amber
+  collection: amber
+  user:
+  password:

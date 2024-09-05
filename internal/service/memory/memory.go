@@ -36,7 +36,7 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 		return err
 	}
 	vector := entity2.FloatVector(vec[0])
-	existingMemories, err := s.Milvus.Search(ctx, s.config.Milvus.Collection,
+	existingMemories, err := s.Milvus.Search(ctx, s.config.Milvus.MemoryCollection,
 		[]string{},
 		filter,
 		[]string{"memory_id"},
@@ -170,7 +170,7 @@ func (s *Service) Purge(ctx context.Context, userId schema.UserId) error {
 
 	// milvus delete
 	var filter = fmt.Sprintf("user_id == %d", userId)
-	errDelete := s.Milvus.Delete(ctx, s.config.Milvus.Collection, "", filter)
+	errDelete := s.Milvus.Delete(ctx, s.config.Milvus.MemoryCollection, "", filter)
 	if errDelete != nil {
 		return errDelete
 	}

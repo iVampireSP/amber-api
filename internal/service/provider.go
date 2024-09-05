@@ -12,6 +12,7 @@ import (
 	"rag-new/internal/service/embedding"
 	"rag-new/internal/service/file"
 	"rag-new/internal/service/jwks"
+	"rag-new/internal/service/library"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/memory"
 	"rag-new/internal/service/stream"
@@ -31,6 +32,7 @@ type Service struct {
 	BuiltinTool *builtin_tool.Service
 	File        *file.Service
 	Stream      *stream.Service
+	Library     *library.Service
 }
 
 var Provider = wire.NewSet(
@@ -46,6 +48,7 @@ var Provider = wire.NewSet(
 	llm.NewLLM,
 	file.NewService,
 	stream.NewService,
+	library.NewService,
 	NewService,
 )
 
@@ -62,6 +65,7 @@ func NewService(
 	batch *batch.Batch,
 	file *file.Service,
 	stream *stream.Service,
+	library *library.Service,
 ) *Service {
 	return &Service{
 		logger,
@@ -75,5 +79,6 @@ func NewService(
 		builtinTool,
 		file,
 		stream,
+		library,
 	}
 }

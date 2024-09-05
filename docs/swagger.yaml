@@ -125,6 +125,8 @@ definitions:
         type: string
       path:
         type: string
+      size:
+        type: integer
       updated_at:
         type: string
       url:
@@ -1284,11 +1286,11 @@ paths:
       summary: 清空聊天记录
       tags:
       - chat_message
-  /api/v1/chats/{id}/images:
+  /api/v1/chats/{id}/files:
     post:
       consumes:
       - application/json
-      description: 将一个图片添加到聊天记录中
+      description: 将一个文件添加到聊天记录中
       parameters:
       - in: path
         name: id
@@ -1298,9 +1300,9 @@ paths:
         name: url
         required: true
         type: string
-      - description: 图片
+      - description: 文件
         in: formData
-        name: image
+        name: file
         type: file
       produces:
       - application/json
@@ -1337,7 +1339,7 @@ paths:
             $ref: '#/definitions/schema.ResponseBody'
       security:
       - ApiKeyAuth: []
-      summary: 添加图片
+      summary: 添加文件
       tags:
       - chat_message
   /api/v1/chats/{id}/messages:
@@ -1454,6 +1456,54 @@ paths:
       summary: 下载文件
       tags:
       - file
+  /api/v1/libraries:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.Memory'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取所有的资料库
+      tags:
+      - libraries
+  /api/v1/libraries/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除资料库
+      tags:
+      - memoires
   /api/v1/memories:
     get:
       consumes:

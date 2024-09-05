@@ -56,7 +56,7 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	}
 
 	var schema = &entity.Schema{
-		CollectionName:     Config.Milvus.Collection,
+		CollectionName:     Config.Milvus.MemoryCollection,
 		Description:        "",
 		AutoID:             true,
 		Fields:             field,
@@ -69,14 +69,14 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	}
 
 	marisaTrie := entity.NewGenericIndex("idx_model", entity.Trie, map[string]string{})
-	err = Milvus.CreateIndex(ctx, Config.Milvus.Collection, "model", marisaTrie, false)
+	err = Milvus.CreateIndex(ctx, Config.Milvus.MemoryCollection, "model", marisaTrie, false)
 	if err != nil {
 		return errors.Join(errors.New("failed to create model index"), err)
 
 	}
 
 	inverted := entity.NewGenericIndex("idx_user_id", entity.Inverted, map[string]string{})
-	err = Milvus.CreateIndex(ctx, Config.Milvus.Collection, "user_id", inverted, false)
+	err = Milvus.CreateIndex(ctx, Config.Milvus.MemoryCollection, "user_id", inverted, false)
 	if err != nil {
 		return errors.Join(errors.New("failed to create user_id index"), err)
 
@@ -84,7 +84,7 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 
 	marisaTrieHash := entity.NewGenericIndex("idx_hash", entity.Trie, map[string]string{})
 
-	err = Milvus.CreateIndex(ctx, Config.Milvus.Collection, "hash", marisaTrieHash, false)
+	err = Milvus.CreateIndex(ctx, Config.Milvus.MemoryCollection, "hash", marisaTrieHash, false)
 	if err != nil {
 		return errors.Join(errors.New("failed to create hash index"), err)
 	}
@@ -93,7 +93,7 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	if err != nil {
 		return errors.Join(errors.New("auto index error"), err)
 	}
-	err = Milvus.CreateIndex(ctx, Config.Milvus.Collection, "vector", index, false)
+	err = Milvus.CreateIndex(ctx, Config.Milvus.MemoryCollection, "vector", index, false)
 	if err != nil {
 		return errors.Join(errors.New("failed to create vector index"), err)
 	}
@@ -102,6 +102,6 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 }
 
 func Down7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
-	err := Milvus.DropCollection(ctx, Config.Milvus.Collection)
+	err := Milvus.DropCollection(ctx, Config.Milvus.MemoryCollection)
 	return err
 }

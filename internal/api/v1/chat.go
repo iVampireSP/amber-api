@@ -15,6 +15,7 @@ import (
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/chat_message"
 	"rag-new/internal/service/file"
+	"rag-new/internal/service/library"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/memory"
 	"rag-new/pkg/consts"
@@ -34,6 +35,7 @@ type ChatController struct {
 	cm               *chat_message.Service
 	fileService      *file.Service
 	memoryService    *memory.Service
+	libraryService   *library.Service
 	config           *conf.Config
 }
 
@@ -48,6 +50,7 @@ func NewChatController(
 	config *conf.Config,
 	fileService *file.Service,
 	memoryService *memory.Service,
+	libraryService *library.Service,
 ) *ChatController {
 	return &ChatController{
 		authService,
@@ -59,6 +62,7 @@ func NewChatController(
 		chatMessageService,
 		fileService,
 		memoryService,
+		libraryService,
 		config,
 	}
 }

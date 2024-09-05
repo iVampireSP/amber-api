@@ -66,7 +66,8 @@ milvus:
   host: 127.0.0.1
   port: 19530
   db_name: amber
-  collection: amber
+  memory_collection: memories
+  document_collection: documents
   user:
   password:
 

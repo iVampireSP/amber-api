@@ -57,7 +57,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 	r.GET("/chats/:id/messages", a.Chat.ListChatMessage)
 	r.POST("/chats/:id/messages", a.Chat.AddChatMessage)
-	r.POST("/chats/:id/images", a.Chat.AddChatImage)
+	r.POST("/chats/:id/files", a.Chat.AddChatFile)
 
 	r.GET("/memories", a.Memory.List)
 	r.POST("/memories/purge", a.Memory.Purge)

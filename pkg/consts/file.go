@@ -11,4 +11,5 @@ var (
 	ErrFileNotExists              = errors.New("文件不存在")
 	ErrFileRequired               = errors.New("如果你没有传入 URL，那么文件是必须的")
 	ErrFileUrlRequired            = errors.New("如果你没有传入文件，那么文件 URL 是必须的")
+	ErrFileNotSupportChunk        = errors.New("文件无法被分块")
 )

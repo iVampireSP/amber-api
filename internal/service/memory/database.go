@@ -58,7 +58,7 @@ func (s *Service) addMemory(ctx context.Context, data string, userId schema.User
 	}
 
 	// insert to milvus
-	_, err = s.Milvus.Upsert(ctx, s.config.Milvus.Collection, "", entityCols...)
+	_, err = s.Milvus.Upsert(ctx, s.config.Milvus.MemoryCollection, "", entityCols...)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (s *Service) updateMemory(ctx context.Context, memoryId schema.EntityId, da
 	}
 
 	// insert to milvus
-	_, err = s.Milvus.Upsert(ctx, s.config.Milvus.Collection, "", entityCols...)
+	_, err = s.Milvus.Upsert(ctx, s.config.Milvus.MemoryCollection, "", entityCols...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func (s *Service) deleteMemory(ctx context.Context, memoryId schema.EntityId) er
 
 	// milvus delete
 	ids := entity2.NewColumnInt64("memory_id", []int64{int64(mem.Id)})
-	errDelete := s.Milvus.DeleteByPks(ctx, s.config.Milvus.Collection, "", ids)
+	errDelete := s.Milvus.DeleteByPks(ctx, s.config.Milvus.MemoryCollection, "", ids)
 	if errDelete != nil {
 		return errDelete
 	}

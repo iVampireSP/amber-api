@@ -14,6 +14,7 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/pkg/consts"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -54,7 +55,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 
 	// 获取内容
 	// 先验证大小
-	err = s.validateRemoteFileSize(url)
+	size, err := s.validateRemoteFileSize(url)
 	if err != nil {
 		return nil, err
 	}
@@ -75,8 +76,10 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 		return nil, consts.ErrMimeTypeNotFound
 	}
 	fileMimeTypeString := fileMimeType.String()
+	// 如果有;则取;前面的
+	fileMimeTypeString2 := strings.Split(fileMimeTypeString, ";")[0]
 
-	if !allowedMimeTypes[fileMimeTypeString] {
+	if !allowedMimeTypes[fileMimeTypeString2] {
 		return nil, consts.ErrMimeTypeNotAllowed
 	}
 
@@ -92,6 +95,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 	fileEntity.FileHash = fileSha256
 	fileEntity.MimeType = fileMimeType.String()
 	fileEntity.Path = filePath + "/" + fileName
+	fileEntity.Size = size
 
 	var expiredAt = time.Now().AddDate(0, 0, ExpiredDAY)
 	fileEntity.ExpiredAt = &expiredAt
@@ -108,6 +112,15 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 }
 
 func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.File, error) {
+	size, err := io.Copy(io.Discard, file)
+	if err != nil {
+		return nil, err
+	}
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		return nil, err
+	}
+
 	fileEntity := &entity.File{
 		Url:     nil,
 		UrlHash: nil,
@@ -139,16 +152,19 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.F
 		return nil, consts.ErrMimeTypeNotFound
 	}
 	fileMimeTypeString := fileMimeType.String()
+	// 如果有;则取;前面的
+	// 应将原始 mimeType 保存到数据库
+	fileMimeTypeString2 := strings.Split(fileMimeTypeString, ";")[0]
 
 	// 只允许指定的 Mimetype
-	if !allowedMimeTypes[fileMimeTypeString] {
+	if !allowedMimeTypes[fileMimeTypeString2] {
 		return nil, consts.ErrMimeTypeNotAllowed
 	}
 
 	// 上传文件到 S3
 	fileName, filePath := s.GenerateFilePath(fileSha256)
 
-	err = s.uploadToBucketIO(ctx, filePath+"/"+fileName, file)
+	err = s.uploadToBucketIO(ctx, filePath+"/"+fileName, size, file)
 	if err != nil {
 		return nil, err
 	}
@@ -157,6 +173,7 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.F
 	fileEntity.FileHash = fileSha256
 	fileEntity.MimeType = fileMimeType.String()
 	fileEntity.Path = filePath + "/" + fileName
+	fileEntity.Size = size
 
 	var expiredAt = time.Now().AddDate(0, 0, ExpiredDAY)
 	fileEntity.ExpiredAt = &expiredAt
@@ -178,20 +195,12 @@ func (s *Service) uploadToBucket(ctx context.Context, filename string, localPath
 	return nil
 }
 
-func (s *Service) uploadToBucketIO(ctx context.Context, filename string, file io.ReadSeeker) error {
+func (s *Service) uploadToBucketIO(ctx context.Context, filename string, size int64, file io.ReadSeeker) error {
 	_, err := file.Seek(0, 0)
 	if err != nil {
 		return err
 	}
 
-	size, err := io.Copy(io.Discard, file)
-	if err != nil {
-		return err
-	}
-	_, err = file.Seek(0, 0)
-	if err != nil {
-		return err
-	}
 	_, err = s.s3.Client.PutObject(ctx, s.s3.Bucket, filename, file, size, minio.PutObjectOptions{})
 	if err != nil {
 		return err
@@ -211,7 +220,7 @@ func (s *Service) GenerateFilePath(sha256FileName string) (filename string, path
 }
 
 // GetBucketFile 获取 S3 中的文件，并返回一个 io.ReadCloser
-func (s *Service) GetBucketFile(ctx context.Context, fileEntity *entity.File) (size int64, io io.ReadCloser, err error) {
+func (s *Service) GetBucketFile(ctx context.Context, fileEntity *entity.File) (size int64, object *minio.Object, err error) {
 	obj, err := s.s3.Client.GetObject(ctx, s.s3.Bucket, fileEntity.Path, minio.GetObjectOptions{})
 	if err != nil {
 		return 0, nil, err
@@ -267,7 +276,7 @@ func (s *Service) downloadRemoteFile(url string) (path string, err error) {
 }
 
 // ValidateRemoteFileSize 验证远程文件大小，如果超过限制则返回错误
-func (s *Service) validateRemoteFileSize(url string) error {
+func (s *Service) validateRemoteFileSize(url string) (int64, error) {
 	// Create a new HTTP client
 	client := http.Client{
 		Timeout: time.Second * 10,
@@ -276,13 +285,13 @@ func (s *Service) validateRemoteFileSize(url string) error {
 	// Create a new HTTP request
 	req, err := http.NewRequest("HEAD", url, nil)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	// Send the HTTP request and get the response
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -294,21 +303,21 @@ func (s *Service) validateRemoteFileSize(url string) error {
 	// Get the content length from the response headers
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength == "" {
-		return consts.ErrContentLengthHeaderMissing
+		return 0, consts.ErrContentLengthHeaderMissing
 	}
 
 	// Convert the content length to an integer
 	fileSize, err := strconv.ParseInt(contentLength, 10, 64)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	// Check if the file size exceeds the limit
 	if fileSize > MaxSize {
-		return consts.ErrFileSizeTooLarge
+		return 0, consts.ErrFileSizeTooLarge
 	}
 
-	return nil
+	return fileSize, nil
 }
 
 // delete tmp file

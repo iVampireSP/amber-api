@@ -35,6 +35,7 @@ func newFile(db *gorm.DB, opts ...gen.DOOption) file {
 	_file.FileHash = field.NewString(tableName, "file_hash")
 	_file.MimeType = field.NewString(tableName, "mime_type")
 	_file.Path = field.NewString(tableName, "path")
+	_file.Size = field.NewInt64(tableName, "size")
 	_file.ExpiredAt = field.NewTime(tableName, "expired_at")
 
 	_file.fillFieldMap()
@@ -54,6 +55,7 @@ type file struct {
 	FileHash  field.String
 	MimeType  field.String
 	Path      field.String
+	Size      field.Int64
 	ExpiredAt field.Time
 
 	fieldMap map[string]field.Expr
@@ -79,6 +81,7 @@ func (f *file) updateTableName(table string) *file {
 	f.FileHash = field.NewString(table, "file_hash")
 	f.MimeType = field.NewString(table, "mime_type")
 	f.Path = field.NewString(table, "path")
+	f.Size = field.NewInt64(table, "size")
 	f.ExpiredAt = field.NewTime(table, "expired_at")
 
 	f.fillFieldMap()
@@ -96,7 +99,7 @@ func (f *file) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (f *file) fillFieldMap() {
-	f.fieldMap = make(map[string]field.Expr, 9)
+	f.fieldMap = make(map[string]field.Expr, 10)
 	f.fieldMap["id"] = f.Id
 	f.fieldMap["created_at"] = f.CreatedAt
 	f.fieldMap["updated_at"] = f.UpdatedAt
@@ -105,6 +108,7 @@ func (f *file) fillFieldMap() {
 	f.fieldMap["file_hash"] = f.FileHash
 	f.fieldMap["mime_type"] = f.MimeType
 	f.fieldMap["path"] = f.Path
+	f.fieldMap["size"] = f.Size
 	f.fieldMap["expired_at"] = f.ExpiredAt
 }
 

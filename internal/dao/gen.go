@@ -22,8 +22,11 @@ var (
 	AssistantTool  *assistantTool
 	Chat           *chat
 	ChatMessage    *chatMessage
+	Document       *document
+	DocumentChunk  *documentChunk
 	Embedding      *embedding
 	File           *file
+	Library        *library
 	Memory         *memory
 	Tool           *tool
 )
@@ -35,8 +38,11 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	AssistantTool = &Q.AssistantTool
 	Chat = &Q.Chat
 	ChatMessage = &Q.ChatMessage
+	Document = &Q.Document
+	DocumentChunk = &Q.DocumentChunk
 	Embedding = &Q.Embedding
 	File = &Q.File
+	Library = &Q.Library
 	Memory = &Q.Memory
 	Tool = &Q.Tool
 }
@@ -49,8 +55,11 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		AssistantTool:  newAssistantTool(db, opts...),
 		Chat:           newChat(db, opts...),
 		ChatMessage:    newChatMessage(db, opts...),
+		Document:       newDocument(db, opts...),
+		DocumentChunk:  newDocumentChunk(db, opts...),
 		Embedding:      newEmbedding(db, opts...),
 		File:           newFile(db, opts...),
+		Library:        newLibrary(db, opts...),
 		Memory:         newMemory(db, opts...),
 		Tool:           newTool(db, opts...),
 	}
@@ -64,8 +73,11 @@ type Query struct {
 	AssistantTool  assistantTool
 	Chat           chat
 	ChatMessage    chatMessage
+	Document       document
+	DocumentChunk  documentChunk
 	Embedding      embedding
 	File           file
+	Library        library
 	Memory         memory
 	Tool           tool
 }
@@ -80,8 +92,11 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		AssistantTool:  q.AssistantTool.clone(db),
 		Chat:           q.Chat.clone(db),
 		ChatMessage:    q.ChatMessage.clone(db),
+		Document:       q.Document.clone(db),
+		DocumentChunk:  q.DocumentChunk.clone(db),
 		Embedding:      q.Embedding.clone(db),
 		File:           q.File.clone(db),
+		Library:        q.Library.clone(db),
 		Memory:         q.Memory.clone(db),
 		Tool:           q.Tool.clone(db),
 	}
@@ -103,8 +118,11 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		AssistantTool:  q.AssistantTool.replaceDB(db),
 		Chat:           q.Chat.replaceDB(db),
 		ChatMessage:    q.ChatMessage.replaceDB(db),
+		Document:       q.Document.replaceDB(db),
+		DocumentChunk:  q.DocumentChunk.replaceDB(db),
 		Embedding:      q.Embedding.replaceDB(db),
 		File:           q.File.replaceDB(db),
+		Library:        q.Library.replaceDB(db),
 		Memory:         q.Memory.replaceDB(db),
 		Tool:           q.Tool.replaceDB(db),
 	}
@@ -116,8 +134,11 @@ type queryCtx struct {
 	AssistantTool  IAssistantToolDo
 	Chat           IChatDo
 	ChatMessage    IChatMessageDo
+	Document       IDocumentDo
+	DocumentChunk  IDocumentChunkDo
 	Embedding      IEmbeddingDo
 	File           IFileDo
+	Library        ILibraryDo
 	Memory         IMemoryDo
 	Tool           IToolDo
 }
@@ -129,8 +150,11 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		AssistantTool:  q.AssistantTool.WithContext(ctx),
 		Chat:           q.Chat.WithContext(ctx),
 		ChatMessage:    q.ChatMessage.WithContext(ctx),
+		Document:       q.Document.WithContext(ctx),
+		DocumentChunk:  q.DocumentChunk.WithContext(ctx),
 		Embedding:      q.Embedding.WithContext(ctx),
 		File:           q.File.WithContext(ctx),
+		Library:        q.Library.WithContext(ctx),
 		Memory:         q.Memory.WithContext(ctx),
 		Tool:           q.Tool.WithContext(ctx),
 	}

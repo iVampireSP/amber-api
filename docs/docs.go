@@ -1304,14 +1304,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/chats/{id}/images": {
+        "/api/v1/chats/{id}/files": {
             "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "将一个图片添加到聊天记录中",
+                "description": "将一个文件添加到聊天记录中",
                 "consumes": [
                     "application/json"
                 ],
@@ -1321,7 +1321,7 @@ const docTemplate = `{
                 "tags": [
                     "chat_message"
                 ],
-                "summary": "添加图片",
+                "summary": "添加文件",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1337,8 +1337,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "file",
-                        "description": "图片",
-                        "name": "image",
+                        "description": "文件",
+                        "name": "file",
                         "in": "formData"
                     }
                 ],
@@ -1586,6 +1586,89 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "type": "file"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/libraries": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "libraries"
+                ],
+                "summary": "获取所有的资料库",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.Memory"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/libraries/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "memoires"
+                ],
+                "summary": "删除资料库",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
                         }
                     }
                 }
@@ -2342,6 +2425,9 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                },
+                "size": {
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"

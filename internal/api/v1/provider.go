@@ -9,4 +9,5 @@ var ProviderApiControllerSet = wire.NewSet(
 	NewChatController,
 	NewFileController,
 	NewMemoryController,
+	NewLibraryController,
 )

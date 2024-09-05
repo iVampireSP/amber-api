@@ -32,6 +32,7 @@ import (
 	"rag-new/internal/service/embedding"
 	"rag-new/internal/service/file"
 	"rag-new/internal/service/jwks"
+	"rag-new/internal/service/library"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/memory"
 	"rag-new/internal/service/stream"
@@ -66,14 +67,15 @@ func CreateApp() (*base.Application, error) {
 	embeddingService := embedding.NewEmbedding(config, loggerLogger, query)
 	clientClient := milvus.NewMilvus(config)
 	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, clientClient, query, streamService)
-	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService)
+	libraryService := library.NewService(config, query, clientClient, fileService)
+	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService)
 	fileController := v1.NewFileController(fileService, loggerLogger)
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController, fileController, memoryController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService)
 	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query, openaiClient, clientClient)
 	return application, nil
 }

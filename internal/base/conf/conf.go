@@ -91,12 +91,13 @@ type LLM struct {
 }
 
 type Milvus struct {
-	Host       string `yaml:"host" mapstructure:"host"`
-	Port       int    `yaml:"port" mapstructure:"port"`
-	DBName     string `yaml:"db_name" mapstructure:"db_name"`
-	Collection string `yaml:"collection" mapstructure:"collection"`
-	User       string `yaml:"user" mapstructure:"user"`
-	Password   string `yaml:"password" mapstructure:"password"`
+	Host               string `yaml:"host" mapstructure:"host"`
+	Port               int    `yaml:"port" mapstructure:"port"`
+	DBName             string `yaml:"db_name" mapstructure:"db_name"`
+	MemoryCollection   string `yaml:"memory_collection" mapstructure:"memory_collection"`
+	DocumentCollection string `yaml:"document_collection" mapstructure:"document_collection"`
+	User               string `yaml:"user" mapstructure:"user"`
+	Password           string `yaml:"password" mapstructure:"password"`
 }
 
 type Kafka struct {

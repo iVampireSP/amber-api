@@ -12,6 +12,7 @@ type File struct {
 	FileHash string  `json:"file_hash"`
 	MimeType string  `json:"mime_type"`
 	Path     string  `json:"path"`
+	Size     int64   `json:"size"`
 	// TODO: 移除 file 的到期时间，如果当 file 没有任何引用的时候再删除
 	// 因为有外键，所以直接删除是删不掉的，必须删除消息
 	ExpiredAt *time.Time `json:"expired_at"`

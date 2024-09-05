@@ -45,23 +45,23 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 						return consts.ErrWordRepeatedDetected
 					}
 
-					llmChat.ResponseChan <- &schema.AssistantResponse{
+					s.write(ctx, llmChat, &schema.AssistantResponse{
 						State: schema.StateChunk,
 						ChunkMessage: &schema.ChunkMessage{
 							Content: stringChunk,
 						},
 						Content: stringChunk,
-					}
+					})
 				}
 
 			} else {
-				llmChat.ResponseChan <- &schema.AssistantResponse{
+				s.write(ctx, llmChat, &schema.AssistantResponse{
 					State: schema.StateChunk,
 					ChunkMessage: &schema.ChunkMessage{
 						Content: stringChunk,
 					},
 					Content: stringChunk,
-				}
+				})
 			}
 
 			return nil

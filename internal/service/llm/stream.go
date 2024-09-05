@@ -15,8 +15,7 @@ import (
 func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) error {
 	// 不要从接收侧关闭 channel
 	defer close(llmChat.ResponseChan)
-	// 处理事件
-	go s.event(ctx, llmChat)
+
 	// 处理历史
 	h, err := s.processHistory(llmChat, history)
 	if err != nil {
@@ -58,10 +57,11 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 		resp, err := s.GenerateContent(ctx, llmChat, llmTools, historyContent)
 		if err != nil {
-			llmChat.ResponseChan <- &schema.AssistantResponse{
+
+			s.write(ctx, llmChat, &schema.AssistantResponse{
 				State:   schema.StateFailed,
 				Content: err.Error(),
-			}
+			})
 			return err
 		}
 
@@ -112,14 +112,6 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 				}
 
 				prefix, functionName := s.spiltFunctionName(tc.FunctionCall.Name)
-				//if err != nil {
-				//	llmChat.ResponseChan <- &schema.AssistantResponse{
-				//		State:      schema.StateFailed,
-				//		Content:    err.Error(),
-				//		TokenUsage: tokenUsage,
-				//	}
-				//	return err
-				//}
 
 				var toolCalling = &schema.AssistantResponse{
 					State: schema.StateToolCalling,
@@ -144,7 +136,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 					// 转换 prefix
 					toolId, err := strconv.Atoi(prefix)
 					if err != nil {
-						llmChat.ResponseChan <- &schema.AssistantResponse{
+						s.write(ctx, llmChat, &schema.AssistantResponse{
 							// 这里改成 failed 会不会更好？
 							State:   schema.StateToolFailed,
 							Content: err.Error(),
@@ -154,14 +146,14 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 								Content:      err.Error(),
 							},
 							TokenUsage: tokenUsage,
-						}
+						})
 						return err
 					}
 
 					// 获取 Tool
 					selectedTool, err = s.GetToolById(ctx, schema.EntityId(toolId))
 					if err != nil {
-						llmChat.ResponseChan <- &schema.AssistantResponse{
+						s.write(ctx, llmChat, &schema.AssistantResponse{
 							// 这里改成 failed 会不会更好？
 							State:   schema.StateToolFailed,
 							Content: err.Error(),
@@ -171,7 +163,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 								Content:      err.Error(),
 							},
 							TokenUsage: tokenUsage,
-						}
+						})
 						return err
 					}
 
@@ -180,7 +172,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 				toolCalling.ToolCallMessage.ToolName = toolName
 				// 发布工具调用
-				llmChat.ResponseChan <- toolCalling
+				s.write(ctx, llmChat, toolCalling)
 
 				if prefix == builtin_tool.NAME {
 					// 是 builtin，则调用内置函数
@@ -193,7 +185,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 					builtInResponse, err := s.BuiltInTools.CallFunction(ctx, builtInToolRequest)
 					if err != nil {
 						// 也许内置函数不应该报 ToolFailed,不如直接 failed
-						llmChat.ResponseChan <- &schema.AssistantResponse{
+						s.write(ctx, llmChat, &schema.AssistantResponse{
 							State:   schema.StateFailed,
 							Content: err.Error(),
 							//ToolResponseMessage: &schema.ToolResponseMessage{
@@ -202,7 +194,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 							//	Content:      err.Error(),
 							//},
 							TokenUsage: tokenUsage,
-						}
+						})
 						return err
 					}
 
@@ -229,7 +221,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 					// 调用远程函数
 					toolRemoteResponse, err = s.callRemoteFunction(selectedTool, llmChat, functionName, functionCallArgs)
 					if err != nil {
-						llmChat.ResponseChan <- &schema.AssistantResponse{
+						s.write(ctx, llmChat, &schema.AssistantResponse{
 							State:   schema.StateToolFailed,
 							Content: err.Error(),
 							ToolResponseMessage: &schema.ToolResponseMessage{
@@ -238,7 +230,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 								Content:      err.Error(),
 							},
 							TokenUsage: tokenUsage,
-						}
+						})
 						return err
 					}
 				}
@@ -248,7 +240,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 				//}
 
 				// 算了，告知吧，好处理点
-				llmChat.ResponseChan <- &schema.AssistantResponse{
+				s.write(ctx, llmChat, &schema.AssistantResponse{
 					State: schema.StateToolResponse,
 					ToolResponseMessage: &schema.ToolResponseMessage{
 						ToolName:       toolName,
@@ -263,7 +255,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 						ToolCallId: tc.ID,
 						ToolCall:   &tc,
 					},
-				}
+				})
 
 				// End Built-in tools
 
@@ -293,19 +285,25 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 			functionCallCount = 0
 		}
 
-		llmChat.ResponseChan <- &schema.AssistantResponse{
+		s.write(ctx, llmChat, &schema.AssistantResponse{
 			State: schema.StateDone,
-		}
+		})
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
 
 		//fmt.Println("本轮历史", historyContent)
 	}
 
-	llmChat.ResponseChan <- &schema.AssistantResponse{
+	s.write(ctx, llmChat, &schema.AssistantResponse{
 		State:      schema.StateFinished,
 		TokenUsage: tokenUsage,
-	}
+	})
 
 	return nil
+}
+
+func (s *Service) write(ctx context.Context, llmChat *schema.LLMChat, r *schema.AssistantResponse) {
+	llmChat.ResponseChan <- r
+
+	go s.event(ctx, llmChat.UserPublicInfo, r)
 }

@@ -51,6 +51,8 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 		response, err = s.DownloadFile(ctx, req.Args)
 	case "calculator":
 		response, err = s.Calculator(ctx, req.Args)
+	case "compare":
+		response, err = s.Compare(ctx, req.Args)
 	default:
 		return nil, errors.New("function not found")
 	}

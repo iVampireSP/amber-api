@@ -122,4 +122,27 @@ var tools = []llms.Tool{
 			},
 		},
 	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        prefix("compare"),
+			Description: "It's useful for comparing numbers",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"A": {
+						Type:        jsonschema.String,
+						Description: "Number A",
+					},
+					"B": {
+						Type:        jsonschema.String,
+						Description: "Number B",
+					},
+				},
+				Required: []string{
+					"A", "B",
+				},
+			},
+		},
+	},
 }

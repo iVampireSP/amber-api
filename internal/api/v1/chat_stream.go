@@ -99,7 +99,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	// 提取 history
 	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
-	var llmResponseChan = make(chan *schema.AssistantResponse)
+	var llmResponseChan = make(chan *schema.AssistantResponse, 1)
 
 	streamUserCacheKey := u.getCacheKey("stream:" + streamIdStr + ":user")
 
@@ -187,6 +187,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		j, err := sonic.MarshalString(msg)
 		if err != nil {
 			u.logger.Sugar.Error(err)
+			return false
 		}
 
 		c.SSEvent(eventName, j)

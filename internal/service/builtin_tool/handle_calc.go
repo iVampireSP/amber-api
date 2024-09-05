@@ -60,3 +60,40 @@ func (s *Service) Calculator(_ context.Context, args schema.FunctionCallArgument
 	response.Content = fmt.Sprintf("%.f", result)
 	return response, nil
 }
+
+type compareParams struct {
+	A string `json:"a"`
+	B string `json:"b"`
+}
+
+func (s *Service) Compare(_ context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
+	var response = &schema.CallBuiltInResponse{}
+	var params compareParams
+	err := args.Unmarshal(&params)
+	if err != nil {
+		return response, err
+	}
+
+	a := new(big.Float)
+	b := new(big.Float)
+
+	a, _, err = big.ParseFloat(params.A, 10, 0, big.ToZero)
+	if err != nil {
+		return response, errors.New("invalid value for A")
+	}
+
+	b, _, err = big.ParseFloat(params.B, 10, 0, big.ToZero)
+	if err != nil {
+		return response, errors.New("invalid value for B")
+	}
+
+	if a.Cmp(b) == 0 {
+		response.Content = "equal"
+	} else if a.Cmp(b) > 0 {
+		response.Content = "a greater than b"
+	} else {
+		response.Content = "a less than b"
+	}
+
+	return response, nil
+}

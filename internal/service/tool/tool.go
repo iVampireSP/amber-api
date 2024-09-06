@@ -17,7 +17,7 @@ import (
 )
 
 func (s *Service) ListToolFromUserId(ctx context.Context, userId schema.UserId) ([]*entity.Tool, error) {
-	tools, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.UserId.Eq(int64(userId))).Find()
+	tools, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.UserId.Eq(userId.String())).Find()
 
 	if err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (s *Service) GetTool(ctx context.Context, id schema.EntityId) (*entity.Tool
 }
 
 func (s *Service) CheckTool(ctx context.Context, url string, userId schema.UserId) (bool, error) {
-	count, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.UserId.Eq(int64(userId))).Where(s.dao.Tool.DiscoveryUrl.Eq(url)).Count()
+	count, err := s.dao.WithContext(ctx).Tool.Where(s.dao.Tool.UserId.Eq(userId.String())).Where(s.dao.Tool.DiscoveryUrl.Eq(url)).Count()
 
 	return count > 0, err
 }

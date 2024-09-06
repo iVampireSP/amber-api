@@ -7,7 +7,7 @@ CREATE INDEX files_public_index ON files (public);
 
 CREATE TABLE user_files (
     id SERIAL PRIMARY KEY AUTO_INCREMENT,
-    user_id bigint unsigned NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     file_id bigint unsigned NOT NULL,
     created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

@@ -33,7 +33,7 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 	_assistant.Name = field.NewString(tableName, "name")
 	_assistant.Prompt = field.NewString(tableName, "prompt")
 	_assistant.Description = field.NewString(tableName, "description")
-	_assistant.UserId = field.NewInt64(tableName, "user_id")
+	_assistant.UserId = field.NewString(tableName, "user_id")
 	_assistant.LibraryId = field.NewUint(tableName, "library_id")
 	_assistant.DisableDefaultPrompt = field.NewBool(tableName, "disable_default_prompt")
 	_assistant.DisableMemory = field.NewBool(tableName, "disable_memory")
@@ -80,7 +80,7 @@ type assistant struct {
 	Name                          field.String
 	Prompt                        field.String
 	Description                   field.String
-	UserId                        field.Int64
+	UserId                        field.String
 	LibraryId                     field.Uint
 	DisableDefaultPrompt          field.Bool
 	DisableMemory                 field.Bool
@@ -108,7 +108,7 @@ func (a *assistant) updateTableName(table string) *assistant {
 	a.Name = field.NewString(table, "name")
 	a.Prompt = field.NewString(table, "prompt")
 	a.Description = field.NewString(table, "description")
-	a.UserId = field.NewInt64(table, "user_id")
+	a.UserId = field.NewString(table, "user_id")
 	a.LibraryId = field.NewUint(table, "library_id")
 	a.DisableDefaultPrompt = field.NewBool(table, "disable_default_prompt")
 	a.DisableMemory = field.NewBool(table, "disable_memory")

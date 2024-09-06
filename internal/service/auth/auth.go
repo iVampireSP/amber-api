@@ -9,7 +9,7 @@ import (
 	"rag-new/internal/schema"
 	"rag-new/internal/service/jwks"
 	"rag-new/pkg/consts"
-	"strconv"
+	"strings"
 )
 
 type Service struct {
@@ -27,7 +27,22 @@ func NewAuthService(config *conf.Config, jwks *jwks.JWKS, logger *logger.Logger)
 }
 
 func (a *Service) GinMiddlewareAuth(tokenType schema.JWTTokenTypes, c *gin.Context) (*schema.User, error) {
-	return a.parseUserJWT(tokenType, c.GetHeader(consts.AuthHeader))
+	authorization := c.Request.Header.Get(consts.AuthHeader)
+
+	if authorization == "" {
+		return nil, consts.ErrJWTFormatError
+	}
+
+	authSplit := strings.Split(authorization, " ")
+	if len(authSplit) != 2 {
+		return nil, consts.ErrJWTFormatError
+	}
+
+	if authSplit[0] != consts.AuthPrefix {
+		return nil, consts.ErrNotBearerType
+	}
+
+	return a.parseUserJWT(tokenType, authSplit[1])
 }
 
 func (a *Service) GetUserFromIdToken(idToken string) (*schema.User, error) {
@@ -75,12 +90,12 @@ func (a *Service) parseUserJWT(tokenType schema.JWTTokenTypes, jwtToken string) 
 			return nil, consts.ErrNotValidToken
 		}
 
-		subInt, err := strconv.Atoi(subStr)
-		if err != nil {
-			return nil, consts.ErrNotValidToken
-		}
+		//subInt, err := strconv.Atoi(subStr)
+		//if err != nil {
+		//	return nil, consts.ErrNotValidToken
+		//}
 
-		sub = schema.UserId(subInt)
+		sub = schema.UserId(subStr)
 
 		// 如果 token.Header 中没有 typ
 		if token.Header["typ"] == "" {

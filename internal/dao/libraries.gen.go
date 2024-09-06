@@ -33,7 +33,7 @@ func newLibrary(db *gorm.DB, opts ...gen.DOOption) library {
 	_library.Name = field.NewString(tableName, "name")
 	_library.Default = field.NewBool(tableName, "default")
 	_library.Description = field.NewString(tableName, "description")
-	_library.UserId = field.NewInt64(tableName, "user_id")
+	_library.UserId = field.NewString(tableName, "user_id")
 	_library.Document = libraryHasManyDocument{
 		db: db.Session(&gorm.Session{}),
 
@@ -73,7 +73,7 @@ type library struct {
 	Name        field.String
 	Default     field.Bool
 	Description field.String
-	UserId      field.Int64
+	UserId      field.String
 	Document    libraryHasManyDocument
 
 	fieldMap map[string]field.Expr
@@ -97,7 +97,7 @@ func (l *library) updateTableName(table string) *library {
 	l.Name = field.NewString(table, "name")
 	l.Default = field.NewBool(table, "default")
 	l.Description = field.NewString(table, "description")
-	l.UserId = field.NewInt64(table, "user_id")
+	l.UserId = field.NewString(table, "user_id")
 
 	l.fillFieldMap()
 

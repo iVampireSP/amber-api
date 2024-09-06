@@ -35,7 +35,7 @@ func newTool(db *gorm.DB, opts ...gen.DOOption) tool {
 	_tool.DiscoveryUrl = field.NewString(tableName, "discovery_url")
 	_tool.ApiKey = field.NewString(tableName, "api_key")
 	_tool.Data = field.NewField(tableName, "data")
-	_tool.UserId = field.NewInt64(tableName, "user_id")
+	_tool.UserId = field.NewString(tableName, "user_id")
 
 	_tool.fillFieldMap()
 
@@ -54,7 +54,7 @@ type tool struct {
 	DiscoveryUrl field.String
 	ApiKey       field.String
 	Data         field.Field
-	UserId       field.Int64
+	UserId       field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -79,7 +79,7 @@ func (t *tool) updateTableName(table string) *tool {
 	t.DiscoveryUrl = field.NewString(table, "discovery_url")
 	t.ApiKey = field.NewString(table, "api_key")
 	t.Data = field.NewField(table, "data")
-	t.UserId = field.NewInt64(table, "user_id")
+	t.UserId = field.NewString(table, "user_id")
 
 	t.fillFieldMap()
 

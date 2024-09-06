@@ -32,7 +32,7 @@ func newChat(db *gorm.DB, opts ...gen.DOOption) chat {
 	_chat.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_chat.Name = field.NewString(tableName, "name")
 	_chat.AssistantId = field.NewUint(tableName, "assistant_id")
-	_chat.UserId = field.NewInt64(tableName, "user_id")
+	_chat.UserId = field.NewString(tableName, "user_id")
 	_chat.ExpiredAt = field.NewTime(tableName, "expired_at")
 	_chat.Owner = field.NewString(tableName, "owner")
 	_chat.GuestId = field.NewString(tableName, "guest_id")
@@ -91,7 +91,7 @@ type chat struct {
 	UpdatedAt   field.Time
 	Name        field.String
 	AssistantId field.Uint
-	UserId      field.Int64
+	UserId      field.String
 	ExpiredAt   field.Time
 	Owner       field.String
 	GuestId     field.String
@@ -117,7 +117,7 @@ func (c *chat) updateTableName(table string) *chat {
 	c.UpdatedAt = field.NewTime(table, "updated_at")
 	c.Name = field.NewString(table, "name")
 	c.AssistantId = field.NewUint(table, "assistant_id")
-	c.UserId = field.NewInt64(table, "user_id")
+	c.UserId = field.NewString(table, "user_id")
 	c.ExpiredAt = field.NewTime(table, "expired_at")
 	c.Owner = field.NewString(table, "owner")
 	c.GuestId = field.NewString(table, "guest_id")

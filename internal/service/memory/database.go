@@ -3,10 +3,11 @@ package memory
 import (
 	"context"
 	"fmt"
-	entity2 "github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/md5"
+
+	entity2 "github.com/milvus-io/milvus-sdk-go/v2/entity"
 )
 
 func (s *Service) addMemory(ctx context.Context, data string, userId schema.UserId) (*entity.Memory, error) {
@@ -17,13 +18,13 @@ func (s *Service) addMemory(ctx context.Context, data string, userId schema.User
 
 	// check if memory exists
 	count, err := s.dao.Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
-		Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(int64(userId))).Count()
+		Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(userId.String())).Count()
 	if err != nil {
 		return nil, err
 	}
 	if count > 0 {
 		mem, err := s.dao.Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
-			Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(int64(userId))).First()
+			Where(s.dao.Memory.ContentMd5.Eq(dataMd5)).Where(s.dao.Memory.UserId.Eq(userId.String())).First()
 		if err != nil {
 			return nil, err
 		}
@@ -54,7 +55,7 @@ func (s *Service) addMemory(ctx context.Context, data string, userId schema.User
 		entity2.NewColumnVarChar("hash", []string{dataMd5}),
 		entity2.NewColumnVarChar("model", []string{s.config.OpenAI.EmbeddingModel}),
 		entity2.NewColumnInt64("memory_id", []int64{int64(mem.Id)}),
-		entity2.NewColumnInt64("user_id", []int64{int64(userId)}),
+		entity2.NewColumnVarChar("user_id", []string{userId.String()}),
 	}
 
 	// insert to milvus
@@ -111,7 +112,7 @@ func (s *Service) updateMemory(ctx context.Context, memoryId schema.EntityId, da
 		entity2.NewColumnVarChar("hash", []string{dataMd5}),
 		entity2.NewColumnVarChar("model", []string{s.config.OpenAI.EmbeddingModel}),
 		entity2.NewColumnInt64("memory_id", []int64{int64(memoryId)}),
-		entity2.NewColumnInt64("user_id", []int64{int64(mem.UserId)}),
+		entity2.NewColumnVarChar("user_id", []string{mem.UserId.String()}),
 	}
 
 	// insert to milvus

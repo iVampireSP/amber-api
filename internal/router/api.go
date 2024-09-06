@@ -65,8 +65,6 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.POST("/memories/purge", a.Memory.Purge)
 	r.DELETE("/memories/:id", a.Memory.Delete)
 
-	r.GET("/files/user/:id/download", a.File.DownloadUserFile)
-
 	// Dummy API for library
 	r.GET("/libraries", a.Library.List)
 	r.GET("/libraries/:id/documents", a.Library.ListDocuments)
@@ -83,6 +81,8 @@ func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {
 	r.POST("/chat_public/:chat_id/images", a.Chat.AddPublicChatImage)
 
 	r.GET("/files/:id/download", a.File.DownloadPublicFile)
+	r.GET("/files/user/:id/download", a.File.DownloadUserFile)
+
 }
 
 func (a *Api) InitOpenAICompatibleApiRouter(r *gin.RouterGroup) {

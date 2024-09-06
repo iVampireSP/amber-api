@@ -3,7 +3,7 @@ CREATE TABLE libraries (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) DEFAULT NULL,
-    user_id BIGINT UNSIGNED NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     `default` boolean NOT NULL DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()

@@ -2,10 +2,11 @@ package assistant
 
 import (
 	"context"
-	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+
+	"github.com/tmc/langchaingo/llms"
 )
 
 func (s *Service) ListAssistant(ctx context.Context) ([]*entity.Assistant, error) {
@@ -13,7 +14,7 @@ func (s *Service) ListAssistant(ctx context.Context) ([]*entity.Assistant, error
 }
 
 func (s *Service) ListAssistantFromUserId(ctx context.Context, userId schema.UserId) ([]*entity.Assistant, error) {
-	assistants, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.UserId.Eq(int64(userId))).Find()
+	assistants, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.UserId.Eq(userId.String())).Find()
 
 	return assistants, err
 }

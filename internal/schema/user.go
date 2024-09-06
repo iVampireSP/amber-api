@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"strconv"
 	"time"
 )
 
@@ -29,10 +28,10 @@ type User struct {
 	Valid bool
 }
 
-type UserId int64
+type UserId string
 
 func (u UserId) String() string {
-	return strconv.FormatInt(int64(u), 10)
+	return string(u)
 }
 
 type JWTTokenTypes string

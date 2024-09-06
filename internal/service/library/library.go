@@ -27,7 +27,7 @@ func (s *Service) DefaultLibrary(ctx context.Context, userId schema.UserId) (*en
 		}
 	} else {
 		library, err = libraryDao.
-			Where(s.dao.Library.UserId.Eq(int64(userId))).
+			Where(s.dao.Library.UserId.Eq(userId.String())).
 			Where(s.dao.Library.Default.Is(true)).First()
 	}
 
@@ -73,7 +73,7 @@ func (s *Service) GetLibrary(ctx context.Context, id schema.EntityId) (*entity.L
 
 func (s *Service) GetLibraryByUserId(ctx context.Context, userId schema.UserId) (*entity.Library, error) {
 	var libraryDao = s.dao.WithContext(ctx).Library
-	library, err := libraryDao.Where(s.dao.Library.UserId.Eq(int64(userId))).First()
+	library, err := libraryDao.Where(s.dao.Library.UserId.Eq(userId.String())).First()
 	return library, err
 }
 
@@ -134,20 +134,20 @@ func (s *Service) DeleteLibrary(ctx context.Context, library *entity.Library) er
 
 func (s *Service) ListLibrary(ctx context.Context, userId schema.UserId) ([]*entity.Library, error) {
 	var libraryDao = s.dao.WithContext(ctx).Library
-	libraries, err := libraryDao.Where(s.dao.Library.UserId.Eq(int64(userId))).Find()
+	libraries, err := libraryDao.Where(s.dao.Library.UserId.Eq(userId.String())).Find()
 	return libraries, err
 }
 
 func (s *Service) ListLibraryByUserId(ctx context.Context, userId schema.UserId) ([]*entity.Library, error) {
 	var libraryDao = s.dao.WithContext(ctx).Library
-	libraries, err := libraryDao.Where(s.dao.Library.UserId.Eq(int64(userId))).Find()
+	libraries, err := libraryDao.Where(s.dao.Library.UserId.Eq(userId.String())).Find()
 	return libraries, err
 }
 
 func (s *Service) HasDefaultLibrary(ctx context.Context, userId schema.UserId) (bool, error) {
 	var libraryDao = s.dao.WithContext(ctx).Library
 	count, err := libraryDao.
-		Where(s.dao.Library.UserId.Eq(int64(userId))).
+		Where(s.dao.Library.UserId.Eq(userId.String())).
 		Where(s.dao.Library.Default.Is(true)).
 		Count()
 

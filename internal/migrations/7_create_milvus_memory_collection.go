@@ -25,7 +25,10 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 			Name:       "user_id",
 			PrimaryKey: false,
 			AutoID:     false,
-			DataType:   entity.FieldTypeInt64,
+			DataType:   entity.FieldTypeVarChar,
+			TypeParams: map[string]string{
+				"max_length": "255",
+			},
 		},
 		{
 			Name:       "model",
@@ -75,14 +78,15 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 
 	}
 
-	inverted := entity.NewGenericIndex("idx_user_id", entity.Inverted, map[string]string{})
-	err = Milvus.CreateIndex(ctx, Config.Milvus.MemoryCollection, "user_id", inverted, false)
+	//inverted := entity.NewGenericIndex("idx_user_id", entity.Trie, map[string]string{})
+	marisaTrieHash := entity.NewGenericIndex("idx_user_id", entity.Trie, map[string]string{})
+	err = Milvus.CreateIndex(ctx, Config.Milvus.MemoryCollection, "user_id", marisaTrieHash, false)
 	if err != nil {
 		return errors.Join(errors.New("failed to create user_id index"), err)
 
 	}
 
-	marisaTrieHash := entity.NewGenericIndex("idx_hash", entity.Trie, map[string]string{})
+	marisaTrieHash = entity.NewGenericIndex("idx_hash", entity.Trie, map[string]string{})
 
 	err = Milvus.CreateIndex(ctx, Config.Milvus.MemoryCollection, "hash", marisaTrieHash, false)
 	if err != nil {

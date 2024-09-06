@@ -30,7 +30,7 @@ func newUserFile(db *gorm.DB, opts ...gen.DOOption) userFile {
 	_userFile.Id = field.NewUint(tableName, "id")
 	_userFile.CreatedAt = field.NewTime(tableName, "created_at")
 	_userFile.UpdatedAt = field.NewTime(tableName, "updated_at")
-	_userFile.UserId = field.NewInt64(tableName, "user_id")
+	_userFile.UserId = field.NewString(tableName, "user_id")
 	_userFile.FileId = field.NewUint(tableName, "file_id")
 	_userFile.File = userFileBelongsToFile{
 		db: db.Session(&gorm.Session{}),
@@ -50,7 +50,7 @@ type userFile struct {
 	Id        field.Uint
 	CreatedAt field.Time
 	UpdatedAt field.Time
-	UserId    field.Int64
+	UserId    field.String
 	FileId    field.Uint
 	File      userFileBelongsToFile
 
@@ -72,7 +72,7 @@ func (u *userFile) updateTableName(table string) *userFile {
 	u.Id = field.NewUint(table, "id")
 	u.CreatedAt = field.NewTime(table, "created_at")
 	u.UpdatedAt = field.NewTime(table, "updated_at")
-	u.UserId = field.NewInt64(table, "user_id")
+	u.UserId = field.NewString(table, "user_id")
 	u.FileId = field.NewUint(table, "file_id")
 
 	u.fillFieldMap()

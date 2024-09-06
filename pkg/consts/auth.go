@@ -9,7 +9,8 @@ const (
 	AuthHeader = "Authorization"
 	AuthPrefix = "Bearer"
 
-	AnonymousUser schema.UserId = 1
+	//AnonymousUser schema.UserId = 1
+	AnonymousUser schema.UserId = "anonymous"
 
 	AuthMiddlewareKey               = "auth.user"
 	AuthAssistantShareMiddlewareKey = "auth.assistant.share"

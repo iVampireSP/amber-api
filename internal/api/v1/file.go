@@ -101,7 +101,6 @@ func (f *FileController) DownloadPublicFile(c *gin.Context) {
 // @Tags         file
 // @Accept       json
 // @Produce      json
-// @Security     ApiKeyAuth
 // @Param        schema.FileUserDownloadRequest  path  schema.FileUserDownloadRequest true  "User File ID"
 // @Param        schema.UserIDTokenRequest  query  schema.UserIDTokenRequest true  "ID Token"
 // @Success 	 200 {file} file

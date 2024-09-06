@@ -34,7 +34,7 @@ func newMemory(db *gorm.DB, opts ...gen.DOOption) memory {
 	_memory.ContentMd5 = field.NewString(tableName, "content_md5")
 	_memory.EmbeddingModel = field.NewString(tableName, "model")
 	_memory.Vector = field.NewField(tableName, "vector")
-	_memory.UserId = field.NewInt64(tableName, "user_id")
+	_memory.UserId = field.NewString(tableName, "user_id")
 
 	_memory.fillFieldMap()
 
@@ -52,7 +52,7 @@ type memory struct {
 	ContentMd5     field.String
 	EmbeddingModel field.String
 	Vector         field.Field
-	UserId         field.Int64
+	UserId         field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -76,7 +76,7 @@ func (m *memory) updateTableName(table string) *memory {
 	m.ContentMd5 = field.NewString(table, "content_md5")
 	m.EmbeddingModel = field.NewString(table, "model")
 	m.Vector = field.NewField(table, "vector")
-	m.UserId = field.NewInt64(table, "user_id")
+	m.UserId = field.NewString(table, "user_id")
 
 	m.fillFieldMap()
 

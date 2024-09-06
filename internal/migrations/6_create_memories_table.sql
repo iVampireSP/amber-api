@@ -2,7 +2,8 @@
 -- create memories table
 CREATE TABLE memories (
   id SERIAL PRIMARY KEY,
-  user_id bigint NOT NULL,
+  user_id       VARCHAR(255) NOT NULL,
+
   content TEXT NOT NULL,
   content_md5 VARCHAR(255) NOT NULL COMMENT 'md5',
   model VARCHAR(255) NOT NULL,

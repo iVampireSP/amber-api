@@ -3,13 +3,14 @@ package memory
 import (
 	"context"
 	"fmt"
+	"rag-new/internal/entity"
+	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
+
 	"github.com/bytedance/sonic"
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	entity2 "github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/tmc/langchaingo/llms"
-	"rag-new/internal/entity"
-	"rag-new/internal/schema"
-	"rag-new/pkg/consts"
 )
 
 // 也许服务层不需要关心用户 ID，只需要在控制器层判断
@@ -106,7 +107,7 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 
 func (s *Service) GetMemories(ctx context.Context, userId schema.UserId) ([]*entity.Memory, error) {
 	m, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
-		Where(s.dao.Memory.UserId.Eq(int64(userId))).Find()
+		Where(s.dao.Memory.UserId.Eq(userId.String())).Find()
 
 	if err != nil {
 		return nil, err
@@ -117,7 +118,7 @@ func (s *Service) GetMemories(ctx context.Context, userId schema.UserId) ([]*ent
 func (s *Service) Exists(ctx context.Context, memoryId uint, userId schema.UserId) (bool, error) {
 	i, err := s.dao.WithContext(ctx).Memory.
 		Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).
-		Where(s.dao.Memory.UserId.Eq(int64(userId))).
+		Where(s.dao.Memory.UserId.Eq(userId.String())).
 		Where(s.dao.Memory.Id.Eq(memoryId)).Count()
 
 	return i > 0, err
@@ -134,7 +135,7 @@ func (s *Service) GetMemory(ctx context.Context, memoryId uint, userId schema.Us
 		return nil, consts.ErrMemoryNotFound
 	}
 
-	m, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).Where(s.dao.Memory.Id.Eq(memoryId)).Where(s.dao.Memory.UserId.Eq(int64(userId))).First()
+	m, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.EmbeddingModel.Eq(s.config.OpenAI.EmbeddingModel)).Where(s.dao.Memory.Id.Eq(memoryId)).Where(s.dao.Memory.UserId.Eq(userId.String())).First()
 
 	if err != nil {
 		s.Logger.Sugar.Error("Unable to get memories, err: " + err.Error())
@@ -162,7 +163,7 @@ func (s *Service) Delete(ctx context.Context, memory *entity.Memory) error {
 
 // Purge 清除用户的所有记忆
 func (s *Service) Purge(ctx context.Context, userId schema.UserId) error {
-	_, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.UserId.Eq(int64(userId))).Delete()
+	_, err := s.dao.WithContext(ctx).Memory.Where(s.dao.Memory.UserId.Eq(userId.String())).Delete()
 
 	if err != nil {
 		return err

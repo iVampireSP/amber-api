@@ -98,13 +98,13 @@ func (s *Service) DeleteChats(ctx context.Context, chat ...*entity.Chat) error {
 }
 
 func (s *Service) DeleteChatFromUserId(ctx context.Context, id schema.EntityId, userId schema.UserId) error {
-	_, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(id))).Where(s.dao.Chat.UserId.Eq(int64(userId))).Delete()
+	_, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(id))).Where(s.dao.Chat.UserId.Eq(userId.String())).Delete()
 
 	return err
 }
 
 func (s *Service) ListChatFromUserId(ctx context.Context, userId schema.UserId) ([]*entity.Chat, error) {
-	chats, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.UserId.Eq(int64(userId))).Find()
+	chats, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.UserId.Eq(userId.String())).Find()
 
 	return chats, err
 }

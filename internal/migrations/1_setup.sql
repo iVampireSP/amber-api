@@ -8,7 +8,7 @@ CREATE TABLE tools
     discovery_url varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
     api_key       varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
     data          json                                    DEFAULT NULL,
-    user_id       bigint    NOT NULL,
+    user_id       VARCHAR(255) NOT NULL,
     created_at    timestamp NULL                          DEFAULT NULL,
     updated_at    timestamp NULL                          DEFAULT NULL,
     PRIMARY KEY (id)
@@ -23,7 +23,8 @@ CREATE TABLE assistants
     description            varchar(255)   DEFAULT NULL,
     prompt                 text           DEFAULT NULL,
     disable_default_prompt boolean   NOT NULL,
-    user_id                bigint unsigned NOT NULL,
+    user_id       VARCHAR(255) NOT NULL,
+
     created_at             timestamp NULL DEFAULT NULL,
     updated_at             timestamp NULL DEFAULT NULL,
     PRIMARY KEY (id)
@@ -50,7 +51,8 @@ CREATE TABLE chats
     id           bigint unsigned AUTO_INCREMENT,
     name         varchar(255)   DEFAULT NULL,
     assistant_id bigint unsigned NOT NULL,
-    user_id      bigint unsigned DEFAULT NULL,
+    user_id       VARCHAR(255) NOT NULL,
+
     created_at   timestamp NULL DEFAULT NULL,
     updated_at   timestamp NULL DEFAULT NULL,
     PRIMARY KEY (id)

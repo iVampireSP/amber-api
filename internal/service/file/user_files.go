@@ -15,7 +15,7 @@ func (s *Service) BindFileToUser(ctx context.Context, file *entity.File, user sc
 	// 检测是否绑定过
 	// count
 	count, err := s.dao.UserFile.WithContext(ctx).
-		Where(s.dao.UserFile.FileId.Eq(uint(file.Id)), s.dao.UserFile.UserId.Eq(int64(user))).
+		Where(s.dao.UserFile.FileId.Eq(uint(file.Id)), s.dao.UserFile.UserId.Eq(user.String())).
 		Count()
 
 	if count > 0 {
@@ -32,14 +32,14 @@ func (s *Service) BindFileToUser(ctx context.Context, file *entity.File, user sc
 func (s *Service) UnbindFileFromUser(ctx context.Context, fileId schema.EntityId, user schema.UserId) error {
 	_, err := s.dao.UserFile.
 		WithContext(ctx).
-		Where(s.dao.UserFile.FileId.Eq(uint(fileId)), s.dao.UserFile.UserId.Eq(int64(user))).
+		Where(s.dao.UserFile.FileId.Eq(uint(fileId)), s.dao.UserFile.UserId.Eq(user.String())).
 		Delete()
 
 	return err
 }
 
 func (s *Service) GetUserFiles(ctx context.Context, user schema.UserId) ([]*entity.UserFile, error) {
-	userFiles, err := s.dao.UserFile.WithContext(ctx).Where(s.dao.UserFile.UserId.Eq(int64(user))).Find()
+	userFiles, err := s.dao.UserFile.WithContext(ctx).Where(s.dao.UserFile.UserId.Eq(user.String())).Find()
 
 	return userFiles, err
 }

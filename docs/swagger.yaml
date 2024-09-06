@@ -12,8 +12,8 @@ definitions:
       enable_memory_for_assistant_share:
         type: boolean
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       library:
         $ref: '#/definitions/entity.Library'
       library_id:
@@ -25,7 +25,7 @@ definitions:
       updated_at:
         type: string
       user_id:
-        type: integer
+        type: string
     type: object
   entity.AssistantShare:
     properties:
@@ -36,8 +36,8 @@ definitions:
       created_at:
         type: string
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       token:
         type: string
       updated_at:
@@ -52,8 +52,8 @@ definitions:
       created_at:
         type: string
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       tool:
         $ref: '#/definitions/entity.Tool'
       tool_id:
@@ -72,8 +72,8 @@ definitions:
       guest_id:
         type: string
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       name:
         type: string
       owner:
@@ -81,7 +81,7 @@ definitions:
       updated_at:
         type: string
       user_id:
-        type: integer
+        type: string
     type: object
   entity.ChatMessage:
     properties:
@@ -103,8 +103,8 @@ definitions:
       hidden:
         type: boolean
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       prompt_tokens:
         type: integer
       role:
@@ -118,6 +118,33 @@ definitions:
       user_file_id:
         type: integer
     type: object
+  entity.Document:
+    properties:
+      chunked:
+        type: boolean
+      created_at:
+        type: string
+      file:
+        $ref: '#/definitions/entity.File'
+      file_hash:
+        description: |-
+          FileHash 是 File 结构体的 hash，用于判断文件内容是否发生变化
+          只不过一般情况也不会改变，因为 File 就不会变
+        type: string
+      file_id:
+        type: integer
+      id:
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
+      library:
+        $ref: '#/definitions/entity.Library'
+      library_id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
   entity.File:
     properties:
       created_at:
@@ -130,8 +157,8 @@ definitions:
       file_hash:
         type: string
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       mime_type:
         type: string
       path:
@@ -156,15 +183,19 @@ definitions:
         type: boolean
       description:
         type: string
+      documents:
+        items:
+          $ref: '#/definitions/entity.Document'
+        type: array
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       name:
         type: string
       updated_at:
         type: string
       user_id:
-        type: integer
+        type: string
     type: object
   entity.Memory:
     properties:
@@ -173,12 +204,12 @@ definitions:
       created_at:
         type: string
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       updated_at:
         type: string
       user_id:
-        type: integer
+        type: string
     type: object
   entity.Tool:
     properties:
@@ -193,14 +224,14 @@ definitions:
       discovery_url:
         type: string
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       name:
         type: string
       updated_at:
         type: string
       user_id:
-        type: integer
+        type: string
     type: object
   entity.UserFile:
     properties:
@@ -211,12 +242,12 @@ definitions:
       file_id:
         type: integer
       id:
-        example: "0"
-        type: string
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
       updated_at:
         type: string
       user_id:
-        type: integer
+        type: string
     type: object
   schema.AddPublicChatMessageRequest:
     properties:
@@ -356,7 +387,7 @@ definitions:
       userEmail:
         type: string
       userId:
-        type: integer
+        type: string
       userName:
         type: string
       valid:
@@ -389,6 +420,15 @@ definitions:
     required:
     - assistant_token
     - guest_id
+    type: object
+  schema.LibraryUpdateRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - name
     type: object
   schema.OpenAIChatCompletionRequest:
     properties:
@@ -1527,8 +1567,6 @@ paths:
           description: OK
           schema:
             type: file
-      security:
-      - ApiKeyAuth: []
       summary: 下载用户开文件
       tags:
       - file
@@ -1546,7 +1584,9 @@ paths:
             - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/entity.Memory'
+                  items:
+                    $ref: '#/definitions/entity.Library'
+                  type: array
               type: object
         "400":
           description: Bad Request
@@ -1564,7 +1604,6 @@ paths:
       parameters:
       - in: path
         name: id
-        required: true
         type: integer
       produces:
       - application/json
@@ -1579,7 +1618,90 @@ paths:
       - ApiKeyAuth: []
       summary: 删除资料库
       tags:
-      - memoires
+      - libraries
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        type: integer
+      - description: schema.LibraryUpdateRequest
+        in: body
+        name: schema.LibraryUpdateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/schema.LibraryUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新资料库
+      tags:
+      - libraries
+  /api/v1/libraries/{id}/documents:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        type: integer
+      - description: schema.LibraryUpdateRequest
+        in: body
+        name: schema.LibraryUpdateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/schema.LibraryUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 列出资料库以及资料库下的文档
+      tags:
+      - libraries
+  /api/v1/libraries/{id}/documents/{document_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        type: integer
+      - description: schema.LibraryUpdateRequest
+        in: body
+        name: schema.LibraryUpdateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/schema.LibraryUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除指定的文档
+      tags:
+      - libraries
   /api/v1/memories:
     get:
       consumes:

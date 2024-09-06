@@ -1562,11 +1562,6 @@ const docTemplate = `{
         },
         "/api/v1/files/user/{id}/download": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "根据 File ID 下载文件。如果文件是私有的，将无法下载",
                 "consumes": [
                     "application/json"
@@ -1661,7 +1656,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/entity.Memory"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Library"
+                                            }
                                         }
                                     }
                                 }
@@ -1691,15 +1689,150 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "memoires"
+                    "libraries"
                 ],
                 "summary": "删除资料库",
                 "parameters": [
                     {
                         "type": "integer",
                         "name": "id",
-                        "in": "path",
-                        "required": true
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "libraries"
+                ],
+                "summary": "更新资料库",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "schema.LibraryUpdateRequest",
+                        "name": "schema.LibraryUpdateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.LibraryUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/libraries/{id}/documents": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "libraries"
+                ],
+                "summary": "列出资料库以及资料库下的文档",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "schema.LibraryUpdateRequest",
+                        "name": "schema.LibraryUpdateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.LibraryUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/libraries/{id}/documents/{document_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "libraries"
+                ],
+                "summary": "删除指定的文档",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "schema.LibraryUpdateRequest",
+                        "name": "schema.LibraryUpdateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.LibraryUpdateRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -2301,8 +2434,8 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "library": {
                     "$ref": "#/definitions/entity.Library"
@@ -2320,7 +2453,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -2337,8 +2470,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "token": {
                     "type": "string"
@@ -2361,8 +2494,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "tool": {
                     "$ref": "#/definitions/entity.Tool"
@@ -2391,8 +2524,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -2404,7 +2537,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -2434,8 +2567,8 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "prompt_tokens": {
                     "type": "integer"
@@ -2457,6 +2590,43 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.Document": {
+            "type": "object",
+            "properties": {
+                "chunked": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "file": {
+                    "$ref": "#/definitions/entity.File"
+                },
+                "file_hash": {
+                    "description": "FileHash 是 File 结构体的 hash，用于判断文件内容是否发生变化\n只不过一般情况也不会改变，因为 File 就不会变",
+                    "type": "string"
+                },
+                "file_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
+                },
+                "library": {
+                    "$ref": "#/definitions/entity.Library"
+                },
+                "library_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.File": {
             "type": "object",
             "properties": {
@@ -2471,8 +2641,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "mime_type": {
                     "type": "string"
@@ -2510,9 +2680,15 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
+                "documents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Document"
+                    }
+                },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -2521,7 +2697,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -2535,14 +2711,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -2565,8 +2741,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -2575,7 +2751,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -2592,14 +2768,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "0"
+                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
                 },
                 "user_id": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
@@ -2798,7 +2974,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userId": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "userName": {
                     "type": "string"
@@ -2846,6 +3022,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "guest_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "schema.LibraryUpdateRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

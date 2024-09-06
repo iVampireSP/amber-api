@@ -50,7 +50,7 @@ func (s *Service) GenerateImage(ctx context.Context, args schema.FunctionCallArg
 	// 读取为 io.ReadSeeker
 	r := bytes.NewReader(imgBytes)
 
-	fileEntity, err := s.fileService.CreateFile(ctx, r)
+	fileEntity, err := s.fileService.CreateFile(ctx, r, true)
 
 	url, err := s.fileService.GetImageUrl(fileEntity)
 	if err != nil {

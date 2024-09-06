@@ -18,7 +18,7 @@ func (s *Service) DownloadFile(ctx context.Context, args schema.FunctionCallArgu
 		return nil, err
 	}
 
-	fileEntity, err := s.fileService.CreateFileFromUrl(ctx, params.Url)
+	fileEntity, err := s.fileService.CreateFileFromUrl(ctx, params.Url, true)
 	if err != nil {
 		return nil, err
 	}

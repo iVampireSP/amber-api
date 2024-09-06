@@ -92,6 +92,9 @@ definitions:
       file:
         $ref: '#/definitions/entity.File'
       file_id:
+        description: |-
+          FileId
+          虽然有了 UserFileId， 但是 File Id 还是应该保留，因为这个是针对访客用户的
         type: integer
       hidden:
         type: boolean
@@ -106,6 +109,10 @@ definitions:
         type: integer
       updated_at:
         type: string
+      user_file:
+        $ref: '#/definitions/entity.UserFile'
+      user_file_id:
+        type: integer
     type: object
   entity.File:
     properties:
@@ -125,6 +132,9 @@ definitions:
         type: string
       path:
         type: string
+      public:
+        description: 是否公开，访客上传的文件应始终公开，或归属于所有者
+        type: boolean
       size:
         type: integer
       updated_at:
@@ -164,6 +174,22 @@ definitions:
         example: "0"
         type: string
       name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  entity.UserFile:
+    properties:
+      created_at:
+        type: string
+      file:
+        $ref: '#/definitions/entity.File'
+      file_id:
+        type: integer
+      id:
+        example: "0"
         type: string
       updated_at:
         type: string

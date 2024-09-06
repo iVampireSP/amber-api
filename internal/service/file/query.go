@@ -121,3 +121,35 @@ func (s *Service) getURL(ctx context.Context, file *entity.File) (string, error)
 func (s *Service) getCacheKey(key string) string {
 	return fmt.Sprintf("file:%s", key)
 }
+
+func (s *Service) BindFileToUser(ctx context.Context, file *entity.File, user schema.UserId) (*entity.UserFile, error) {
+	var userFile = &entity.UserFile{
+		FileId: file.Id,
+		UserId: user,
+	}
+
+	// 检测是否绑定过
+	// count
+	count, err := s.dao.UserFile.WithContext(ctx).
+		Where(s.dao.UserFile.FileId.Eq(uint(file.Id)), s.dao.UserFile.UserId.Eq(int64(user))).
+		Count()
+
+	if count > 0 {
+		// 获取并返回
+		return s.dao.UserFile.WithContext(ctx).
+			Where(s.dao.UserFile.FileId.Eq(uint(file.Id))).First()
+	}
+
+	err = s.dao.UserFile.WithContext(ctx).Create(userFile)
+
+	return userFile, err
+}
+
+func (s *Service) UnbindFileFromUser(ctx context.Context, fileId schema.EntityId, user schema.UserId) error {
+	_, err := s.dao.UserFile.
+		WithContext(ctx).
+		Where(s.dao.UserFile.FileId.Eq(uint(fileId)), s.dao.UserFile.UserId.Eq(int64(user))).
+		Delete()
+
+	return err
+}

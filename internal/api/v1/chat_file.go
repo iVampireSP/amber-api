@@ -102,7 +102,7 @@ func (u *ChatController) AddChatFile(c *gin.Context) {
 			return
 		}
 
-		file, err = u.fileService.CreateFile(c, f)
+		file, err = u.fileService.CreateFile(c, f, false)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -117,7 +117,7 @@ func (u *ChatController) AddChatFile(c *gin.Context) {
 		}(f)
 	} else {
 		filename = "RemoteFile_" + chatDownloadRemoteFileRequest.Url
-		file, err = u.fileService.CreateFileFromUrl(c, chatDownloadRemoteFileRequest.Url)
+		file, err = u.fileService.CreateFileFromUrl(c, chatDownloadRemoteFileRequest.Url, false)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -136,17 +136,38 @@ func (u *ChatController) AddChatFile(c *gin.Context) {
 		return
 	}
 	if lastChatMessage != nil {
-		if lastChatMessage.Role == schema.RoleFile && *lastChatMessage.FileId == file.Id {
-			response.Status(http.StatusConflict).Error(consts.ErrProvideSameImage).Message(consts.ErrProvideSameImage.Error()).Send()
-			return
+		// 检测 FileId 或 UserFileId
+		if lastChatMessage.Role == schema.RoleFile {
+			if lastChatMessage.FileId != nil {
+				if *lastChatMessage.FileId == file.Id {
+					response.Status(http.StatusConflict).Error(consts.ErrProvideSameImage).Message(consts.ErrProvideSameImage.Error()).Send()
+					return
+				}
+			}
+
+			if lastChatMessage.UserFileId != nil {
+				if lastChatMessage.UserFile.FileId == file.Id {
+					response.Status(http.StatusConflict).Error(consts.ErrProvideSameImage).Message(consts.ErrProvideSameImage.Error()).Send()
+					return
+				}
+			}
 		}
+	}
+
+	// bind a file to user
+	userFile, err := u.fileService.BindFileToUser(c, file, userId)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
 	}
 
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id
 	//chatMessage.Content = file.Id.String()
 	chatMessage.Role = schema.RoleFile
-	chatMessage.FileId = &file.Id
+	//chatMessage.FileId = &file.Id
+	chatMessage.UserFileId = &userFile.Id
+	chatMessage.UserFile = userFile
 
 	err = u.cm.CreateChatMessage(c, &chatMessage)
 	if err != nil {
@@ -275,7 +296,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 			return
 		}
 
-		file, err = u.fileService.CreateFile(c, f)
+		file, err = u.fileService.CreateFile(c, f, true)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -290,7 +311,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 		}(f)
 	} else {
 		var err error
-		file, err = u.fileService.CreateFileFromUrl(c, chatDownloadRemoteFileRequest.Url)
+		file, err = u.fileService.CreateFileFromUrl(c, chatDownloadRemoteFileRequest.Url, true)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -304,10 +325,28 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 		return
 	}
 
-	if lastChatMessage.Role == schema.RoleFile && *lastChatMessage.FileId == file.Id {
-		response.Status(http.StatusConflict).Error(consts.ErrProvideSameImage).Message(consts.ErrProvideSameImage.Error()).Send()
-		return
+	if lastChatMessage != nil {
+		// 检测 FileId 或 UserFileId
+		if lastChatMessage.Role == schema.RoleFile {
+			if lastChatMessage.FileId != nil {
+				if *lastChatMessage.FileId == file.Id {
+					response.Status(http.StatusConflict).Error(consts.ErrProvideSameImage).Message(consts.ErrProvideSameImage.Error()).Send()
+					return
+				}
+			}
+
+			if lastChatMessage.UserFileId != nil {
+				if lastChatMessage.UserFile.FileId == file.Id {
+					response.Status(http.StatusConflict).Error(consts.ErrProvideSameImage).Message(consts.ErrProvideSameImage.Error()).Send()
+					return
+				}
+			}
+		}
 	}
+	//if lastChatMessage.Role == schema.RoleFile && *lastChatMessage.FileId == file.Id {
+	//	response.Status(http.StatusConflict).Error(consts.ErrProvideSameImage).Message(consts.ErrProvideSameImage.Error()).Send()
+	//	return
+	//}
 
 	var chatMessage entity.ChatMessage
 	chatMessage.ChatId = chatEntity.Id

@@ -35,7 +35,7 @@ var allowedMimeTypes = map[string]bool{
 	"application/pdf": true, // pdf
 }
 
-func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.File, error) {
+func (s *Service) CreateFileFromUrl(ctx context.Context, url string, public bool) (*entity.File, error) {
 	var urlHash = s.sha256String(url)
 
 	fileEntity := &entity.File{}
@@ -52,6 +52,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 
 	fileEntity.Url = &url
 	fileEntity.UrlHash = &urlHash
+	fileEntity.Public = public
 
 	// 获取内容
 	// 先验证大小
@@ -111,7 +112,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.Fi
 	return fileEntity, nil
 }
 
-func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.File, error) {
+func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker, public bool) (*entity.File, error) {
 	size, err := io.Copy(io.Discard, file)
 	if err != nil {
 		return nil, err
@@ -124,6 +125,7 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.F
 	fileEntity := &entity.File{
 		Url:     nil,
 		UrlHash: nil,
+		Public:  public,
 	}
 
 	fileSha256, err := checksum.MD5sumReader(file)

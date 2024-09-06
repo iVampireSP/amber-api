@@ -2380,6 +2380,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/entity.File"
                 },
                 "file_id": {
+                    "description": "FileId\n虽然有了 UserFileId， 但是 File Id 还是应该保留，因为这个是针对访客用户的",
                     "type": "integer"
                 },
                 "hidden": {
@@ -2400,6 +2401,12 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                },
+                "user_file": {
+                    "$ref": "#/definitions/entity.UserFile"
+                },
+                "user_file_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -2425,6 +2432,10 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                },
+                "public": {
+                    "description": "是否公开，访客上传的文件应始终公开，或归属于所有者",
+                    "type": "boolean"
                 },
                 "size": {
                     "type": "integer"
@@ -2485,6 +2496,30 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.UserFile": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "file": {
+                    "$ref": "#/definitions/entity.File"
+                },
+                "file_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
                 },
                 "updated_at": {
                     "type": "string"

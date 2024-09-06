@@ -134,17 +134,19 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 			//	llmChat.Model = s.config.OpenAI.VisionModel
 			//}
 
+			var fileText = ""
 			// 如果文件存在
 			if h.File != nil {
-				// 如果不是，则普通处理
-
-				// 不能忽略 image 工具
 				llmChat.WithoutImage = false
-
 				// 将 fileEntity 的 url 添加到 historyContent
-				fileText := "[File]File ID: " + h.File.Id.String() + ", MimeType: " + h.File.MimeType
-				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
+				fileText = "[File]File ID: " + h.File.Id.String() + ", MimeType: " + h.File.MimeType
+			} else if h.UserFile != nil {
+				llmChat.WithoutImage = false
+				fileText = "[File]File ID: " + h.UserFile.File.Id.String() + ", MimeType: " + h.UserFile.File.MimeType
+			}
 
+			if fileText != "" {
+				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
 			}
 
 		}

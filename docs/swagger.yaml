@@ -14,6 +14,10 @@ definitions:
       id:
         example: "0"
         type: string
+      library:
+        $ref: '#/definitions/entity.Library'
+      library_id:
+        type: integer
       name:
         type: string
       prompt:
@@ -144,6 +148,24 @@ definitions:
       url_hash:
         type: string
     type: object
+  entity.Library:
+    properties:
+      created_at:
+        type: string
+      default:
+        type: boolean
+      description:
+        type: string
+      id:
+        example: "0"
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
   entity.Memory:
     properties:
       content:
@@ -258,6 +280,9 @@ definitions:
         - true
         - false
         type: boolean
+      library_id:
+        maximum: 255
+        type: integer
       name:
         maxLength: 255
         type: string
@@ -1492,6 +1517,9 @@ paths:
         name: id
         required: true
         type: integer
+      - in: query
+        name: id_token
+        type: string
       produces:
       - application/json
       responses:

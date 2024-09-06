@@ -1584,6 +1584,11 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "id_token",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2299,6 +2304,12 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
+                "library": {
+                    "$ref": "#/definitions/entity.Library"
+                },
+                "library_id": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -2487,6 +2498,33 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.Library": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "entity.Memory": {
             "type": "object",
             "properties": {
@@ -2650,6 +2688,10 @@ const docTemplate = `{
                         true,
                         false
                     ]
+                },
+                "library_id": {
+                    "type": "integer",
+                    "maximum": 255
                 },
                 "name": {
                     "type": "string",

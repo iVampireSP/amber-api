@@ -58,7 +58,7 @@ func CreateApp() (*base.Application, error) {
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, batchBatch)
 	client := redis.NewRedis(config)
 	s3S3 := s3.NewS3(config)
-	fileService := file.NewService(s3S3, config, query)
+	fileService := file.NewService(s3S3, config, query, client)
 	openaiClient := openai.NewOpenAI(config)
 	builtin_toolService := builtin_tool.NewService(config, loggerLogger, fileService, openaiClient)
 	streamService := stream.NewService(config)

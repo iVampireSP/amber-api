@@ -3,6 +3,7 @@ package file
 import (
 	"context"
 	"errors"
+	"fmt"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -100,4 +101,23 @@ func (s *Service) GetFilesByIds(ctx context.Context, ids []schema.EntityId) ([]*
 	}
 
 	return files, err
+}
+
+func (s *Service) getURL(ctx context.Context, file *entity.File) (string, error) {
+	// TODO 生成 1 分钟的 key。不用管 key 是否存在或已生成，可直接生成新的 key
+	//cmd := s.redis.Get(ctx, s.getCacheKey("temp_key_file:"+file.Id.String()))
+	//result, err := cmd.Result()
+	//if err != nil {
+	//	if !errors.Is(err, redis.Nil) {
+	//		return "", err
+	//	}
+	//} else {
+	//
+	//}
+
+	return "", nil
+}
+
+func (s *Service) getCacheKey(key string) string {
+	return fmt.Sprintf("file:%s", key)
 }

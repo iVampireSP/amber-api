@@ -60,6 +60,10 @@ func (f *FileController) DownloadFile(c *gin.Context) {
 		return
 	}
 
+	// TODO: 在下载文件的时候，应该采取一种更加安全的方式，比如通过临时密钥来下载文件
+	// 对于 AI 生成的文件。文件应该分为 Private 和 Public。如果是 Public，则可以随意下载。如果是 Private，则需要 Token
+	// AI 生成的文件应始终为 Public
+
 	// 设置 mime type
 	//c.Writer.Header().Set("Content-Disposition", "attachment; filename="+fileEntity.FileHash)
 	c.Writer.Header().Set("Content-Type", fileEntity.MimeType)

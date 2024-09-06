@@ -42,7 +42,11 @@ func (s *Service) UpdateDocument(ctx context.Context, document *entity.Document)
 		document.Chunked = false
 
 		_, err = tx.Document.WithContext(ctx).Updates(document)
+		if err != nil {
+			return err
+		}
 
+		err = s.deleteMilvusChunk(ctx, document)
 		return err
 	})
 
@@ -56,8 +60,13 @@ func (s *Service) DeleteDocument(ctx context.Context, document *entity.Document)
 		}
 
 		_, err = tx.Document.WithContext(ctx).Delete(document)
+		if err != nil {
+			return err
+		}
 
-		return nil
+		err = s.deleteMilvusChunk(ctx, document)
+
+		return err
 	})
 	return err
 }

@@ -36,6 +36,11 @@ func newAssistantShare(db *gorm.DB, opts ...gen.DOOption) assistantShare {
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("Assistant", "entity.Assistant"),
+		Library: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Assistant.Library", "entity.Library"),
+		},
 	}
 
 	_assistantShare.fillFieldMap()
@@ -113,6 +118,10 @@ type assistantShareBelongsToAssistant struct {
 	db *gorm.DB
 
 	field.RelationField
+
+	Library struct {
+		field.RelationField
+	}
 }
 
 func (a assistantShareBelongsToAssistant) Where(conds ...field.Expr) *assistantShareBelongsToAssistant {

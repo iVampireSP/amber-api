@@ -65,6 +65,11 @@ func (s *Service) DeleteAssistant(ctx context.Context, id schema.EntityId) error
 		return err
 	}
 
+	//// 如果绑定了资料库，则不能删除
+	//if assistant.LibraryId != nil {
+	//	return consts.ErrAssistantHasBindLibraryCantDelete
+	//}
+
 	// 如果已经绑定过工具，则不能删除
 	toolEntity, err := s.ListAssistantTool(ctx, assistant)
 	if err != nil {

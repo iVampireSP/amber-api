@@ -34,9 +34,15 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 	_assistant.Prompt = field.NewString(tableName, "prompt")
 	_assistant.Description = field.NewString(tableName, "description")
 	_assistant.UserId = field.NewInt64(tableName, "user_id")
+	_assistant.LibraryId = field.NewUint(tableName, "library_id")
 	_assistant.DisableDefaultPrompt = field.NewBool(tableName, "disable_default_prompt")
 	_assistant.DisableMemory = field.NewBool(tableName, "disable_memory")
 	_assistant.EnableMemoryForAssistantShare = field.NewBool(tableName, "enable_memory_for_assistant_share")
+	_assistant.Library = assistantBelongsToLibrary{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Library", "entity.Library"),
+	}
 
 	_assistant.fillFieldMap()
 
@@ -54,9 +60,11 @@ type assistant struct {
 	Prompt                        field.String
 	Description                   field.String
 	UserId                        field.Int64
+	LibraryId                     field.Uint
 	DisableDefaultPrompt          field.Bool
 	DisableMemory                 field.Bool
 	EnableMemoryForAssistantShare field.Bool
+	Library                       assistantBelongsToLibrary
 
 	fieldMap map[string]field.Expr
 }
@@ -80,6 +88,7 @@ func (a *assistant) updateTableName(table string) *assistant {
 	a.Prompt = field.NewString(table, "prompt")
 	a.Description = field.NewString(table, "description")
 	a.UserId = field.NewInt64(table, "user_id")
+	a.LibraryId = field.NewUint(table, "library_id")
 	a.DisableDefaultPrompt = field.NewBool(table, "disable_default_prompt")
 	a.DisableMemory = field.NewBool(table, "disable_memory")
 	a.EnableMemoryForAssistantShare = field.NewBool(table, "enable_memory_for_assistant_share")
@@ -99,7 +108,7 @@ func (a *assistant) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *assistant) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 10)
+	a.fieldMap = make(map[string]field.Expr, 12)
 	a.fieldMap["id"] = a.Id
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -107,9 +116,11 @@ func (a *assistant) fillFieldMap() {
 	a.fieldMap["prompt"] = a.Prompt
 	a.fieldMap["description"] = a.Description
 	a.fieldMap["user_id"] = a.UserId
+	a.fieldMap["library_id"] = a.LibraryId
 	a.fieldMap["disable_default_prompt"] = a.DisableDefaultPrompt
 	a.fieldMap["disable_memory"] = a.DisableMemory
 	a.fieldMap["enable_memory_for_assistant_share"] = a.EnableMemoryForAssistantShare
+
 }
 
 func (a assistant) clone(db *gorm.DB) assistant {
@@ -120,6 +131,77 @@ func (a assistant) clone(db *gorm.DB) assistant {
 func (a assistant) replaceDB(db *gorm.DB) assistant {
 	a.assistantDo.ReplaceDB(db)
 	return a
+}
+
+type assistantBelongsToLibrary struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a assistantBelongsToLibrary) Where(conds ...field.Expr) *assistantBelongsToLibrary {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a assistantBelongsToLibrary) WithContext(ctx context.Context) *assistantBelongsToLibrary {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a assistantBelongsToLibrary) Session(session *gorm.Session) *assistantBelongsToLibrary {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a assistantBelongsToLibrary) Model(m *entity.Assistant) *assistantBelongsToLibraryTx {
+	return &assistantBelongsToLibraryTx{a.db.Model(m).Association(a.Name())}
+}
+
+type assistantBelongsToLibraryTx struct{ tx *gorm.Association }
+
+func (a assistantBelongsToLibraryTx) Find() (result *entity.Library, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a assistantBelongsToLibraryTx) Append(values ...*entity.Library) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a assistantBelongsToLibraryTx) Replace(values ...*entity.Library) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a assistantBelongsToLibraryTx) Delete(values ...*entity.Library) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a assistantBelongsToLibraryTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a assistantBelongsToLibraryTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type assistantDo struct{ gen.DO }

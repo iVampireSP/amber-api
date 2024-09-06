@@ -188,7 +188,7 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 			return
 		}
 
-		assistantEntity.LibraryId = *updateReq.LibraryId
+		assistantEntity.LibraryId = updateReq.LibraryId
 	}
 
 	assistantEntity.DisableDefaultPrompt = updateReq.DisableDefaultPrompt

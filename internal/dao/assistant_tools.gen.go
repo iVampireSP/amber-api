@@ -36,6 +36,11 @@ func newAssistantTool(db *gorm.DB, opts ...gen.DOOption) assistantTool {
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("Assistant", "entity.Assistant"),
+		Library: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Assistant.Library", "entity.Library"),
+		},
 	}
 
 	_assistantTool.Tool = assistantToolBelongsToTool{
@@ -121,6 +126,10 @@ type assistantToolBelongsToAssistant struct {
 	db *gorm.DB
 
 	field.RelationField
+
+	Library struct {
+		field.RelationField
+	}
 }
 
 func (a assistantToolBelongsToAssistant) Where(conds ...field.Expr) *assistantToolBelongsToAssistant {

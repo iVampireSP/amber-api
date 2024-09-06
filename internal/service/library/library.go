@@ -4,6 +4,7 @@ import (
 	"context"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/pkg/consts"
 )
 
 func (s *Service) DefaultLibrary(ctx context.Context, userId schema.UserId) (*entity.Library, error) {
@@ -71,8 +72,26 @@ func (s *Service) GetLibrary(ctx context.Context, id schema.EntityId) (*entity.L
 }
 
 func (s *Service) DeleteLibrary(ctx context.Context, library *entity.Library) error {
+	// 检测资料库是否有文档
+	count, err := s.dao.Document.WithContext(ctx).Where(s.dao.Document.LibraryId.Eq(uint(library.Id))).Count()
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return consts.ErrLibraryHasDocuments
+	}
+
+	// 如果资料库内绑定了助理
+	count, err = s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.LibraryId.Eq(uint(library.Id))).Count()
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return consts.ErrLibraryUsedByAssistants
+	}
+
 	var libraryDao = s.dao.Library.WithContext(ctx)
-	_, err := libraryDao.Delete(library)
+	_, err = libraryDao.Delete(library)
 	return err
 }
 

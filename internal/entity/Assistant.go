@@ -6,13 +6,15 @@ import (
 
 type Assistant struct {
 	Model
-	Name                          string        `json:"name"`
-	Prompt                        string        `json:"prompt"`
-	Description                   string        `json:"description"`
-	UserId                        schema.UserId `json:"user_id"`
-	DisableDefaultPrompt          bool          `json:"disable_default_prompt"`
-	DisableMemory                 bool          `json:"disable_memory"`
-	EnableMemoryForAssistantShare bool          `json:"enable_memory_for_assistant_share"`
+	Name                          string          `json:"name"`
+	Prompt                        string          `json:"prompt"`
+	Description                   string          `json:"description"`
+	UserId                        schema.UserId   `json:"user_id"`
+	LibraryId                     schema.EntityId `json:"library_id"`
+	Library                       *Library        `json:"library"`
+	DisableDefaultPrompt          bool            `json:"disable_default_prompt"`
+	DisableMemory                 bool            `json:"disable_memory"`
+	EnableMemoryForAssistantShare bool            `json:"enable_memory_for_assistant_share"`
 }
 
 func (a *Assistant) TableName() string {

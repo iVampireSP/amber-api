@@ -11,6 +11,7 @@ import (
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/chat_message"
+	"rag-new/internal/service/library"
 	"rag-new/internal/service/tool"
 	"rag-new/pkg/consts"
 	"strconv"
@@ -22,6 +23,7 @@ type AssistantController struct {
 	assistantService   *assistant.Service
 	chatService        *chat.Service
 	chatMessageService *chat_message.Service
+	libraryService     *library.Service
 	batch              *batch.Batch
 }
 
@@ -31,9 +33,10 @@ func NewAssistantController(
 	assistantService *assistant.Service,
 	chatService *chat.Service,
 	chatMessageService *chat_message.Service,
+	libraryService *library.Service,
 	batch *batch.Batch,
 ) *AssistantController {
-	return &AssistantController{authService, toolService, assistantService, chatService, chatMessageService, batch}
+	return &AssistantController{authService, toolService, assistantService, chatService, chatMessageService, libraryService, batch}
 }
 
 // List godoc
@@ -171,6 +174,21 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 
 	if updateReq.Prompt != "" {
 		assistantEntity.Prompt = updateReq.Prompt
+	}
+
+	if updateReq.LibraryId != nil {
+		// 检测用户是否有这个 library
+		getLibrary, err := u.libraryService.GetLibrary(c, *updateReq.LibraryId)
+		if err != nil {
+			return
+		}
+
+		if getLibrary.UserId != u.authService.GetUserId(c) {
+			response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
+			return
+		}
+
+		assistantEntity.LibraryId = *updateReq.LibraryId
 	}
 
 	assistantEntity.DisableDefaultPrompt = updateReq.DisableDefaultPrompt

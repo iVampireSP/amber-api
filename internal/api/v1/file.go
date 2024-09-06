@@ -56,6 +56,11 @@ func (f *FileController) DownloadPublicFile(c *gin.Context) {
 		return
 	}
 
+	if !fileEntity.Public {
+		response.Status(http.StatusForbidden).Error(consts.ErrFileNotPublic).Send()
+		return
+	}
+
 	size, bucketFile, err := f.fileService.GetBucketFile(c, fileEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()

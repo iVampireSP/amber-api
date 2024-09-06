@@ -204,7 +204,8 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		}
 	}
 
-	// TODO: 如果 request.Message 的大小超过了 1mb
+	// TODO: 如果 request.Message 的大小超过了 1mb, 则转换为文件。转换之前应该先判断助理是否存在知识库
+	// 如果存在知识库，则将文件放入知识库中，否则将不处理
 	//if len(request.Message) > 1024*1024 {
 	//	// 转换为 file
 	//

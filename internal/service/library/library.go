@@ -71,6 +71,43 @@ func (s *Service) GetLibrary(ctx context.Context, id schema.EntityId) (*entity.L
 	return library, err
 }
 
+func (s *Service) GetLibraryByUserId(ctx context.Context, userId schema.UserId) (*entity.Library, error) {
+	var libraryDao = s.dao.WithContext(ctx).Library
+	library, err := libraryDao.Where(s.dao.Library.UserId.Eq(int64(userId))).First()
+	return library, err
+}
+
+// GetLibraryDocuments returns a library with its documents.
+//
+// The returned library object is loaded with its documents.
+// This is useful for scenarios where you need to access the documents of a library.
+//
+// The returned error is non-nil if the library doesn't exist.
+//
+// Example:
+//
+//	library, err := service.GetLibraryDocuments(ctx, library)
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	for _, document := range library.Documents {
+//	    // Do something with the document.
+//	}
+func (s *Service) GetLibraryDocuments(ctx context.Context, library *entity.Library) (*entity.Library, error) {
+	var libraryDao = s.dao.WithContext(ctx).Library
+	library, err := libraryDao.Where(s.dao.Library.Id.Eq(uint(library.Id))).
+		Preload(s.dao.Library.Document).First()
+	return library, err
+}
+
+func (s *Service) GetLibraryDocumentsById(ctx context.Context, libraryId schema.EntityId) (*entity.Library, error) {
+	var libraryDao = s.dao.WithContext(ctx).Library
+	library, err := libraryDao.Where(s.dao.Library.Id.Eq(uint(libraryId))).
+		Preload(s.dao.Library.Document).First()
+	return library, err
+}
+
 func (s *Service) DeleteLibrary(ctx context.Context, library *entity.Library) error {
 	// 检测资料库是否有文档
 	count, err := s.dao.Document.WithContext(ctx).Where(s.dao.Document.LibraryId.Eq(uint(library.Id))).Count()

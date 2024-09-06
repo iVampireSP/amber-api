@@ -34,6 +34,29 @@ func newLibrary(db *gorm.DB, opts ...gen.DOOption) library {
 	_library.Default = field.NewBool(tableName, "default")
 	_library.Description = field.NewString(tableName, "description")
 	_library.UserId = field.NewInt64(tableName, "user_id")
+	_library.Document = libraryHasManyDocument{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Document", "entity.Document"),
+		Library: struct {
+			field.RelationField
+			Document struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("Document.Library", "entity.Library"),
+			Document: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Document.Library.Document", "entity.Document"),
+			},
+		},
+		File: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Document.File", "entity.File"),
+		},
+	}
 
 	_library.fillFieldMap()
 
@@ -51,6 +74,7 @@ type library struct {
 	Default     field.Bool
 	Description field.String
 	UserId      field.Int64
+	Document    libraryHasManyDocument
 
 	fieldMap map[string]field.Expr
 }
@@ -90,7 +114,7 @@ func (l *library) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (l *library) fillFieldMap() {
-	l.fieldMap = make(map[string]field.Expr, 7)
+	l.fieldMap = make(map[string]field.Expr, 8)
 	l.fieldMap["id"] = l.Id
 	l.fieldMap["created_at"] = l.CreatedAt
 	l.fieldMap["updated_at"] = l.UpdatedAt
@@ -98,6 +122,7 @@ func (l *library) fillFieldMap() {
 	l.fieldMap["default"] = l.Default
 	l.fieldMap["description"] = l.Description
 	l.fieldMap["user_id"] = l.UserId
+
 }
 
 func (l library) clone(db *gorm.DB) library {
@@ -108,6 +133,87 @@ func (l library) clone(db *gorm.DB) library {
 func (l library) replaceDB(db *gorm.DB) library {
 	l.libraryDo.ReplaceDB(db)
 	return l
+}
+
+type libraryHasManyDocument struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Library struct {
+		field.RelationField
+		Document struct {
+			field.RelationField
+		}
+	}
+	File struct {
+		field.RelationField
+	}
+}
+
+func (a libraryHasManyDocument) Where(conds ...field.Expr) *libraryHasManyDocument {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a libraryHasManyDocument) WithContext(ctx context.Context) *libraryHasManyDocument {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a libraryHasManyDocument) Session(session *gorm.Session) *libraryHasManyDocument {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a libraryHasManyDocument) Model(m *entity.Library) *libraryHasManyDocumentTx {
+	return &libraryHasManyDocumentTx{a.db.Model(m).Association(a.Name())}
+}
+
+type libraryHasManyDocumentTx struct{ tx *gorm.Association }
+
+func (a libraryHasManyDocumentTx) Find() (result []*entity.Document, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a libraryHasManyDocumentTx) Append(values ...*entity.Document) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a libraryHasManyDocumentTx) Replace(values ...*entity.Document) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a libraryHasManyDocumentTx) Delete(values ...*entity.Document) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a libraryHasManyDocumentTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a libraryHasManyDocumentTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type libraryDo struct{ gen.DO }

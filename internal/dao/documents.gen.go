@@ -39,6 +39,27 @@ func newDocument(db *gorm.DB, opts ...gen.DOOption) document {
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("Library", "entity.Library"),
+		Document: struct {
+			field.RelationField
+			Library struct {
+				field.RelationField
+			}
+			File struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("Library.Document", "entity.Document"),
+			Library: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Library.Document.Library", "entity.Library"),
+			},
+			File: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Library.Document.File", "entity.File"),
+			},
+		},
 	}
 
 	_document.File = documentBelongsToFile{
@@ -133,6 +154,16 @@ type documentBelongsToLibrary struct {
 	db *gorm.DB
 
 	field.RelationField
+
+	Document struct {
+		field.RelationField
+		Library struct {
+			field.RelationField
+		}
+		File struct {
+			field.RelationField
+		}
+	}
 }
 
 func (a documentBelongsToLibrary) Where(conds ...field.Expr) *documentBelongsToLibrary {

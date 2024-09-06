@@ -39,6 +39,27 @@ func newDocumentChunk(db *gorm.DB, opts ...gen.DOOption) documentChunk {
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("Library", "entity.Library"),
+		Document: struct {
+			field.RelationField
+			Library struct {
+				field.RelationField
+			}
+			File struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("Library.Document", "entity.Document"),
+			Library: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Library.Document.Library", "entity.Library"),
+			},
+			File: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Library.Document.File", "entity.File"),
+			},
+		},
 	}
 
 	_documentChunk.fillFieldMap()
@@ -125,6 +146,16 @@ type documentChunkBelongsToLibrary struct {
 	db *gorm.DB
 
 	field.RelationField
+
+	Document struct {
+		field.RelationField
+		Library struct {
+			field.RelationField
+		}
+		File struct {
+			field.RelationField
+		}
+	}
 }
 
 func (a documentChunkBelongsToLibrary) Where(conds ...field.Expr) *documentChunkBelongsToLibrary {

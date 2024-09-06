@@ -12,6 +12,7 @@ type Api struct {
 	Chat      *v1.ChatController
 	File      *v1.FileController
 	Memory    *v1.MemoryController
+	Library   *v1.LibraryController
 }
 
 func NewApiRoute(
@@ -21,9 +22,10 @@ func NewApiRoute(
 	Chat *v1.ChatController,
 	File *v1.FileController,
 	Memory *v1.MemoryController,
+	Library *v1.LibraryController,
 ) *Api {
 	return &Api{
-		User, Tool, Assistant, Chat, File, Memory,
+		User, Tool, Assistant, Chat, File, Memory, Library,
 	}
 }
 
@@ -64,6 +66,11 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.DELETE("/memories/:id", a.Memory.Delete)
 
 	r.GET("/files/user/:id/download", a.File.DownloadUserFile)
+
+	// Dummy API for library
+	r.GET("/libraries", a.Library.List)
+	r.GET("/libraries/:id/documents", a.Library.ListDocuments)
+	r.PATCH("/libraries/:id/documents/:document_id", a.Library.UpdateDocument)
 }
 
 func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {

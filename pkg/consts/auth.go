@@ -23,5 +23,6 @@ var (
 	ErrTokenError     = errors.New("token 类型错误")
 	ErrBearerToken    = errors.New("无效的 Bearer 令牌")
 
-	ErrNotYourResource = errors.New("你不能修改这个资源，因为它不是你创建的。")
+	ErrNotYourResource  = errors.New("你不能修改这个资源，因为它不是你创建的。")
+	ErrPermissionDenied = errors.New("没有权限访问此资源")
 )

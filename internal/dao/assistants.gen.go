@@ -42,6 +42,27 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 		db: db.Session(&gorm.Session{}),
 
 		RelationField: field.NewRelation("Library", "entity.Library"),
+		Document: struct {
+			field.RelationField
+			Library struct {
+				field.RelationField
+			}
+			File struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("Library.Document", "entity.Document"),
+			Library: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Library.Document.Library", "entity.Library"),
+			},
+			File: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("Library.Document.File", "entity.File"),
+			},
+		},
 	}
 
 	_assistant.fillFieldMap()
@@ -137,6 +158,16 @@ type assistantBelongsToLibrary struct {
 	db *gorm.DB
 
 	field.RelationField
+
+	Document struct {
+		field.RelationField
+		Library struct {
+			field.RelationField
+		}
+		File struct {
+			field.RelationField
+		}
+	}
 }
 
 func (a assistantBelongsToLibrary) Where(conds ...field.Expr) *assistantBelongsToLibrary {

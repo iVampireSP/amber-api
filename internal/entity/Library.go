@@ -8,6 +8,7 @@ type Library struct {
 	Default     bool          `json:"default"`
 	Description *string       `json:"description"`
 	UserId      schema.UserId `json:"user_id"`
+	Document    []*Document   `json:"documents"`
 }
 
 func (*Library) TableName() string {

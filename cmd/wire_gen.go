@@ -69,7 +69,7 @@ func CreateApp() (*base.Application, error) {
 	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, clientClient, query, streamService)
 	libraryService := library.NewService(config, query, clientClient, fileService)
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService)
-	fileController := v1.NewFileController(fileService, loggerLogger)
+	fileController := v1.NewFileController(fileService, loggerLogger, authService)
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
 	api := router.NewApiRoute(userController, toolController, assistantController, chatController, fileController, memoryController)
 	swaggerRouter := router.NewSwaggerRoute()

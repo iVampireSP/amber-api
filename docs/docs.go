@@ -1560,9 +1560,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/files/{id}/download": {
+        "/api/v1/files/user/{id}/download": {
             "get": {
-                "description": "根据 File ID 下载文件",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据 File ID 下载文件。如果文件是私有的，将无法下载",
                 "consumes": [
                     "application/json"
                 ],
@@ -1572,7 +1577,38 @@ const docTemplate = `{
                 "tags": [
                     "file"
                 ],
-                "summary": "下载文件",
+                "summary": "下载用户开文件",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/files/{id}/download": {
+            "get": {
+                "description": "根据 File ID 下载文件。如果文件是私有的，将无法下载",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "下载公开文件",
                 "parameters": [
                     {
                         "type": "integer",

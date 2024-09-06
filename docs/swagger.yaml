@@ -1466,7 +1466,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 根据 File ID 下载文件
+      description: 根据 File ID 下载文件。如果文件是私有的，将无法下载
       parameters:
       - in: path
         name: id
@@ -1479,7 +1479,29 @@ paths:
           description: OK
           schema:
             type: file
-      summary: 下载文件
+      summary: 下载公开文件
+      tags:
+      - file
+  /api/v1/files/user/{id}/download:
+    get:
+      consumes:
+      - application/json
+      description: 根据 File ID 下载文件。如果文件是私有的，将无法下载
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      security:
+      - ApiKeyAuth: []
+      summary: 下载用户开文件
       tags:
       - file
   /api/v1/libraries:

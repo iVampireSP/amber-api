@@ -30,7 +30,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 	var file = &entity.File{}
 
 	if params.Url != "" {
-		file, err = s.fileService.CreateFileFromUrl(ctx, params.Url, true)
+		file, err = s.fileService.CreateFileFromUrl(ctx, params.Url, false)
 		if err != nil {
 			return response, err
 		}

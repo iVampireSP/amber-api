@@ -22,6 +22,7 @@ ALTER TABLE chat_messages ADD CONSTRAINT chat_messages_user_file_id_foreign FORE
 
 -- +goose Down
 ALTER TABLE files DROP COLUMN size;
+ALTER TABLE files DROP COLUMN public;
 ALTER TABLE chat_messages DROP FOREIGN KEY chat_messages_user_file_id_foreign;
 ALTER TABLE chat_messages DROP COLUMN user_file_id;
 DROP TABLE user_files;

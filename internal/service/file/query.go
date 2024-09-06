@@ -3,7 +3,6 @@ package file
 import (
 	"context"
 	"errors"
-	"fmt"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -103,53 +102,6 @@ func (s *Service) GetFilesByIds(ctx context.Context, ids []schema.EntityId) ([]*
 	return files, err
 }
 
-func (s *Service) getURL(ctx context.Context, file *entity.File) (string, error) {
-	// TODO 生成 1 分钟的 key。不用管 key 是否存在或已生成，可直接生成新的 key
-	//cmd := s.redis.Get(ctx, s.getCacheKey("temp_key_file:"+file.Id.String()))
-	//result, err := cmd.Result()
-	//if err != nil {
-	//	if !errors.Is(err, redis.Nil) {
-	//		return "", err
-	//	}
-	//} else {
-	//
-	//}
-
-	return "", nil
-}
-
-func (s *Service) getCacheKey(key string) string {
-	return fmt.Sprintf("file:%s", key)
-}
-
-func (s *Service) BindFileToUser(ctx context.Context, file *entity.File, user schema.UserId) (*entity.UserFile, error) {
-	var userFile = &entity.UserFile{
-		FileId: file.Id,
-		UserId: user,
-	}
-
-	// 检测是否绑定过
-	// count
-	count, err := s.dao.UserFile.WithContext(ctx).
-		Where(s.dao.UserFile.FileId.Eq(uint(file.Id)), s.dao.UserFile.UserId.Eq(int64(user))).
-		Count()
-
-	if count > 0 {
-		// 获取并返回
-		return s.dao.UserFile.WithContext(ctx).
-			Where(s.dao.UserFile.FileId.Eq(uint(file.Id))).First()
-	}
-
-	err = s.dao.UserFile.WithContext(ctx).Create(userFile)
-
-	return userFile, err
-}
-
-func (s *Service) UnbindFileFromUser(ctx context.Context, fileId schema.EntityId, user schema.UserId) error {
-	_, err := s.dao.UserFile.
-		WithContext(ctx).
-		Where(s.dao.UserFile.FileId.Eq(uint(fileId)), s.dao.UserFile.UserId.Eq(int64(user))).
-		Delete()
-
-	return err
-}
+//func (s *Service) getCacheKey(key string) string {
+//	return fmt.Sprintf("file:%s", key)
+//}

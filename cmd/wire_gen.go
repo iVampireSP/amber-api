@@ -64,10 +64,10 @@ func CreateApp() (*base.Application, error) {
 	streamService := stream.NewService(config)
 	messageMessage := message.NewMessage()
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService, streamService, messageMessage)
-	embeddingService := embedding.NewEmbedding(config, loggerLogger, query)
+	embeddingService := embedding.NewService(config, loggerLogger, query)
 	clientClient := milvus.NewMilvus(config)
 	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, clientClient, query, streamService)
-	libraryService := library.NewService(config, query, clientClient, fileService)
+	libraryService := library.NewService(config, query, clientClient, fileService, embeddingService)
 	chatController := v1.NewChatController(authService, chatService, client, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService)
 	fileController := v1.NewFileController(fileService, loggerLogger, authService)
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
@@ -75,8 +75,8 @@ func CreateApp() (*base.Application, error) {
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService)
-	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query, openaiClient, clientClient)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService)
+	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, client, batchBatch, s3S3, db, query, openaiClient, clientClient, embeddingService)
 	return application, nil
 }
 

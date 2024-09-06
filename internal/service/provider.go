@@ -33,12 +33,13 @@ type Service struct {
 	File        *file.Service
 	Stream      *stream.Service
 	Library     *library.Service
+	Embedding   *embedding.Service
 }
 
 var Provider = wire.NewSet(
 	jwks.NewJWKS,
 	auth.NewAuthService,
-	embedding.NewEmbedding,
+	embedding.NewService,
 	memory.NewMemory,
 	chat_message.NewService,
 	chat.NewService,
@@ -66,6 +67,7 @@ func NewService(
 	file *file.Service,
 	stream *stream.Service,
 	library *library.Service,
+	embedding *embedding.Service,
 ) *Service {
 	return &Service{
 		logger,
@@ -80,5 +82,6 @@ func NewService(
 		file,
 		stream,
 		library,
+		embedding,
 	}
 }

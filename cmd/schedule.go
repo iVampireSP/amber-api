@@ -31,6 +31,8 @@ var scheduleCmd = &cobra.Command{
 func runSchedule(app *base.Application) {
 	var wg sync.WaitGroup
 
+	var ctx = context.Background()
+
 	wg.Add(1)
 	// 启动一个定时器
 	go func() {
@@ -40,11 +42,29 @@ func runSchedule(app *base.Application) {
 				BeforeTime:  time.Now(),
 				ChatService: app.Service.Chat,
 			}
-			err := app.Batch.DeleteExpiredChats(context.Background(), chatDeleteExpired)
+			err := app.Batch.DeleteExpiredChats(ctx, chatDeleteExpired)
 			if err != nil {
 				app.Logger.Sugar.Error(err)
 			}
 			time.Sleep(1 * time.Hour)
+		}
+	}()
+
+	wg.Add(1)
+	// 向量 chunk
+	go func() {
+		app.Logger.Sugar.Info("Vector Chunk is ready.")
+		for {
+			app.Logger.Sugar.Info("Vector Chunk running.")
+			var vectorChunk = &batch.ChunkVectorBatch{
+				LibraryService: app.Service.Library,
+				DAO:            app.DAO,
+			}
+			err := app.Batch.ChunkVector(ctx, vectorChunk)
+			if err != nil {
+				app.Logger.Sugar.Error(err)
+			}
+			time.Sleep(1 * time.Minute)
 		}
 	}()
 

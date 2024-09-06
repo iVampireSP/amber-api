@@ -14,7 +14,7 @@ type Service struct {
 	dao    *dao.Query
 }
 
-func NewEmbedding(config *conf.Config, logger *logger.Logger, dao *dao.Query) *Service {
+func NewService(config *conf.Config, logger *logger.Logger, dao *dao.Query) *Service {
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.InternalBaseUrl),

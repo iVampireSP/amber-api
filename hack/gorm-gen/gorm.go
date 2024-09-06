@@ -1,7 +1,6 @@
-package cmd
+package main
 
 import (
-	"github.com/spf13/cobra"
 	"gorm.io/gen"
 	"rag-new/internal/entity"
 )
@@ -12,28 +11,17 @@ import (
 //	FilterWithNameAndRole(name, role string) ([]gen.T, error)
 //}
 
-func init() {
-	RootCmd.AddCommand(gormGenCmd)
-}
-
-var gormGenCmd = &cobra.Command{
-	Use: "gorm-gen",
-	Run: func(cmd *cobra.Command, args []string) {
-		gormGen()
-	},
-}
-
-func gormGen() {
-	app, err := CreateApp()
-	if err != nil {
-		panic(err)
-	}
+func main() {
+	//app, err := cmd.CreateApp()
+	//if err != nil {
+	//	panic(err)
+	//}
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "./internal/dao",
+		OutPath: "./dao",
 		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface, // generate mode
 	})
 
-	g.UseDB(app.GORM)
+	//g.UseDB(app.GORM)
 
 	g.ApplyBasic(
 		entity.Chat{},

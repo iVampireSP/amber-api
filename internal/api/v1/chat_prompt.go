@@ -79,3 +79,11 @@ The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hin
 
 	return prompt, nil
 }
+
+//func (u *ChatController) promptFromLibrary(c context.Context, assistant *entity.Assistant, content string) (string, error) {
+//	// RAG 的 prompt 生成
+//
+//	u.libraryService.SearchLibrary(c, content)
+//
+//	return "", nil
+//}

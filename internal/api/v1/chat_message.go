@@ -146,6 +146,8 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		}
 	}
 
+	// TODO： 从知识库获取内容，然后创建一个新的消息，并插入到数据库
+
 	var userInfo = u.authService.GetUser(c)
 	var publicUser = &schema.UserPublicInfo{
 		Name:      userInfo.Token.Name,

@@ -27,8 +27,9 @@ var tools = []llms.Tool{
 	{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
-			Name:        prefix("describe_image"),
-			Description: "only used to retrieve the content of images and cannot obtain file information of images. only for which mimetype is image",
+			Name: prefix("describe_image"),
+			Description: "only used to retrieve the content of images and cannot obtain file information of images." +
+				" only for which mimetype is image",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
@@ -37,12 +38,15 @@ var tools = []llms.Tool{
 						Description: "The id of the file(with image mimetype, from history) you want to describe",
 					},
 					"url": {
-						Type:        jsonschema.String,
-						Description: "The url of the image you want to describe(URL and file ID must be chosen between two options)",
+						Type: jsonschema.String,
+						Description: "The url of the image you want to describe" +
+							"(URL and file ID must be chosen between two options)",
 					},
 					"question": {
-						Type:        jsonschema.String,
-						Description: "What you need to explain, using natural language like 'What is this image about?', Write questions in the user language like '我想知道这张图片是什么关于的'。",
+						Type: jsonschema.String,
+						Description: "What you need to explain, " +
+							"using natural language like 'What is this image about?', " +
+							"Write questions in the user language like '我想知道这张图片是什么关于的'。",
 					},
 				},
 				Required: []string{
@@ -60,8 +64,9 @@ var tools = []llms.Tool{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
 					"url": {
-						Type:        jsonschema.Integer,
-						Description: "the url of the file you want to download. when downloaded, you can get file id from history",
+						Type: jsonschema.Integer,
+						Description: "the url of the file you want to download. " +
+							"when downloaded, you can get file id from history",
 					},
 				},
 				Required: []string{
@@ -97,8 +102,12 @@ var tools = []llms.Tool{
 	{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
-			Name:        prefix("calculator"),
-			Description: "It's useful for mathematical calculations",
+			Name: prefix("calculator"),
+			Description: "It's useful for mathematical calculations," +
+				"Take a deep breath and work on this step by step." +
+				"When encountering functions such as log and sqrt, " +
+				"you need to call the tool multiple times to calculate, " +
+				"tThe calculation process must be written out before calling the tool to perform the calculation",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{

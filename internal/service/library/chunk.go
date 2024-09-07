@@ -74,6 +74,9 @@ func (s *Service) ChunkFileToDocument(ctx context.Context, file *entity.File, do
 	)
 
 	chunks, err := documentLoader.LoadAndSplit(ctx, recursiveCharacter)
+	if err != nil {
+		return err
+	}
 
 	var documentChunks = make([]*entity.DocumentChunk, 0)
 

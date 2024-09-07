@@ -87,3 +87,8 @@ func (s *Service) GetDocumentByFileId(ctx context.Context, fileId schema.EntityI
 func (s *Service) GetDocumentByFileAndLibrary(ctx context.Context, file *entity.File, library *entity.Library) (*entity.Document, error) {
 	return s.dao.Document.WithContext(ctx).Where(s.dao.Document.FileId.Eq(uint(file.Id)), s.dao.Document.LibraryId.Eq(uint(library.Id))).First()
 }
+
+func (s *Service) GetDocumentFromLibrary(ctx context.Context, library *entity.Library, documentId schema.EntityId) (*entity.Document, error) {
+	return s.dao.Document.WithContext(ctx).Where(s.dao.Document.Id.Eq(uint(documentId))).
+		Where(s.dao.Document.LibraryId.Eq(uint(library.Id))).First()
+}

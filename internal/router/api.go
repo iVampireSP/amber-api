@@ -67,8 +67,13 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 	// Dummy API for library
 	r.GET("/libraries", a.Library.List)
+	r.GET("/libraries/:id/", a.Library.GetLibrary)
+	r.POST("/libraries", a.Library.CreateLibrary)
+	r.PATCH("/libraries/:id/", a.Library.Update)
+	r.DELETE("/libraries/:id/", a.Library.Delete)
 	r.GET("/libraries/:id/documents", a.Library.ListDocuments)
-	r.PATCH("/libraries/:id/documents/:document_id", a.Library.UpdateDocument)
+	//r.PATCH("/libraries/:id/documents/:document_id", a.Library.UpdateDocument)
+	r.DELETE("/libraries/:id/documents/:document_id", a.Library.DeleteDocument)
 }
 
 func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {

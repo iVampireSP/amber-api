@@ -421,8 +421,19 @@ definitions:
     - assistant_token
     - guest_id
     type: object
+  schema.LibraryCreateRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
   schema.LibraryUpdateRequest:
     properties:
+      default:
+        type: boolean
       description:
         type: string
       name:
@@ -1597,6 +1608,37 @@ paths:
       summary: 获取所有的资料库
       tags:
       - libraries
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: schema.LibraryCreateRequest
+        in: body
+        name: schema.LibraryCreateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/schema.LibraryCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.Library'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建一个资料库
+      tags:
+      - libraries
   /api/v1/libraries/{id}:
     delete:
       consumes:
@@ -1617,6 +1659,36 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 删除资料库
+      tags:
+      - libraries
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Library'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取一个资料库
       tags:
       - libraries
     patch:
@@ -1654,17 +1726,20 @@ paths:
       - in: path
         name: id
         type: integer
-      - description: schema.LibraryUpdateRequest
-        in: body
-        name: schema.LibraryUpdateRequest
-        required: true
-        schema:
-          $ref: '#/definitions/schema.LibraryUpdateRequest'
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Document'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -1680,14 +1755,11 @@ paths:
       - application/json
       parameters:
       - in: path
+        name: document_id
+        type: integer
+      - in: path
         name: id
         type: integer
-      - description: schema.LibraryUpdateRequest
-        in: body
-        name: schema.LibraryUpdateRequest
-        required: true
-        schema:
-          $ref: '#/definitions/schema.LibraryUpdateRequest'
       produces:
       - application/json
       responses:

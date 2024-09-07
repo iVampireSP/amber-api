@@ -17,7 +17,7 @@ func main() {
 	//	panic(err)
 	//}
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "./dao",
+		OutPath: "../../internal/dao",
 		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface, // generate mode
 	})
 

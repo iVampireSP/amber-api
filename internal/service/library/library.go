@@ -53,10 +53,20 @@ func (s *Service) UpdateLibrary(ctx context.Context, library *entity.Library) er
 	var libraryDao = s.dao.Library.WithContext(ctx)
 
 	hasDefault, err := s.HasDefaultLibrary(ctx, library.UserId)
-	if hasDefault && library.Default {
-		library.Default = false
-	} else {
-		library.Default = true
+	if err != nil {
+		return err
+	}
+	defaultLibrary, err := s.GetDefaultLibrary(ctx, library.UserId)
+	if err != nil {
+		return err
+	}
+
+	// 如果要设置 library 为默认，那么需要取消之前的默认
+	if library.Default && hasDefault {
+		_, err = s.dao.Library.Where(s.dao.Library.Id.Eq(uint(defaultLibrary.Id))).Update(s.dao.Library.Default, false)
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err = libraryDao.Updates(library)
@@ -68,12 +78,6 @@ func (s *Service) GetLibrary(ctx context.Context, id schema.EntityId) (*entity.L
 
 	library, err := libraryDao.Where(s.dao.Library.Id.Eq(uint(id))).First()
 
-	return library, err
-}
-
-func (s *Service) GetLibraryByUserId(ctx context.Context, userId schema.UserId) (*entity.Library, error) {
-	var libraryDao = s.dao.WithContext(ctx).Library
-	library, err := libraryDao.Where(s.dao.Library.UserId.Eq(userId.String())).First()
 	return library, err
 }
 
@@ -94,18 +98,14 @@ func (s *Service) GetLibraryByUserId(ctx context.Context, userId schema.UserId) 
 //	for _, document := range library.Documents {
 //	    // Do something with the document.
 //	}
-func (s *Service) GetLibraryDocuments(ctx context.Context, library *entity.Library) (*entity.Library, error) {
-	var libraryDao = s.dao.WithContext(ctx).Library
-	library, err := libraryDao.Where(s.dao.Library.Id.Eq(uint(library.Id))).
-		Preload(s.dao.Library.Document).First()
-	return library, err
+func (s *Service) GetLibraryDocuments(ctx context.Context, library *entity.Library) ([]*entity.Document, error) {
+	documents, err := s.dao.Document.WithContext(ctx).Where(s.dao.Document.LibraryId.Eq(uint(library.Id))).Find()
+	return documents, err
 }
 
-func (s *Service) GetLibraryDocumentsById(ctx context.Context, libraryId schema.EntityId) (*entity.Library, error) {
-	var libraryDao = s.dao.WithContext(ctx).Library
-	library, err := libraryDao.Where(s.dao.Library.Id.Eq(uint(libraryId))).
-		Preload(s.dao.Library.Document).First()
-	return library, err
+func (s *Service) GetLibraryDocumentsById(ctx context.Context, libraryId schema.EntityId) ([]*entity.Document, error) {
+	documents, err := s.dao.Document.WithContext(ctx).Where(s.dao.Document.LibraryId.Eq(uint(libraryId))).Find()
+	return documents, err
 }
 
 func (s *Service) DeleteLibrary(ctx context.Context, library *entity.Library) error {
@@ -152,4 +152,12 @@ func (s *Service) HasDefaultLibrary(ctx context.Context, userId schema.UserId) (
 		Count()
 
 	return count > 0, err
+}
+
+func (s *Service) GetDefaultLibrary(ctx context.Context, userId schema.UserId) (*entity.Library, error) {
+	var libraryDao = s.dao.WithContext(ctx).Library
+	return libraryDao.
+		Where(s.dao.Library.UserId.Eq(userId.String())).
+		Where(s.dao.Library.Default.Is(true)).
+		First()
 }

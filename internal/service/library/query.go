@@ -94,7 +94,7 @@ func (s *Service) SearchLibrary(ctx context.Context, content string, library *en
 }
 
 func (s *Service) deleteMilvusChunk(ctx context.Context, document *entity.Document) error {
-	var filter = fmt.Sprintf("document_id == %d && model == %s", document.Id, s.config.OpenAI.EmbeddingModel)
-	errDelete := s.milvus.Delete(ctx, s.config.Milvus.MemoryCollection, "", filter)
+	var filter = fmt.Sprintf(`document_id == %d && model == "%s"`, document.Id, s.config.OpenAI.EmbeddingModel)
+	errDelete := s.milvus.Delete(ctx, s.config.Milvus.DocumentCollection, "", filter)
 	return errDelete
 }

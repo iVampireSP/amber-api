@@ -11,19 +11,19 @@ type ChunkVectorBatch struct {
 	DAO            *dao.Query
 }
 
-func (*Batch) ChunkVector(ctx context.Context, cv *ChunkVectorBatch) error {
-	chunks, i, err := cv.DAO.WithContext(ctx).DocumentChunk.Where(cv.DAO.DocumentChunk.Chunked.Is(false)).FindByPage(0, 10)
+func (b *Batch) ChunkVector(ctx context.Context, cv *ChunkVectorBatch) error {
+	chunks, err := cv.DAO.WithContext(ctx).DocumentChunk.Where(cv.DAO.DocumentChunk.Chunked.Is(false)).Find()
 	if err != nil {
 		return err
 	}
 
-	if i > 0 {
+	if len(chunks) > 0 {
 		for _, chunk := range chunks {
+			b.logger.Sugar.Infof("Vectoring chunk: %v", chunk.Id)
 			err = cv.LibraryService.ChunkToMilvus(ctx, chunk)
 			if err != nil {
 				return err
 			}
-
 		}
 	}
 

@@ -27,6 +27,10 @@ func NewAuthService(config *conf.Config, jwks *jwks.JWKS, logger *logger.Logger)
 }
 
 func (a *Service) GinMiddlewareAuth(tokenType schema.JWTTokenTypes, c *gin.Context) (*schema.User, error) {
+	if a.config.Debug.Enabled {
+		return a.parseUserJWT(tokenType, "")
+	}
+
 	authorization := c.Request.Header.Get(consts.AuthHeader)
 
 	if authorization == "" {

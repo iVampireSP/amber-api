@@ -52,6 +52,9 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.POST("/assistants/:id/tools/:tool_id", a.Assistant.BindTool)
 	r.DELETE("/assistants/:id/tools/:tool_id", a.Assistant.UnbindTool)
 
+	r.POST("/assistants/:id/library", a.Assistant.BindLibrary)
+	r.DELETE("/assistants/:id/library", a.Assistant.UnbindLibrary)
+
 	r.GET("/chats", a.Chat.List)
 	r.POST("/chats", a.Chat.Create)
 	r.POST("/chats/:id/clear", a.Chat.ClearChatMessage)
@@ -65,7 +68,6 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.POST("/memories/purge", a.Memory.Purge)
 	r.DELETE("/memories/:id", a.Memory.Delete)
 
-	// Dummy API for library
 	r.GET("/libraries", a.Library.List)
 	r.GET("/libraries/:id/", a.Library.GetLibrary)
 	r.POST("/libraries", a.Library.CreateLibrary)

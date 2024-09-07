@@ -332,6 +332,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/assistants/{id}/library": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "绑定资料库",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "AssistantLibraryRequest",
+                        "name": "AssistantLibraryRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.AssistantLibraryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "解绑资料库",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/assistants/{id}/shares": {
             "get": {
                 "security": [
@@ -2949,6 +3032,17 @@ const docTemplate = `{
                 }
             }
         },
+        "schema.AssistantLibraryRequest": {
+            "type": "object",
+            "required": [
+                "library_id"
+            ],
+            "properties": {
+                "library_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "schema.AssistantUpdateRequest": {
             "type": "object",
             "properties": {
@@ -2976,10 +3070,6 @@ const docTemplate = `{
                         true,
                         false
                     ]
-                },
-                "library_id": {
-                    "type": "integer",
-                    "maximum": 255
                 },
                 "name": {
                     "type": "string",

@@ -176,20 +176,23 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 		assistantEntity.Prompt = updateReq.Prompt
 	}
 
-	if updateReq.LibraryId != nil {
-		// 检测用户是否有这个 library
-		getLibrary, err := u.libraryService.GetLibrary(c, *updateReq.LibraryId)
-		if err != nil {
-			return
-		}
-
-		if getLibrary.UserId != u.authService.GetUserId(c) {
-			response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
-			return
-		}
-
-		assistantEntity.LibraryId = updateReq.LibraryId
-	}
+	//if updateReq.LibraryId == nil {
+	//	assistantEntity.LibraryId = nil
+	//} else {
+	//	// 检测用户是否有这个 library
+	//	getLibrary, err := u.libraryService.GetLibrary(c, *updateReq.LibraryId)
+	//	if err != nil {
+	//		response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
+	//		return
+	//	}
+	//
+	//	if getLibrary.UserId != u.authService.GetUserId(c) {
+	//		response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
+	//		return
+	//	}
+	//
+	//	assistantEntity.LibraryId = updateReq.LibraryId
+	//}
 
 	assistantEntity.DisableDefaultPrompt = updateReq.DisableDefaultPrompt
 	assistantEntity.DisableMemory = updateReq.DisableMemory
@@ -432,4 +435,120 @@ func (u *AssistantController) UnbindTool(c *gin.Context) {
 	}
 
 	response.Status(http.StatusOK).Send()
+}
+
+// BindLibrary godoc
+// @Summary      绑定资料库
+// @Tags         assistant
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        AssistantIDRequest  path  schema.AssistantIDRequest  true  "AssistantIDRequest"
+// @Param        AssistantLibraryRequest  body  schema.AssistantLibraryRequest  true  "AssistantLibraryRequest"
+// @Success      204
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Router       /api/v1/assistants/{id}/library [post]
+func (u *AssistantController) BindLibrary(c *gin.Context) {
+	var updateReq schema.AssistantLibraryRequest
+	var response = schema.NewResponse(c)
+
+	if err := c.ShouldBindJSON(&updateReq); err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	var assistantRequest = &schema.AssistantIDRequest{}
+	if err := c.ShouldBindUri(assistantRequest); err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	assistantEntity, err := u.assistantService.GetAssistant(c, assistantRequest.ID)
+	if err != nil {
+		if errors.Is(err, consts.ErrAssistantNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+		}
+		return
+	}
+	if !u.authService.Compare(c, assistantEntity) {
+		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+		return
+	}
+
+	libraryEntity, err := u.libraryService.GetLibrary(c, updateReq.LibraryId)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if libraryEntity.Id == consts.NoRecord || libraryEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
+		return
+	}
+
+	err = u.assistantService.BindLibrary(c, assistantEntity, libraryEntity)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	response.Status(http.StatusNoContent).Send()
+}
+
+// UnbindLibrary godoc
+// @Summary      解绑资料库
+// @Tags         assistant
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        AssistantIDRequest  path  schema.AssistantIDRequest  true  "AssistantIDRequest"
+// @Success      204
+// @Failure      400  {object}  schema.ResponseBody{}
+// @Router       /api/v1/assistants/{id}/library [delete]
+func (u *AssistantController) UnbindLibrary(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
+	var assistantRequest = &schema.AssistantIDRequest{}
+	if err := c.ShouldBindUri(assistantRequest); err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	assistantEntity, err := u.assistantService.GetAssistant(c, assistantRequest.ID)
+	if err != nil {
+		if errors.Is(err, consts.ErrAssistantNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+		}
+		return
+	}
+	if !u.authService.Compare(c, assistantEntity) {
+		response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+		return
+	}
+
+	if assistantEntity.LibraryId == nil {
+		response.Status(http.StatusNoContent).Send()
+		return
+	}
+
+	libraryEntity, err := u.libraryService.GetLibrary(c, *assistantEntity.LibraryId)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if libraryEntity.Id == consts.NoRecord || libraryEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
+		return
+	}
+
+	err = u.assistantService.UnbindLibrary(c, assistantEntity, libraryEntity)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	response.Status(http.StatusNoContent).Send()
 }

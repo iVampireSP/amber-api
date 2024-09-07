@@ -2,6 +2,7 @@ package assistant
 
 import (
 	"context"
+	"gorm.io/gen/field"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -44,17 +45,18 @@ func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.Assi
 }
 
 func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assistant) error {
-	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).UpdateSimple(
+	var assignExpr = []field.AssignExpr{
 		s.dao.Assistant.Name.Value(assistant.Name),
 		s.dao.Assistant.Description.Value(assistant.Description),
 		s.dao.Assistant.Prompt.Value(assistant.Prompt),
 		s.dao.Assistant.DisableDefaultPrompt.Value(assistant.DisableDefaultPrompt),
 		s.dao.Assistant.DisableMemory.Value(assistant.DisableMemory),
 		s.dao.Assistant.EnableMemoryForAssistantShare.Value(assistant.EnableMemoryForAssistantShare),
-	)
-	if err != nil {
-		return err
 	}
+	// 这里不能直接设置 library_id
+
+	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
+		UpdateSimple(assignExpr...)
 
 	return err
 }
@@ -127,4 +129,34 @@ func (s *Service) GetAssistantFromCtx(ctx context.Context) *entity.Assistant {
 	assistantEntity := ctx.Value(consts.AuthAssistantShareMiddlewareKey)
 
 	return assistantEntity.(*entity.Assistant)
+}
+
+func (s *Service) BindLibrary(ctx context.Context, assistant *entity.Assistant, library *entity.Library) error {
+	// 重复绑定不处理
+	if assistant.LibraryId != nil && *assistant.LibraryId == library.Id {
+		return nil
+	}
+	//if library.UserId != assistant.UserId {
+	//	return consts.ErrPermissionDenied
+	//}
+
+	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
+		Update(s.dao.Assistant.LibraryId, library.Id)
+
+	return err
+}
+
+func (s *Service) UnbindLibrary(ctx context.Context, assistant *entity.Assistant, library *entity.Library) error {
+	//if library.UserId != assistant.UserId {
+	//	return consts.ErrPermissionDenied
+	//}
+
+	if assistant.LibraryId != nil && *assistant.LibraryId != library.Id {
+		return consts.ErrPermissionDenied
+	}
+
+	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
+		Update(s.dao.Assistant.LibraryId, nil)
+
+	return err
 }

@@ -291,6 +291,13 @@ definitions:
     - description
     - name
     type: object
+  schema.AssistantLibraryRequest:
+    properties:
+      library_id:
+        type: integer
+    required:
+    - library_id
+    type: object
   schema.AssistantUpdateRequest:
     properties:
       description:
@@ -311,9 +318,6 @@ definitions:
         - true
         - false
         type: boolean
-      library_id:
-        maximum: 255
-        type: integer
       name:
         maxLength: 255
         type: string
@@ -803,6 +807,57 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 更新 Assistant
+      tags:
+      - assistant
+  /api/v1/assistants/{id}/library:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 解绑资料库
+      tags:
+      - assistant
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      - description: AssistantLibraryRequest
+        in: body
+        name: AssistantLibraryRequest
+        required: true
+        schema:
+          $ref: '#/definitions/schema.AssistantLibraryRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 绑定资料库
       tags:
       - assistant
   /api/v1/assistants/{id}/shares:

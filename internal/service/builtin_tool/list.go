@@ -104,7 +104,7 @@ var tools = []llms.Tool{
 		Function: &llms.FunctionDefinition{
 			Name: prefix("calculator"),
 			Description: "It's useful for mathematical calculations," +
-				"Take a deep breath and work on this step by step." +
+				"Every time a step is executed, the user must be informed and then proceed to the next step." +
 				"When encountering functions such as log and sqrt, " +
 				"you need to call the tool multiple times to calculate, " +
 				"tThe calculation process must be written out before calling the tool to perform the calculation",

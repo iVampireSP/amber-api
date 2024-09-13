@@ -54,6 +54,11 @@ func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assista
 		s.dao.Assistant.EnableMemoryForAssistantShare.Value(assistant.EnableMemoryForAssistantShare),
 	}
 	// 这里不能直接设置 library_id
+	if assistant.LibraryId != nil {
+		assignExpr = append(assignExpr, s.dao.Assistant.LibraryId.Value(uint(*assistant.LibraryId)))
+	} else {
+		assignExpr = append(assignExpr, s.dao.Assistant.LibraryId.Null())
+	}
 
 	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
 		UpdateSimple(assignExpr...)

@@ -69,7 +69,10 @@ func (s *Service) UpdateLibrary(ctx context.Context, library *entity.Library) er
 		}
 	}
 
-	_, err = libraryDao.Updates(library)
+	_, err = libraryDao.Updates(entity.Library{
+		Name:        library.Name,
+		Description: library.Description,
+	})
 	return err
 }
 

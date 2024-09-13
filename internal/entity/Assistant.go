@@ -11,7 +11,7 @@ type Assistant struct {
 	Description                   string           `json:"description"`
 	UserId                        schema.UserId    `json:"user_id"`
 	LibraryId                     *schema.EntityId `json:"library_id"`
-	Library                       *Library         `json:"library"`
+	Library                       *Library         `json:"-"`
 	DisableDefaultPrompt          bool             `json:"disable_default_prompt"`
 	DisableMemory                 bool             `json:"disable_memory"`
 	EnableMemoryForAssistantShare bool             `json:"enable_memory_for_assistant_share"`

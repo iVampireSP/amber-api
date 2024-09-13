@@ -134,7 +134,7 @@ func (u *AssistantController) CreateAssistant(c *gin.Context) {
 // @Param        assistantUpdateRequest  body  schema.AssistantUpdateRequest  true  "Assistant Update"
 // @Success      200  {object}  schema.ResponseBody{data=entity.Assistant}
 // @Failure      400  {object}  schema.ResponseBody{}
-// @Router       /api/v1/assistants/{id} [patch]
+// @Router       /api/v1/assistants/{id} [put]
 func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 	var updateReq schema.AssistantUpdateRequest
 	var response = schema.NewResponse(c)
@@ -164,35 +164,27 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 		return
 	}
 
-	if updateReq.Name != "" {
-		assistantEntity.Name = updateReq.Name
-	}
+	assistantEntity.Name = updateReq.Name
+	assistantEntity.Description = updateReq.Description
+	assistantEntity.Prompt = updateReq.Prompt
 
-	if updateReq.Description != "" {
-		assistantEntity.Description = updateReq.Description
-	}
+	if updateReq.LibraryId == nil {
+		assistantEntity.LibraryId = nil
+	} else {
+		// 检测用户是否有这个 library
+		getLibrary, err := u.libraryService.GetLibrary(c, *updateReq.LibraryId)
+		if err != nil {
+			response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
+			return
+		}
 
-	if updateReq.Prompt != "" {
-		assistantEntity.Prompt = updateReq.Prompt
-	}
+		if getLibrary.UserId != u.authService.GetUserId(c) {
+			response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
+			return
+		}
 
-	//if updateReq.LibraryId == nil {
-	//	assistantEntity.LibraryId = nil
-	//} else {
-	//	// 检测用户是否有这个 library
-	//	getLibrary, err := u.libraryService.GetLibrary(c, *updateReq.LibraryId)
-	//	if err != nil {
-	//		response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
-	//		return
-	//	}
-	//
-	//	if getLibrary.UserId != u.authService.GetUserId(c) {
-	//		response.Status(http.StatusNotFound).Error(consts.ErrLibraryNotFound).Send()
-	//		return
-	//	}
-	//
-	//	assistantEntity.LibraryId = updateReq.LibraryId
-	//}
+		assistantEntity.LibraryId = updateReq.LibraryId
+	}
 
 	assistantEntity.DisableDefaultPrompt = updateReq.DisableDefaultPrompt
 	assistantEntity.DisableMemory = updateReq.DisableMemory

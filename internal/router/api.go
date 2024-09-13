@@ -34,7 +34,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 
 	r.GET("/assistants", a.Assistant.List)
 	r.GET("/assistants/:id", a.Assistant.GetAssistant)
-	r.PATCH("/assistants/:id", a.Assistant.UpdateAssistant)
+	r.PUT("/assistants/:id", a.Assistant.UpdateAssistant)
 	r.POST("/assistants", a.Assistant.CreateAssistant)
 	r.DELETE("/assistants/:id", a.Assistant.DeleteAssistant)
 	r.GET("/assistants/:id/shares", a.Assistant.ListAssistantShares)
@@ -73,7 +73,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.GET("/libraries", a.Library.List)
 	r.GET("/libraries/:id/", a.Library.GetLibrary)
 	r.POST("/libraries", a.Library.CreateLibrary)
-	r.PATCH("/libraries/:id/", a.Library.Update)
+	r.PUT("/libraries/:id/", a.Library.Update)
 	r.DELETE("/libraries/:id/", a.Library.Delete)
 	r.GET("/libraries/:id/documents", a.Library.ListDocuments)
 	r.POST("/libraries/:id/documents", a.Library.CreateDocument)

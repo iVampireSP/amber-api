@@ -312,6 +312,8 @@ definitions:
         - true
         - false
         type: boolean
+      library_id:
+        type: integer
       name:
         maxLength: 255
         type: string
@@ -790,7 +792,7 @@ paths:
       summary: 获取指定的 Assistant
       tags:
       - assistant
-    patch:
+    put:
       consumes:
       - application/json
       parameters:
@@ -1845,7 +1847,7 @@ paths:
       summary: 获取一个资料库
       tags:
       - libraries
-    patch:
+    put:
       consumes:
       - application/json
       parameters:

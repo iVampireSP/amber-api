@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"errors"
+	"gorm.io/gen/field"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -70,12 +71,24 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 }
 
 func (s *Service) UpdateChat(ctx context.Context, chat *entity.Chat) error {
-	_, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(chat.Id))).
-		Updates(entity.Chat{
-			Name:        chat.Name,
-			ExpiredAt:   chat.ExpiredAt,
-			AssistantId: chat.AssistantId,
-		})
+	var updateExpr = []field.AssignExpr{
+		s.dao.Chat.Name.Value(chat.Name),
+	}
+
+	if chat.ExpiredAt != nil {
+		updateExpr = append(updateExpr, s.dao.Chat.ExpiredAt.Value(*chat.ExpiredAt))
+	} else {
+		updateExpr = append(updateExpr, s.dao.Chat.ExpiredAt.Null())
+	}
+
+	if chat.AssistantId != nil {
+		updateExpr = append(updateExpr, s.dao.Chat.AssistantId.Value(uint(*chat.AssistantId)))
+	} else {
+		updateExpr = append(updateExpr, s.dao.Chat.AssistantId.Null())
+	}
+
+	_, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(chat.Id))).Debug().
+		UpdateSimple(updateExpr...)
 
 	return err
 }

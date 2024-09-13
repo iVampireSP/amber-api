@@ -227,50 +227,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "assistant"
-                ],
-                "summary": "删除 Assistant",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Assistant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/schema.ResponseBody"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/schema.ResponseBody"
-                        }
-                    }
-                }
-            },
-            "patch": {
+            "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -325,6 +282,49 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "删除 Assistant",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Assistant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/schema.ResponseBody"
                         }
@@ -2003,42 +2003,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "libraries"
-                ],
-                "summary": "删除资料库",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/schema.ResponseBody"
-                        }
-                    }
-                }
-            },
-            "patch": {
+            "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -2068,6 +2033,41 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/schema.LibraryUpdateRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "libraries"
+                ],
+                "summary": "删除资料库",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path"
                     }
                 ],
                 "responses": {
@@ -3245,6 +3245,9 @@ const docTemplate = `{
                         true,
                         false
                     ]
+                },
+                "library_id": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string",

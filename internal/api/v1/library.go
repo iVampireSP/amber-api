@@ -166,7 +166,7 @@ func (lc *LibraryController) Delete(c *gin.Context) {
 // @Param        schema.LibraryUpdateRequest  body  	schema.LibraryUpdateRequest  true  "schema.LibraryUpdateRequest"
 // @Success      204
 // @Failure      400  {object}  schema.ResponseBody
-// @Router       /api/v1/libraries/{id} [patch]
+// @Router       /api/v1/libraries/{id} [put]
 func (lc *LibraryController) Update(c *gin.Context) {
 	var response = schema.NewResponse(c)
 	userId := lc.authService.GetUserId(c)
@@ -192,16 +192,9 @@ func (lc *LibraryController) Update(c *gin.Context) {
 		return
 	}
 
-	if libraryUpdateRequest.Name != "" {
-		libraryEntity.Name = libraryUpdateRequest.Name
-	}
-
-	if libraryUpdateRequest.Description != nil {
-		libraryEntity.Description = libraryUpdateRequest.Description
-	}
-	if libraryUpdateRequest.Default != nil {
-		libraryEntity.Default = *libraryUpdateRequest.Default
-	}
+	libraryEntity.Name = libraryUpdateRequest.Name
+	libraryEntity.Description = libraryUpdateRequest.Description
+	libraryEntity.Default = *libraryUpdateRequest.Default
 
 	err = lc.libraryService.UpdateLibrary(c, libraryEntity)
 	if err != nil {

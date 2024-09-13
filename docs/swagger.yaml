@@ -379,6 +379,18 @@ definitions:
     - guest_id
     - name
     type: object
+  schema.ChatUpdateRequest:
+    properties:
+      assistant_id:
+        type: integer
+      expired_at:
+        $ref: '#/definitions/schema.CustomTime'
+      name:
+        maxLength: 30
+        type: string
+    required:
+    - name
+    type: object
   schema.CurrentUserResponse:
     properties:
       ip:
@@ -1410,6 +1422,88 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete Chat
+      tags:
+      - chat
+    get:
+      consumes:
+      - application/json
+      description: 将返回一个实体
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.Chat'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 显示一个对话的数据
+      tags:
+      - chat
+    put:
+      consumes:
+      - application/json
+      description: 可以重新设置对话的一些信息
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      - description: ChatUpdateRequest
+        in: body
+        name: schema.ChatUpdateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/schema.ChatUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.Chat'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新对话
       tags:
       - chat
   /api/v1/chats/{id}/clear:

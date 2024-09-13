@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
@@ -144,6 +145,144 @@ func (u *ChatController) Create(c *gin.Context) {
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
+	}
+
+	response.Status(http.StatusOK).Data(chatEntity).Send()
+}
+
+// Show godoc
+// @Summary      显示一个对话的数据
+// @Description  将返回一个实体
+// @Tags         chat
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        schema.ChatRequest  path  schema.ChatRequest true  "Chat ID"
+// @Success      200  {object}  schema.ResponseBody{data=entity.Chat}
+// @Failure      400  {object}  schema.ResponseBody
+// @Failure      404  {object}  schema.ResponseBody
+// @Failure      500  {object}  schema.ResponseBody
+// @Router       /api/v1/chats/{id} [get]
+func (u *ChatController) Show(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
+	var chatRequest = &schema.ChatRequest{}
+	err := c.ShouldBindUri(chatRequest)
+	if err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)
+	if err != nil {
+		if errors.Is(err, consts.ErrChatNotFound) || errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
+
+	if chatEntity.Id == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
+		return
+	}
+
+	response.Status(http.StatusOK).Data(chatEntity).Send()
+}
+
+// Update godoc
+// @Summary      更新对话
+// @Description  可以重新设置对话的一些信息
+// @Tags         chat
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        schema.ChatRequest  path  schema.ChatRequest true  "Chat ID"
+// @Param        schema.ChatUpdateRequest  body  schema.ChatUpdateRequest true  "ChatUpdateRequest"
+// @Success      200  {object}  schema.ResponseBody{data=entity.Chat}
+// @Failure      400  {object}  schema.ResponseBody
+// @Failure      404  {object}  schema.ResponseBody
+// @Failure      500  {object}  schema.ResponseBody
+// @Router       /api/v1/chats/{id} [put]
+func (u *ChatController) Update(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
+	var chatRequest = &schema.ChatRequest{}
+	err := c.ShouldBindUri(chatRequest)
+	if err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	var chatUpdateRequest = &schema.ChatUpdateRequest{}
+	err = c.ShouldBindJSON(chatUpdateRequest)
+	if err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)
+	if err != nil {
+		if errors.Is(err, consts.ErrChatNotFound) || errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
+
+	if chatEntity.Id == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
+		return
+	}
+
+	// 检查状态是否是回复中
+	isStreaming := u.isStreaming(c, chatEntity.Id)
+	if isStreaming {
+		response.Status(http.StatusBadRequest).Error(consts.ErrChatStreaming).Send()
+		return
+	}
+
+	chatEntity.Name = chatUpdateRequest.Name
+	if chatUpdateRequest.ExpiredAt != nil {
+		chatEntity.ExpiredAt = &chatUpdateRequest.ExpiredAt.Time
+	} else {
+		chatEntity.ExpiredAt = nil
+	}
+
+	if chatUpdateRequest.AssistantId != nil {
+		assistantEntity, err := u.assistantService.GetAssistant(c, *chatUpdateRequest.AssistantId)
+		if err != nil {
+			if errors.Is(err, consts.ErrAssistantNotFound) || errors.Is(err, gorm.ErrRecordNotFound) {
+				response.Status(http.StatusNotFound).Error(err).Send()
+				return
+			} else {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+		}
+
+		if assistantEntity.UserId != u.authService.GetUserId(c) {
+			response.Status(http.StatusForbidden).Error(consts.ErrPermissionDenied).Send()
+			return
+		}
+		chatEntity.AssistantId = chatUpdateRequest.AssistantId
+
+	} else {
+		chatEntity.AssistantId = nil
+	}
+
+	err = u.chatService.UpdateChat(c, chatEntity)
+	if err != nil {
+		if errors.Is(err, consts.ErrChatNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
 	}
 
 	response.Status(http.StatusOK).Data(chatEntity).Send()

@@ -69,6 +69,17 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 	return &chat, err
 }
 
+func (s *Service) UpdateChat(ctx context.Context, chat *entity.Chat) error {
+	_, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(chat.Id))).
+		Updates(entity.Chat{
+			Name:        chat.Name,
+			ExpiredAt:   chat.ExpiredAt,
+			AssistantId: chat.AssistantId,
+		})
+
+	return err
+}
+
 func (s *Service) GetChat(ctx context.Context, id schema.EntityId) (*entity.Chat, error) {
 	chat, err := s.dao.WithContext(ctx).Chat.Preload(s.dao.Chat.Assistant).Where(s.dao.Chat.Id.Eq(uint(id))).First()
 

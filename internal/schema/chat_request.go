@@ -49,6 +49,12 @@ type ChatCreateRequest struct {
 	UserId      UserId      `json:"user_id" swaggerignore:"true" binding:"-"`
 }
 
+type ChatUpdateRequest struct {
+	Name        string      `json:"name" binding:"required" validate:"max=30"`
+	AssistantId *EntityId   `json:"assistant_id"`
+	ExpiredAt   *CustomTime `json:"expired_at" time_format:"2006-01-02" time_utc:"1"`
+}
+
 type ChatGuestCreateRequest struct {
 	Name        string   `json:"name" binding:"required" validate:"max=30"`
 	AssistantId EntityId `json:"assistant_id" binding:"required"`

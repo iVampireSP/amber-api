@@ -86,6 +86,9 @@ definitions:
   entity.ChatMessage:
     properties:
       assistant_id:
+        description: AssistantId 可以让同一个对话中，使用不同的助手来处理消息
+        type: integer
+      chat_id:
         type: integer
       completion_tokens:
         type: integer
@@ -124,15 +127,6 @@ definitions:
         type: boolean
       created_at:
         type: string
-      file:
-        $ref: '#/definitions/entity.File'
-      file_hash:
-        description: |-
-          FileHash 是 File 结构体的 hash，用于判断文件内容是否发生变化
-          只不过一般情况也不会改变，因为 File 就不会变
-        type: string
-      file_id:
-        type: integer
       id:
         description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
         type: integer
@@ -339,6 +333,8 @@ definitions:
     type: object
   schema.ChatMessageAddRequest:
     properties:
+      assistant_id:
+        type: integer
       message:
         maxLength: 255
         type: string
@@ -400,6 +396,16 @@ definitions:
     properties:
       time.Time:
         type: string
+    type: object
+  schema.DocumentCreateRequest:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+    required:
+    - content
+    - name
     type: object
   schema.FunctionsInput:
     properties:
@@ -1801,6 +1807,33 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 列出资料库以及资料库下的文档
+      tags:
+      - libraries
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        type: integer
+      - description: schema.DocumentCreateRequest
+        in: body
+        name: schema.DocumentCreateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/schema.DocumentCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建文档
       tags:
       - libraries
   /api/v1/libraries/{id}/documents/{document_id}:

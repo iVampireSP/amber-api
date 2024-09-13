@@ -175,36 +175,49 @@ func (u *ChatController) AddChatFile(c *gin.Context) {
 		return
 	}
 
-	if u.libraryService.CanChunk(file) {
-		// TODO: 如果设置了助理使用的知识库，则不适用默认知识库
-		library, err := u.libraryService.DefaultLibrary(c, userId)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
+	// 由于一个会话里面会有多个助理,但是很幸运,这里不需要关心
+	// 但是如果这个会话没有助理,但是得注意的
+	if chatEntity.AssistantId != nil && u.libraryService.CanChunk(file) {
+		var library *entity.Library
 
-		// 检测用户下有没有相同 File ID 的 Document，如果有，则比较文件是否一致
-		document, err := u.libraryService.GetDocumentByFileAndLibrary(c, file, library)
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-
-		if document != nil {
-			if *document.FileHash == file.FileHash {
-				response.Status(http.StatusOK).Data(chatMessageResponse).Send()
+		if chatEntity.Assistant != nil && chatEntity.Assistant.LibraryId != nil {
+			library, err = u.libraryService.GetLibrary(c, *chatEntity.Assistant.LibraryId)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
 				return
 			}
 		} else {
-			document = &entity.Document{
-				LibraryId: library.Id,
-				FileId:    &file.Id,
-				FileHash:  &file.FileHash,
-				Name:      filename,
+			library, err = u.libraryService.DefaultLibrary(c, userId)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
 			}
 		}
 
-		err = u.libraryService.CreateDocument(c, document)
+		// 检测用户下有没有相同 File ID 的 Document，如果有，则比较文件是否一致
+		//document, err := u.libraryService.GetDocumentByFileAndLibrary(c, file, library)
+		//if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		//	response.Status(http.StatusInternalServerError).Error(err).Send()
+		//	return
+		//}
+		//
+		//if document != nil {
+		//	if *document.FileHash == file.FileHash {
+		//		response.Status(http.StatusOK).Data(chatMessageResponse).Send()
+		//		return
+		//	}
+		//} else {
+		//	document = &entity.Document{
+		//		LibraryId: library.Id,
+		//		FileId:    &file.Id,
+		//		FileHash:  &file.FileHash,
+		//		Name:      filename,
+		//	}
+		//}
+
+		// 因为文档不再与文件绑定,所以这里需要直接创建文档
+
+		documentEntity, err := u.libraryService.CreateDocument(c, library, filename, "")
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -212,7 +225,7 @@ func (u *ChatController) AddChatFile(c *gin.Context) {
 
 		// Chunk
 		go func() {
-			err := u.libraryService.ChunkFileToDocument(c, file, document)
+			err := u.libraryService.ChunkFileToDocument(c, file, documentEntity)
 			if err != nil {
 				u.logger.Sugar.Error(err)
 			}

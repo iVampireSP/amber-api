@@ -93,3 +93,36 @@ func (s *Service) ChunkFileToDocument(ctx context.Context, file *entity.File, do
 	})
 
 }
+
+func (s *Service) ChunkTextToDocument(ctx context.Context, content string, document *entity.Document) error {
+	var io = strings.NewReader(content)
+
+	documentLoader := documentloaders.NewText(io)
+
+	// 这种就很容易,后端只需要 chunk 纯文本即可，文档解析这类应该交给客户端处理
+
+	recursiveCharacter := textsplitter.NewRecursiveCharacter(
+		textsplitter.WithChunkSize(ChunkSize),
+		textsplitter.WithChunkOverlap(ChunkOverlap),
+	)
+
+	chunks, err := documentLoader.LoadAndSplit(ctx, recursiveCharacter)
+	if err != nil {
+		return err
+	}
+
+	var documentChunks = make([]*entity.DocumentChunk, 0)
+
+	for _, chunk := range chunks {
+		documentChunks = append(documentChunks, &entity.DocumentChunk{
+			Content:    chunk.PageContent,
+			DocumentId: document.Id,
+			LibraryId:  document.LibraryId,
+		})
+	}
+
+	return s.dao.Transaction(func(tx *dao.Query) error {
+		return tx.DocumentChunk.WithContext(ctx).Create(documentChunks...)
+	})
+
+}

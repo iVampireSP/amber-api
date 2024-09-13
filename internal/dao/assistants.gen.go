@@ -47,20 +47,12 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 			Library struct {
 				field.RelationField
 			}
-			File struct {
-				field.RelationField
-			}
 		}{
 			RelationField: field.NewRelation("Library.Document", "entity.Document"),
 			Library: struct {
 				field.RelationField
 			}{
 				RelationField: field.NewRelation("Library.Document.Library", "entity.Library"),
-			},
-			File: struct {
-				field.RelationField
-			}{
-				RelationField: field.NewRelation("Library.Document.File", "entity.File"),
 			},
 		},
 	}
@@ -162,9 +154,6 @@ type assistantBelongsToLibrary struct {
 	Document struct {
 		field.RelationField
 		Library struct {
-			field.RelationField
-		}
-		File struct {
 			field.RelationField
 		}
 	}

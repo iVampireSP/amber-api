@@ -33,8 +33,6 @@ func newDocument(db *gorm.DB, opts ...gen.DOOption) document {
 	_document.Name = field.NewString(tableName, "name")
 	_document.Chunked = field.NewBool(tableName, "chunked")
 	_document.LibraryId = field.NewUint(tableName, "library_id")
-	_document.FileId = field.NewUint(tableName, "file_id")
-	_document.FileHash = field.NewString(tableName, "file_hash")
 	_document.Library = documentBelongsToLibrary{
 		db: db.Session(&gorm.Session{}),
 
@@ -44,9 +42,6 @@ func newDocument(db *gorm.DB, opts ...gen.DOOption) document {
 			Library struct {
 				field.RelationField
 			}
-			File struct {
-				field.RelationField
-			}
 		}{
 			RelationField: field.NewRelation("Library.Document", "entity.Document"),
 			Library: struct {
@@ -54,18 +49,7 @@ func newDocument(db *gorm.DB, opts ...gen.DOOption) document {
 			}{
 				RelationField: field.NewRelation("Library.Document.Library", "entity.Library"),
 			},
-			File: struct {
-				field.RelationField
-			}{
-				RelationField: field.NewRelation("Library.Document.File", "entity.File"),
-			},
 		},
-	}
-
-	_document.File = documentBelongsToFile{
-		db: db.Session(&gorm.Session{}),
-
-		RelationField: field.NewRelation("File", "entity.File"),
 	}
 
 	_document.fillFieldMap()
@@ -83,11 +67,7 @@ type document struct {
 	Name      field.String
 	Chunked   field.Bool
 	LibraryId field.Uint
-	FileId    field.Uint
-	FileHash  field.String
 	Library   documentBelongsToLibrary
-
-	File documentBelongsToFile
 
 	fieldMap map[string]field.Expr
 }
@@ -110,8 +90,6 @@ func (d *document) updateTableName(table string) *document {
 	d.Name = field.NewString(table, "name")
 	d.Chunked = field.NewBool(table, "chunked")
 	d.LibraryId = field.NewUint(table, "library_id")
-	d.FileId = field.NewUint(table, "file_id")
-	d.FileHash = field.NewString(table, "file_hash")
 
 	d.fillFieldMap()
 
@@ -128,15 +106,13 @@ func (d *document) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (d *document) fillFieldMap() {
-	d.fieldMap = make(map[string]field.Expr, 10)
+	d.fieldMap = make(map[string]field.Expr, 7)
 	d.fieldMap["id"] = d.Id
 	d.fieldMap["created_at"] = d.CreatedAt
 	d.fieldMap["updated_at"] = d.UpdatedAt
 	d.fieldMap["name"] = d.Name
 	d.fieldMap["chunked"] = d.Chunked
 	d.fieldMap["library_id"] = d.LibraryId
-	d.fieldMap["file_id"] = d.FileId
-	d.fieldMap["file_hash"] = d.FileHash
 
 }
 
@@ -158,9 +134,6 @@ type documentBelongsToLibrary struct {
 	Document struct {
 		field.RelationField
 		Library struct {
-			field.RelationField
-		}
-		File struct {
 			field.RelationField
 		}
 	}
@@ -228,77 +201,6 @@ func (a documentBelongsToLibraryTx) Clear() error {
 }
 
 func (a documentBelongsToLibraryTx) Count() int64 {
-	return a.tx.Count()
-}
-
-type documentBelongsToFile struct {
-	db *gorm.DB
-
-	field.RelationField
-}
-
-func (a documentBelongsToFile) Where(conds ...field.Expr) *documentBelongsToFile {
-	if len(conds) == 0 {
-		return &a
-	}
-
-	exprs := make([]clause.Expression, 0, len(conds))
-	for _, cond := range conds {
-		exprs = append(exprs, cond.BeCond().(clause.Expression))
-	}
-	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
-	return &a
-}
-
-func (a documentBelongsToFile) WithContext(ctx context.Context) *documentBelongsToFile {
-	a.db = a.db.WithContext(ctx)
-	return &a
-}
-
-func (a documentBelongsToFile) Session(session *gorm.Session) *documentBelongsToFile {
-	a.db = a.db.Session(session)
-	return &a
-}
-
-func (a documentBelongsToFile) Model(m *entity.Document) *documentBelongsToFileTx {
-	return &documentBelongsToFileTx{a.db.Model(m).Association(a.Name())}
-}
-
-type documentBelongsToFileTx struct{ tx *gorm.Association }
-
-func (a documentBelongsToFileTx) Find() (result *entity.File, err error) {
-	return result, a.tx.Find(&result)
-}
-
-func (a documentBelongsToFileTx) Append(values ...*entity.File) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Append(targetValues...)
-}
-
-func (a documentBelongsToFileTx) Replace(values ...*entity.File) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Replace(targetValues...)
-}
-
-func (a documentBelongsToFileTx) Delete(values ...*entity.File) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Delete(targetValues...)
-}
-
-func (a documentBelongsToFileTx) Clear() error {
-	return a.tx.Clear()
-}
-
-func (a documentBelongsToFileTx) Count() int64 {
 	return a.tx.Count()
 }
 

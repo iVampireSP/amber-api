@@ -56,8 +56,9 @@ type ChatGuestCreateRequest struct {
 }
 
 type ChatMessageAddRequest struct {
-	Message string   `json:"message" binding:"required" validate:"max=255"`
-	Role    ChatRole `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant,image"`
+	AssistantId *EntityId `json:"assistant_id"`
+	Message     string    `json:"message" binding:"required" validate:"max=255"`
+	Role        ChatRole  `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant,image"`
 }
 
 type ChatMessageAddImageRequest struct {

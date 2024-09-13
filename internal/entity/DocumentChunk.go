@@ -9,7 +9,8 @@ type DocumentChunk struct {
 	DocumentId schema.EntityId `json:"document_id"`
 	Library    *Library        `json:"library"`
 	LibraryId  schema.EntityId `json:"library_id"`
-	Chunked    bool            `json:"chunked"`
+	// Vectorized 代表是否已经向量化，不应该用 Chunked
+	Vectorized bool `json:"vectorized"`
 }
 
 func (*DocumentChunk) TableName() string {

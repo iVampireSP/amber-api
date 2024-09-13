@@ -1999,6 +1999,50 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "libraries"
+                ],
+                "summary": "创建文档",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "schema.DocumentCreateRequest",
+                        "name": "schema.DocumentCreateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.DocumentCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
             }
         },
         "/api/v1/libraries/{id}/documents/{document_id}": {
@@ -2740,6 +2784,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "assistant_id": {
+                    "description": "AssistantId 可以让同一个对话中，使用不同的助手来处理消息",
+                    "type": "integer"
+                },
+                "chat_id": {
                     "type": "integer"
                 },
                 "completion_tokens": {
@@ -2793,16 +2841,6 @@ const docTemplate = `{
                 },
                 "created_at": {
                     "type": "string"
-                },
-                "file": {
-                    "$ref": "#/definitions/entity.File"
-                },
-                "file_hash": {
-                    "description": "FileHash 是 File 结构体的 hash，用于判断文件内容是否发生变化\n只不过一般情况也不会改变，因为 File 就不会变",
-                    "type": "string"
-                },
-                "file_id": {
-                    "type": "integer"
                 },
                 "id": {
                     "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
@@ -3106,6 +3144,9 @@ const docTemplate = `{
                 "role"
             ],
             "properties": {
+                "assistant_id": {
+                    "type": "integer"
+                },
                 "message": {
                     "type": "string",
                     "maxLength": 255
@@ -3189,6 +3230,21 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "time.Time": {
+                    "type": "string"
+                }
+            }
+        },
+        "schema.DocumentCreateRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "name"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

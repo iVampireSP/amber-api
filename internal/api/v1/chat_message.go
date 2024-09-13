@@ -101,6 +101,32 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 
 	var chatMessageResponse = &schema.ChatMessageResponse{}
 
+	var userInfo = u.authService.GetUser(c)
+	var publicUser = &schema.UserPublicInfo{
+		Name:      userInfo.Token.Name,
+		Id:        userInfo.Token.Sub,
+		ChatOwner: schema.OwnerUser,
+	}
+
+	var assistantEntity *entity.Assistant
+	if request.AssistantId != nil {
+		// 检测 Assistant 是否属于用户
+		assistantEntity, err = u.assistantService.GetAssistant(c, *request.AssistantId)
+		if err != nil {
+			if errors.Is(err, consts.ErrAssistantNotFound) {
+				response.Status(http.StatusNotFound).Error(err).Send()
+			} else {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+			}
+			return
+		}
+		if assistantEntity.UserId != userInfo.Token.Sub {
+			response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+			return
+		}
+
+	}
+
 	// 检查状态是否是回复中
 	isStreaming := u.isStreaming(c, chatRequest.ChatId)
 	if isStreaming {
@@ -147,15 +173,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
-	}
-
-	// TODO： 从知识库获取内容，然后创建一个新的消息，并插入到数据库
-
-	var userInfo = u.authService.GetUser(c)
-	var publicUser = &schema.UserPublicInfo{
-		Name:      userInfo.Token.Name,
-		Id:        userInfo.Token.Sub,
-		ChatOwner: schema.OwnerUser,
 	}
 
 	// last chat message
@@ -207,28 +224,65 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		}
 	}
 
+	// 消息写入列表
+	var chatMessages []entity.ChatMessage
+
+	// 如果 Role 是 File
+	if request.Role == schema.RoleFile {
+		// 不需要串流，也不需要获取知识库
+		needStream = false
+	}
+
+	chatMessages = append(chatMessages, entity.ChatMessage{
+		ChatId:      chatEntity.Id,
+		AssistantId: chatEntity.AssistantId,
+		Content:     request.Message,
+		Role:        request.Role,
+	})
+
+	if assistantEntity != nil && needStream {
+		libraryEntity, err := u.libraryService.GetLibrary(c, *assistantEntity.LibraryId)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		// 从知识库获取内容，并添加到历史上下文
+		libraryResults, err := u.libraryService.SearchLibrary(c, request.Message, libraryEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		var chunkContent = ""
+		// 将 libraryResults 拼接起来
+		for _, libraryResult := range libraryResults {
+			chunkContent += libraryResult.Content
+		}
+
+		// 添加知识库消息
+		chatMessages = append(chatMessages, entity.ChatMessage{
+			ChatId:      chatEntity.Id,
+			AssistantId: &assistantEntity.Id,
+			Content:     chunkContent,
+			Role:        schema.RoleSystem,
+		})
+	}
+
 	// TODO: 如果 request.Message 的大小超过了 1mb, 则转换为文件。转换之前应该先判断助理是否存在知识库
+	// Update: 其实我也不知道这个要不要做,感觉做了意义也不大
 	// 如果存在知识库，则将文件放入知识库中，否则将不处理
 	//if len(request.Message) > 1024*1024 {
 	//	// 转换为 file
 	//
 	//}
 
-	var chatMessage entity.ChatMessage
-	chatMessage.ChatId = chatEntity.Id
-	chatMessage.Content = request.Message
-	// 准备检测 Role
-	chatMessage.Role = request.Role
-
-	// 如果 Role 是 File
-	if request.Role == schema.RoleFile {
-		needStream = false
-	}
-
-	err = u.cm.CreateChatMessage(c, &chatMessage)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
+	for _, chatMessage := range chatMessages {
+		err = u.cm.CreateChatMessage(c, &chatMessage)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
 	}
 
 	chatMessageResponse.Stream = needStream

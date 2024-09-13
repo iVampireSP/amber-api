@@ -51,11 +51,6 @@ func newLibrary(db *gorm.DB, opts ...gen.DOOption) library {
 				RelationField: field.NewRelation("Document.Library.Document", "entity.Document"),
 			},
 		},
-		File: struct {
-			field.RelationField
-		}{
-			RelationField: field.NewRelation("Document.File", "entity.File"),
-		},
 	}
 
 	_library.fillFieldMap()
@@ -145,9 +140,6 @@ type libraryHasManyDocument struct {
 		Document struct {
 			field.RelationField
 		}
-	}
-	File struct {
-		field.RelationField
 	}
 }
 

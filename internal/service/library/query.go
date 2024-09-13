@@ -28,9 +28,9 @@ func (s *Service) ChunkToMilvus(ctx context.Context, chunk *entity.DocumentChunk
 		return err
 	}
 
-	chunk.Chunked = true
+	chunk.Vectorized = true
 
-	_, err = s.dao.WithContext(ctx).DocumentChunk.Where(s.dao.DocumentChunk.Id.Eq(uint(chunk.Id))).Update(s.dao.DocumentChunk.Chunked, true)
+	_, err = s.dao.WithContext(ctx).DocumentChunk.Where(s.dao.DocumentChunk.Id.Eq(uint(chunk.Id))).Update(s.dao.DocumentChunk.Vectorized, true)
 	if err != nil {
 		return err
 	}

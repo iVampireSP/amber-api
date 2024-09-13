@@ -34,7 +34,7 @@ func newDocumentChunk(db *gorm.DB, opts ...gen.DOOption) documentChunk {
 	_documentChunk.Order_ = field.NewInt(tableName, "order")
 	_documentChunk.DocumentId = field.NewUint(tableName, "document_id")
 	_documentChunk.LibraryId = field.NewUint(tableName, "library_id")
-	_documentChunk.Chunked = field.NewBool(tableName, "chunked")
+	_documentChunk.Vectorized = field.NewBool(tableName, "vectorized")
 	_documentChunk.Library = documentChunkBelongsToLibrary{
 		db: db.Session(&gorm.Session{}),
 
@@ -44,20 +44,12 @@ func newDocumentChunk(db *gorm.DB, opts ...gen.DOOption) documentChunk {
 			Library struct {
 				field.RelationField
 			}
-			File struct {
-				field.RelationField
-			}
 		}{
 			RelationField: field.NewRelation("Library.Document", "entity.Document"),
 			Library: struct {
 				field.RelationField
 			}{
 				RelationField: field.NewRelation("Library.Document.Library", "entity.Library"),
-			},
-			File: struct {
-				field.RelationField
-			}{
-				RelationField: field.NewRelation("Library.Document.File", "entity.File"),
 			},
 		},
 	}
@@ -78,7 +70,7 @@ type documentChunk struct {
 	Order_     field.Int
 	DocumentId field.Uint
 	LibraryId  field.Uint
-	Chunked    field.Bool
+	Vectorized field.Bool
 	Library    documentChunkBelongsToLibrary
 
 	fieldMap map[string]field.Expr
@@ -103,7 +95,7 @@ func (d *documentChunk) updateTableName(table string) *documentChunk {
 	d.Order_ = field.NewInt(table, "order")
 	d.DocumentId = field.NewUint(table, "document_id")
 	d.LibraryId = field.NewUint(table, "library_id")
-	d.Chunked = field.NewBool(table, "chunked")
+	d.Vectorized = field.NewBool(table, "vectorized")
 
 	d.fillFieldMap()
 
@@ -128,7 +120,7 @@ func (d *documentChunk) fillFieldMap() {
 	d.fieldMap["order"] = d.Order_
 	d.fieldMap["document_id"] = d.DocumentId
 	d.fieldMap["library_id"] = d.LibraryId
-	d.fieldMap["chunked"] = d.Chunked
+	d.fieldMap["vectorized"] = d.Vectorized
 
 }
 
@@ -150,9 +142,6 @@ type documentChunkBelongsToLibrary struct {
 	Document struct {
 		field.RelationField
 		Library struct {
-			field.RelationField
-		}
-		File struct {
 			field.RelationField
 		}
 	}

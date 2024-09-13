@@ -47,9 +47,6 @@ func newChat(db *gorm.DB, opts ...gen.DOOption) chat {
 				Library struct {
 					field.RelationField
 				}
-				File struct {
-					field.RelationField
-				}
 			}
 		}{
 			RelationField: field.NewRelation("Assistant.Library", "entity.Library"),
@@ -58,20 +55,12 @@ func newChat(db *gorm.DB, opts ...gen.DOOption) chat {
 				Library struct {
 					field.RelationField
 				}
-				File struct {
-					field.RelationField
-				}
 			}{
 				RelationField: field.NewRelation("Assistant.Library.Document", "entity.Document"),
 				Library: struct {
 					field.RelationField
 				}{
 					RelationField: field.NewRelation("Assistant.Library.Document.Library", "entity.Library"),
-				},
-				File: struct {
-					field.RelationField
-				}{
-					RelationField: field.NewRelation("Assistant.Library.Document.File", "entity.File"),
 				},
 			},
 		},
@@ -170,9 +159,6 @@ type chatBelongsToAssistant struct {
 		Document struct {
 			field.RelationField
 			Library struct {
-				field.RelationField
-			}
-			File struct {
 				field.RelationField
 			}
 		}

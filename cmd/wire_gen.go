@@ -59,7 +59,7 @@ func CreateApp() (*base.Application, error) {
 	redisClient := redis.NewRedis(config)
 	fileService := file.NewService(s3S3, config, query, redisClient)
 	embeddingService := embedding.NewService(config, loggerLogger, query)
-	libraryService := library.NewService(config, query, client, fileService, embeddingService)
+	libraryService := library.NewService(config, query, client, fileService, embeddingService, loggerLogger)
 	batchBatch := batch.NewBatch(loggerLogger)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, libraryService, batchBatch)
 	openaiClient := openai.NewOpenAI(config)

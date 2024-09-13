@@ -74,6 +74,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.PATCH("/libraries/:id/", a.Library.Update)
 	r.DELETE("/libraries/:id/", a.Library.Delete)
 	r.GET("/libraries/:id/documents", a.Library.ListDocuments)
+	r.POST("/libraries/:id/documents", a.Library.CreateDocument)
 	//r.PATCH("/libraries/:id/documents/:document_id", a.Library.UpdateDocument)
 	r.DELETE("/libraries/:id/documents/:document_id", a.Library.DeleteDocument)
 }

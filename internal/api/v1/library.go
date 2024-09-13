@@ -253,6 +253,54 @@ func (lc *LibraryController) ListDocuments(c *gin.Context) {
 	return
 }
 
+// CreateDocument godoc
+// @Summary      创建文档
+// @Tags         libraries
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        schema.LibraryIdRequest  path  	schema.LibraryIdRequest  true  "schema.LibraryIdRequest"
+// @Param        schema.DocumentCreateRequest  body  	schema.DocumentCreateRequest  true  "schema.DocumentCreateRequest"
+// @Success      204
+// @Failure      400  {object}  schema.ResponseBody
+// @Router       /api/v1/libraries/{id}/documents [post]
+func (lc *LibraryController) CreateDocument(c *gin.Context) {
+	var response = schema.NewResponse(c)
+	userId := lc.authService.GetUserId(c)
+
+	var libraryIdRequest = &schema.LibraryIdRequest{}
+	if err := c.ShouldBindUri(libraryIdRequest); err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	var documentCreateRequest = &schema.DocumentCreateRequest{}
+	if err := c.ShouldBindJSON(documentCreateRequest); err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	libraryEntity, err := lc.libraryService.GetLibrary(c, libraryIdRequest.Id)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+	if libraryEntity.UserId != userId {
+		response.Status(http.StatusForbidden).Error(consts.ErrPermissionDenied).Send()
+		return
+	}
+
+	documentEntity, err := lc.libraryService.CreateDocument(c, libraryEntity,
+		documentCreateRequest.Name, documentCreateRequest.Content)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	response.Status(http.StatusCreated).Data(documentEntity).Send()
+	return
+}
+
 //// UpdateDocument godoc
 //// @Summary      更新文档
 //// @Tags         libraries

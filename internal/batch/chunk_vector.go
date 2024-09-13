@@ -12,7 +12,7 @@ type ChunkVectorBatch struct {
 }
 
 func (b *Batch) ChunkVector(ctx context.Context, cv *ChunkVectorBatch) error {
-	chunks, err := cv.DAO.WithContext(ctx).DocumentChunk.Where(cv.DAO.DocumentChunk.Chunked.Is(false)).Find()
+	chunks, err := cv.DAO.WithContext(ctx).DocumentChunk.Where(cv.DAO.DocumentChunk.Vectorized.Is(false)).Find()
 	if err != nil {
 		return err
 	}

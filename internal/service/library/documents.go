@@ -19,7 +19,7 @@ func (s *Service) GetDocument(ctx context.Context, id schema.EntityId) (*entity.
 	return documentDao.Where(s.dao.Document.Id.Eq(uint(id))).First()
 }
 
-func (s *Service) CreateDocument(ctx context.Context, document *entity.Document) error {
+func (s *Service) CreateDocument(ctx context.Context, library *entity.Library, name string, content string) (*entity.Document, error) {
 	// 如果有 file_id，则寻找是否存在相同的
 	//if document.FileId != 0 {
 	//	count, err := s.dao.WithContext(ctx).Document.Where(s.dao.Document.FileId.Eq(uint(document.FileId))).Count()
@@ -28,8 +28,35 @@ func (s *Service) CreateDocument(ctx context.Context, document *entity.Document)
 	//	}
 	//}
 
+	document := &entity.Document{
+		LibraryId: library.Id,
+		Name:      name,
+		Chunked:   false,
+	}
+
+	// chunk 文档
 	var documentDao = s.dao.Document.WithContext(ctx)
-	return documentDao.Create(document)
+	err := documentDao.Create(document)
+	if err != nil {
+		return nil, err
+	}
+
+	if content != "" {
+		go func() {
+			err = s.ChunkTextToDocument(ctx, content, document)
+			if err != nil {
+				s.logger.Sugar.Error(err)
+
+				// 删除文档
+				_, err = documentDao.Delete(document)
+				if err != nil {
+					s.logger.Sugar.Error(err)
+				}
+			}
+		}()
+	}
+
+	return document, nil
 }
 
 func (s *Service) UpdateDocument(ctx context.Context, document *entity.Document) error {
@@ -78,14 +105,6 @@ func (s *Service) AddDocumentChunk(ctx context.Context, chunk ...*entity.Documen
 func (s *Service) DeleteDocumentChunk(ctx context.Context, document *entity.Document) error {
 	_, err := s.dao.DocumentChunk.WithContext(ctx).Where(s.dao.DocumentChunk.DocumentId.Eq(uint(document.Id))).Delete()
 	return err
-}
-
-func (s *Service) GetDocumentByFileId(ctx context.Context, fileId schema.EntityId) (*entity.Document, error) {
-	return s.dao.Document.WithContext(ctx).Where(s.dao.Document.FileId.Eq(uint(fileId))).First()
-}
-
-func (s *Service) GetDocumentByFileAndLibrary(ctx context.Context, file *entity.File, library *entity.Library) (*entity.Document, error) {
-	return s.dao.Document.WithContext(ctx).Where(s.dao.Document.FileId.Eq(uint(file.Id)), s.dao.Document.LibraryId.Eq(uint(library.Id))).First()
 }
 
 func (s *Service) GetDocumentFromLibrary(ctx context.Context, library *entity.Library, documentId schema.EntityId) (*entity.Document, error) {

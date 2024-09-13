@@ -43,9 +43,6 @@ func newAssistantShare(db *gorm.DB, opts ...gen.DOOption) assistantShare {
 				Library struct {
 					field.RelationField
 				}
-				File struct {
-					field.RelationField
-				}
 			}
 		}{
 			RelationField: field.NewRelation("Assistant.Library", "entity.Library"),
@@ -54,20 +51,12 @@ func newAssistantShare(db *gorm.DB, opts ...gen.DOOption) assistantShare {
 				Library struct {
 					field.RelationField
 				}
-				File struct {
-					field.RelationField
-				}
 			}{
 				RelationField: field.NewRelation("Assistant.Library.Document", "entity.Document"),
 				Library: struct {
 					field.RelationField
 				}{
 					RelationField: field.NewRelation("Assistant.Library.Document.Library", "entity.Library"),
-				},
-				File: struct {
-					field.RelationField
-				}{
-					RelationField: field.NewRelation("Assistant.Library.Document.File", "entity.File"),
 				},
 			},
 		},
@@ -154,9 +143,6 @@ type assistantShareBelongsToAssistant struct {
 		Document struct {
 			field.RelationField
 			Library struct {
-				field.RelationField
-			}
-			File struct {
 				field.RelationField
 			}
 		}

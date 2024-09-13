@@ -31,6 +31,7 @@ func newChatMessage(db *gorm.DB, opts ...gen.DOOption) chatMessage {
 	_chatMessage.CreatedAt = field.NewTime(tableName, "created_at")
 	_chatMessage.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_chatMessage.ChatId = field.NewUint(tableName, "chat_id")
+	_chatMessage.AssistantId = field.NewUint(tableName, "assistant_id")
 	_chatMessage.Content = field.NewString(tableName, "content")
 	_chatMessage.Role = field.NewString(tableName, "role")
 	_chatMessage.ToolCall = field.NewField(tableName, "tool_call")
@@ -40,6 +41,36 @@ func newChatMessage(db *gorm.DB, opts ...gen.DOOption) chatMessage {
 	_chatMessage.PromptTokens = field.NewInt(tableName, "prompt_tokens")
 	_chatMessage.CompletionTokens = field.NewInt(tableName, "completion_tokens")
 	_chatMessage.TotalTokens = field.NewInt(tableName, "total_tokens")
+	_chatMessage.Assistant = chatMessageBelongsToAssistant{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Assistant", "entity.Assistant"),
+		Library: struct {
+			field.RelationField
+			Document struct {
+				field.RelationField
+				Library struct {
+					field.RelationField
+				}
+			}
+		}{
+			RelationField: field.NewRelation("Assistant.Library", "entity.Library"),
+			Document: struct {
+				field.RelationField
+				Library struct {
+					field.RelationField
+				}
+			}{
+				RelationField: field.NewRelation("Assistant.Library.Document", "entity.Document"),
+				Library: struct {
+					field.RelationField
+				}{
+					RelationField: field.NewRelation("Assistant.Library.Document.Library", "entity.Library"),
+				},
+			},
+		},
+	}
+
 	_chatMessage.File = chatMessageBelongsToFile{
 		db: db.Session(&gorm.Session{}),
 
@@ -70,6 +101,7 @@ type chatMessage struct {
 	CreatedAt        field.Time
 	UpdatedAt        field.Time
 	ChatId           field.Uint
+	AssistantId      field.Uint
 	Content          field.String
 	Role             field.String
 	ToolCall         field.Field
@@ -79,7 +111,9 @@ type chatMessage struct {
 	PromptTokens     field.Int
 	CompletionTokens field.Int
 	TotalTokens      field.Int
-	File             chatMessageBelongsToFile
+	Assistant        chatMessageBelongsToAssistant
+
+	File chatMessageBelongsToFile
 
 	UserFile chatMessageBelongsToUserFile
 
@@ -102,6 +136,7 @@ func (c *chatMessage) updateTableName(table string) *chatMessage {
 	c.CreatedAt = field.NewTime(table, "created_at")
 	c.UpdatedAt = field.NewTime(table, "updated_at")
 	c.ChatId = field.NewUint(table, "chat_id")
+	c.AssistantId = field.NewUint(table, "assistant_id")
 	c.Content = field.NewString(table, "content")
 	c.Role = field.NewString(table, "role")
 	c.ToolCall = field.NewField(table, "tool_call")
@@ -127,11 +162,12 @@ func (c *chatMessage) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *chatMessage) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 15)
+	c.fieldMap = make(map[string]field.Expr, 17)
 	c.fieldMap["id"] = c.Id
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
 	c.fieldMap["chat_id"] = c.ChatId
+	c.fieldMap["assistant_id"] = c.AssistantId
 	c.fieldMap["content"] = c.Content
 	c.fieldMap["role"] = c.Role
 	c.fieldMap["tool_call"] = c.ToolCall
@@ -152,6 +188,87 @@ func (c chatMessage) clone(db *gorm.DB) chatMessage {
 func (c chatMessage) replaceDB(db *gorm.DB) chatMessage {
 	c.chatMessageDo.ReplaceDB(db)
 	return c
+}
+
+type chatMessageBelongsToAssistant struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Library struct {
+		field.RelationField
+		Document struct {
+			field.RelationField
+			Library struct {
+				field.RelationField
+			}
+		}
+	}
+}
+
+func (a chatMessageBelongsToAssistant) Where(conds ...field.Expr) *chatMessageBelongsToAssistant {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a chatMessageBelongsToAssistant) WithContext(ctx context.Context) *chatMessageBelongsToAssistant {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a chatMessageBelongsToAssistant) Session(session *gorm.Session) *chatMessageBelongsToAssistant {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a chatMessageBelongsToAssistant) Model(m *entity.ChatMessage) *chatMessageBelongsToAssistantTx {
+	return &chatMessageBelongsToAssistantTx{a.db.Model(m).Association(a.Name())}
+}
+
+type chatMessageBelongsToAssistantTx struct{ tx *gorm.Association }
+
+func (a chatMessageBelongsToAssistantTx) Find() (result *entity.Assistant, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a chatMessageBelongsToAssistantTx) Append(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a chatMessageBelongsToAssistantTx) Replace(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a chatMessageBelongsToAssistantTx) Delete(values ...*entity.Assistant) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a chatMessageBelongsToAssistantTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a chatMessageBelongsToAssistantTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type chatMessageBelongsToFile struct {

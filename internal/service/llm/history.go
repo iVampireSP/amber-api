@@ -17,6 +17,8 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 	var hasHumanMessage = false
 	var hasFileMessage = false
 
+	var foundedToolCalls []llms.ToolCall
+
 	// 粗略字数统计，用于切换模型
 	var count = 0
 
@@ -98,6 +100,8 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 				assistantResponse.Parts = append(assistantResponse.Parts, toolCall)
 
 				historyContent = append(historyContent, assistantResponse)
+
+				foundedToolCalls = append(foundedToolCalls, toolCall)
 			}
 		case schema.RoleTool:
 			// Tool Call 响应
@@ -112,6 +116,14 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 						},
 					},
 				})
+
+				// 如果 foundedToolCallIds 存在 ID, 则删除
+				for _, tc := range foundedToolCalls {
+					if h.ToolCall.ID == tc.ID {
+						foundedToolCalls = append(foundedToolCalls[:i], foundedToolCalls[i+1:]...)
+						break
+					}
+				}
 			}
 
 		case schema.RoleSystem:
@@ -150,6 +162,23 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
 			}
 
+		}
+	}
+
+	if len(foundedToolCalls) > 0 {
+		// 剩下的都是悬垂的 ToolCall,都没有被正确响应
+		// 所以都标记为失败
+		for _, tc := range foundedToolCalls {
+			historyContent = append(historyContent, llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{
+						ToolCallID: tc.ID,
+						Name:       tc.FunctionCall.Name,
+						Content:    "ToolCall Failed, timeout or error",
+					},
+				},
+			})
 		}
 	}
 

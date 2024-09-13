@@ -12,20 +12,25 @@ import (
 func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.ChatCreateRequest) (*entity.Chat, error) {
 	var chat entity.Chat
 
-	// 验证 assistant Id 是否属于存在且属于用户
-	a, err := s.a.GetAssistant(ctx, createChatRequest.AssistantId)
-	if err != nil {
-		return nil, err
-	}
-
-	if a.Id == consts.NoRecord || a.UserId != createChatRequest.UserId {
-		return nil, consts.ErrAssistantNotFound
+	// 如果 assistant id 不为 nil
+	if createChatRequest.AssistantId != nil {
+		// 验证 assistant Id 是否属于存在且属于用户
+		a, err := s.a.GetAssistant(ctx, *createChatRequest.AssistantId)
+		if err != nil {
+			return nil, err
+		}
+		if a.Id == consts.NoRecord || a.UserId != createChatRequest.UserId {
+			return nil, consts.ErrAssistantNotFound
+		}
 	}
 
 	chat.Name = createChatRequest.Name
-	chat.AssistantId = createChatRequest.AssistantId
 	chat.UserId = createChatRequest.UserId
 	chat.Owner = schema.OwnerUser
+
+	if createChatRequest.AssistantId != nil {
+		chat.AssistantId = createChatRequest.AssistantId
+	}
 
 	if createChatRequest.ExpiredAt != nil {
 		// 过期时间不能小于当前时间
@@ -41,7 +46,7 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 		chat.ExpiredAt = &createChatRequest.ExpiredAt.Time
 	}
 
-	err = s.dao.WithContext(ctx).Chat.Create(&chat)
+	err := s.dao.WithContext(ctx).Chat.Create(&chat)
 
 	return &chat, err
 }
@@ -51,7 +56,7 @@ func (s *Service) CreateGuestChat(ctx context.Context, createGuestChatRequest *s
 	var chat = entity.Chat{}
 
 	chat.Name = createGuestChatRequest.Name
-	chat.AssistantId = createGuestChatRequest.AssistantId
+	chat.AssistantId = &createGuestChatRequest.AssistantId
 	chat.Owner = schema.OwnerGuest
 	chat.GuestId = &createGuestChatRequest.GuestID
 

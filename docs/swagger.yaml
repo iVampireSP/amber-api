@@ -335,7 +335,6 @@ definitions:
         maxLength: 30
         type: string
     required:
-    - assistant_id
     - name
     type: object
   schema.ChatMessageAddRequest:

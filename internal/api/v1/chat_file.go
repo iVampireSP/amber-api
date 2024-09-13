@@ -377,7 +377,7 @@ func (u *ChatController) canPublicChatNext(c *gin.Context, response *schema.Http
 	}
 
 	// 检查 assistant id 是否一致
-	if chatEntity.AssistantId != assistantShare.AssistantId {
+	if *chatEntity.AssistantId != assistantShare.AssistantId {
 		response.Status(http.StatusForbidden).Error(err).Send()
 		return false, nil
 	}

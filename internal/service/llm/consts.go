@@ -9,3 +9,5 @@ const warningCount = 4
 // 警告 LLM 调用太多次工具， 要求停止
 const warningMessage = "[Warning]You are attempting to call the tool/function repeatedly, please use the tool/function properly and stop response. If you continue to call repeatedly, the chat will be forcibly terminated."
 const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the tool/function many times, and the chat has been forcibly terminated."
+
+const prompt = "LaTeX must be within $$of markdown, such as the $$LaTeX formula$$"

@@ -102,7 +102,7 @@ type LLMChat struct {
 
 type ChatPublicModel struct {
 	Name        string     `json:"name"`
-	AssistantId EntityId   `json:"assistant_id"`
+	AssistantId *EntityId  `json:"assistant_id"`
 	ExpiredAt   *time.Time `json:"expired_at"`
 	Owner       ChatOwner  `json:"owner"`
 	GuestId     *string    `json:"guest_id"`

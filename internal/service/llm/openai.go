@@ -73,6 +73,11 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 		llms.WithTopP(llmChat.TopP),
 		llms.WithModel(llmChat.Model),
 		llms.WithTopK(llmChat.TopK))
+
+	if err != nil {
+		s.Logger.Sugar.Errorf("OpenAI.GenerateContent error: %v", err)
+		err = consts.ErrUnableGenerateContent
+	}
 	return resp, err
 }
 

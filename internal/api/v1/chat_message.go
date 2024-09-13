@@ -40,7 +40,7 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 
 	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)
 	if err != nil {
-		if errors.Is(err, consts.ErrChatNotFound) {
+		if errors.Is(err, consts.ErrChatNotFound) || errors.Is(err, gorm.ErrRecordNotFound) {
 			response.Status(http.StatusNotFound).Error(err).Send()
 			return
 		} else {
@@ -55,8 +55,11 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 	}
 
 	chatHistories, err := u.cm.GetChatMessage(c, chatEntity)
-	//chatHistories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		}
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
@@ -193,15 +196,13 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			return
 		} else if lastChatMessage.Role == schema.RoleAssistant {
 			// 如果是 Assistant 消息，则开始采样记忆
-			if request.Role == schema.RoleHuman && !chatEntity.Assistant.DisableDefaultPrompt {
-				go func() {
-					u.logger.Sugar.Info("memory service adding: ", request.Message)
-
-					err = u.memoryService.Add(c, request.Message, userInfo.Token.Sub)
-					if err != nil {
-						u.logger.Sugar.Error("memory service add error: ", err)
-					}
-				}()
+			if request.Role == schema.RoleHuman {
+				// 如果对话没有 Assistant，则默认启用记忆
+				if chatEntity.Assistant == nil {
+					u.addMemory(c, userInfo, request)
+				} else if !chatEntity.Assistant.DisableDefaultPrompt {
+					u.addMemory(c, userInfo, request)
+				}
 			}
 		}
 	}
@@ -327,4 +328,15 @@ func (u *ChatController) ClearChatMessage(c *gin.Context) {
 	}
 
 	response.Status(http.StatusNoContent).Send()
+}
+
+func (u *ChatController) addMemory(c context.Context, userInfo *schema.User, request schema.ChatMessageAddRequest) {
+	go func() {
+		u.logger.Sugar.Info("memory service adding: ", request.Message)
+
+		err := u.memoryService.Add(c, request.Message, userInfo.Token.Sub)
+		if err != nil {
+			u.logger.Sugar.Error("memory service add error: ", err)
+		}
+	}()
 }

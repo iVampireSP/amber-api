@@ -3084,7 +3084,6 @@ const docTemplate = `{
         "schema.ChatCreateRequest": {
             "type": "object",
             "required": [
-                "assistant_id",
                 "name"
             ],
             "properties": {

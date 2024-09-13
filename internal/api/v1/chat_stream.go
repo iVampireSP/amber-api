@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
+	"github.com/tmc/langchaingo/llms"
 	"io"
 	"net/http"
 	"rag-new/internal/entity"
@@ -84,17 +85,22 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	assistantEntity, err := u.assistantService.GetAssistant(c, chatEntity.AssistantId)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	var assistantEntity *entity.Assistant
+	var tools []llms.Tool
 
-	// 获取 assistant 绑定的 tools
-	tools, err := u.assistantService.ToLLMTool(c, assistantEntity)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
+	if chatEntity.AssistantId != nil {
+		assistantEntity, err = u.assistantService.GetAssistant(c, *chatEntity.AssistantId)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+		// 获取 assistant 绑定的 tools
+		tools, err = u.assistantService.ToLLMTool(c, assistantEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
 	}
 
 	// 提取 history

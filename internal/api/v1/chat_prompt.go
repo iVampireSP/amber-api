@@ -68,7 +68,7 @@ The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hin
 				}
 
 				if owner == schema.OwnerGuest {
-					if assistant.EnableMemoryForAssistantShare && !assistant.DisableMemory {
+					if assistant.EnableMemoryForAssistantAPI && !assistant.DisableMemory {
 						useMemory = true
 					}
 				}

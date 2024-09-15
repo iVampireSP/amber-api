@@ -188,7 +188,7 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 
 	assistantEntity.DisableDefaultPrompt = updateReq.DisableDefaultPrompt
 	assistantEntity.DisableMemory = updateReq.DisableMemory
-	assistantEntity.EnableMemoryForAssistantShare = updateReq.EnableMemoryForAssistantShare
+	assistantEntity.EnableMemoryForAssistantAPI = updateReq.EnableMemoryForAssistantAPI
 
 	err = u.assistantService.UpdateAssistant(c, assistantEntity)
 	if err != nil {

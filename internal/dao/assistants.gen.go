@@ -37,7 +37,7 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 	_assistant.LibraryId = field.NewUint(tableName, "library_id")
 	_assistant.DisableDefaultPrompt = field.NewBool(tableName, "disable_default_prompt")
 	_assistant.DisableMemory = field.NewBool(tableName, "disable_memory")
-	_assistant.EnableMemoryForAssistantShare = field.NewBool(tableName, "enable_memory_for_assistant_share")
+	_assistant.EnableMemoryForAssistantAPI = field.NewBool(tableName, "enable_memory_for_assistant_api")
 	_assistant.Library = assistantBelongsToLibrary{
 		db: db.Session(&gorm.Session{}),
 
@@ -65,19 +65,19 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 type assistant struct {
 	assistantDo
 
-	ALL                           field.Asterisk
-	Id                            field.Uint
-	CreatedAt                     field.Time
-	UpdatedAt                     field.Time
-	Name                          field.String
-	Prompt                        field.String
-	Description                   field.String
-	UserId                        field.String
-	LibraryId                     field.Uint
-	DisableDefaultPrompt          field.Bool
-	DisableMemory                 field.Bool
-	EnableMemoryForAssistantShare field.Bool
-	Library                       assistantBelongsToLibrary
+	ALL                         field.Asterisk
+	Id                          field.Uint
+	CreatedAt                   field.Time
+	UpdatedAt                   field.Time
+	Name                        field.String
+	Prompt                      field.String
+	Description                 field.String
+	UserId                      field.String
+	LibraryId                   field.Uint
+	DisableDefaultPrompt        field.Bool
+	DisableMemory               field.Bool
+	EnableMemoryForAssistantAPI field.Bool
+	Library                     assistantBelongsToLibrary
 
 	fieldMap map[string]field.Expr
 }
@@ -104,7 +104,7 @@ func (a *assistant) updateTableName(table string) *assistant {
 	a.LibraryId = field.NewUint(table, "library_id")
 	a.DisableDefaultPrompt = field.NewBool(table, "disable_default_prompt")
 	a.DisableMemory = field.NewBool(table, "disable_memory")
-	a.EnableMemoryForAssistantShare = field.NewBool(table, "enable_memory_for_assistant_share")
+	a.EnableMemoryForAssistantAPI = field.NewBool(table, "enable_memory_for_assistant_api")
 
 	a.fillFieldMap()
 
@@ -132,7 +132,7 @@ func (a *assistant) fillFieldMap() {
 	a.fieldMap["library_id"] = a.LibraryId
 	a.fieldMap["disable_default_prompt"] = a.DisableDefaultPrompt
 	a.fieldMap["disable_memory"] = a.DisableMemory
-	a.fieldMap["enable_memory_for_assistant_share"] = a.EnableMemoryForAssistantShare
+	a.fieldMap["enable_memory_for_assistant_api"] = a.EnableMemoryForAssistantAPI
 
 }
 

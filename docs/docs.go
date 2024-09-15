@@ -462,7 +462,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "name": "share_id",
+                        "name": "key_id",
                         "in": "path",
                         "required": true
                     },
@@ -2807,7 +2807,7 @@ const docTemplate = `{
                 "disable_memory": {
                     "type": "boolean"
                 },
-                "enable_memory_for_assistant_share": {
+                "enable_memory_for_assistant_api": {
                     "type": "boolean"
                 },
                 "id": {
@@ -3237,7 +3237,7 @@ const docTemplate = `{
                         false
                     ]
                 },
-                "enable_memory_for_assistant_share": {
+                "enable_memory_for_assistant_api": {
                     "type": "boolean",
                     "enum": [
                         true,

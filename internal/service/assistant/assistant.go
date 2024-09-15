@@ -51,7 +51,7 @@ func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assista
 		s.dao.Assistant.Prompt.Value(assistant.Prompt),
 		s.dao.Assistant.DisableDefaultPrompt.Value(assistant.DisableDefaultPrompt),
 		s.dao.Assistant.DisableMemory.Value(assistant.DisableMemory),
-		s.dao.Assistant.EnableMemoryForAssistantShare.Value(assistant.EnableMemoryForAssistantShare),
+		s.dao.Assistant.EnableMemoryForAssistantAPI.Value(assistant.EnableMemoryForAssistantAPI),
 	}
 	// 这里不能直接设置 library_id
 	if assistant.LibraryId != nil {

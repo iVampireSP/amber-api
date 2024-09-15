@@ -453,7 +453,7 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "name": "share_id",
+                        "name": "key_id",
                         "in": "path",
                         "required": true
                     },
@@ -2798,7 +2798,7 @@
                 "disable_memory": {
                     "type": "boolean"
                 },
-                "enable_memory_for_assistant_share": {
+                "enable_memory_for_assistant_api": {
                     "type": "boolean"
                 },
                 "id": {
@@ -3228,7 +3228,7 @@
                         false
                     ]
                 },
-                "enable_memory_for_assistant_share": {
+                "enable_memory_for_assistant_api": {
                     "type": "boolean",
                     "enum": [
                         true,

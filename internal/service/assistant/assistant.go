@@ -88,6 +88,10 @@ func (s *Service) DeleteAssistant(ctx context.Context, id schema.EntityId) error
 		return consts.ErrAssistantHasBindToolCantDelete
 	}
 
+	// 如果助理在聊天消息列表中，则将他们设置为 null
+	_, err = s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.AssistantId.Eq(uint(assistant.Id))).
+		UpdateSimple(s.dao.ChatMessage.AssistantId.Null())
+
 	_, err = s.dao.WithContext(ctx).Assistant.Delete(assistant)
 
 	return err

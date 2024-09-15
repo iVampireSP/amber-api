@@ -86,22 +86,29 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 		switch h.Role {
 		case schema.RoleHuman:
 
+			// 获取多个对话中的助理的信息
 			// 如果当前助理不存在，则设置
 			if currentAssistantId == 0 && h.AssistantId != nil {
 				currentAssistantId = *h.AssistantId
-			} else if h.AssistantId != nil && currentAssistantId != *h.AssistantId {
-				// 获取多个对话中的助理的信息
+			} else {
 				var content string
 
+				if h.AssistantId == nil {
+					// 这说明上个助理不存在
+					content = "[Warning]The previous message has been replied to by another assistant, no you, but can not get assistant info."
+				}
 				if h.Assistant != nil {
 					content = fmt.Sprintf("[Warning]The previous message has been replied to by another assistant, whose name is '%s' and the description is '%s'",
 						h.Assistant.Name, h.Assistant.Description)
-				} else {
-					content = "[Warning]The previous message has been replied to by another assistant, not you"
+
+					currentAssistantId = *h.AssistantId
+
 				}
 
-				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, content))
-				currentAssistantId = *h.AssistantId
+				if content != "" {
+					historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, content))
+				}
+
 			}
 
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))

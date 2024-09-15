@@ -1,22 +1,23 @@
 package v1
 
 import (
-	"github.com/bytedance/sonic"
-	"github.com/gin-gonic/gin"
-	"github.com/tmc/langchaingo/llms"
 	"io"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
 	"strconv"
+
+	"github.com/bytedance/sonic"
+	"github.com/gin-gonic/gin"
+	"github.com/tmc/langchaingo/llms"
 )
 
 const HeaderUserIp = "X-User-IP"
 
 // Stream godoc
-// @Summary      流式传输聊天内容
-// @Description  get string by ID
+// @Summary      流式传输文本
+// @Description  将会通过 SSE 的方式来流式传输内容，不建议使用本文档生成的代码来获取，第三方库有更好的解决方案。
 // @Tags         chat_message
 // @Accept       json
 // @Produce      json

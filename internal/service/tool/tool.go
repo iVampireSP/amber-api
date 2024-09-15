@@ -28,7 +28,7 @@ func (s *Service) ListToolFromUserId(ctx context.Context, userId schema.UserId) 
 
 func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest, userId schema.UserId) (*entity.Tool, error) {
 	if !s.config.Debug.Enabled {
-		internalAddress, err := s.IsAllowed(tool.Url)
+		internalAddress, err := s.IsAllowed(tool.DiscoveryUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -43,10 +43,10 @@ func (s *Service) CreateTool(ctx context.Context, tool *schema.ToolCreateRequest
 
 	toolEntity.Name = tool.Name
 	toolEntity.Description = tool.Description
-	toolEntity.DiscoveryUrl = tool.Url
+	toolEntity.DiscoveryUrl = tool.DiscoveryUrl
 	toolEntity.ApiKey = tool.ApiKey
 
-	toolData, err := s.getToolData(tool.Url)
+	toolData, err := s.getToolData(tool.DiscoveryUrl)
 	if err != nil {
 		return nil, err
 	}

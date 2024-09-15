@@ -1164,7 +1164,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
+                "description": "列出当前账户下的所有的对话",
                 "consumes": [
                     "application/json"
                 ],
@@ -1219,7 +1219,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
+                "description": "创建一个对话，如果不指定 Assistant ID，将会使用默认 Assistant。默认 Assistant 不支持上传文件以及使用外部工具。",
                 "consumes": [
                     "application/json"
                 ],
@@ -1419,7 +1419,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
+                "description": "删除一个对话以及聊天记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -1627,7 +1627,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
+                "description": "获取一个对话的所有聊天记录",
                 "consumes": [
                     "application/json"
                 ],
@@ -1694,7 +1694,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
+                "description": "添加一条消息",
                 "consumes": [
                     "application/json"
                 ],
@@ -2344,7 +2344,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "get string by ID",
+                "description": "测试接口，将会返回当前用户的信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -2355,6 +2355,7 @@ const docTemplate = `{
                     "ping"
                 ],
                 "summary": "Greet",
+                "deprecated": true,
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2390,7 +2391,7 @@ const docTemplate = `{
                         "none": []
                     }
                 ],
-                "description": "get string by ID",
+                "description": "将会通过 SSE 的方式来流式传输内容，不建议使用本文档生成的代码来获取，第三方库有更好的解决方案。",
                 "consumes": [
                     "application/json"
                 ],
@@ -2400,7 +2401,7 @@ const docTemplate = `{
                 "tags": [
                     "chat_message"
                 ],
-                "summary": "流式传输聊天内容",
+                "summary": "流式传输文本",
                 "parameters": [
                     {
                         "type": "string",
@@ -3601,8 +3602,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "description",
-                "name",
-                "url"
+                "discovery_url",
+                "name"
             ],
             "properties": {
                 "api_key": {
@@ -3613,11 +3614,11 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255
                 },
-                "name": {
+                "discovery_url": {
                     "type": "string",
                     "maxLength": 255
                 },
-                "url": {
+                "name": {
                     "type": "string",
                     "maxLength": 255
                 }

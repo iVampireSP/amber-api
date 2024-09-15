@@ -66,7 +66,7 @@ func (t *ToolController) CreateTool(c *gin.Context) {
 		return
 	}
 
-	exists, err := t.toolService.CheckTool(c, req.Url, t.authService.GetUserId(c))
+	exists, err := t.toolService.CheckTool(c, req.DiscoveryUrl, t.authService.GetUserId(c))
 	if err != nil {
 		response.Error(err).Send()
 		return

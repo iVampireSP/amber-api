@@ -4,20 +4,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bytedance/sonic"
-	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
 	"rag-new/pkg/random"
+
+	"github.com/bytedance/sonic"
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 // ListChatMessage godoc
 // @Summary      查看聊天记录
-// @Description  get string by ID
+// @Description  获取一个对话的所有聊天记录
 // @Tags         chat_message
 // @Accept       json
 // @Produce      json
@@ -69,7 +70,7 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 
 // AddChatMessage godoc
 // @Summary      添加聊天记录
-// @Description  get string by ID
+// @Description  添加一条消息
 // @Tags         chat_message
 // @Accept       json
 // @Produce      json

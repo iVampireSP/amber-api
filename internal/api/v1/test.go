@@ -17,11 +17,12 @@ func NewUserController(authService *auth.Service) *UserController {
 
 // Test godoc
 // @Summary      Greet
-// @Description  get string by ID
+// @Description  测试接口，将会返回当前用户的信息
 // @Tags         ping
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
+// @deprecated   true
 // @Success      200  {object}  schema.ResponseBody{data=schema.CurrentUserResponse}
 // @Failure      400  {object}  schema.ResponseBody
 // @Router       /api/v1/ping [get]

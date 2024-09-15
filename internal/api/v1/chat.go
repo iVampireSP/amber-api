@@ -70,7 +70,7 @@ func NewChatController(
 
 // List godoc
 // @Summary      获取所有 Chat
-// @Description  get string by ID
+// @Description  列出当前账户下的所有的对话
 // @Tags         chat
 // @Accept       json
 // @Produce      json
@@ -121,7 +121,7 @@ func (u *ChatController) List(c *gin.Context) {
 
 // Create godoc
 // @Summary      Create Chat
-// @Description  get string by ID
+// @Description  创建一个对话，如果不指定 Assistant ID，将会使用默认 Assistant。默认 Assistant 不支持上传文件以及使用外部工具。
 // @Tags         chat
 // @Accept       json
 // @Produce      json
@@ -290,7 +290,7 @@ func (u *ChatController) Update(c *gin.Context) {
 
 // Delete godoc
 // @Summary      Delete Chat
-// @Description  get string by ID
+// @Description  删除一个对话以及聊天记录
 // @Tags         chat
 // @Accept       json
 // @Produce      json

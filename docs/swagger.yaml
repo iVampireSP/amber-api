@@ -556,16 +556,16 @@ definitions:
       description:
         maxLength: 255
         type: string
-      name:
+      discovery_url:
         maxLength: 255
         type: string
-      url:
+      name:
         maxLength: 255
         type: string
     required:
     - description
+    - discovery_url
     - name
-    - url
     type: object
   schema.ToolDiscoveryInput:
     properties:
@@ -1324,7 +1324,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: get string by ID
+      description: 列出当前账户下的所有的对话
       parameters:
       - description: Assistant ID
         in: query
@@ -1356,7 +1356,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: get string by ID
+      description: 创建一个对话，如果不指定 Assistant ID，将会使用默认 Assistant。默认 Assistant 不支持上传文件以及使用外部工具。
       parameters:
       - description: Chat
         in: body
@@ -1393,7 +1393,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: get string by ID
+      description: 删除一个对话以及聊天记录
       parameters:
       - description: Chat ID
         in: path
@@ -1602,7 +1602,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: get string by ID
+      description: 获取一个对话的所有聊天记录
       parameters:
       - in: path
         name: id
@@ -1642,7 +1642,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: get string by ID
+      description: 添加一条消息
       parameters:
       - in: path
         name: id
@@ -2025,7 +2025,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: get string by ID
+      deprecated: true
+      description: 测试接口，将会返回当前用户的信息
       produces:
       - application/json
       responses:
@@ -2051,7 +2052,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: get string by ID
+      description: 将会通过 SSE 的方式来流式传输内容，不建议使用本文档生成的代码来获取，第三方库有更好的解决方案。
       parameters:
       - description: 指定聊天中的用户 IP 地址，不指定则自动获取。此 IP 地址只会增加至 Prompt 中，如果不希望增加，请关闭系统自带
           Prompt 选项
@@ -2098,7 +2099,7 @@ paths:
             $ref: '#/definitions/schema.ResponseBody'
       security:
       - none: []
-      summary: 流式传输聊天内容
+      summary: 流式传输文本
       tags:
       - chat_message
   /api/v1/tools:

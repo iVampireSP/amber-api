@@ -2,15 +2,15 @@ package entity
 
 import "rag-new/internal/schema"
 
-type AssistantShare struct {
+type AssistantToken struct {
 	Model
 	AssistantId schema.EntityId `json:"assistant_id"`
 	Assistant   Assistant       `json:"assistant"`
 	Token       string          `json:"token"`
 }
 
-func (a *AssistantShare) TableName() string {
-	return "assistant_shares"
+func (a *AssistantToken) TableName() string {
+	return "assistant_tokens"
 }
 
 //func (a *AssistantShareType) TableName() string {

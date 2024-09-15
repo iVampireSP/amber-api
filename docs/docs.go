@@ -415,14 +415,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/assistants/{id}/shares": {
+        "/api/v1/assistants/{id}/tokens": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "此 API 可以创建一个 Assistant 共享 Token，可以将你的 Assistant 公开出去使用。",
+                "description": "此 API 可以创建一个 Assistant Token，可以将你的 Assistant 对接其他应用。",
                 "consumes": [
                     "application/json"
                 ],
@@ -432,7 +432,7 @@ const docTemplate = `{
                 "tags": [
                     "assistant"
                 ],
-                "summary": "获取 Assistant 共享列表",
+                "summary": "获取 Assistant 密钥列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -455,7 +455,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/entity.AssistantShare"
+                                                "$ref": "#/definitions/entity.AssistantToken"
                                             }
                                         }
                                     }
@@ -477,7 +477,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "此方法将会获取一个 Token，用户将会通过这个 Token 来访问你的 Assistant 并调用工具。",
+                "description": "此方法将会获取一个 Token，应用将会通过这个 Token 来访问你的 Assistant 并调用工具。",
                 "consumes": [
                     "application/json"
                 ],
@@ -487,7 +487,7 @@ const docTemplate = `{
                 "tags": [
                     "assistant"
                 ],
-                "summary": "创建 Assistant 共享",
+                "summary": "创建 Assistant 密钥",
                 "parameters": [
                     {
                         "type": "integer",
@@ -508,7 +508,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/entity.AssistantShare"
+                                            "$ref": "#/definitions/entity.AssistantToken"
                                         }
                                     }
                                 }
@@ -524,14 +524,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/assistants/{id}/shares/{share_id}": {
+        "/api/v1/assistants/{id}/tokens/{token_id}": {
             "delete": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "此方法将会删除共享，删除后，共享将会立即失效。",
+                "description": "此方法将会删除密钥，删除后，密钥将会立即失效。",
                 "consumes": [
                     "application/json"
                 ],
@@ -541,7 +541,7 @@ const docTemplate = `{
                 "tags": [
                     "assistant"
                 ],
-                "summary": "删除 Assistant 共享",
+                "summary": "删除 Assistant 密钥",
                 "parameters": [
                     {
                         "type": "integer",
@@ -2813,9 +2813,6 @@ const docTemplate = `{
                     "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
                     "type": "integer"
                 },
-                "library": {
-                    "$ref": "#/definitions/entity.Library"
-                },
                 "library_id": {
                     "type": "integer"
                 },
@@ -2833,7 +2830,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.AssistantShare": {
+        "entity.AssistantToken": {
             "type": "object",
             "properties": {
                 "assistant": {

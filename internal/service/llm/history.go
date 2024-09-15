@@ -146,13 +146,22 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 					},
 				})
 
-				// 如果 foundedToolCallIds 存在 ID, 则删除
-				for _, tc := range foundedToolCalls {
+				// 如果 foundedToolCalls 存在 ID, 则删除
+				for i, tc := range foundedToolCalls {
 					if h.ToolCall.ID == tc.ID {
-						foundedToolCalls = append(foundedToolCalls[:i], foundedToolCalls[i+1:]...)
-						break
+						// 检查索引是否在有效范围内
+						if i < len(foundedToolCalls)-1 {
+							// 安全地删除元素
+							foundedToolCalls = append(foundedToolCalls[:i], foundedToolCalls[i+1:]...)
+							break
+						} else {
+							// 如果已经是最后一个元素，直接设置为空切片
+							foundedToolCalls = foundedToolCalls[:0]
+							break
+						}
 					}
 				}
+
 			}
 
 		case schema.RoleSystem:

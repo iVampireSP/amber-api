@@ -10,7 +10,7 @@ type AssistantApiKeyCreateRequest struct {
 
 type AssistantApiKeyDeleteRequest struct {
 	AssistantId EntityId `uri:"id" binding:"required"`
-	ApiKeyId    EntityId `uri:"key_id" binding:"required"`
+	KeyId       EntityId `uri:"key_id" binding:"required"`
 }
 
 type AssistantApiKeyUpdateRequest struct {

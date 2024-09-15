@@ -462,13 +462,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "name": "key_id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
-                        "name": "id",
+                        "name": "key_id",
                         "in": "path",
                         "required": true
                     }

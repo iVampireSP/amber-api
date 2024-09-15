@@ -131,7 +131,7 @@ func (u *AssistantController) DeleteAssistantApiKey(c *gin.Context) {
 		return
 	}
 
-	apiKey, err := u.assistantService.GetApiKey(c, assistantApiKeyDeleteRequest.ApiKeyId)
+	apiKey, err := u.assistantService.GetApiKey(c, assistantApiKeyDeleteRequest.KeyId)
 
 	if err != nil {
 		if errors.Is(err, consts.ErrApiKeyNotFound) {

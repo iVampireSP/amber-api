@@ -377,7 +377,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 }
 
 func (u *ChatController) canPublicChatNext(c *gin.Context, response *schema.HttpResponse, getPublicChatMessageRequest *schema.GetPublicChatMessageRequest, getPublicChatMessageRequestParams *schema.GetPublicChatMessageRequestParams) (bool, *entity.Chat) {
-	assistantShare, err := u.assistantService.GetTokenBySecret(c, getPublicChatMessageRequest.AssistantToken)
+	assistantShare, err := u.assistantService.GetShareByToken(c, getPublicChatMessageRequest.AssistantToken)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return false, nil

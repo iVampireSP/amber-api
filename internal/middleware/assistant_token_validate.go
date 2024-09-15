@@ -54,7 +54,7 @@ func (a *AssistantTokenValidateMiddleware) AssistantTokenValidate(c *gin.Context
 		return
 	}
 
-	assistantEntity, err := a.assistantService.GetTokenBySecret(c, assistantToken)
+	assistantEntity, err := a.assistantService.GetShareByToken(c, assistantToken)
 	if assistantEntity == nil {
 		c.Abort()
 		response.Error(consts.ErrAssistantNotFound).Status(http.StatusUnauthorized).Send()

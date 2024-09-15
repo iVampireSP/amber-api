@@ -37,9 +37,9 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.PUT("/assistants/:id", a.Assistant.UpdateAssistant)
 	r.POST("/assistants", a.Assistant.CreateAssistant)
 	r.DELETE("/assistants/:id", a.Assistant.DeleteAssistant)
-	r.GET("/assistants/:id/tokens", a.Assistant.ListAssistantTokens)
-	r.POST("/assistants/:id/tokens", a.Assistant.CreateAssistantToken)
-	r.DELETE("/assistants/:id/tokens/:token_id", a.Assistant.DeleteAssistantToken)
+	r.GET("/assistants/:id/shares", a.Assistant.ListAssistantShares)
+	r.POST("/assistants/:id/shares", a.Assistant.CreateAssistantShare)
+	r.DELETE("/assistants/:id/shares/:share_id", a.Assistant.DeleteAssistantShare)
 
 	r.GET("/tools", a.Tool.List)
 	r.POST("/tools", a.Tool.CreateTool)

@@ -18,7 +18,7 @@ import (
 var (
 	Q              = new(Query)
 	Assistant      *assistant
-	AssistantToken *assistantToken
+	AssistantShare *assistantShare
 	AssistantTool  *assistantTool
 	Chat           *chat
 	ChatMessage    *chatMessage
@@ -35,7 +35,7 @@ var (
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Assistant = &Q.Assistant
-	AssistantToken = &Q.AssistantToken
+	AssistantShare = &Q.AssistantShare
 	AssistantTool = &Q.AssistantTool
 	Chat = &Q.Chat
 	ChatMessage = &Q.ChatMessage
@@ -53,7 +53,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:             db,
 		Assistant:      newAssistant(db, opts...),
-		AssistantToken: newAssistantToken(db, opts...),
+		AssistantShare: newAssistantShare(db, opts...),
 		AssistantTool:  newAssistantTool(db, opts...),
 		Chat:           newChat(db, opts...),
 		ChatMessage:    newChatMessage(db, opts...),
@@ -72,7 +72,7 @@ type Query struct {
 	db *gorm.DB
 
 	Assistant      assistant
-	AssistantToken assistantToken
+	AssistantShare assistantShare
 	AssistantTool  assistantTool
 	Chat           chat
 	ChatMessage    chatMessage
@@ -92,7 +92,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:             db,
 		Assistant:      q.Assistant.clone(db),
-		AssistantToken: q.AssistantToken.clone(db),
+		AssistantShare: q.AssistantShare.clone(db),
 		AssistantTool:  q.AssistantTool.clone(db),
 		Chat:           q.Chat.clone(db),
 		ChatMessage:    q.ChatMessage.clone(db),
@@ -119,7 +119,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:             db,
 		Assistant:      q.Assistant.replaceDB(db),
-		AssistantToken: q.AssistantToken.replaceDB(db),
+		AssistantShare: q.AssistantShare.replaceDB(db),
 		AssistantTool:  q.AssistantTool.replaceDB(db),
 		Chat:           q.Chat.replaceDB(db),
 		ChatMessage:    q.ChatMessage.replaceDB(db),
@@ -136,7 +136,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 
 type queryCtx struct {
 	Assistant      IAssistantDo
-	AssistantToken IAssistantTokenDo
+	AssistantShare IAssistantShareDo
 	AssistantTool  IAssistantToolDo
 	Chat           IChatDo
 	ChatMessage    IChatMessageDo
@@ -153,7 +153,7 @@ type queryCtx struct {
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		Assistant:      q.Assistant.WithContext(ctx),
-		AssistantToken: q.AssistantToken.WithContext(ctx),
+		AssistantShare: q.AssistantShare.WithContext(ctx),
 		AssistantTool:  q.AssistantTool.WithContext(ctx),
 		Chat:           q.Chat.WithContext(ctx),
 		ChatMessage:    q.ChatMessage.WithContext(ctx),

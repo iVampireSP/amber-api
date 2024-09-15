@@ -1,6 +1,8 @@
 package llm
 
 import (
+	"context"
+	"fmt"
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
@@ -13,7 +15,7 @@ type Message struct {
 	MessageContent []llms.MessageContent
 }
 
-func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
+func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
 	var hasHumanMessage = false
 	var hasFileMessage = false
 
@@ -26,6 +28,9 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
 
 	var systemPrompts []string
+
+	// 当前的助理（用于通知助理上条消息的回复者
+	var currentAssistantId schema.EntityId
 
 	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn, chinese name: 利飞)")
 	systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
@@ -81,7 +86,26 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 
 		switch h.Role {
 		case schema.RoleHuman:
-			//content := "[User says] " + h.Content
+
+			// 如果当前助理不存在，则设置
+			if currentAssistantId == 0 && h.AssistantId != nil {
+				currentAssistantId = *h.AssistantId
+			} else if h.AssistantId != nil && currentAssistantId != *h.AssistantId {
+				// 获取多个对话中的助理的信息
+				var content string
+
+				// TODO: 优化获取逻辑，比如将获取到的助理放到一个缓存里面
+				assistant, err := s.AssistantService.GetAssistant(ctx, *h.AssistantId)
+				if err != nil {
+					content = "[Warning]The previous message has been replied to by another assistant, but information about that assistant cannot be obtained"
+				}
+				content = fmt.Sprintf("[Warning]The previous message has been replied to by another assistant, whose name is '%s' and the description is '%s'",
+					assistant.Name, assistant.Description)
+
+				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, content))
+				currentAssistantId = *h.AssistantId
+			}
+
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
 
 			if !hasHumanMessage {

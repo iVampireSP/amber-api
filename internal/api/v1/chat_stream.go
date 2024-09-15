@@ -296,12 +296,16 @@ func (u *ChatController) Stream(c *gin.Context) {
 			CompletionTokens: tokenUsage.CompletionTokens,
 			TotalTokens:      tokenUsage.TotalTokens,
 		}
-
 		messageList = append(messageList, *newMessage)
 	}
 
 	// 添加到数据库
 	for _, message := range messageList {
+		// 如果 assistant 不为空，则为接下来的每个消息附上当前回复的 assistant id
+		if assistantEntity != nil {
+			message.AssistantId = &assistantEntity.Id
+		}
+
 		err = u.cm.CreateChatMessage(c, &message)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()

@@ -17,7 +17,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 	defer close(llmChat.ResponseChan)
 
 	// 处理历史
-	h, err := s.processHistory(llmChat, history)
+	h, err := s.processHistory(ctx, llmChat, history)
 	if err != nil {
 		return err
 	}

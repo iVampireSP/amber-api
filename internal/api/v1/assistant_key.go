@@ -2,28 +2,29 @@ package v1
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+
+	"github.com/gin-gonic/gin"
 )
 
-// ListAssistantApiKeys godoc
+// ListAssistantKeys godoc
 // @Summary      获取 Assistant API Key列表
 // @Description  此 API 可以创建一个 Assistant API Key，可以将你的 Assistant 公开出去使用。
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
-// @Param        schema.AssistantApiKeyListRequest  path  schema.AssistantApiKeyListRequest true  "Assistant ID"
-// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantApiKey}
+// @Param        schema.AssistantKeyListRequest  path  schema.AssistantKeyListRequest true  "Assistant ID"
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.AssistantKey}
 // @Failure      500  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants/{id}/keys [get]
-func (u *AssistantController) ListAssistantApiKeys(c *gin.Context) {
+func (u *AssistantController) ListAssistantKeys(c *gin.Context) {
 	var response = schema.NewResponse(c)
 
-	var assistantApiKeyListRequest = schema.AssistantApiKeyListRequest{}
+	var assistantApiKeyListRequest = schema.AssistantKeyListRequest{}
 	if err := c.ShouldBindUri(&assistantApiKeyListRequest); err != nil {
 		response.Error(err).Send()
 		return
@@ -43,30 +44,30 @@ func (u *AssistantController) ListAssistantApiKeys(c *gin.Context) {
 		return
 	}
 
-	assistantApiKeyList, err := u.assistantService.ListApiKey(c, assistantEntity)
+	assistantSecretList, err := u.assistantService.ListKey(c, assistantEntity)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
 
-	response.Status(http.StatusOK).Data(assistantApiKeyList).Send()
+	response.Status(http.StatusOK).Data(assistantSecretList).Send()
 }
 
-// CreateAssistantApiKey godoc
+// CreateAssistantKey godoc
 // @Summary      创建 Assistant API Key
 // @Description  此方法将会获取一个 Token，用户将会通过这个 Token 来访问你的 Assistant 并调用工具。
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
-// @Param        schema.AssistantApiKeyCreateRequest  path  schema.AssistantApiKeyCreateRequest true  "Assistant ID"
-// @Success      200  {object}  schema.ResponseBody{data=entity.AssistantApiKey}
+// @Param        schema.AssistantKeyCreateRequest  path  schema.AssistantKeyCreateRequest true  "Assistant ID"
+// @Success      200  {object}  schema.ResponseBody{data=entity.AssistantKey}
 // @Failure      500  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants/{id}/keys [post]
-func (u *AssistantController) CreateAssistantApiKey(c *gin.Context) {
+func (u *AssistantController) CreateAssistantKey(c *gin.Context) {
 	var response = schema.NewResponse(c)
 
-	var assistantApiKeyCreateRequest = schema.AssistantApiKeyCreateRequest{}
+	var assistantApiKeyCreateRequest = schema.AssistantKeyCreateRequest{}
 	if err := c.ShouldBindUri(&assistantApiKeyCreateRequest); err != nil {
 		response.Error(err).Send()
 		return
@@ -86,29 +87,29 @@ func (u *AssistantController) CreateAssistantApiKey(c *gin.Context) {
 		return
 	}
 
-	apiKey, err := u.assistantService.CrateApiKey(c, assistantEntity)
+	secret, err := u.assistantService.CreateKey(c, assistantEntity)
 	if err != nil {
 		return
 	}
 
-	response.Status(http.StatusOK).Data(apiKey).Send()
+	response.Status(http.StatusOK).Data(secret).Send()
 }
 
-// DeleteAssistantApiKey godoc
+// DeleteAssistantKey godoc
 // @Summary      删除 Assistant API Key
 // @Description  此方法将会删除API Key，删除后，API Key将会立即失效。
 // @Tags         assistant
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
-// @Param        schema.AssistantApiKeyDeleteRequest  path  schema.AssistantApiKeyDeleteRequest true  "Assistant ID"
+// @Param        schema.AssistantKeyDeleteRequest  path  schema.AssistantKeyDeleteRequest true  "Assistant ID"
 // @Success      200  {object}  schema.ResponseBody{}
 // @Failure      500  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants/{id}/keys/{key_id} [delete]
-func (u *AssistantController) DeleteAssistantApiKey(c *gin.Context) {
+func (u *AssistantController) DeleteAssistantKey(c *gin.Context) {
 	var response = schema.NewResponse(c)
 
-	var assistantApiKeyDeleteRequest = schema.AssistantApiKeyDeleteRequest{}
+	var assistantApiKeyDeleteRequest = schema.AssistantKeyDeleteRequest{}
 	if err := c.ShouldBindUri(&assistantApiKeyDeleteRequest); err != nil {
 		response.Error(err).Send()
 		return
@@ -131,7 +132,7 @@ func (u *AssistantController) DeleteAssistantApiKey(c *gin.Context) {
 		return
 	}
 
-	apiKey, err := u.assistantService.GetApiKey(c, assistantApiKeyDeleteRequest.KeyId)
+	apiKey, err := u.assistantService.GetKey(c, assistantApiKeyDeleteRequest.KeyId)
 
 	if err != nil {
 		if errors.Is(err, consts.ErrApiKeyNotFound) {
@@ -142,7 +143,7 @@ func (u *AssistantController) DeleteAssistantApiKey(c *gin.Context) {
 		return
 	}
 
-	err = u.assistantService.DeleteApiKey(c, apiKey)
+	err = u.assistantService.DeleteKey(c, apiKey)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -151,7 +152,7 @@ func (u *AssistantController) DeleteAssistantApiKey(c *gin.Context) {
 	response.Status(http.StatusOK).Send()
 }
 
-//func (u *AssistantController) UpdateAssistantApiKey(c *gin.Context) {}
+//func (u *AssistantController) UpdateAssistantKey(c *gin.Context) {}
 
-func (u *AssistantController) GetAssistantApiKey(c *gin.Context) {
+func (u *AssistantController) GetAssistantKey(c *gin.Context) {
 }

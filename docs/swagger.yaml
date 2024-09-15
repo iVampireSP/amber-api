@@ -25,7 +25,7 @@ definitions:
       user_id:
         type: string
     type: object
-  entity.AssistantApiKey:
+  entity.AssistantKey:
     properties:
       assistant:
         $ref: '#/definitions/entity.Assistant'
@@ -243,7 +243,7 @@ definitions:
     type: object
   schema.AddPublicChatMessageRequest:
     properties:
-      assistant_token:
+      assistant_key:
         type: string
       guest_id:
         type: string
@@ -258,7 +258,7 @@ definitions:
         - assistant
         type: string
     required:
-    - assistant_token
+    - assistant_key
     - guest_id
     - message
     - role
@@ -367,7 +367,7 @@ definitions:
     type: object
   schema.ChatPublicRequest:
     properties:
-      assistant_token:
+      assistant_key:
         type: string
       guest_id:
         type: string
@@ -375,7 +375,7 @@ definitions:
         maxLength: 32
         type: string
     required:
-    - assistant_token
+    - assistant_key
     - guest_id
     - name
     type: object
@@ -434,12 +434,12 @@ definitions:
     type: object
   schema.GetPublicChatMessageRequest:
     properties:
-      assistant_token:
+      assistant_key:
         type: string
       guest_id:
         type: string
     required:
-    - assistant_token
+    - assistant_key
     - guest_id
     type: object
   schema.LibraryCreateRequest:
@@ -847,7 +847,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/entity.AssistantApiKey'
+                    $ref: '#/definitions/entity.AssistantKey'
                   type: array
               type: object
         "500":
@@ -878,7 +878,7 @@ paths:
             - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/entity.AssistantApiKey'
+                  $ref: '#/definitions/entity.AssistantKey'
               type: object
         "500":
           description: Internal Server Error
@@ -1181,7 +1181,7 @@ paths:
         required: true
         type: integer
       - in: formData
-        name: assistant_token
+        name: assistant_key
         required: true
         type: string
       - in: formData
@@ -1242,7 +1242,7 @@ paths:
         required: true
         type: integer
       - in: query
-        name: assistant_token
+        name: assistant_key
         required: true
         type: string
       - in: query

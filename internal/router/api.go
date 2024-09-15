@@ -1,8 +1,9 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	v1 "rag-new/internal/api/v1"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Api struct {
@@ -37,9 +38,9 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.PUT("/assistants/:id", a.Assistant.UpdateAssistant)
 	r.POST("/assistants", a.Assistant.CreateAssistant)
 	r.DELETE("/assistants/:id", a.Assistant.DeleteAssistant)
-	r.GET("/assistants/:id/keys", a.Assistant.ListAssistantApiKeys)
-	r.POST("/assistants/:id/keys", a.Assistant.CreateAssistantApiKey)
-	r.DELETE("/assistants/:id/keys/:key_id", a.Assistant.DeleteAssistantApiKey)
+	r.GET("/assistants/:id/keys", a.Assistant.ListAssistantKeys)
+	r.POST("/assistants/:id/keys", a.Assistant.CreateAssistantKey)
+	r.DELETE("/assistants/:id/keys/:key_id", a.Assistant.DeleteAssistantKey)
 
 	r.GET("/tools", a.Tool.List)
 	r.POST("/tools", a.Tool.CreateTool)

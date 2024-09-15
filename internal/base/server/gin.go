@@ -1,9 +1,6 @@
 package server
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/middleware"
@@ -11,6 +8,10 @@ import (
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
 	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func promHandler(handler http.Handler) gin.HandlerFunc {
@@ -86,7 +87,7 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 
 	apiV1OpenAICompatible := rootGroup.Group("/api/openai-compatible/v1")
 	{
-		apiV1OpenAICompatible.Use(hs.middleware.AssistantTokenValidate.AssistantTokenValidate)
+		apiV1OpenAICompatible.Use(hs.middleware.AssistantKeyValidate.AssistantKeytValidate)
 		hs.apiRouter.InitOpenAICompatibleApiRouter(apiV1OpenAICompatible)
 	}
 

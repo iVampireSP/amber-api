@@ -1,25 +1,26 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"rag-new/internal/schema"
 	"rag-new/internal/service/assistant"
 	"rag-new/pkg/consts"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
-type AssistantTokenValidateMiddleware struct {
+type AssistantKeyValidateMiddleware struct {
 	assistantService *assistant.Service
 }
 
-func NewAssistantTokenValidateMiddleware(assistantService *assistant.Service) *AssistantTokenValidateMiddleware {
-	return &AssistantTokenValidateMiddleware{
+func NewAssistantKeyValidateMiddleware(assistantService *assistant.Service) *AssistantKeyValidateMiddleware {
+	return &AssistantKeyValidateMiddleware{
 		assistantService,
 	}
 }
 
-func (a *AssistantTokenValidateMiddleware) AssistantTokenValidate(c *gin.Context) {
+func (a *AssistantKeyValidateMiddleware) AssistantKeytValidate(c *gin.Context) {
 	var response = schema.NewResponse(c)
 	authorization := c.Request.Header.Get(consts.AuthHeader)
 
@@ -42,19 +43,19 @@ func (a *AssistantTokenValidateMiddleware) AssistantTokenValidate(c *gin.Context
 		return
 	}
 
-	assistantToken := authSplit[1]
+	key := authSplit[1]
 	// if start with sk-
-	if strings.HasPrefix(assistantToken, "sk-") {
-		assistantToken = assistantToken[3:]
+	if strings.HasPrefix(key, "sk-") {
+		key = key[3:]
 	}
 
-	if assistantToken == "" {
+	if key == "" {
 		c.Abort()
-		response.Error(consts.ErrAssistantTokenNotFound).Status(http.StatusUnauthorized).Send()
+		response.Error(consts.ErrAssistantKeyNotFound).Status(http.StatusUnauthorized).Send()
 		return
 	}
 
-	assistantEntity, err := a.assistantService.GetApiKeyBySecret(c, assistantToken)
+	assistantEntity, err := a.assistantService.GetByKey(c, key)
 	if assistantEntity == nil {
 		c.Abort()
 		response.Error(consts.ErrAssistantNotFound).Status(http.StatusUnauthorized).Send()

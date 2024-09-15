@@ -7,12 +7,12 @@ import (
 	"rag-new/pkg/random"
 )
 
-func (s *Service) CrateApiKey(ctx context.Context, assistant *entity.Assistant) (*entity.AssistantApiKey, error) {
-	var assistantApiKey = &entity.AssistantApiKey{}
+func (s *Service) CreateKey(ctx context.Context, assistant *entity.Assistant) (*entity.AssistantKey, error) {
+	var assistantKey = &entity.AssistantKey{}
 
-	assistantApiKey.AssistantId = assistant.Id
+	assistantKey.AssistantId = assistant.Id
 	// 生成 Secret
-	assistantApiKey.Secret = random.String(40)
+	assistantKey.Secret = random.String(40)
 
 	//// 检测 assistant 是否存在
 	//assistant, err := s.GetAssistant(ctx, assistant.Id)
@@ -23,53 +23,53 @@ func (s *Service) CrateApiKey(ctx context.Context, assistant *entity.Assistant) 
 	//	return nil, consts.ErrAssistantNotFound
 	//}
 
-	err := s.dao.WithContext(ctx).AssistantApiKey.Create(assistantApiKey)
+	err := s.dao.WithContext(ctx).AssistantKey.Create(assistantKey)
 
-	return assistantApiKey, err
+	return assistantKey, err
 }
 
-func (s *Service) GetApiKey(ctx context.Context, assistantApiKeyId schema.EntityId) (*entity.AssistantApiKey, error) {
-	assistantApiKey, err := s.dao.WithContext(ctx).AssistantApiKey.Where(s.dao.AssistantApiKey.Id.Eq(uint(assistantApiKeyId))).Preload(s.dao.AssistantApiKey.Assistant).
+func (s *Service) GetKey(ctx context.Context, assistantKeyId schema.EntityId) (*entity.AssistantKey, error) {
+	assistantKey, err := s.dao.WithContext(ctx).AssistantKey.Where(s.dao.AssistantKey.Id.Eq(uint(assistantKeyId))).Preload(s.dao.AssistantKey.Assistant).
 		First()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return assistantApiKey, err
+	return assistantKey, err
 }
 
-func (s *Service) GetApiKeyBySecret(ctx context.Context, secret string) (*entity.AssistantApiKey, error) {
-	assistantApiKey, err := s.dao.WithContext(ctx).AssistantApiKey.Where(s.dao.AssistantApiKey.Secret.Eq(secret)).Preload(s.dao.AssistantApiKey.Assistant).
+func (s *Service) GetByKey(ctx context.Context, secret string) (*entity.AssistantKey, error) {
+	assistantKey, err := s.dao.WithContext(ctx).AssistantKey.Where(s.dao.AssistantKey.Secret.Eq(secret)).Preload(s.dao.AssistantKey.Assistant).
 		First()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return assistantApiKey, err
+	return assistantKey, err
 }
 
-// ListApiKey 获取当前助理的所有分享
-func (s *Service) ListApiKey(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantApiKey, error) {
-	assistantApiKeys, err := s.dao.WithContext(ctx).AssistantApiKey.Where(s.dao.AssistantApiKey.AssistantId.Eq(uint(assistant.Id))).Find()
+// ListKey 获取当前助理的所有的密钥
+func (s *Service) ListKey(ctx context.Context, assistant *entity.Assistant) ([]*entity.AssistantKey, error) {
+	assistantKeys, err := s.dao.WithContext(ctx).AssistantKey.Where(s.dao.AssistantKey.AssistantId.Eq(uint(assistant.Id))).Find()
 
-	return assistantApiKeys, err
+	return assistantKeys, err
 }
 
-func (s *Service) DeleteApiKey(ctx context.Context, assistantApiKey *entity.AssistantApiKey) error {
-	_, err := s.dao.WithContext(ctx).AssistantApiKey.Delete(assistantApiKey)
+func (s *Service) DeleteKey(ctx context.Context, assistantKey *entity.AssistantKey) error {
+	_, err := s.dao.WithContext(ctx).AssistantKey.Delete(assistantKey)
 
 	return err
 }
 
-func (s *Service) DeleteAllApiKey(ctx context.Context, assistant *entity.Assistant) error {
-	_, err := s.dao.WithContext(ctx).AssistantApiKey.Where(s.dao.AssistantApiKey.AssistantId.Eq(uint(assistant.Id))).Delete()
+func (s *Service) DeleteAllKey(ctx context.Context, assistant *entity.Assistant) error {
+	_, err := s.dao.WithContext(ctx).AssistantKey.Where(s.dao.AssistantKey.AssistantId.Eq(uint(assistant.Id))).Delete()
 
 	return err
 }
 
-//func (s *Service) UpdateApiKey(ctx context.Context, assistant *entity.Assistant) error {
+//func (s *Service) UpdateKey(ctx context.Context, assistant *entity.Assistant) error {
 //	_, err := s.x.Context(ctx).ID(assistant.Id).AllCols().Update(assistant)
 //	return err
 //}

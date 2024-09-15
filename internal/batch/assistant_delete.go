@@ -47,10 +47,9 @@ func (b *Batch) AssistantDelete(ctx context.Context, adb *AssistantDeleteBatch) 
 			chatPage++
 		}
 
-		// 删除 API Key
-		err := adb.AssistantService.DeleteAllApiKey(ctx, adb.AssistantEntity)
+		err := adb.AssistantService.DeleteAllKey(ctx, adb.AssistantEntity)
 		if err != nil {
-			b.logger.Sugar.Errorf("Batch AssistantAPIKeyDelete: %v", err)
+			b.logger.Sugar.Errorf("Batch AssistantAllSecretDelete: %v", err)
 			return
 		}
 

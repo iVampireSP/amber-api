@@ -372,7 +372,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/entity.AssistantApiKey"
+                                                "$ref": "#/definitions/entity.AssistantKey"
                                             }
                                         }
                                     }
@@ -425,7 +425,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/entity.AssistantApiKey"
+                                            "$ref": "#/definitions/entity.AssistantKey"
                                         }
                                     }
                                 }
@@ -928,7 +928,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "assistant_token",
+                        "name": "assistant_key",
                         "in": "formData",
                         "required": true
                     },
@@ -1030,7 +1030,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "assistant_token",
+                        "name": "assistant_key",
                         "in": "query",
                         "required": true
                     },
@@ -2831,7 +2831,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.AssistantApiKey": {
+        "entity.AssistantKey": {
             "type": "object",
             "properties": {
                 "assistant": {
@@ -3150,13 +3150,13 @@ const docTemplate = `{
         "schema.AddPublicChatMessageRequest": {
             "type": "object",
             "required": [
-                "assistant_token",
+                "assistant_key",
                 "guest_id",
                 "message",
                 "role"
             ],
             "properties": {
-                "assistant_token": {
+                "assistant_key": {
                     "type": "string"
                 },
                 "guest_id": {
@@ -3327,12 +3327,12 @@ const docTemplate = `{
         "schema.ChatPublicRequest": {
             "type": "object",
             "required": [
-                "assistant_token",
+                "assistant_key",
                 "guest_id",
                 "name"
             ],
             "properties": {
-                "assistant_token": {
+                "assistant_key": {
                     "type": "string"
                 },
                 "guest_id": {
@@ -3427,11 +3427,11 @@ const docTemplate = `{
         "schema.GetPublicChatMessageRequest": {
             "type": "object",
             "required": [
-                "assistant_token",
+                "assistant_key",
                 "guest_id"
             ],
             "properties": {
-                "assistant_token": {
+                "assistant_key": {
                     "type": "string"
                 },
                 "guest_id": {

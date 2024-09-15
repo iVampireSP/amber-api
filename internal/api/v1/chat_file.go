@@ -2,13 +2,14 @@ package v1
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"mime/multipart"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // AddChatFile godoc
@@ -377,7 +378,7 @@ func (u *ChatController) AddPublicChatImage(c *gin.Context) {
 }
 
 func (u *ChatController) canPublicChatNext(c *gin.Context, response *schema.HttpResponse, getPublicChatMessageRequest *schema.GetPublicChatMessageRequest, getPublicChatMessageRequestParams *schema.GetPublicChatMessageRequestParams) (bool, *entity.Chat) {
-	assistantShare, err := u.assistantService.GetApiKeyBySecret(c, getPublicChatMessageRequest.AssistantToken)
+	assistantShare, err := u.assistantService.GetByKey(c, getPublicChatMessageRequest.AssistantKey)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return false, nil

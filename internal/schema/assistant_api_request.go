@@ -1,19 +1,19 @@
 package schema
 
-type AssistantApiKeyListRequest struct {
+type AssistantKeyListRequest struct {
 	AssistantId EntityId `uri:"id" binding:"required"`
 }
 
-type AssistantApiKeyCreateRequest struct {
+type AssistantKeyCreateRequest struct {
 	AssistantId EntityId `uri:"id" binding:"required"`
 }
 
-type AssistantApiKeyDeleteRequest struct {
+type AssistantKeyDeleteRequest struct {
 	AssistantId EntityId `uri:"id" binding:"required"`
 	KeyId       EntityId `uri:"key_id" binding:"required"`
 }
 
-type AssistantApiKeyUpdateRequest struct {
+type AssistantKeyUpdateRequest struct {
 	AssistantId int64
 	Token       string
 }

@@ -1,14 +1,14 @@
 package schema
 
 type ChatPublicRequest struct {
-	AssistantToken string `json:"assistant_token" binding:"required"`
-	GuestId        string `json:"guest_id" binding:"required"`
-	Name           string `json:"name" binding:"required" validate:"max=32"`
+	AssistantKey string `json:"assistant_key" binding:"required"`
+	GuestId      string `json:"guest_id" binding:"required"`
+	Name         string `json:"name" binding:"required" validate:"max=32"`
 }
 
 type ChatPublicResponse struct {
-	AssistantToken string `json:"assistant_token" binding:"required"`
-	GuestId        string `json:"guest_id" binding:"required"`
+	AssistantKey string `json:"assistant_key" binding:"required"`
+	GuestId      string `json:"guest_id" binding:"required"`
 }
 
 type ChatPublicListRequest struct {
@@ -20,13 +20,13 @@ type GetPublicChatMessageRequestParams struct {
 }
 
 type GetPublicChatMessageRequest struct {
-	AssistantToken string `query:"assistant_token" form:"assistant_token"  json:"assistant_token" binding:"required"`
-	GuestId        string `query:"guest_id" form:"guest_id"  json:"guest_id" binding:"required"`
+	AssistantKey string `query:"assistant_key" form:"assistant_key"  json:"assistant_key" binding:"required"`
+	GuestId      string `query:"guest_id" form:"guest_id"  json:"guest_id" binding:"required"`
 }
 
 type AddPublicChatMessageRequest struct {
-	AssistantToken string   `json:"assistant_token" binding:"required"`
-	GuestId        string   `json:"guest_id" binding:"required"`
-	Message        string   `json:"message" binding:"required"`
-	Role           ChatRole `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant"`
+	AssistantKey string   `json:"assistant_key" binding:"required"`
+	GuestId      string   `json:"guest_id" binding:"required"`
+	Message      string   `json:"message" binding:"required"`
+	Role         ChatRole `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant"`
 }

@@ -3,14 +3,15 @@ package v1
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/entity"
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 // CreatePublicChat godoc
@@ -30,7 +31,7 @@ func (u *ChatController) CreatePublicChat(c *gin.Context) {
 		return
 	}
 
-	assistantShare, err := u.assistantService.GetApiKeyBySecret(c, request.AssistantToken)
+	assistantShare, err := u.assistantService.GetByKey(c, request.AssistantKey)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
@@ -103,7 +104,7 @@ func (u *ChatController) GetPublicChatMessages(c *gin.Context) {
 		return
 	}
 	// get assistant by token
-	assistantShare, err := u.assistantService.GetApiKeyBySecret(c, getPublicChatMessageRequest.AssistantToken)
+	assistantShare, err := u.assistantService.GetByKey(c, getPublicChatMessageRequest.AssistantKey)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
@@ -322,7 +323,7 @@ func (u *ChatController) ClearPublicChatMessages(c *gin.Context) {
 		return
 	}
 	// get assistant by token
-	assistantShare, err := u.assistantService.GetApiKeyBySecret(c, getPublicChatMessageRequest.AssistantToken)
+	assistantShare, err := u.assistantService.GetByKey(c, getPublicChatMessageRequest.AssistantKey)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return

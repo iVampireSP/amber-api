@@ -54,7 +54,7 @@ func CreateApp() (*base.Application, error) {
 	assistantService := assistant.NewService(query)
 	chat_messageService := chat_message.NewService(query)
 	chatService := chat.NewService(query, assistantService, chat_messageService)
-	client := milvus.NewMilvus(config)
+	client := milvus.NewMilvus(config, loggerLogger)
 	s3S3 := s3.NewS3(config)
 	redisClient := redis.NewRedis(config)
 	fileService := file.NewService(s3S3, config, query, redisClient)

@@ -1,7 +1,6 @@
 package llm
 
 import (
-	"context"
 	"fmt"
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
@@ -15,7 +14,7 @@ type Message struct {
 	MessageContent []llms.MessageContent
 }
 
-func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
+func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
 	var hasHumanMessage = false
 	var hasFileMessage = false
 
@@ -94,13 +93,12 @@ func (s *Service) processHistory(ctx context.Context, llmChat *schema.LLMChat, h
 				// 获取多个对话中的助理的信息
 				var content string
 
-				// TODO: 优化获取逻辑，比如将获取到的助理放到一个缓存里面
-				assistant, err := s.AssistantService.GetAssistant(ctx, *h.AssistantId)
-				if err != nil {
-					content = "[Warning]The previous message has been replied to by another assistant, but information about that assistant cannot be obtained"
+				if h.Assistant != nil {
+					content = fmt.Sprintf("[Warning]The previous message has been replied to by another assistant, whose name is '%s' and the description is '%s'",
+						h.Assistant.Name, h.Assistant.Description)
+				} else {
+					content = "[Warning]The previous message has been replied to by another assistant, not you"
 				}
-				content = fmt.Sprintf("[Warning]The previous message has been replied to by another assistant, whose name is '%s' and the description is '%s'",
-					assistant.Name, assistant.Description)
 
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, content))
 				currentAssistantId = *h.AssistantId

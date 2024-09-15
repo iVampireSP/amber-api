@@ -98,7 +98,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	if lastChatMessage != nil && (lastChatMessage.Role == schema.RoleHuman || lastChatMessage.Role == schema.RoleHideHuman) {
+	if lastChatMessage != nil && lastChatMessage.AssistantId != nil && (lastChatMessage.Role == schema.RoleHuman || lastChatMessage.Role == schema.RoleHideHuman) {
 		assistantEntity, err = u.assistantService.GetAssistant(c, *lastChatMessage.AssistantId)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()

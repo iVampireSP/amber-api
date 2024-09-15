@@ -30,7 +30,7 @@ func (u *ChatController) CreatePublicChat(c *gin.Context) {
 		return
 	}
 
-	assistantShare, err := u.assistantService.GetShareByToken(c, request.AssistantToken)
+	assistantShare, err := u.assistantService.GetApiKeyBySecret(c, request.AssistantToken)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
@@ -103,7 +103,7 @@ func (u *ChatController) GetPublicChatMessages(c *gin.Context) {
 		return
 	}
 	// get assistant by token
-	assistantShare, err := u.assistantService.GetShareByToken(c, getPublicChatMessageRequest.AssistantToken)
+	assistantShare, err := u.assistantService.GetApiKeyBySecret(c, getPublicChatMessageRequest.AssistantToken)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
@@ -322,7 +322,7 @@ func (u *ChatController) ClearPublicChatMessages(c *gin.Context) {
 		return
 	}
 	// get assistant by token
-	assistantShare, err := u.assistantService.GetShareByToken(c, getPublicChatMessageRequest.AssistantToken)
+	assistantShare, err := u.assistantService.GetApiKeyBySecret(c, getPublicChatMessageRequest.AssistantToken)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return

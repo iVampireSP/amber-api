@@ -234,14 +234,33 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		needStream = false
 	}
 
+	var assistantId = chatEntity.AssistantId
+
+	if request.AssistantId != nil {
+		// 如果这个 assistant 不是用户的
+		assistantEntity2, err := u.assistantService.GetAssistant(c, *request.AssistantId)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		if assistantEntity2.UserId != userInfo.Token.Sub {
+			response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+			return
+		}
+
+		assistantId = request.AssistantId
+	}
+
 	chatMessages = append(chatMessages, entity.ChatMessage{
 		ChatId:      chatEntity.Id,
-		AssistantId: chatEntity.AssistantId,
+		AssistantId: assistantId,
 		Content:     request.Message,
 		Role:        request.Role,
 	})
 
-	if assistantEntity != nil && needStream {
+	// 检测是否存在知识库
+	if needStream && assistantEntity != nil && assistantEntity.LibraryId != nil {
 		libraryEntity, err := u.libraryService.GetLibrary(c, *assistantEntity.LibraryId)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()

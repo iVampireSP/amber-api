@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"errors"
+	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"rag-new/internal/entity"
@@ -89,7 +91,24 @@ func (u *ChatController) Stream(c *gin.Context) {
 	var assistantEntity *entity.Assistant
 	var tools []llms.Tool
 
-	if chatEntity.AssistantId != nil {
+	// 获取上一条消息，拿到指定的 assistant id
+	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	if lastChatMessage != nil && (lastChatMessage.Role == schema.RoleHuman || lastChatMessage.Role == schema.RoleHideHuman) {
+		assistantEntity, err = u.assistantService.GetAssistant(c, *lastChatMessage.AssistantId)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		// 这里不用判断是不是用户的，因为添加消息时已经判断了
+	}
+
+	if assistantEntity == nil && chatEntity.AssistantId != nil {
 		assistantEntity, err = u.assistantService.GetAssistant(c, *chatEntity.AssistantId)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()

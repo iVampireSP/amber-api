@@ -28,7 +28,7 @@ func NewMemoryController(authService *auth.Service, memoryService *memory.Servic
 // @Accept       json
 // @Produce      json
 // @Security     ApiKeyAuth
-// @Success      200  {object}  schema.ResponseBody{data=entity.Memory}
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.Memory}
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/memories [get]
 func (mc *MemoryController) List(c *gin.Context) {

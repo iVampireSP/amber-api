@@ -2253,7 +2253,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/entity.Memory"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Memory"
+                                            }
                                         }
                                     }
                                 }

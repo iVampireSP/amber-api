@@ -2011,7 +2011,9 @@ paths:
             - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  $ref: '#/definitions/entity.Memory'
+                  items:
+                    $ref: '#/definitions/entity.Memory'
+                  type: array
               type: object
         "400":
           description: Bad Request

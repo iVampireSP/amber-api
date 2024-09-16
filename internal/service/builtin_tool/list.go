@@ -42,11 +42,9 @@ var tools = []llms.Tool{
 						Description: "The url of the image you want to describe" +
 							"(URL and file ID must be chosen between two options)",
 					},
-					"question": {
-						Type: jsonschema.String,
-						Description: "What you need to explain, " +
-							"using natural language like 'What is this image about?', " +
-							"Write questions in the user language like '我想知道这张图片是什么关于的'。",
+					"prompt": {
+						Type:        jsonschema.String,
+						Description: "What you need to explain.",
 					},
 				},
 				Required: []string{
@@ -79,7 +77,7 @@ var tools = []llms.Tool{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
 			Name:        prefix("generate_image"),
-			Description: "It's useful for generating/drawing images",
+			Description: "It's useful for generating/drawing images,if there are no special requirements, always use the markdown syntax to display images",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{

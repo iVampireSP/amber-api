@@ -9,9 +9,9 @@ import (
 )
 
 type describeImageParams struct {
-	Question string          `json:"question"`
-	Url      string          `json:"url"`
-	FileId   schema.EntityId `json:"file_id" mapstructure:"file_id"`
+	Prompt string          `json:"prompt"`
+	Url    string          `json:"url"`
+	FileId schema.EntityId `json:"file_id" mapstructure:"file_id"`
 }
 
 func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
@@ -77,7 +77,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 			Role: llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{
 				llms.ImageURLWithDetailPart(fileUrl, "auto"),
-				llms.TextPart(params.Question),
+				llms.TextPart(params.Prompt),
 			},
 		},
 	}

@@ -31,7 +31,7 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 	}
 	extractedMemoriesText := extractedMemories.Choices[0].Content
 
-	var filter = fmt.Sprintf(`user_id == "%s" && model == "%s"`, userId, s.config.OpenAI.EmbeddingModel)
+	var filter = fmt.Sprintf("user_id == '%s' && model == '%s'", userId, s.config.OpenAI.EmbeddingModel)
 	sp, err := entity2.NewIndexAUTOINDEXSearchParam(1)
 	if err != nil {
 		return err
@@ -46,11 +46,22 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 		entity2.L2,
 		10,
 		sp, client.WithLimit(5))
+	if err != nil {
+		return err
+	}
 
 	var LLMMemories []*LLMMemory
 
 	// get all data
 	for _, res := range existingMemories {
+		if res.ResultCount == 0 {
+			continue
+		}
+
+		if res.Err != nil {
+			return res.Err
+		}
+
 		var idColumn *entity2.ColumnInt64
 		for _, field := range res.Fields {
 			if field.Name() == "memory_id" {
@@ -170,7 +181,7 @@ func (s *Service) Purge(ctx context.Context, userId schema.UserId) error {
 	}
 
 	// milvus delete
-	var filter = fmt.Sprintf(`user_id == "%s"`, userId)
+	var filter = fmt.Sprintf("user_id == '%s'", userId)
 	errDelete := s.Milvus.Delete(ctx, s.config.Milvus.MemoryCollection, "", filter)
 	if errDelete != nil {
 		return errDelete

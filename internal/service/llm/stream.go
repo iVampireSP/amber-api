@@ -195,18 +195,13 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 					if err != nil {
 						// 也许内置函数不应该报 ToolFailed,不如直接 failed
 						s.write(ctx, llmChat, &schema.AssistantResponse{
-							State:   schema.StateFailed,
-							Content: err.Error(),
-							//ToolResponseMessage: &schema.ToolResponseMessage{
-							//	ToolName:     builtin_tool.NAME,
-							//	FunctionName: tc.FunctionCall.Name,
-							//	Content:      err.Error(),
-							//},
+							State:      schema.StateFailed,
+							Content:    err.Error(),
 							TokenUsage: tokenUsage,
-							Internal: &schema.AssistantInternal{
-								ToolCall:   &tc,
-								ToolCallId: tc.ID,
-							},
+							//Internal: &schema.AssistantInternal{
+							//	ToolCall:   &tc,
+							//	ToolCallId: tc.ID,
+							//},
 						})
 						return err
 					}

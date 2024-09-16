@@ -33,6 +33,7 @@ const HeaderUserIp = "X-User-IP"
 // @Failure      500  {object}  schema.ResponseBody
 // @Router       /api/v1/stream/{stream_id} [get]
 func (u *ChatController) Stream(c *gin.Context) {
+
 	var response = schema.NewResponse(c)
 	// 检查 stream id 是否存在
 	streamIdStr := c.Param("stream_id")
@@ -262,6 +263,11 @@ func (u *ChatController) Stream(c *gin.Context) {
 		case schema.StateDone:
 			return true
 		case schema.StateFailed:
+			return false
+		case schema.StateFinished:
+			tokenUsage = msg.TokenUsage
+			return false
+		case schema.StateToolFailed:
 			// 这样会发生悬垂
 			// 所以要添加个新的消息
 			var cm = entity.ChatMessage{
@@ -274,11 +280,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 			messageList = append(messageList, cm)
 
 			return false
-		case schema.StateFinished:
-			tokenUsage = msg.TokenUsage
-			return false
-		case schema.StateToolFailed:
-			return false
 		default:
 			return true
 		}
@@ -290,12 +291,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 	// close sse stream
 	c.SSEvent("close", "")
 	c.Writer.Flush()
-
-	// 移除缓存
-	u.redis.Del(c, streamIdCacheKey)
-	u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))
-	u.redis.Del(c, u.getCacheKey("stream:"+streamIdStr+":user"))
-	u.redis.Del(c, chatIdStreamKey)
 
 	if llmFullMessage != "" {
 		// 添加到消息 entity.ChatMessage
@@ -325,4 +320,12 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+
+	defer func() {
+		// 移除缓存
+		u.redis.Del(c, streamIdCacheKey)
+		u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))
+		u.redis.Del(c, u.getCacheKey("stream:"+streamIdStr+":user"))
+		u.redis.Del(c, chatIdStreamKey)
+	}()
 }

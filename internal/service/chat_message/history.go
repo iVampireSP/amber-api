@@ -12,6 +12,7 @@ func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*ent
 		//Preload(s.dao.ChatMessage.File).
 		//Preload(s.dao.ChatMessage.File).
 		Preload(s.dao.ChatMessage.UserFile.File).
+		Preload(s.dao.ChatMessage.Assistant).
 		Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).
 		Where(s.dao.ChatMessage.Role.Neq(schema.RoleHideSystem.String())).
 		Where(s.dao.ChatMessage.Role.Neq(schema.RoleHideHuman.String())).

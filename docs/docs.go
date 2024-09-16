@@ -1660,7 +1660,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/entity.ChatMessage"
+                                                "$ref": "#/definitions/entity.ChatMessageList"
                                             }
                                         }
                                     }
@@ -2918,6 +2918,9 @@ const docTemplate = `{
         "entity.ChatMessage": {
             "type": "object",
             "properties": {
+                "assistant": {
+                    "$ref": "#/definitions/entity.Assistant"
+                },
                 "assistant_id": {
                     "description": "AssistantId 可以让同一个对话中，使用不同的助手来处理消息",
                     "type": "integer"
@@ -2946,6 +2949,67 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
+                    "type": "integer"
+                },
+                "prompt_tokens": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "total_tokens": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_file": {
+                    "$ref": "#/definitions/entity.UserFile"
+                },
+                "user_file_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.ChatMessageList": {
+            "type": "object",
+            "properties": {
+                "assistant": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "assistant_id": {
+                    "type": "integer"
+                },
+                "chat_id": {
+                    "type": "integer"
+                },
+                "completion_tokens": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "file": {
+                    "$ref": "#/definitions/entity.File"
+                },
+                "file_id": {
+                    "type": "integer"
+                },
+                "hidden": {
+                    "type": "boolean"
+                },
+                "id": {
                     "type": "integer"
                 },
                 "prompt_tokens": {

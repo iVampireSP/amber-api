@@ -24,7 +24,7 @@ import (
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        schema.ChatRequest  path  schema.ChatRequest true  "Chat ID"
-// @Success      200  {object}  schema.ResponseBody{data=[]entity.ChatMessage}
+// @Success      200  {object}  schema.ResponseBody{data=[]entity.ChatMessageList}
 // @Failure      400  {object}  schema.ResponseBody
 // @Failure      404  {object}  schema.ResponseBody
 // @Failure      500  {object}  schema.ResponseBody
@@ -55,6 +55,8 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 		return
 	}
 
+	var chatMessageListResponse []*entity.ChatMessageList
+
 	chatHistories, err := u.cm.GetChatMessage(c, chatEntity)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -65,7 +67,43 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 		return
 	}
 
-	response.Status(http.StatusOK).Data(chatHistories).Send()
+	for _, chatMessage := range chatHistories {
+		var cmr = &entity.ChatMessageList{}
+		cmr.Id = chatMessage.Id
+		cmr.CreatedAt = chatMessage.CreatedAt
+		cmr.UpdatedAt = chatMessage.UpdatedAt
+		cmr.ChatId = chatMessage.ChatId
+		cmr.AssistantId = chatMessage.AssistantId
+		cmr.Role = chatMessage.Role
+		cmr.Content = chatMessage.Content
+		cmr.FileId = chatMessage.FileId
+		cmr.UserFileId = chatMessage.UserFileId
+		if chatMessage.File != nil {
+			cmr.File = chatMessage.File
+		}
+		if chatMessage.UserFile != nil {
+			cmr.UserFile = chatMessage.UserFile
+		}
+
+		cmr.Hidden = chatMessage.Hidden
+		cmr.PromptTokens = chatMessage.PromptTokens
+		cmr.CompletionTokens = chatMessage.CompletionTokens
+		cmr.TotalTokens = chatMessage.TotalTokens
+
+		if chatMessage.Assistant != nil {
+			cmr.Assistant = &struct {
+				Id   schema.EntityId `json:"id"`
+				Name string          `json:"name"`
+			}{
+				Id:   chatMessage.Assistant.Id,
+				Name: chatMessage.Assistant.Name,
+			}
+		}
+
+		chatMessageListResponse = append(chatMessageListResponse, cmr)
+	}
+
+	response.Status(http.StatusOK).Data(chatMessageListResponse).Send()
 }
 
 // AddChatMessage godoc

@@ -13,7 +13,7 @@ func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, 
 	var prompt = ""
 
 	var currentTime = time.Now().Format("2006-01-02 15:04:05")
-	var userPrompt = "DateTime: " + currentTime
+	var userPrompt = "Now Time: " + currentTime
 
 	if assistant != nil {
 		userPrompt += "\nYour(assistant) name: " + assistant.Name

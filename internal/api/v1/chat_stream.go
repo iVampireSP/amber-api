@@ -262,6 +262,17 @@ func (u *ChatController) Stream(c *gin.Context) {
 		case schema.StateDone:
 			return true
 		case schema.StateFailed:
+			// 这样会发生悬垂
+			// 所以要添加个新的消息
+			var cm = entity.ChatMessage{
+				Role:     schema.RoleTool,
+				Content:  msg.ToolResponseMessage.Content,
+				ChatId:   chatEntity.Id,
+				ToolCall: (*schema.ToolCall)(msg.Internal.ToolCall),
+			}
+
+			messageList = append(messageList, cm)
+
 			return false
 		case schema.StateFinished:
 			tokenUsage = msg.TokenUsage

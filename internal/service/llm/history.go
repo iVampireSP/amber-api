@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"context"
 	"fmt"
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
@@ -14,11 +15,13 @@ type Message struct {
 	MessageContent []llms.MessageContent
 }
 
-func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
+const defaultToolFailed = "ToolCall Failed, timeout or error"
+
+func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, history []*entity.ChatMessage) (*Message, error) {
 	var hasHumanMessage = false
 	var hasFileMessage = false
 
-	var foundedToolCalls []llms.ToolCall
+	var lastToolCall *llms.ToolCall
 
 	// 粗略字数统计，用于切换模型
 	var count = 0
@@ -85,7 +88,6 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 
 		switch h.Role {
 		case schema.RoleHuman:
-
 			// 获取多个对话中的助理的信息
 			// 如果当前助理不存在，则设置
 			if currentAssistantId == 0 && h.AssistantId != nil {
@@ -117,6 +119,32 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 				hasHumanMessage = true
 			}
 		case schema.RoleAssistant:
+			// 检测是否是悬垂调用
+			if lastToolCall != nil {
+				// 上条消息可能有问题，将上个 ToolCall 标记为失败
+				historyContent = append(historyContent, llms.MessageContent{
+					Role: llms.ChatMessageTypeTool,
+					Parts: []llms.ContentPart{
+						llms.ToolCallResponse{
+							ToolCallID: lastToolCall.ID,
+							Name:       lastToolCall.FunctionCall.Name,
+							Content:    defaultToolFailed,
+						},
+					},
+				})
+				//s.write(ctx, llmChat, &schema.AssistantResponse{
+				//	State:   schema.StateToolFailed,
+				//	Content: defaultToolFailed,
+				//	ToolResponseMessage: &schema.ToolResponseMessage{
+				//		ToolName:     "unknown",
+				//		FunctionName: lastToolCall.FunctionCall.Name,
+				//		Content:      defaultToolFailed,
+				//	},
+				//})
+
+				lastToolCall = nil
+			}
+
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))
 		case schema.RoleToolCall:
 			// ToolCall 消息
@@ -130,36 +158,48 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 
 				historyContent = append(historyContent, assistantResponse)
 
-				foundedToolCalls = append(foundedToolCalls, toolCall)
+				// 因为 ToolCall 消息的下一条消息必须是 tool
+				lastToolCall = &toolCall
 			}
 		case schema.RoleTool:
 			// Tool Call 响应
 			if h.ToolCall != nil {
-				historyContent = append(historyContent, llms.MessageContent{
-					Role: llms.ChatMessageTypeTool,
-					Parts: []llms.ContentPart{
-						llms.ToolCallResponse{
-							ToolCallID: h.ToolCall.ID,
-							Name:       h.ToolCall.FunctionCall.Name,
-							Content:    h.Content,
-						},
-					},
-				})
+				if lastToolCall != nil && lastToolCall.ID == h.ToolCall.ID {
+					lastToolCall = nil
 
-				// 如果 foundedToolCalls 存在 ID, 则删除
-				for i, tc := range foundedToolCalls {
-					if h.ToolCall.ID == tc.ID {
-						// 检查索引是否在有效范围内
-						if i < len(foundedToolCalls)-1 {
-							// 安全地删除元素
-							foundedToolCalls = append(foundedToolCalls[:i], foundedToolCalls[i+1:]...)
-							break
-						} else {
-							// 如果已经是最后一个元素，直接设置为空切片
-							foundedToolCalls = foundedToolCalls[:0]
-							break
-						}
-					}
+					historyContent = append(historyContent, llms.MessageContent{
+						Role: llms.ChatMessageTypeTool,
+						Parts: []llms.ContentPart{
+							llms.ToolCallResponse{
+								ToolCallID: h.ToolCall.ID,
+								Name:       h.ToolCall.FunctionCall.Name,
+								Content:    h.Content,
+							},
+						},
+					})
+				} else {
+					// 不相同，说明有问题,将上个 Tool Call 标记为失败
+					historyContent = append(historyContent, llms.MessageContent{
+						Role: llms.ChatMessageTypeTool,
+						Parts: []llms.ContentPart{
+							llms.ToolCallResponse{
+								ToolCallID: lastToolCall.ID,
+								Name:       lastToolCall.FunctionCall.Name,
+								Content:    defaultToolFailed,
+							},
+						},
+					})
+					//s.write(ctx, llmChat, &schema.AssistantResponse{
+					//	State:   schema.StateToolFailed,
+					//	Content: defaultToolFailed,
+					//	ToolResponseMessage: &schema.ToolResponseMessage{
+					//		ToolName:     "unknown",
+					//		FunctionName: lastToolCall.FunctionCall.Name,
+					//		Content:      defaultToolFailed,
+					//	},
+					//})
+
+					lastToolCall = nil
 				}
 
 			}
@@ -203,28 +243,12 @@ func (s *Service) processHistory(llmChat *schema.LLMChat, history []*entity.Chat
 		}
 	}
 
-	if len(foundedToolCalls) > 0 {
-		// 剩下的都是悬垂的 ToolCall,都没有被正确响应
-		// 所以都标记为失败
-		for _, tc := range foundedToolCalls {
-			historyContent = append(historyContent, llms.MessageContent{
-				Role: llms.ChatMessageTypeTool,
-				Parts: []llms.ContentPart{
-					llms.ToolCallResponse{
-						ToolCallID: tc.ID,
-						Name:       tc.FunctionCall.Name,
-						Content:    "ToolCall Failed, timeout or error",
-					},
-				},
-			})
-		}
-	}
-
 	// 如果整个对话里面没有 Human 消息，则不能继续
 	if !hasHumanMessage {
 		return nil, consts.ErrNoHumanMessage
 	}
 
+	// 拼接系统 Prompt 并放入最底
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, strings.Join(systemPrompts, "\n")))
 
 	var message = &Message{

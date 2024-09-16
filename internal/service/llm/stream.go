@@ -17,7 +17,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 	defer close(llmChat.ResponseChan)
 
 	// 处理历史
-	h, err := s.processHistory(llmChat, history)
+	h, err := s.processHistory(ctx, llmChat, history)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,8 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 						Arguments:    functionCallArgs,
 					},
 					Internal: &schema.AssistantInternal{
-						ToolCall: &tc,
+						ToolCall:   &tc,
+						ToolCallId: tc.ID,
 					},
 				}
 
@@ -145,6 +146,10 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 								FunctionName: tc.FunctionCall.Name,
 								Content:      err.Error(),
 							},
+							Internal: &schema.AssistantInternal{
+								ToolCall:   &tc,
+								ToolCallId: tc.ID,
+							},
 							TokenUsage: tokenUsage,
 						})
 						return err
@@ -163,6 +168,10 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 								Content:      err.Error(),
 							},
 							TokenUsage: tokenUsage,
+							Internal: &schema.AssistantInternal{
+								ToolCall:   &tc,
+								ToolCallId: tc.ID,
+							},
 						})
 						return err
 					}
@@ -194,6 +203,10 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 							//	Content:      err.Error(),
 							//},
 							TokenUsage: tokenUsage,
+							Internal: &schema.AssistantInternal{
+								ToolCall:   &tc,
+								ToolCallId: tc.ID,
+							},
 						})
 						return err
 					}

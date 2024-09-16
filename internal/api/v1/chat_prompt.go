@@ -10,7 +10,7 @@ import (
 )
 
 func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, user *schema.UserPublicInfo, owner schema.ChatOwner) (string, error) {
-	var prompt = ""
+	var prompt = "When encountering problems, you must first observe the problem and then think about what to do next, and output your thoughts.\n"
 
 	var currentTime = time.Now().Format("2006-01-02 15:04:05")
 	var userPrompt = "Now Time: " + currentTime
@@ -29,14 +29,14 @@ func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, 
 			return "", err
 		}
 
-		prompt = consts.DefaultPrompt
+		prompt += consts.DefaultPrompt
 
 		prompt += "\nUser memory you know: " + memoryPrompt + "\n"
 		prompt += userPrompt
 
 	} else if assistant.DisableDefaultPrompt {
 		// 如果禁用了默认的 Prompt
-		prompt = assistant.Prompt
+		prompt += assistant.Prompt
 
 		// 那还是可以获取记忆
 		memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, user.Id)

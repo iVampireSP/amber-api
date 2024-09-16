@@ -102,10 +102,11 @@ var tools = []llms.Tool{
 		Function: &llms.FunctionDefinition{
 			Name: prefix("calculator"),
 			Description: "It's useful for mathematical calculations," +
-				"Every time a step is executed, the user must be informed and then proceed to the next step." +
+				"every time a step is executed, the user must be informed and then proceed to the next step." +
 				"When encountering functions such as log and sqrt, " +
 				"you need to call the tool multiple times to calculate, " +
-				"tThe calculation process must be written out before calling the tool to perform the calculation",
+				"the calculation process must be written out before calling the tool to perform the calculation." +
+				"The result of this tool is always right.",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{

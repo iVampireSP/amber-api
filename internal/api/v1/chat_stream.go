@@ -109,19 +109,23 @@ func (u *ChatController) Stream(c *gin.Context) {
 		// 这里不用判断是不是用户的，因为添加消息时已经判断了
 	}
 
+	// 如果上条消息没有助理，但是对话有助理
 	if assistantEntity == nil && chatEntity.AssistantId != nil {
 		assistantEntity, err = u.assistantService.GetAssistant(c, *chatEntity.AssistantId)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
+	}
+
+	// 如果确实有助理，则绑定工具
+	if assistantEntity != nil {
 		// 获取 assistant 绑定的 tools
 		tools, err = u.assistantService.ToLLMTool(c, assistantEntity)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
-
 	}
 
 	// 提取 history

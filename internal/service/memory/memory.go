@@ -31,7 +31,7 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 	}
 	extractedMemoriesText := extractedMemories.Choices[0].Content
 
-	var filter = fmt.Sprintf("user_id == %s && model == %s", userId, s.config.OpenAI.EmbeddingModel)
+	var filter = fmt.Sprintf(`user_id == "%s" && model == "%s"`, userId, s.config.OpenAI.EmbeddingModel)
 	sp, err := entity2.NewIndexAUTOINDEXSearchParam(1)
 	if err != nil {
 		return err
@@ -170,7 +170,7 @@ func (s *Service) Purge(ctx context.Context, userId schema.UserId) error {
 	}
 
 	// milvus delete
-	var filter = fmt.Sprintf("user_id == %s", userId)
+	var filter = fmt.Sprintf(`user_id == "%s"`, userId)
 	errDelete := s.Milvus.Delete(ctx, s.config.Milvus.MemoryCollection, "", filter)
 	if errDelete != nil {
 		return errDelete

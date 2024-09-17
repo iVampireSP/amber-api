@@ -182,7 +182,7 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 							},
 						},
 					})
-				} else {
+				} else if lastToolCall != nil {
 					// 不相同，说明有问题,将上个 Tool Call 标记为失败
 					historyContent = append(historyContent, llms.MessageContent{
 						Role: llms.ChatMessageTypeTool,

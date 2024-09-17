@@ -79,8 +79,12 @@ The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hin
 			useMemory = false
 		}
 
+		// 助理 API 是禁用记忆的
 		if owner == schema.OwnerGuest {
-			if assistant.EnableMemoryForAssistantAPI && !assistant.DisableMemory {
+			useMemory = false
+
+			// 例外情况：如果用户要求 启用记忆
+			if assistant.EnableMemoryForAssistantAPI {
 				useMemory = true
 			}
 		}

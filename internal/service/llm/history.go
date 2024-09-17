@@ -86,31 +86,24 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			//}
 		}
 
+		var timeString = ""
+		// 创建时间，如果 h.CreatedAt 已设置（不为 0000）
+		if !h.CreatedAt.IsZero() {
+			// 将创建时间转换为字符串
+			timeString = fmt.Sprintf("%s", h.CreatedAt.Format("2006-01-02 15:04:05"))
+		}
+
 		switch h.Role {
 		case schema.RoleHuman:
+
 			// 获取多个对话中的助理的信息
 			// 如果当前助理不存在，则设置
 			if currentAssistantId == 0 && h.AssistantId != nil {
 				currentAssistantId = *h.AssistantId
-			} else {
-				var content string
+			}
 
-				if h.AssistantId == nil {
-					// 这说明上个助理不存在
-					content = "[Warning]The previous message has been replied to by another assistant, no you, but can not get assistant info."
-				}
-				if h.Assistant != nil {
-					content = fmt.Sprintf("[Warning]The previous message has been replied to by another assistant, whose name is '%s' and the description is '%s'",
-						h.Assistant.Name, h.Assistant.Description)
-
-					currentAssistantId = *h.AssistantId
-
-				}
-
-				if content != "" {
-					historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, content))
-				}
-
+			if timeString != "" {
+				h.Content = fmt.Sprintf("Send at:%s\n%s", timeString, h.Content)
 			}
 
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
@@ -132,17 +125,29 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 						},
 					},
 				})
-				//s.write(ctx, llmChat, &schema.AssistantResponse{
-				//	State:   schema.StateToolFailed,
-				//	Content: defaultToolFailed,
-				//	ToolResponseMessage: &schema.ToolResponseMessage{
-				//		ToolName:     "unknown",
-				//		FunctionName: lastToolCall.FunctionCall.Name,
-				//		Content:      defaultToolFailed,
-				//	},
-				//})
-
 				lastToolCall = nil
+			}
+
+			var systemContent = ""
+			// 也不一定不存在，因为可能上个消息没有助理
+			//if h.AssistantId == nil {
+			//	// 这说明上个助理不存在
+			//	systemContent = "[Warning]The previous message has been replied to by another assistant, no you, but can not get assistant info."
+			//}
+			if h.Assistant != nil {
+				systemContent = fmt.Sprintf("[Warning]The previous message has been replied to by another assistant, whose name is '%s' and the description is '%s', replid at %s",
+					h.Assistant.Name, h.Assistant.Description, timeString)
+
+				currentAssistantId = *h.AssistantId
+
+			}
+
+			if systemContent != "" {
+				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, systemContent))
+			}
+
+			if timeString != "" {
+				h.Content = fmt.Sprintf("Send at:%s\n%s", timeString, h.Content)
 			}
 
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))

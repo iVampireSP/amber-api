@@ -2,6 +2,10 @@ package consts
 
 import "errors"
 
+const (
+	MaxToolFunctions = 100
+)
+
 var (
 	ErrToolAlreadyExists                       = errors.New("该工具已存在")
 	ErrToolNotFound                            = errors.New("未找到该工具")
@@ -15,4 +19,6 @@ var (
 	ErrToolObjectRequiredMissing               = errors.New("parameters 对象中，required 数组是必须存在的，你可以不填入内容")
 	ErrToolObjectPropertiesMissing             = errors.New("parameters 对象中，properties 对象是必须存在的")
 	ErrToolObjectTypeMissing                   = errors.New("parameters 对象中，type 对象是必须存在的")
+	ErrToolTooManyFunctions                    = errors.New("最多只能有 64 个函数")
+	ErrToolFunctionTooMany                     = errors.New("助理所使用的工具中所有的函数加起来不能超过 100 个")
 )

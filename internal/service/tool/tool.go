@@ -143,7 +143,12 @@ func (s *Service) getToolData(url string) (*schema.ToolDiscoveryInput, error) {
 		return nil, err
 	}
 
-	return &toolData, err
+	// 最多只能有 64 个
+	if len(toolData.Functions) > 64 {
+		return nil, consts.ErrToolTooManyFunctions
+	}
+
+	return &toolData, nil
 }
 
 func (s *Service) DeleteTool(ctx context.Context, id schema.EntityId) error {

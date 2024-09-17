@@ -15,6 +15,12 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 	// 重复次数
 	var lastWordRepeatCount = 0
 
+	// llmTools 必须小于 128 个
+	if len(llmTools) > 128 {
+		// 忽略多出的
+		llmTools = llmTools[:128]
+	}
+
 	resp, err := s.OpenAI.GenerateContent(ctx,
 		historyContent,
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {

@@ -132,6 +132,12 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}
 
+	// 如果 tools 超过了 100 个，则拒绝
+	if len(tools) > consts.MaxToolFunctions {
+		response.Status(http.StatusBadRequest).Error(consts.ErrToolFunctionTooMany).Send()
+		return
+	}
+
 	// 提取 history
 	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
 	var llmResponseChan = make(chan *schema.AssistantResponse, 1)

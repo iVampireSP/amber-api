@@ -48,7 +48,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		return
 	}
 
-	prompt, err := u.getPrompt(c, assistantEntity, nil, schema.OwnerGuest)
+	prompt, err := u.getPrompt(c, assistantEntity, nil, schema.OwnerGuest, nil)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return

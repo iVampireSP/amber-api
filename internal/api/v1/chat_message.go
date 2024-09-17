@@ -130,7 +130,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		response.Status(http.StatusBadRequest).Error(err).Send()
 		return
 	}
-	var chatIdStr = fmt.Sprintf("%d", chatRequest.ChatId)
 	var request schema.ChatMessageAddRequest
 	err = c.ShouldBindJSON(&request)
 	if err != nil {
@@ -166,6 +165,17 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 
 	}
 
+	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)
+	if err != nil || chatEntity.UserId != u.authService.GetUserId(c) {
+		if errors.Is(err, consts.ErrChatNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
+
 	// 检查状态是否是回复中
 	isStreaming := u.isStreaming(c, chatRequest.ChatId)
 	if isStreaming {
@@ -174,7 +184,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	// 检测 chat 是否存在缓存
-	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatIdStr))
+	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatEntity.Id.String()))
 	result, err := cmd.Result()
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
@@ -201,17 +211,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	if request.Role != schema.RoleHuman && request.Role != schema.RoleHideHuman {
 		// 不需要生成 ID,直接添加
 		needStream = false
-	}
-
-	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)
-	if err != nil || chatEntity.UserId != u.authService.GetUserId(c) {
-		if errors.Is(err, consts.ErrChatNotFound) {
-			response.Status(http.StatusNotFound).Error(err).Send()
-			return
-		} else {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
 	}
 
 	// last chat message
@@ -241,7 +240,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			}
 
 			// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
-			randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+			randomStreamId, err := u.generateChatStream(c, chatEntity.Id, publicUser, request.Variables)
 			if err != nil {
 				response.Status(http.StatusInternalServerError).Error(err).Send()
 				return
@@ -345,7 +344,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 
 	chatMessageResponse.Stream = needStream
 	if needStream {
-		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+		randomStreamId, err := u.generateChatStream(c, chatEntity.Id, publicUser, request.Variables)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -360,15 +359,33 @@ func (u *ChatController) getCacheKey(key string) string {
 	return fmt.Sprintf("chat:%s", key)
 }
 
-func (u *ChatController) generateChatStream(c context.Context, chatId string, userPublic *schema.UserPublicInfo) (streamId string, err error) {
+type ChatStreamCache struct {
+	ChatId    schema.EntityId
+	Variables map[string]string
+}
+
+func (u *ChatController) generateChatStream(c context.Context,
+	chatId schema.EntityId,
+	userPublic *schema.UserPublicInfo,
+	variables map[string]string) (streamId string, err error) {
 	var randomId = random.String(32)
 	// 保存 chat stream id
-	err = u.redis.Set(c, u.getCacheKey("entity:"+chatId), randomId, consts.ChatStreamExpire).Err()
+	err = u.redis.Set(c, u.getCacheKey("entity:"+chatId.String()), randomId, consts.ChatStreamExpire).Err()
 	if err != nil {
 		return "", err
 	}
 
-	err = u.redis.Set(c, u.getCacheKey("stream:"+randomId), chatId, consts.ChatStreamExpire).Err()
+	var csc = ChatStreamCache{
+		ChatId:    chatId,
+		Variables: variables,
+	}
+
+	chatJson, err := sonic.MarshalString(csc)
+	if err != nil {
+		return "", err
+	}
+
+	err = u.redis.Set(c, u.getCacheKey("stream:"+randomId), chatJson, consts.ChatStreamExpire).Err()
 	if err != nil {
 		return "", err
 	}

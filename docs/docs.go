@@ -2414,7 +2414,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Chat stream id",
                         "name": "stream_id",
                         "in": "path",
                         "required": true
@@ -3366,6 +3365,12 @@ const docTemplate = `{
                         "assistant",
                         "image"
                     ]
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },

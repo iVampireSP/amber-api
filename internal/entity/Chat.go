@@ -16,11 +16,6 @@ type Chat struct {
 	GuestId     *string          `json:"guest_id"`
 }
 
-type ChatWithAssistant struct {
-	Model
-	Assistant *Assistant ` json:"assistant"`
-}
-
 func (a *Model) TableName() string {
 	return "chats"
 }

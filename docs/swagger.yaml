@@ -389,6 +389,10 @@ definitions:
         - assistant
         - image
         type: string
+      variables:
+        additionalProperties:
+          type: string
+        type: object
     required:
     - message
     - role
@@ -2103,8 +2107,7 @@ paths:
         in: header
         name: X-User-IP
         type: string
-      - description: Chat stream id
-        in: path
+      - in: path
         name: stream_id
         required: true
         type: string

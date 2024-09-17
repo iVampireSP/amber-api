@@ -2,17 +2,15 @@ package v1
 
 import (
 	"errors"
+	"github.com/bytedance/sonic"
+	"github.com/gin-gonic/gin"
+	"github.com/tmc/langchaingo/llms"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
-	"strconv"
-
-	"github.com/bytedance/sonic"
-	"github.com/gin-gonic/gin"
-	"github.com/tmc/langchaingo/llms"
 )
 
 const HeaderUserIp = "X-User-IP"
@@ -25,7 +23,7 @@ const HeaderUserIp = "X-User-IP"
 // @Produce      json
 // @Security     none
 // @Param 	     X-User-IP  header  string  false  "指定聊天中的用户 IP 地址，不指定则自动获取。此 IP 地址只会增加至 Prompt 中，如果不希望增加，请关闭系统自带 Prompt 选项"
-// @Param        stream_id  path  string  true  "Chat stream id"
+// @Param        schema.ChatStreamRequest  path  schema.ChatStreamRequest true  "ChatStreamRequest"
 // @Success      200  {object}  schema.ResponseBody{data=schema.ChatMessageResponse}
 // @Failure      400  {object}  schema.ResponseBody
 // @Failure      404  {object}  schema.ResponseBody
@@ -35,9 +33,14 @@ const HeaderUserIp = "X-User-IP"
 func (u *ChatController) Stream(c *gin.Context) {
 
 	var response = schema.NewResponse(c)
-	// 检查 stream id 是否存在
-	streamIdStr := c.Param("stream_id")
-	streamIdCacheKey := u.getCacheKey("stream:" + streamIdStr)
+
+	var chatStreamRequest = &schema.ChatStreamRequest{}
+	if err := c.ShouldBindUri(&chatStreamRequest); err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	streamIdCacheKey := u.getCacheKey("stream:" + chatStreamRequest.StreamId)
 	// 检查缓存是否存在
 	i, err := u.redis.Exists(c, streamIdCacheKey).Result()
 	if err != nil {
@@ -51,21 +54,22 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 获取 chat id
-	chatIdStr, err := u.redis.Get(c, streamIdCacheKey).Result()
+	streamCacheResult, err := u.redis.Get(c, streamIdCacheKey).Bytes()
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
 
-	chatId, err := strconv.Atoi(chatIdStr)
+	var csc = ChatStreamCache{}
+	err = sonic.Unmarshal(streamCacheResult, &csc)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
 	}
 
-	var chatIdStreamKey = u.getChatIdStreamingKey(schema.EntityId(chatId))
+	var chatIdStreamKey = u.getChatIdStreamingKey(csc.ChatId)
 	// 检查状态是否是回复中
-	isStreaming := u.isStreaming(c, schema.EntityId(chatId))
+	isStreaming := u.isStreaming(c, csc.ChatId)
 	if isStreaming {
 		response.Status(http.StatusConflict).Error(consts.ErrChatStreamingPleaseWait).Send()
 		return
@@ -78,7 +82,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}
 
-	chatEntity, err := u.chatService.GetChat(c, schema.EntityId(chatId))
+	chatEntity, err := u.chatService.GetChat(c, csc.ChatId)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -132,7 +136,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
 	var llmResponseChan = make(chan *schema.AssistantResponse, 1)
 
-	streamUserCacheKey := u.getCacheKey("stream:" + streamIdStr + ":user")
+	streamUserCacheKey := u.getCacheKey("stream:" + chatStreamRequest.StreamId + ":user")
 
 	// 检查缓存是否存在
 	i, err = u.redis.Exists(c, streamUserCacheKey).Result()
@@ -162,7 +166,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	// MessageList
 	var messageList = make([]entity.ChatMessage, 0)
 
-	prompt, err := u.getPrompt(c, assistantEntity, user, chatEntity.Owner)
+	prompt, err := u.getPrompt(c, assistantEntity, user, chatEntity.Owner, csc.Variables)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -328,8 +332,8 @@ func (u *ChatController) Stream(c *gin.Context) {
 	defer func() {
 		// 移除缓存
 		u.redis.Del(c, streamIdCacheKey)
-		u.redis.Del(c, u.getCacheKey("entity:"+chatIdStr))
-		u.redis.Del(c, u.getCacheKey("stream:"+streamIdStr+":user"))
+		u.redis.Del(c, u.getCacheKey("entity:"+csc.ChatId.String()))
+		u.redis.Del(c, u.getCacheKey("stream:"+chatStreamRequest.StreamId+":user"))
 		u.redis.Del(c, chatIdStreamKey)
 	}()
 }

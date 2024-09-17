@@ -2405,7 +2405,6 @@
                     },
                     {
                         "type": "string",
-                        "description": "Chat stream id",
                         "name": "stream_id",
                         "in": "path",
                         "required": true
@@ -3357,6 +3356,12 @@
                         "assistant",
                         "image"
                     ]
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },

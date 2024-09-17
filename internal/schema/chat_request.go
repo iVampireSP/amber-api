@@ -62,9 +62,10 @@ type ChatGuestCreateRequest struct {
 }
 
 type ChatMessageAddRequest struct {
-	AssistantId *EntityId `json:"assistant_id"`
-	Message     string    `json:"message" binding:"required" validate:"max=255"`
-	Role        ChatRole  `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant,image"`
+	AssistantId *EntityId         `json:"assistant_id"`
+	Message     string            `json:"message" binding:"required" validate:"max=255"`
+	Role        ChatRole          `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant,image"`
+	Variables   map[string]string `json:"variables"`
 }
 
 type ChatMessageAddImageRequest struct {
@@ -82,4 +83,8 @@ type ChatMessageResponse struct {
 
 type ChatDownloadRemoteFileRequest struct {
 	Url string `form:"url"   binding:"required"`
+}
+
+type ChatStreamRequest struct {
+	StreamId string `uri:"stream_id" binding:"required"`
 }

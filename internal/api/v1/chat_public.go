@@ -2,7 +2,6 @@ package v1
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"rag-new/internal/entity"
 	_ "rag-new/internal/entity"
@@ -198,8 +197,6 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 
 	var chatMessageResponse = &schema.ChatMessageResponse{}
 
-	var chatIdStr = fmt.Sprintf("%d", chatEntity.Id)
-
 	var needStream = true
 	// 如果不是 human 或者 hide_human，则不需要回复
 	if addPublicChatMessageRequest.Role != schema.RoleHuman && addPublicChatMessageRequest.Role != schema.RoleHideHuman {
@@ -208,7 +205,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	}
 
 	// 检测 chat 是否存在缓存，用于判断是否已经打开了对话
-	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatIdStr))
+	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatEntity.Id.String()))
 	result, err := cmd.Result()
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
@@ -259,7 +256,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 			}
 
 			// 如果 stream id 过期了，但 role 还是 entity.RoleHuman ，则说明没有打开 chat stream，重新生成一个 stream id
-			randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+			randomStreamId, err := u.generateChatStream(c, chatEntity.Id, publicUser, nil)
 			if err != nil {
 				response.Status(http.StatusInternalServerError).Error(err).Send()
 				return
@@ -285,7 +282,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	// 如果需要流式输出的情况
 	chatMessageResponse.Stream = needStream
 	if needStream {
-		randomStreamId, err := u.generateChatStream(c, chatIdStr, publicUser)
+		randomStreamId, err := u.generateChatStream(c, chatEntity.Id, publicUser, nil)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return

@@ -6,14 +6,19 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"rag-new/pkg/safetpl"
 	"time"
 )
 
-func (u *ChatController) getPrompt(c *gin.Context, assistant *entity.Assistant, user *schema.UserPublicInfo, owner schema.ChatOwner) (string, error) {
+func (u *ChatController) getPrompt(c *gin.Context,
+	assistant *entity.Assistant,
+	user *schema.UserPublicInfo,
+	owner schema.ChatOwner,
+	variable map[string]string) (string, error) {
 	var prompt = "When encountering problems, you must first observe the problem and then think about what to do next, and output your thoughts.\n"
 
 	var currentTime = time.Now().Format("2006-01-02 15:04:05")
-	var userPrompt = "Now Time: " + currentTime
+	var userPrompt = "Server Time: " + currentTime
 
 	if assistant != nil {
 		userPrompt += "\nYour(assistant) name: " + assistant.Name
@@ -98,10 +103,12 @@ The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hin
 			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
 		}
 
-		if assistant.Prompt != "" {
-			prompt += "\n" + assistant.Prompt
+		if assistant.Prompt != "" && variable != nil && len(variable) > 0 {
+			prompt += "\n" + safetpl.RenderTemplate(assistant.Prompt, variable)
 		}
 	}
+
+	prompt += "\n" + safetpl.RenderTemplate("User time: {now}", variable)
 
 	return prompt, nil
 }

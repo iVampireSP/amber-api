@@ -27,29 +27,35 @@ func (u *ChatController) getPrompt(c *gin.Context,
 		userPrompt += "\nUsername: " + user.Name + "\nUserId: " + user.Id.String()
 	}
 
+	// 如果没有指定 Assistant
 	if assistant == nil {
-		// 默认启用记忆
-		memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, user.Id)
-		if err != nil {
-			return "", err
+		// 如果有用户的情况下才启用记忆
+		if user != nil {
+			// 默认启用记忆
+			memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, user.Id)
+			if err != nil {
+				return "", err
+			}
+
+			prompt += consts.DefaultPrompt
+
+			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
+			prompt += userPrompt
 		}
-
-		prompt += consts.DefaultPrompt
-
-		prompt += "\nUser memory you know: " + memoryPrompt + "\n"
-		prompt += userPrompt
-
 	} else if assistant.DisableDefaultPrompt {
 		// 如果禁用了默认的 Prompt
 		prompt += assistant.Prompt
 
-		// 那还是可以获取记忆
-		memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, user.Id)
-		if err != nil {
-			return "", err
+		if user != nil {
+			// 那还是可以获取记忆
+			memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, user.Id)
+			if err != nil {
+				return "", err
+			}
+
+			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
 		}
 
-		prompt += "\nUser memory you know: " + memoryPrompt + "\n"
 	} else {
 		prompt += userPrompt
 

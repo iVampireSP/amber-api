@@ -66,20 +66,18 @@ func (s *Service) UpdateLibrary(ctx context.Context, library *entity.Library) er
 		}
 	}
 
-	var isDefault = false
+	var isDefault = !hasDefault
 	// 如果要设置 library 为默认，那么需要取消之前的默认
 	if library.Default && hasDefault && defaultLibrary != nil {
 		// 有个例外情况，那就是默认资料库就是当前的资料库
 		if defaultLibrary.Id != library.Id {
-			// 如果不是，才可以
 			_, err = s.dao.Library.Where(s.dao.Library.Id.Eq(uint(defaultLibrary.Id))).Update(s.dao.Library.Default, false)
 			if err != nil {
 				return err
 			}
-			isDefault = false
-		} else {
-			// 否则，当前资料库必须是默认
 			isDefault = true
+		} else {
+			isDefault = false
 		}
 	} else {
 		isDefault = true

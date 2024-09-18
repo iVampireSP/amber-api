@@ -83,7 +83,6 @@ CREATE INDEX documents_created_at_index ON documents (created_at);
 CREATE INDEX embeddings_created_at_index ON embeddings (created_at);
 CREATE INDEX files_created_at_index ON files (created_at);
 CREATE INDEX libraries_created_at_index ON libraries (created_at);
-CREATE INDEX memories_created_at_index ON memories (created_at);
 CREATE INDEX tools_created_at_index ON tools (created_at);
 
 -- +goose Down
@@ -185,6 +184,5 @@ DROP INDEX documents_created_at_index ON documents;
 DROP INDEX embeddings_created_at_index ON embeddings;
 DROP INDEX files_created_at_index ON files;
 DROP INDEX libraries_created_at_index ON libraries;
-DROP INDEX memories_created_at_index ON memories;
 DROP INDEX tools_created_at_index ON tools;
 

@@ -17,7 +17,7 @@ type LibraryUpdateRequest struct {
 
 type LibraryCreateRequest struct {
 	Name        string  `json:"name" binding:"required"`
-	Description *string `json:"description"`
+	Description *string `json:"description" max:"65536"`
 }
 
 type DocumentUpdateRequest struct {

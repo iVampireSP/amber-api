@@ -274,11 +274,12 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 				// 如果对话没有 Assistant，则默认启用记忆
 				if chatEntity.Assistant == nil {
 					addMemory = true
-				}
-				// 如果禁用了默认 Prompt
-				if chatEntity.Assistant.DisableDefaultPrompt {
-					// 依旧可以添加记忆
-					addMemory = true
+				} else {
+					// 如果禁用了默认 Prompt
+					if chatEntity.Assistant.DisableDefaultPrompt {
+						// 依旧可以添加记忆
+						addMemory = true
+					}
 				}
 			}
 

@@ -35,6 +35,7 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 	_assistant.Description = field.NewString(tableName, "description")
 	_assistant.UserId = field.NewString(tableName, "user_id")
 	_assistant.LibraryId = field.NewUint(tableName, "library_id")
+	_assistant.Temperature = field.NewFloat64(tableName, "temperature")
 	_assistant.DisableDefaultPrompt = field.NewBool(tableName, "disable_default_prompt")
 	_assistant.DisableMemory = field.NewBool(tableName, "disable_memory")
 	_assistant.EnableMemoryForAssistantAPI = field.NewBool(tableName, "enable_memory_for_assistant_api")
@@ -74,6 +75,7 @@ type assistant struct {
 	Description                 field.String
 	UserId                      field.String
 	LibraryId                   field.Uint
+	Temperature                 field.Float64
 	DisableDefaultPrompt        field.Bool
 	DisableMemory               field.Bool
 	EnableMemoryForAssistantAPI field.Bool
@@ -102,6 +104,7 @@ func (a *assistant) updateTableName(table string) *assistant {
 	a.Description = field.NewString(table, "description")
 	a.UserId = field.NewString(table, "user_id")
 	a.LibraryId = field.NewUint(table, "library_id")
+	a.Temperature = field.NewFloat64(table, "temperature")
 	a.DisableDefaultPrompt = field.NewBool(table, "disable_default_prompt")
 	a.DisableMemory = field.NewBool(table, "disable_memory")
 	a.EnableMemoryForAssistantAPI = field.NewBool(table, "enable_memory_for_assistant_api")
@@ -121,7 +124,7 @@ func (a *assistant) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *assistant) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 12)
+	a.fieldMap = make(map[string]field.Expr, 13)
 	a.fieldMap["id"] = a.Id
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -130,6 +133,7 @@ func (a *assistant) fillFieldMap() {
 	a.fieldMap["description"] = a.Description
 	a.fieldMap["user_id"] = a.UserId
 	a.fieldMap["library_id"] = a.LibraryId
+	a.fieldMap["temperature"] = a.Temperature
 	a.fieldMap["disable_default_prompt"] = a.DisableDefaultPrompt
 	a.fieldMap["disable_memory"] = a.DisableMemory
 	a.fieldMap["enable_memory_for_assistant_api"] = a.EnableMemoryForAssistantAPI

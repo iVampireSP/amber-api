@@ -12,6 +12,7 @@ type Assistant struct {
 	UserId                      schema.UserId    `json:"user_id"`
 	LibraryId                   *schema.EntityId `json:"library_id"`
 	Library                     *Library         `json:"-"`
+	Temperature                 float64          `json:"temperature"`
 	DisableDefaultPrompt        bool             `json:"disable_default_prompt"`
 	DisableMemory               bool             `json:"disable_memory"`
 	EnableMemoryForAssistantAPI bool             `json:"enable_memory_for_assistant_api"`

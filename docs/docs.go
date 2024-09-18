@@ -2790,6 +2790,9 @@ const docTemplate = `{
                 "prompt": {
                     "type": "string"
                 },
+                "temperature": {
+                    "type": "number"
+                },
                 "updated_at": {
                     "type": "string"
                 },
@@ -3192,6 +3195,21 @@ const docTemplate = `{
                 "prompt": {
                     "type": "string",
                     "maxLength": 512
+                },
+                "temperature": {
+                    "type": "number",
+                    "enum": [
+                        0.1,
+                        0.2,
+                        0.3,
+                        0.4,
+                        0.5,
+                        0.6,
+                        0.7,
+                        0.8,
+                        0.9,
+                        1
+                    ]
                 }
             }
         },
@@ -3244,6 +3262,21 @@ const docTemplate = `{
                 "prompt": {
                     "type": "string",
                     "maxLength": 512
+                },
+                "temperature": {
+                    "type": "number",
+                    "enum": [
+                        0.1,
+                        0.2,
+                        0.3,
+                        0.4,
+                        0.5,
+                        0.6,
+                        0.7,
+                        0.8,
+                        0.9,
+                        1
+                    ]
                 }
             }
         },

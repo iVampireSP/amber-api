@@ -189,6 +189,7 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 	assistantEntity.DisableDefaultPrompt = updateReq.DisableDefaultPrompt
 	assistantEntity.DisableMemory = updateReq.DisableMemory
 	assistantEntity.EnableMemoryForAssistantAPI = updateReq.EnableMemoryForAssistantAPI
+	assistantEntity.Temperature = updateReq.Temperature
 
 	err = u.assistantService.UpdateAssistant(c, assistantEntity)
 	if err != nil {

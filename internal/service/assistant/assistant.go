@@ -10,6 +10,8 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
+var defaultTemperature float32 = 0.7
+
 func (s *Service) ListAssistant(ctx context.Context) ([]*entity.Assistant, error) {
 	return s.dao.WithContext(ctx).Assistant.Find()
 }
@@ -40,7 +42,19 @@ func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.Assi
 	assistant.Description = assistantReq.Description
 	assistant.DisableDefaultPrompt = assistantReq.DisableDefaultPrompt
 
-	// 啊，这样也行
+	// 判断 assistantReq.Temperature 是否设置了值
+	if assistantReq.Temperature == 0 {
+		assistantReq.Temperature = defaultTemperature // 如果没有设置，则使用默认值 0.7
+	} else if assistantReq.Temperature < 0.1 || assistantReq.Temperature > 1 {
+		// 检查小数点后是否只有一位
+		if float32(int(assistantReq.Temperature*10)) != assistantReq.Temperature*10 {
+			// 设置默认
+			assistantReq.Temperature = defaultTemperature
+		}
+	}
+
+	assistant.Temperature = assistantReq.Temperature
+
 	return &assistant, s.dao.WithContext(ctx).Assistant.Create(&assistant)
 }
 
@@ -59,6 +73,19 @@ func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assista
 	} else {
 		assignExpr = append(assignExpr, s.dao.Assistant.LibraryId.Null())
 	}
+
+	// 判断 assistantReq.Temperature 是否设置了值
+	if assistant.Temperature == 0 || assistant.Temperature < 0.1 || assistant.Temperature > 1 {
+		assistant.Temperature = defaultTemperature // 如果没有设置，则使用默认值 0.7
+	} else {
+		// 检查小数点后是否只有一位
+		if float32(int(assistant.Temperature*10)) != assistant.Temperature*10 {
+			// 设置默认
+			assistant.Temperature = defaultTemperature
+		}
+	}
+
+	assignExpr = append(assignExpr, s.dao.Assistant.Temperature.Value(assistant.Temperature))
 
 	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
 		UpdateSimple(assignExpr...)

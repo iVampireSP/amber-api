@@ -193,6 +193,10 @@ func (u *ChatController) Stream(c *gin.Context) {
 		},
 	}
 
+	if assistantEntity != nil {
+		llmChat.Temperature = assistantEntity.Temperature
+	}
+
 	// SSE
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
 	c.Writer.Header().Set("Cache-Control", "no-cache")

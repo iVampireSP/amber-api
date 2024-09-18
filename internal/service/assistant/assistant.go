@@ -10,7 +10,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
-var defaultTemperature float32 = 0.7
+var defaultTemperature = 0.7
 
 func (s *Service) ListAssistant(ctx context.Context) ([]*entity.Assistant, error) {
 	return s.dao.WithContext(ctx).Assistant.Find()
@@ -47,7 +47,7 @@ func (s *Service) CreateAssistant(ctx context.Context, assistantReq *schema.Assi
 		assistantReq.Temperature = defaultTemperature // 如果没有设置，则使用默认值 0.7
 	} else if assistantReq.Temperature < 0.1 || assistantReq.Temperature > 1 {
 		// 检查小数点后是否只有一位
-		if float32(int(assistantReq.Temperature*10)) != assistantReq.Temperature*10 {
+		if float64(int(assistantReq.Temperature*10)) != assistantReq.Temperature*10 {
 			// 设置默认
 			assistantReq.Temperature = defaultTemperature
 		}
@@ -79,7 +79,7 @@ func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assista
 		assistant.Temperature = defaultTemperature // 如果没有设置，则使用默认值 0.7
 	} else {
 		// 检查小数点后是否只有一位
-		if float32(int(assistant.Temperature*10)) != assistant.Temperature*10 {
+		if float64(int(assistant.Temperature*10)) != assistant.Temperature*10 {
 			// 设置默认
 			assistant.Temperature = defaultTemperature
 		}

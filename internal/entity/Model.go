@@ -16,7 +16,7 @@ import (
 type Model struct {
 	//Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
 	Id        schema.EntityId `gorm:"primarykey" json:"id"`
-	CreatedAt time.Time       `json:"created_at"`
-	UpdatedAt time.Time       `json:"updated_at"`
+	CreatedAt time.Time       `gorm:"autoUpdateTime:milli" json:"created_at"`
+	UpdatedAt time.Time       `gorm:"autoUpdateTime:milli" json:"updated_at"`
 	//DeletedAt gorm.DeletedAt  `gorm:"index"`
 }

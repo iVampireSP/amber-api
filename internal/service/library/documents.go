@@ -51,7 +51,10 @@ func (s *Service) CreateDocument(ctx context.Context, library *entity.Library, n
 				_, err = documentDao.Delete(document)
 				if err != nil {
 					s.logger.Sugar.Error(err)
+					return
 				}
+
+				return
 			}
 
 			// set chunked true

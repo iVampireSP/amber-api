@@ -72,10 +72,10 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.DELETE("/memories/:id", a.Memory.Delete)
 
 	r.GET("/libraries", a.Library.List)
-	r.GET("/libraries/:id/", a.Library.GetLibrary)
+	r.GET("/libraries/:id", a.Library.GetLibrary)
 	r.POST("/libraries", a.Library.CreateLibrary)
-	r.PUT("/libraries/:id/", a.Library.Update)
-	r.DELETE("/libraries/:id/", a.Library.Delete)
+	r.PUT("/libraries/:id", a.Library.Update)
+	r.DELETE("/libraries/:id", a.Library.Delete)
 	r.GET("/libraries/:id/documents", a.Library.ListDocuments)
 	r.POST("/libraries/:id/documents", a.Library.CreateDocument)
 	//r.PATCH("/libraries/:id/documents/:document_id", a.Library.UpdateDocument)

@@ -268,13 +268,26 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			return
 		} else if lastChatMessage.Role == schema.RoleAssistant {
 			// 如果是 Assistant 消息，则开始采样记忆
+			var addMemory = true
+
 			if request.Role == schema.RoleHuman {
 				// 如果对话没有 Assistant，则默认启用记忆
 				if chatEntity.Assistant == nil {
-					u.addMemory(c, userInfo, request)
-				} else if !chatEntity.Assistant.DisableDefaultPrompt {
-					u.addMemory(c, userInfo, request)
+					addMemory = true
 				}
+				// 如果禁用了默认 Prompt
+				if chatEntity.Assistant.DisableDefaultPrompt {
+					// 依旧可以添加记忆
+					addMemory = true
+				}
+			}
+
+			if assistantEntity != nil && assistantEntity.DisableMemory {
+				addMemory = false
+			}
+
+			if addMemory {
+				u.addMemory(c, userInfo, request)
 			}
 		}
 	}

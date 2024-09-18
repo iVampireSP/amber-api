@@ -52,26 +52,43 @@ func (s *Service) CreateLibrary(ctx context.Context, library *entity.Library) er
 func (s *Service) UpdateLibrary(ctx context.Context, library *entity.Library) error {
 	var libraryDao = s.dao.Library.WithContext(ctx)
 
+	var defaultLibrary *entity.Library
+
 	hasDefault, err := s.HasDefaultLibrary(ctx, library.UserId)
 	if err != nil {
 		return err
 	}
-	defaultLibrary, err := s.GetDefaultLibrary(ctx, library.UserId)
-	if err != nil {
-		return err
-	}
 
-	// 如果要设置 library 为默认，那么需要取消之前的默认
-	if library.Default && hasDefault {
-		_, err = s.dao.Library.Where(s.dao.Library.Id.Eq(uint(defaultLibrary.Id))).Update(s.dao.Library.Default, false)
+	if hasDefault {
+		defaultLibrary, err = s.GetDefaultLibrary(ctx, library.UserId)
 		if err != nil {
 			return err
 		}
 	}
 
-	_, err = libraryDao.Updates(entity.Library{
+	var isDefault = false
+	// 如果要设置 library 为默认，那么需要取消之前的默认
+	if library.Default && hasDefault && defaultLibrary != nil {
+		// 有个例外情况，那就是默认资料库就是当前的资料库
+		if defaultLibrary.Id != library.Id {
+			// 如果不是，才可以
+			_, err = s.dao.Library.Where(s.dao.Library.Id.Eq(uint(defaultLibrary.Id))).Update(s.dao.Library.Default, false)
+			if err != nil {
+				return err
+			}
+			isDefault = false
+		} else {
+			// 否则，当前资料库必须是默认
+			isDefault = true
+		}
+	} else {
+		isDefault = true
+	}
+
+	_, err = libraryDao.Where(s.dao.Library.Id.Eq(uint(library.Id))).Updates(entity.Library{
 		Name:        library.Name,
 		Description: library.Description,
+		Default:     isDefault,
 	})
 	return err
 }

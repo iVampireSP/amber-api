@@ -2,11 +2,11 @@ package base
 
 import (
 	milvusClient "github.com/milvus-io/milvus-sdk-go/v2/client"
-	"github.com/redis/go-redis/v9"
 	"github.com/sashabaranov/go-openai"
 	"gorm.io/gorm"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/redis"
 	"rag-new/internal/base/s3"
 	"rag-new/internal/base/server"
 	"rag-new/internal/batch"
@@ -24,7 +24,7 @@ type Application struct {
 	DAO        *dao.Query
 	Service    *service.Service
 	Middleware *middleware.Middleware
-	Redis      *redis.Client
+	Redis      *redis.Redis
 	Batch      *batch.Batch
 	S3         *s3.S3
 	OpenAI     *openai.Client
@@ -38,7 +38,7 @@ func NewApplication(
 	logger *logger.Logger,
 	services *service.Service,
 	middleware *middleware.Middleware,
-	redis *redis.Client,
+	redis *redis.Redis,
 	batch *batch.Batch,
 	S3 *s3.S3,
 	GORM *gorm.DB,

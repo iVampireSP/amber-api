@@ -127,7 +127,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 			// 先检测否是 url(http)
 			// 检测是否是 http 开头
 			if strings.HasPrefix(imageUrl, "http") {
-				file, err = u.fileService.CreateFileFromUrl(c, imageUrl, true)
+				file, err = u.fileService.CreateFileFromUrl(c, imageUrl)
 				if err != nil {
 					response.Status(http.StatusInternalServerError).Error(consts.ErrFileUrlNotURL).Send()
 					return
@@ -153,7 +153,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 					return
 				}
 
-				file, err = u.fileService.CreateFile(c, reader, true)
+				file, err = u.fileService.CreateFile(c, reader)
 				if err != nil {
 					response.Status(http.StatusInternalServerError).Error(err).Send()
 					return

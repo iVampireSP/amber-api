@@ -43,13 +43,13 @@ func (s *Service) SearchLibrary(ctx context.Context, content string, library *en
 	if err != nil {
 		return nil, err
 	}
-	var filter = fmt.Sprintf("library_id == %d && model == %s", library.Id, s.config.OpenAI.EmbeddingModel)
+	var filter = fmt.Sprintf("library_id == %d && model == '%s'", library.Id, s.config.OpenAI.EmbeddingModel)
 	sp, err := entity2.NewIndexAUTOINDEXSearchParam(1)
 	if err != nil {
 		return nil, err
 	}
 	vector := entity2.FloatVector(emb[0])
-	existingChunks, err := s.milvus.Search(ctx, s.config.Milvus.MemoryCollection,
+	existingChunks, err := s.milvus.Search(ctx, s.config.Milvus.DocumentCollection,
 		[]string{},
 		filter,
 		[]string{"document_id", "chunk_id"},

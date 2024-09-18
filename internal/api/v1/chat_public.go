@@ -205,7 +205,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	}
 
 	// 检测 chat 是否存在缓存，用于判断是否已经打开了对话
-	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatEntity.Id.String()))
+	cmd := u.redis.Client.Get(c, u.getCacheKey("entity:"+chatEntity.Id.String()))
 	result, err := cmd.Result()
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {

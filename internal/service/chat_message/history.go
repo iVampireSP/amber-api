@@ -10,8 +10,8 @@ import (
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
 	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.
 		//Preload(s.dao.ChatMessage.File).
-		//Preload(s.dao.ChatMessage.File).
-		Preload(s.dao.ChatMessage.UserFile.File).
+		Preload(s.dao.ChatMessage.File).
+		//Preload(s.dao.ChatMessage.UserFile.File).
 		Preload(s.dao.ChatMessage.Assistant).
 		Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).
 		Where(s.dao.ChatMessage.Role.Neq(schema.RoleHideSystem.String())).
@@ -28,7 +28,7 @@ func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat)
 		Preload(s.dao.ChatMessage.Assistant).
 		Preload(s.dao.ChatMessage.File).
 		//Preload(s.dao.ChatMessage.UserFile).
-		Preload(s.dao.ChatMessage.UserFile.File).
+		//Preload(s.dao.ChatMessage.UserFile.File).
 		Order(s.dao.ChatMessage.CreatedAt.Asc()).
 		Find()
 
@@ -38,8 +38,8 @@ func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat)
 func (s *Service) CreateChatMessage(ctx context.Context, chatMessage *entity.ChatMessage) error {
 	err := s.dao.WithContext(ctx).ChatMessage.
 		Preload(s.dao.ChatMessage.File).
-		Preload(s.dao.ChatMessage.UserFile).
-		Preload(s.dao.ChatMessage.UserFile.File).
+		//Preload(s.dao.ChatMessage.UserFile).
+		//Preload(s.dao.ChatMessage.UserFile.File).
 		Create(chatMessage)
 
 	return err
@@ -82,7 +82,7 @@ func (s *Service) GetLatestMessage(ctx context.Context, chat *entity.Chat) (*ent
 
 	chatMessage, err := s.dao.WithContext(ctx).ChatMessage.
 		Preload(s.dao.ChatMessage.File).
-		Preload(s.dao.ChatMessage.UserFile).
+		//Preload(s.dao.ChatMessage.UserFile).
 		Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).
 		Order(s.dao.ChatMessage.CreatedAt.Desc()).
 		Order(s.dao.ChatMessage.Id.Desc()).First()

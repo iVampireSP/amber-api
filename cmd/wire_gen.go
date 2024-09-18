@@ -56,9 +56,9 @@ func CreateApp() (*base.Application, error) {
 	chatService := chat.NewService(query, assistantService, chat_messageService)
 	client := milvus.NewMilvus(config, loggerLogger)
 	s3S3 := s3.NewS3(config)
-	redisClient := redis.NewRedis(config)
-	fileService := file.NewService(s3S3, config, query, redisClient)
-	embeddingService := embedding.NewService(config, loggerLogger, query)
+	redisRedis := redis.NewRedis(config)
+	fileService := file.NewService(s3S3, config, query, redisRedis, loggerLogger)
+	embeddingService := embedding.NewService(config, loggerLogger, query, redisRedis)
 	libraryService := library.NewService(config, query, client, fileService, embeddingService, loggerLogger)
 	batchBatch := batch.NewBatch(loggerLogger)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, libraryService, batchBatch)
@@ -68,7 +68,7 @@ func CreateApp() (*base.Application, error) {
 	messageMessage := message.NewMessage()
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService, streamService, messageMessage)
 	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, client, query, streamService)
-	chatController := v1.NewChatController(authService, chatService, redisClient, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService)
+	chatController := v1.NewChatController(authService, chatService, redisRedis, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService)
 	fileController := v1.NewFileController(fileService, loggerLogger, authService)
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
 	libraryController := v1.NewLibraryController(libraryService, authService)
@@ -77,7 +77,7 @@ func CreateApp() (*base.Application, error) {
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService)
-	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, redisClient, batchBatch, s3S3, db, query, openaiClient, client, embeddingService)
+	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, redisRedis, batchBatch, s3S3, db, query, openaiClient, client, embeddingService)
 	return application, nil
 }
 

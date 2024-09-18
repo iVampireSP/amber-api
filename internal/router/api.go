@@ -91,8 +91,8 @@ func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {
 	r.POST("/chat_public/:chat_id/clear", a.Chat.ClearPublicChatMessages)
 	r.POST("/chat_public/:chat_id/images", a.Chat.AddPublicChatImage)
 
-	r.GET("/files/:id/download", a.File.DownloadPublicFile)
-	r.GET("/files/user/:id/download", a.File.DownloadUserFile)
+	r.GET("/files/download/:hash", a.File.DownloadImage)
+	//r.GET("/files/user/:id/download", a.File.DownloadUserFile)
 
 }
 

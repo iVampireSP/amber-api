@@ -1780,9 +1780,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/files/user/{id}/download": {
+        "/api/v1/files/download/{hash}": {
             "get": {
-                "description": "根据 File ID 下载文件。如果文件是私有的，将无法下载",
+                "description": "根据文件 Hash 下载文件。仅支持图片下载，且图片具有有效期",
                 "consumes": [
                     "application/json"
                 ],
@@ -1792,47 +1792,12 @@ const docTemplate = `{
                 "tags": [
                     "file"
                 ],
-                "summary": "下载用户开文件",
+                "summary": "下载图片",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
-                        "name": "id_token",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "file"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/files/{id}/download": {
-            "get": {
-                "description": "根据 File ID 下载文件。如果文件是私有的，将无法下载",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "file"
-                ],
-                "summary": "下载公开文件",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "name": "id",
+                        "description": "FileId uint64 ` + "`" + `uri:\"id\" binding:\"required\"` + "`" + `",
+                        "name": "hash",
                         "in": "path",
                         "required": true
                     }
@@ -2943,10 +2908,11 @@ const docTemplate = `{
                     "$ref": "#/definitions/entity.File"
                 },
                 "file_id": {
-                    "description": "FileId\n虽然有了 UserFileId， 但是 File Id 还是应该保留，因为这个是针对访客用户的",
+                    "description": "FileId",
                     "type": "integer"
                 },
                 "hidden": {
+                    "description": "UserFileId       *schema.EntityId ` + "`" + `json:\"user_file_id\"` + "`" + `\nUserFile         *UserFile        ` + "`" + `json:\"user_file\"` + "`" + `",
                     "type": "boolean"
                 },
                 "id": {
@@ -2964,12 +2930,6 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
-                },
-                "user_file": {
-                    "$ref": "#/definitions/entity.UserFile"
-                },
-                "user_file_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -3009,6 +2969,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "hidden": {
+                    "description": "UserFileId       *schema.EntityId ` + "`" + `json:\"user_file_id\"` + "`" + `\nUserFile         *UserFile        ` + "`" + `json:\"user_file\"` + "`" + `",
                     "type": "boolean"
                 },
                 "id": {
@@ -3025,12 +2986,6 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
-                },
-                "user_file": {
-                    "$ref": "#/definitions/entity.UserFile"
-                },
-                "user_file_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -3068,7 +3023,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expired_at": {
-                    "description": "TODO: 移除 file 的到期时间，如果当 file 没有任何引用的时候再删除\n因为有外键，所以直接删除是删不掉的，必须删除消息",
+                    "description": "Public   bool    ` + "`" + `json:\"public\"` + "`" + ` // 是否公开，访客上传的文件应始终公开，或归属于所有者\nTODO: 移除 file 的到期时间，如果当 file 没有任何引用的时候再删除\n因为有外键，所以直接删除是删不掉的，必须删除消息",
                     "type": "string"
                 },
                 "file_hash": {
@@ -3080,13 +3035,6 @@ const docTemplate = `{
                 },
                 "mime_type": {
                     "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "public": {
-                    "description": "是否公开，访客上传的文件应始终公开，或归属于所有者",
-                    "type": "boolean"
                 },
                 "size": {
                     "type": "integer"
@@ -3180,30 +3128,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "entity.UserFile": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "file": {
-                    "$ref": "#/definitions/entity.File"
-                },
-                "file_id": {
-                    "type": "integer"
-                },
-                "id": {
-                    "description": "Id        schema.EntityId ` + "`" + `gorm:\"primarykey\" json:\"id,string\"` + "`" + `",
-                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"

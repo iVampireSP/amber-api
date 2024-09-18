@@ -13,4 +13,5 @@ var (
 	ErrFileUrlRequired            = errors.New("如果你没有传入文件，那么文件 URL 是必须的")
 	ErrFileNotSupportChunk        = errors.New("文件无法被分块")
 	ErrFileNotPublic              = errors.New("文件不是公开的")
+	ErrFileNotImage               = errors.New("文件不是图片")
 )

@@ -19,12 +19,14 @@ const mimeTypePDF = "application/pdf"
 const mimeTypeCSV = "text/csv"
 const mimeTypeOffice = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 const mimeTypeTXT = "text/plain"
+const mimeTypeHTML = "text/html"
 
 var allowedChunkMimeTypes = map[string]bool{
 	mimeTypeCSV:    true,
 	mimeTypeOffice: true,
 	mimeTypePDF:    true,
 	mimeTypeTXT:    true,
+	mimeTypeHTML:   true,
 }
 
 func (s *Service) CanChunk(file *entity.File) bool {
@@ -63,7 +65,8 @@ func (s *Service) ChunkFileToDocument(ctx context.Context, file *entity.File, do
 		documentLoader = NewDocxLoader(io, size)
 	case mimeTypeTXT:
 		documentLoader = documentloaders.NewText(io)
-
+	case mimeTypeHTML:
+		documentLoader = documentloaders.NewText(io)
 	default:
 		return consts.ErrFileNotSupportChunk
 	}

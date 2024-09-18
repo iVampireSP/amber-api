@@ -6,6 +6,7 @@ toolchain go1.22.5
 
 require (
 	github.com/MicahParks/keyfunc/v3 v3.3.3
+	github.com/bsm/redislock v0.9.4
 	github.com/bytedance/sonic v1.12.2
 	github.com/carmel/gooxml v0.0.0-20220216072414-40ff56130850
 	github.com/codingsince1985/checksum v1.3.0

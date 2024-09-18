@@ -36,7 +36,7 @@ func main() {
 		entity.Library{},
 		entity.Document{},
 		entity.DocumentChunk{},
-		entity.UserFile{},
+		//entity.UserFile{},
 	)
 
 	// Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`

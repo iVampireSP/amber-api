@@ -36,7 +36,6 @@ func newChatMessage(db *gorm.DB, opts ...gen.DOOption) chatMessage {
 	_chatMessage.Role = field.NewString(tableName, "role")
 	_chatMessage.ToolCall = field.NewField(tableName, "tool_call")
 	_chatMessage.FileId = field.NewUint(tableName, "file_id")
-	_chatMessage.UserFileId = field.NewUint(tableName, "user_file_id")
 	_chatMessage.Hidden = field.NewBool(tableName, "hidden")
 	_chatMessage.PromptTokens = field.NewInt(tableName, "prompt_tokens")
 	_chatMessage.CompletionTokens = field.NewInt(tableName, "completion_tokens")
@@ -77,17 +76,6 @@ func newChatMessage(db *gorm.DB, opts ...gen.DOOption) chatMessage {
 		RelationField: field.NewRelation("File", "entity.File"),
 	}
 
-	_chatMessage.UserFile = chatMessageBelongsToUserFile{
-		db: db.Session(&gorm.Session{}),
-
-		RelationField: field.NewRelation("UserFile", "entity.UserFile"),
-		File: struct {
-			field.RelationField
-		}{
-			RelationField: field.NewRelation("UserFile.File", "entity.File"),
-		},
-	}
-
 	_chatMessage.fillFieldMap()
 
 	return _chatMessage
@@ -106,7 +94,6 @@ type chatMessage struct {
 	Role             field.String
 	ToolCall         field.Field
 	FileId           field.Uint
-	UserFileId       field.Uint
 	Hidden           field.Bool
 	PromptTokens     field.Int
 	CompletionTokens field.Int
@@ -114,8 +101,6 @@ type chatMessage struct {
 	Assistant        chatMessageBelongsToAssistant
 
 	File chatMessageBelongsToFile
-
-	UserFile chatMessageBelongsToUserFile
 
 	fieldMap map[string]field.Expr
 }
@@ -141,7 +126,6 @@ func (c *chatMessage) updateTableName(table string) *chatMessage {
 	c.Role = field.NewString(table, "role")
 	c.ToolCall = field.NewField(table, "tool_call")
 	c.FileId = field.NewUint(table, "file_id")
-	c.UserFileId = field.NewUint(table, "user_file_id")
 	c.Hidden = field.NewBool(table, "hidden")
 	c.PromptTokens = field.NewInt(table, "prompt_tokens")
 	c.CompletionTokens = field.NewInt(table, "completion_tokens")
@@ -162,7 +146,7 @@ func (c *chatMessage) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *chatMessage) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 17)
+	c.fieldMap = make(map[string]field.Expr, 15)
 	c.fieldMap["id"] = c.Id
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
@@ -172,7 +156,6 @@ func (c *chatMessage) fillFieldMap() {
 	c.fieldMap["role"] = c.Role
 	c.fieldMap["tool_call"] = c.ToolCall
 	c.fieldMap["file_id"] = c.FileId
-	c.fieldMap["user_file_id"] = c.UserFileId
 	c.fieldMap["hidden"] = c.Hidden
 	c.fieldMap["prompt_tokens"] = c.PromptTokens
 	c.fieldMap["completion_tokens"] = c.CompletionTokens
@@ -339,81 +322,6 @@ func (a chatMessageBelongsToFileTx) Clear() error {
 }
 
 func (a chatMessageBelongsToFileTx) Count() int64 {
-	return a.tx.Count()
-}
-
-type chatMessageBelongsToUserFile struct {
-	db *gorm.DB
-
-	field.RelationField
-
-	File struct {
-		field.RelationField
-	}
-}
-
-func (a chatMessageBelongsToUserFile) Where(conds ...field.Expr) *chatMessageBelongsToUserFile {
-	if len(conds) == 0 {
-		return &a
-	}
-
-	exprs := make([]clause.Expression, 0, len(conds))
-	for _, cond := range conds {
-		exprs = append(exprs, cond.BeCond().(clause.Expression))
-	}
-	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
-	return &a
-}
-
-func (a chatMessageBelongsToUserFile) WithContext(ctx context.Context) *chatMessageBelongsToUserFile {
-	a.db = a.db.WithContext(ctx)
-	return &a
-}
-
-func (a chatMessageBelongsToUserFile) Session(session *gorm.Session) *chatMessageBelongsToUserFile {
-	a.db = a.db.Session(session)
-	return &a
-}
-
-func (a chatMessageBelongsToUserFile) Model(m *entity.ChatMessage) *chatMessageBelongsToUserFileTx {
-	return &chatMessageBelongsToUserFileTx{a.db.Model(m).Association(a.Name())}
-}
-
-type chatMessageBelongsToUserFileTx struct{ tx *gorm.Association }
-
-func (a chatMessageBelongsToUserFileTx) Find() (result *entity.UserFile, err error) {
-	return result, a.tx.Find(&result)
-}
-
-func (a chatMessageBelongsToUserFileTx) Append(values ...*entity.UserFile) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Append(targetValues...)
-}
-
-func (a chatMessageBelongsToUserFileTx) Replace(values ...*entity.UserFile) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Replace(targetValues...)
-}
-
-func (a chatMessageBelongsToUserFileTx) Delete(values ...*entity.UserFile) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Delete(targetValues...)
-}
-
-func (a chatMessageBelongsToUserFileTx) Clear() error {
-	return a.tx.Clear()
-}
-
-func (a chatMessageBelongsToUserFileTx) Count() int64 {
 	return a.tx.Count()
 }
 

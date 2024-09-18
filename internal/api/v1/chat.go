@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/redis"
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/internal/service/assistant"
@@ -29,7 +29,7 @@ const eventDone = "[DONE]"
 type ChatController struct {
 	authService      *auth.Service
 	chatService      *chat.Service
-	redis            *redis.Client
+	redis            *redis.Redis
 	llmService       *llm.Service
 	logger           *logger.Logger
 	assistantService *assistant.Service
@@ -43,7 +43,7 @@ type ChatController struct {
 func NewChatController(
 	authService *auth.Service,
 	chatService *chat.Service,
-	redis *redis.Client,
+	redis *redis.Redis,
 	llmService *llm.Service,
 	logger *logger.Logger,
 	assistantService *assistant.Service,
@@ -338,7 +338,7 @@ func (u *ChatController) getChatIdStreamingKey(chatId schema.EntityId) string {
 func (u *ChatController) isStreaming(ctx context.Context, chatId schema.EntityId) bool {
 	// 检查状态是否是回复中
 	chatIdStreamingKey := u.getChatIdStreamingKey(chatId)
-	i, err := u.redis.Exists(ctx, chatIdStreamingKey).Result()
+	i, err := u.redis.Client.Exists(ctx, chatIdStreamingKey).Result()
 	if err != nil {
 		return false
 	}

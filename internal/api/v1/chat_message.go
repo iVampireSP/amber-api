@@ -77,13 +77,13 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 		cmr.Role = chatMessage.Role
 		cmr.Content = chatMessage.Content
 		cmr.FileId = chatMessage.FileId
-		cmr.UserFileId = chatMessage.UserFileId
+		//cmr.UserFileId = chatMessage.UserFileId
 		if chatMessage.File != nil {
 			cmr.File = chatMessage.File
 		}
-		if chatMessage.UserFile != nil {
-			cmr.UserFile = chatMessage.UserFile
-		}
+		//if chatMessage.UserFile != nil {
+		//	cmr.UserFile = chatMessage.UserFile
+		//}
 
 		cmr.Hidden = chatMessage.Hidden
 		cmr.PromptTokens = chatMessage.PromptTokens
@@ -162,7 +162,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
 			return
 		}
-
 	}
 
 	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)
@@ -176,6 +175,24 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		}
 	}
 
+	// 如果没有 Assistant，则获取对话的 Assistant
+	if assistantEntity == nil && chatEntity.Assistant != nil {
+		assistantEntity = chatEntity.Assistant
+	}
+
+	// 如果对话没有 Preload Assistant，则手动获取 Assistant
+	if chatEntity.AssistantId != nil && chatEntity.Assistant == nil {
+		assistantEntity, err = u.assistantService.GetAssistant(c, *chatEntity.AssistantId)
+		if err != nil {
+			if errors.Is(err, consts.ErrAssistantNotFound) {
+				response.Status(http.StatusNotFound).Error(err).Send()
+			} else {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+			}
+			return
+		}
+	}
+
 	// 检查状态是否是回复中
 	isStreaming := u.isStreaming(c, chatRequest.ChatId)
 	if isStreaming {
@@ -184,7 +201,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	// 检测 chat 是否存在缓存
-	cmd := u.redis.Get(c, u.getCacheKey("entity:"+chatEntity.Id.String()))
+	cmd := u.redis.Client.Get(c, u.getCacheKey("entity:"+chatEntity.Id.String()))
 	result, err := cmd.Result()
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
@@ -289,13 +306,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		assistantId = request.AssistantId
 	}
 
-	chatMessages = append(chatMessages, entity.ChatMessage{
-		ChatId:      chatEntity.Id,
-		AssistantId: assistantId,
-		Content:     request.Message,
-		Role:        request.Role,
-	})
-
 	// 检测是否存在知识库
 	if needStream && assistantEntity != nil && assistantEntity.LibraryId != nil {
 		libraryEntity, err := u.libraryService.GetLibrary(c, *assistantEntity.LibraryId)
@@ -314,7 +324,13 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		var chunkContent = ""
 		// 将 libraryResults 拼接起来
 		for _, libraryResult := range libraryResults {
-			chunkContent += libraryResult.Content
+			chunkContent += libraryResult.Content + "\n"
+		}
+
+		if chunkContent == "" {
+			chunkContent = consts.LibraryResultEmptyPrompt
+		} else {
+			chunkContent = consts.LibraryResultPrompt + "\n" + chunkContent
 		}
 
 		// 添加知识库消息
@@ -325,6 +341,14 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			Role:        schema.RoleSystem,
 		})
 	}
+
+	// 添加用户发送的消息
+	chatMessages = append(chatMessages, entity.ChatMessage{
+		ChatId:      chatEntity.Id,
+		AssistantId: assistantId,
+		Content:     request.Message,
+		Role:        request.Role,
+	})
 
 	// TODO: 如果 request.Message 的大小超过了 1mb, 则转换为文件。转换之前应该先判断助理是否存在知识库
 	// Update: 其实我也不知道这个要不要做,感觉做了意义也不大
@@ -370,7 +394,7 @@ func (u *ChatController) generateChatStream(c context.Context,
 	variables map[string]string) (streamId string, err error) {
 	var randomId = random.String(32)
 	// 保存 chat stream id
-	err = u.redis.Set(c, u.getCacheKey("entity:"+chatId.String()), randomId, consts.ChatStreamExpire).Err()
+	err = u.redis.Client.Set(c, u.getCacheKey("entity:"+chatId.String()), randomId, consts.ChatStreamExpire).Err()
 	if err != nil {
 		return "", err
 	}
@@ -385,7 +409,7 @@ func (u *ChatController) generateChatStream(c context.Context,
 		return "", err
 	}
 
-	err = u.redis.Set(c, u.getCacheKey("stream:"+randomId), chatJson, consts.ChatStreamExpire).Err()
+	err = u.redis.Client.Set(c, u.getCacheKey("stream:"+randomId), chatJson, consts.ChatStreamExpire).Err()
 	if err != nil {
 		return "", err
 	}
@@ -395,7 +419,7 @@ func (u *ChatController) generateChatStream(c context.Context,
 		return "", err
 	}
 
-	err = u.redis.Set(c, u.getCacheKey("stream:"+randomId+":user"), userJson, consts.ChatStreamExpire).Err()
+	err = u.redis.Client.Set(c, u.getCacheKey("stream:"+randomId+":user"), userJson, consts.ChatStreamExpire).Err()
 	if err != nil {
 		return "", err
 	}

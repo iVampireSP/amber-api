@@ -210,6 +210,10 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			}
 
 		case schema.RoleSystem:
+			if h.Content == "" {
+				continue
+			}
+
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
 		case schema.RoleHideSystem:
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
@@ -236,10 +240,12 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 				llmChat.WithoutImage = false
 				// 将 fileEntity 的 url 添加到 historyContent
 				fileText = "[File]File ID: " + h.File.Id.String() + ", MimeType: " + h.File.MimeType
-			} else if h.UserFile != nil {
-				llmChat.WithoutImage = false
-				fileText = "[File]File ID: " + h.UserFile.File.Id.String() + ", MimeType: " + h.UserFile.File.MimeType
 			}
+
+			//	else if h.UserFile != nil {
+			//	llmChat.WithoutImage = false
+			//	fileText = "[File]File ID: " + h.UserFile.File.Id.String() + ", MimeType: " + h.UserFile.File.MimeType
+			//}
 
 			if fileText != "" {
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))

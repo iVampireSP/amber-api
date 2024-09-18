@@ -30,15 +30,14 @@ type ChatMessage struct {
 	Role        schema.ChatRole  `json:"role"`
 	ToolCall    *schema.ToolCall `json:"-"`
 	// FileId
-	// 虽然有了 UserFileId， 但是 File Id 还是应该保留，因为这个是针对访客用户的
-	FileId           *schema.EntityId `json:"file_id"`
-	File             *File            `json:"file"`
-	UserFileId       *schema.EntityId `json:"user_file_id"`
-	UserFile         *UserFile        `json:"user_file"`
-	Hidden           bool             `json:"hidden"`
-	PromptTokens     int              `json:"prompt_tokens"`
-	CompletionTokens int              `json:"completion_tokens"`
-	TotalTokens      int              `json:"total_tokens"`
+	FileId *schema.EntityId `json:"file_id"`
+	File   *File            `json:"file"`
+	//UserFileId       *schema.EntityId `json:"user_file_id"`
+	//UserFile         *UserFile        `json:"user_file"`
+	Hidden           bool `json:"hidden"`
+	PromptTokens     int  `json:"prompt_tokens"`
+	CompletionTokens int  `json:"completion_tokens"`
+	TotalTokens      int  `json:"total_tokens"`
 }
 
 func (at *ChatMessage) TableName() string {
@@ -55,14 +54,14 @@ type ChatMessageList struct {
 		Id   schema.EntityId `json:"id"`
 		Name string          `json:"name"`
 	} `json:"assistant"`
-	Content          string           `json:"content"`
-	Role             schema.ChatRole  `json:"role"`
-	FileId           *schema.EntityId `json:"file_id"`
-	File             *File            `json:"file"`
-	UserFileId       *schema.EntityId `json:"user_file_id"`
-	UserFile         *UserFile        `json:"user_file"`
-	Hidden           bool             `json:"hidden"`
-	PromptTokens     int              `json:"prompt_tokens"`
-	CompletionTokens int              `json:"completion_tokens"`
-	TotalTokens      int              `json:"total_tokens"`
+	Content string           `json:"content"`
+	Role    schema.ChatRole  `json:"role"`
+	FileId  *schema.EntityId `json:"file_id"`
+	File    *File            `json:"file"`
+	//UserFileId       *schema.EntityId `json:"user_file_id"`
+	//UserFile         *UserFile        `json:"user_file"`
+	Hidden           bool `json:"hidden"`
+	PromptTokens     int  `json:"prompt_tokens"`
+	CompletionTokens int  `json:"completion_tokens"`
+	TotalTokens      int  `json:"total_tokens"`
 }

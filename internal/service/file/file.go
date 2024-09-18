@@ -28,6 +28,7 @@ var allowedMimeTypes = map[string]bool{
 	"application/msword": true, // doc
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true, // docx
 	"text/plain":      true, // txt
+	"text/html":       true,
 	"image/jpeg":      true,
 	"image/png":       true,
 	"image/jpg":       true,
@@ -35,7 +36,7 @@ var allowedMimeTypes = map[string]bool{
 	"application/pdf": true, // pdf
 }
 
-func (s *Service) CreateFileFromUrl(ctx context.Context, url string, public bool) (*entity.File, error) {
+func (s *Service) CreateFileFromUrl(ctx context.Context, url string) (*entity.File, error) {
 	var urlHash = s.sha256String(url)
 
 	fileEntity := &entity.File{}
@@ -47,12 +48,17 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string, public bool
 	}
 	if exists {
 		fileEntity, err = s.GetFileByUrlHash(ctx, urlHash)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.Renew(ctx, fileEntity)
 		return fileEntity, err
 	}
 
 	fileEntity.Url = &url
 	fileEntity.UrlHash = &urlHash
-	fileEntity.Public = public
+	//fileEntity.Public = public
 
 	// 获取内容
 	// 先验证大小
@@ -81,6 +87,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string, public bool
 	fileMimeTypeString2 := strings.Split(fileMimeTypeString, ";")[0]
 
 	if !allowedMimeTypes[fileMimeTypeString2] {
+		s.logger.Sugar.Infof("mime type %s not allowed", fileMimeTypeString2)
 		return nil, consts.ErrMimeTypeNotAllowed
 	}
 
@@ -112,7 +119,7 @@ func (s *Service) CreateFileFromUrl(ctx context.Context, url string, public bool
 	return fileEntity, nil
 }
 
-func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker, public bool) (*entity.File, error) {
+func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.File, error) {
 	size, err := io.Copy(io.Discard, file)
 	if err != nil {
 		return nil, err
@@ -125,7 +132,7 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker, public boo
 	fileEntity := &entity.File{
 		Url:     nil,
 		UrlHash: nil,
-		Public:  public,
+		//Public:  public,
 	}
 
 	fileSha256, err := checksum.MD5sumReader(file)
@@ -140,6 +147,11 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker, public boo
 	}
 	if exists {
 		fileEntity, err = s.GetFileByFileHash(ctx, fileSha256)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.Renew(ctx, fileEntity)
 		return fileEntity, err
 	}
 
@@ -160,6 +172,8 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker, public boo
 
 	// 只允许指定的 Mimetype
 	if !allowedMimeTypes[fileMimeTypeString2] {
+		s.logger.Sugar.Infof("mime type %s not allowed", fileMimeTypeString2)
+
 		return nil, consts.ErrMimeTypeNotAllowed
 	}
 

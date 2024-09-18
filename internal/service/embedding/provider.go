@@ -4,6 +4,7 @@ import (
 	"github.com/tmc/langchaingo/llms/openai"
 	"rag-new/internal/base/conf"
 	"rag-new/internal/base/logger"
+	"rag-new/internal/base/redis"
 	"rag-new/internal/dao"
 )
 
@@ -12,9 +13,10 @@ type Service struct {
 	Logger *logger.Logger
 	config *conf.Config
 	dao    *dao.Query
+	redis  *redis.Redis
 }
 
-func NewService(config *conf.Config, logger *logger.Logger, dao *dao.Query) *Service {
+func NewService(config *conf.Config, logger *logger.Logger, dao *dao.Query, redis *redis.Redis) *Service {
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.InternalBaseUrl),
@@ -25,5 +27,5 @@ func NewService(config *conf.Config, logger *logger.Logger, dao *dao.Query) *Ser
 		panic(err)
 	}
 
-	return &Service{llm, logger, config, dao}
+	return &Service{llm, logger, config, dao, redis}
 }

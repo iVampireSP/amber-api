@@ -42,7 +42,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	streamIdCacheKey := u.getCacheKey("stream:" + chatStreamRequest.StreamId)
 	// 检查缓存是否存在
-	i, err := u.redis.Exists(c, streamIdCacheKey).Result()
+	i, err := u.redis.Client.Exists(c, streamIdCacheKey).Result()
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -54,7 +54,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 获取 chat id
-	streamCacheResult, err := u.redis.Get(c, streamIdCacheKey).Bytes()
+	streamCacheResult, err := u.redis.Client.Get(c, streamIdCacheKey).Bytes()
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -75,7 +75,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	} else {
 		// 不在回复中，则设置缓存键，防止再次请求
-		cmd := u.redis.Set(c, chatIdStreamKey, 1, consts.ChatStreamExpire)
+		cmd := u.redis.Client.Set(c, chatIdStreamKey, 1, consts.ChatStreamExpire)
 		if cmd.Err() != nil {
 			response.Status(http.StatusInternalServerError).Error(cmd.Err()).Send()
 			return
@@ -145,7 +145,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	streamUserCacheKey := u.getCacheKey("stream:" + chatStreamRequest.StreamId + ":user")
 
 	// 检查缓存是否存在
-	i, err = u.redis.Exists(c, streamUserCacheKey).Result()
+	i, err = u.redis.Client.Exists(c, streamUserCacheKey).Result()
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -156,7 +156,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	userCmd, err := u.redis.Get(c, streamUserCacheKey).Result()
+	userCmd, err := u.redis.Client.Get(c, streamUserCacheKey).Result()
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -303,7 +303,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 	c.SSEvent(eventName, eventDone)
 
 	// close sse stream
-	c.SSEvent("close", "")
 	c.Writer.Flush()
 
 	if llmFullMessage != "" {
@@ -337,9 +336,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	defer func() {
 		// 移除缓存
-		u.redis.Del(c, streamIdCacheKey)
-		u.redis.Del(c, u.getCacheKey("entity:"+csc.ChatId.String()))
-		u.redis.Del(c, u.getCacheKey("stream:"+chatStreamRequest.StreamId+":user"))
-		u.redis.Del(c, chatIdStreamKey)
+		u.redis.Client.Del(c, streamIdCacheKey)
+		u.redis.Client.Del(c, u.getCacheKey("entity:"+csc.ChatId.String()))
+		u.redis.Client.Del(c, u.getCacheKey("stream:"+chatStreamRequest.StreamId+":user"))
+		u.redis.Client.Del(c, chatIdStreamKey)
 	}()
 }

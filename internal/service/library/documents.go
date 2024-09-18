@@ -53,6 +53,15 @@ func (s *Service) CreateDocument(ctx context.Context, library *entity.Library, n
 					s.logger.Sugar.Error(err)
 				}
 			}
+
+			// set chunked true
+			_, err = documentDao.Where(s.dao.Document.Id.Eq(uint(document.Id))).Updates(entity.Document{Chunked: true})
+			if err != nil {
+				s.logger.Sugar.Error(err)
+				return
+			}
+			s.logger.Sugar.Infof("chunk document %d success", document.Id)
+
 		}()
 	}
 

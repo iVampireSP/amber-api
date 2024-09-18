@@ -41,12 +41,13 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, llmChat *schema.LLMChat,
 	}
 
 	var toolRequest = &schema.ToolRemoteRequest{
-		FunctionName: functionName,
-		Parameters:   args,
-		Chat:         llmChat.Chat,
+		FunctionName:  functionName,
+		Parameters:    args,
+		Chat:          llmChat.Chat,
+		ToolCallToken: llmChat.ToolCallToken,
 	}
 
-	//s.Logger.Sugar.Infof("Calling remote function: %v", toolRequest)
+	s.Logger.Sugar.Infof("Calling remote function: %v", toolRequest)
 
 	if llmChat.UserPublicInfo != nil {
 		toolRequest.User = llmChat.UserPublicInfo

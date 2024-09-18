@@ -19,6 +19,7 @@ import (
 	"rag-new/internal/service/library"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/memory"
+	"rag-new/internal/service/tool"
 	"rag-new/pkg/consts"
 	"strconv"
 )
@@ -38,6 +39,7 @@ type ChatController struct {
 	memoryService    *memory.Service
 	libraryService   *library.Service
 	config           *conf.Config
+	toolService      *tool.Service
 }
 
 func NewChatController(
@@ -52,6 +54,8 @@ func NewChatController(
 	fileService *file.Service,
 	memoryService *memory.Service,
 	libraryService *library.Service,
+	toolService *tool.Service,
+
 ) *ChatController {
 	return &ChatController{
 		authService,
@@ -65,6 +69,7 @@ func NewChatController(
 		memoryService,
 		libraryService,
 		config,
+		toolService,
 	}
 }
 

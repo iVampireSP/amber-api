@@ -21,6 +21,16 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 		llmTools = llmTools[:128]
 	}
 
+	// 如果 llmChat.Temperature < 0.1 ，则设置为 0.1
+	if llmChat.Temperature < 0.1 {
+		llmChat.Temperature = 0.1
+	}
+
+	// 如果 llmChat.Temperature > 1，则设置为 1
+	if llmChat.Temperature > 1 {
+		llmChat.Temperature = 1
+	}
+
 	resp, err := s.OpenAI.GenerateContent(ctx,
 		historyContent,
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
@@ -72,13 +82,14 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 
 			return nil
 		}),
+		llms.WithModel(llmChat.Model),
 		llms.WithTools(llmTools),
-		llms.WithN(llmChat.N),
+		//llms.WithN(llmChat.N),
 		llms.WithMaxTokens(llmChat.MaxTokens),
 		llms.WithTemperature(llmChat.Temperature),
-		llms.WithTopP(llmChat.TopP),
-		llms.WithModel(llmChat.Model),
-		llms.WithTopK(llmChat.TopK))
+	)
+	//llms.WithTopP(llmChat.TopP),
+	//llms.WithTopK(llmChat.TopK))
 
 	if err != nil {
 		s.Logger.Sugar.Errorf("OpenAI.GenerateContent error: %v", err)

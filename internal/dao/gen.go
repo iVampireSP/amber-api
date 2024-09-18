@@ -29,6 +29,7 @@ var (
 	Library       *library
 	Memory        *memory
 	Tool          *tool
+	ToolCallToken *toolCallToken
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -45,6 +46,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Library = &Q.Library
 	Memory = &Q.Memory
 	Tool = &Q.Tool
+	ToolCallToken = &Q.ToolCallToken
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -62,6 +64,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Library:       newLibrary(db, opts...),
 		Memory:        newMemory(db, opts...),
 		Tool:          newTool(db, opts...),
+		ToolCallToken: newToolCallToken(db, opts...),
 	}
 }
 
@@ -80,6 +83,7 @@ type Query struct {
 	Library       library
 	Memory        memory
 	Tool          tool
+	ToolCallToken toolCallToken
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -99,6 +103,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Library:       q.Library.clone(db),
 		Memory:        q.Memory.clone(db),
 		Tool:          q.Tool.clone(db),
+		ToolCallToken: q.ToolCallToken.clone(db),
 	}
 }
 
@@ -125,6 +130,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Library:       q.Library.replaceDB(db),
 		Memory:        q.Memory.replaceDB(db),
 		Tool:          q.Tool.replaceDB(db),
+		ToolCallToken: q.ToolCallToken.replaceDB(db),
 	}
 }
 
@@ -141,6 +147,7 @@ type queryCtx struct {
 	Library       ILibraryDo
 	Memory        IMemoryDo
 	Tool          IToolDo
+	ToolCallToken IToolCallTokenDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -157,6 +164,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Library:       q.Library.WithContext(ctx),
 		Memory:        q.Memory.WithContext(ctx),
 		Tool:          q.Tool.WithContext(ctx),
+		ToolCallToken: q.ToolCallToken.WithContext(ctx),
 	}
 }
 

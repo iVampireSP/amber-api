@@ -90,6 +90,7 @@ type LLMChat struct {
 	SystemPrompt   string
 	UserPublicInfo *UserPublicInfo
 	Chat           *ChatPublicModel `json:"chat"`
+	ToolCallToken  string           `json:"tool_call_token"`
 	Tools          []llms.Tool
 	MaxTokens      int     `json:"max_tokens,omitempty"`
 	Temperature    float64 `json:"temperature,omitempty"`
@@ -102,6 +103,7 @@ type LLMChat struct {
 
 type ChatPublicModel struct {
 	Name        string     `json:"name"`
+	ID          EntityId   `json:"id"`
 	AssistantId *EntityId  `json:"assistant_id"`
 	ExpiredAt   *time.Time `json:"expired_at"`
 	Owner       ChatOwner  `json:"owner"`

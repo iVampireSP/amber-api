@@ -5,10 +5,11 @@ type ToolListResponse struct {
 }
 
 type ToolRemoteRequest struct {
-	FunctionName string           `json:"function_name"`
-	Parameters   interface{}      `json:"parameters"`
-	User         *UserPublicInfo  `json:"user"`
-	Chat         *ChatPublicModel `json:"chat"`
+	FunctionName  string           `json:"function_name"`
+	Parameters    interface{}      `json:"parameters"`
+	User          *UserPublicInfo  `json:"user"`
+	Chat          *ChatPublicModel `json:"chat"`
+	ToolCallToken string           `json:"tool_call_token"`
 }
 
 type ToolRemoteResponse struct {

@@ -1,7 +1,9 @@
 package v1
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"github.com/tmc/langchaingo/llms"
@@ -178,13 +180,21 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
+	tct, err := u.GenerateCallToken(c, chatEntity)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
 	var llmChat = &schema.LLMChat{
 		ResponseChan:   llmResponseChan,
 		SystemPrompt:   prompt,
 		UserPublicInfo: user,
 		MaxTokens:      u.config.LLM.MaxTokens,
 		Tools:          tools,
+		ToolCallToken:  tct,
 		Chat: &schema.ChatPublicModel{
+			ID:          chatEntity.Id,
 			Name:        chatEntity.Name,
 			AssistantId: chatEntity.AssistantId,
 			ExpiredAt:   chatEntity.ExpiredAt,
@@ -345,4 +355,17 @@ func (u *ChatController) Stream(c *gin.Context) {
 		u.redis.Client.Del(c, u.getCacheKey("stream:"+chatStreamRequest.StreamId+":user"))
 		u.redis.Client.Del(c, chatIdStreamKey)
 	}()
+}
+
+func (u *ChatController) GenerateCallToken(ctx context.Context, chatEntity *entity.Chat) (string, error) {
+	tct, err := u.toolService.GenerateToolCallToken(ctx, chatEntity)
+	if err != nil {
+		return "", err
+	}
+
+	if tct == nil {
+		return "", fmt.Errorf("failed to generate tool call token")
+	}
+
+	return tct.Token, nil
 }

@@ -31,3 +31,5 @@ func (s *Service) getTokenUsage(respChoice *llms.ContentChoice) *schema.TokenUsa
 
 	return tokenUsage
 }
+
+//func (s *Service) generateToken()

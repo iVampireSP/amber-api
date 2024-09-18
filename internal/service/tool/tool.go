@@ -9,7 +9,9 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"rag-new/pkg/random"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 
@@ -222,4 +224,18 @@ func (s *Service) IsAllowed(url string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (s *Service) GenerateToolCallToken(ctx context.Context, chat *entity.Chat) (*entity.ToolCallToken, error) {
+	var expiredAt = time.Now().Add(time.Hour * 24)
+
+	var tct = entity.ToolCallToken{
+		Token:     random.String(24),
+		ChatId:    chat.Id,
+		ExpiredAt: expiredAt,
+	}
+
+	err := s.dao.WithContext(ctx).ToolCallToken.Create(&tct)
+
+	return &tct, err
 }

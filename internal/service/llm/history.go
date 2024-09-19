@@ -103,7 +103,7 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			}
 
 			if timeString != "" {
-				h.Content = fmt.Sprintf("Send at:%s\n%s", timeString, h.Content)
+				h.Content = fmt.Sprintf("[Send at %s]%s", timeString, h.Content)
 			}
 
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
@@ -147,7 +147,7 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			}
 
 			if timeString != "" {
-				h.Content = fmt.Sprintf("Send at:%s\n%s", timeString, h.Content)
+				h.Content = fmt.Sprintf("[Send at %s]%s", timeString, h.Content)
 			}
 
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, h.Content))

@@ -90,15 +90,15 @@ type LLMChat struct {
 	SystemPrompt   string
 	UserPublicInfo *UserPublicInfo
 	Chat           *ChatPublicModel `json:"chat"`
-	ToolCallToken  string           `json:"tool_call_token"`
-	Tools          []llms.Tool
-	MaxTokens      int     `json:"max_tokens,omitempty"`
-	Temperature    float64 `json:"temperature,omitempty"`
-	TopK           int     `json:"top_k,omitempty"`
-	TopP           float64 `json:"top_p,omitempty"`
-	N              int     `json:"n,omitempty"`
-	Model          string  `json:"model"`
-	WithoutImage   bool    `json:"-"`
+	//ToolCallToken  string           `json:"tool_call_token"`
+	Tools        []llms.Tool
+	MaxTokens    int     `json:"max_tokens,omitempty"`
+	Temperature  float64 `json:"temperature,omitempty"`
+	TopK         int     `json:"top_k,omitempty"`
+	TopP         float64 `json:"top_p,omitempty"`
+	N            int     `json:"n,omitempty"`
+	Model        string  `json:"model"`
+	WithoutImage bool    `json:"-"`
 }
 
 type ChatPublicModel struct {

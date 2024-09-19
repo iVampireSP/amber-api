@@ -180,11 +180,11 @@ func (u *ChatController) Stream(c *gin.Context) {
 		return
 	}
 
-	tct, err := u.GenerateCallToken(c, chatEntity)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
-	}
+	//tct, err := u.GenerateCallToken(c, chatEntity)
+	//if err != nil {
+	//	response.Status(http.StatusInternalServerError).Error(err).Send()
+	//	return
+	//}
 
 	var llmChat = &schema.LLMChat{
 		ResponseChan:   llmResponseChan,
@@ -192,7 +192,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		UserPublicInfo: user,
 		MaxTokens:      u.config.LLM.MaxTokens,
 		Tools:          tools,
-		ToolCallToken:  tct,
+		//ToolCallToken:  tct,
 		Chat: &schema.ChatPublicModel{
 			ID:          chatEntity.Id,
 			Name:        chatEntity.Name,

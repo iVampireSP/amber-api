@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"rag-new/internal/schema"
 	"strconv"
 )
@@ -39,20 +40,26 @@ func (s *Service) SearchWeb(_ context.Context, args schema.FunctionCallArguments
 		"max_results": strconv.Itoa(SerpMaxResult),
 	}
 
-	var url = s.config.ThirdParty.InternalSerpAPI
+	var url2 = s.config.ThirdParty.InternalSerpAPI
 
-	if url == "" {
+	if url2 == "" {
 		response.Content = ErrOnSearch.Error()
 		return response, ErrOnSearch
 	}
 
 	// 拼接 get 参数
-	url += "/search?"
-	for k, v := range queryParams {
-		url = fmt.Sprintf("%s&%s=%s", url, k, v)
+	url2 += "/search?"
+
+	// 构建为 URL Query 参数
+	var queryData = url.Values{}
+	for key, value := range queryParams {
+		queryData.Set(key, value)
 	}
 
-	rsp, err := http.Get(url)
+	// 拼接 url
+	url2 += httpBuildQuery(queryData)
+
+	rsp, err := http.Get(url2)
 	if err != nil {
 		s.logger.Sugar.Error(err)
 		response.Content = ErrOnSearch.Error()
@@ -84,4 +91,8 @@ func (s *Service) SearchWeb(_ context.Context, args schema.FunctionCallArguments
 	response.Content = string(body)
 
 	return response, nil
+}
+
+func httpBuildQuery(queryData url.Values) string {
+	return queryData.Encode()
 }

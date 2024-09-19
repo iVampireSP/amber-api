@@ -9,6 +9,15 @@ import (
 	"strconv"
 )
 
+type functionCall struct {
+	Id       string `json:"id"`
+	Type     string `json:"type"`
+	Function struct {
+		Name      string `json:"name"`
+		Arguments string `json:"arguments"`
+	} `json:"function"`
+}
+
 func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, llmTools []llms.Tool, historyContent []llms.MessageContent) (response *llms.ContentResponse, err error) {
 	// 上一个字
 	var lastWord = ""
@@ -68,6 +77,34 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 						},
 						Content: stringChunk,
 					})
+				} else {
+					// 如果是 JSON，则判断是否是工具调用
+					var functionCalls []*functionCall
+					err = sonic.Unmarshal(chunk, &functionCalls)
+					if err != nil {
+						s.write(ctx, llmChat, &schema.AssistantResponse{
+							State: schema.StateChunk,
+							ChunkMessage: &schema.ChunkMessage{
+								Content: stringChunk,
+							},
+							Content: stringChunk,
+						})
+
+						// 解析失败，正常输出
+						//return err
+					} else if len(functionCalls) > 0 {
+						// 工具调用，不管
+					} else {
+						// 不是，则正常输出
+						s.write(ctx, llmChat, &schema.AssistantResponse{
+							State: schema.StateChunk,
+							ChunkMessage: &schema.ChunkMessage{
+								Content: stringChunk,
+							},
+							Content: stringChunk,
+						})
+					}
+
 				}
 
 			} else {

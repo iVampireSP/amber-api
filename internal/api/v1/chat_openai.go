@@ -171,12 +171,52 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 			})
 
 		} else {
+			// 普通的消息
 			histories = append(histories, &entity.ChatMessage{
 				Role:    role,
 				Content: content,
 			})
 		}
 
+	}
+
+	// 检测消息的最后一个是不是 user
+	if len(histories) > 0 && histories[len(histories)-1].Role == schema.RoleHuman {
+		// 检测是否存在知识库
+		if assistantEntity != nil && assistantEntity.LibraryId != nil {
+			libraryEntity, err := u.libraryService.GetLibrary(c, *assistantEntity.LibraryId)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+
+			// message
+			var content = histories[len(histories)-1].Content
+
+			// 从知识库获取内容，并添加到历史上下文
+			libraryResults, err := u.libraryService.SearchLibrary(c, content, libraryEntity)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+
+			var chunkContent = ""
+			// 将 libraryResults 拼接起来
+			for _, libraryResult := range libraryResults {
+				chunkContent += libraryResult.Content + "\n"
+			}
+
+			if chunkContent == "" {
+				chunkContent = consts.LibraryResultEmptyPrompt
+			} else {
+				chunkContent = consts.LibraryResultPrompt + "\n" + chunkContent
+			}
+
+			histories = append(histories, &entity.ChatMessage{
+				Role:    schema.RoleHideHuman,
+				Content: fmt.Sprintf("[Knowledgebase]%s", chunkContent),
+			})
+		}
 	}
 
 	go func() {

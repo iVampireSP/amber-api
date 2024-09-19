@@ -268,15 +268,67 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		}
 	}
 
-	var chatMessage entity.ChatMessage
-	chatMessage.ChatId = chatEntity.Id
-	chatMessage.Content = addPublicChatMessageRequest.Message
-	chatMessage.Role = addPublicChatMessageRequest.Role
+	var assistantEntity *entity.Assistant
+	if chatEntity.AssistantId != nil {
+		assistantEntity, err = u.assistantService.GetAssistant(c, *chatEntity.AssistantId)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
 
-	err = u.cm.CreateChatMessage(c, &chatMessage)
-	if err != nil {
-		response.Status(http.StatusInternalServerError).Error(err).Send()
-		return
+	// 消息写入列表
+	var chatMessages []entity.ChatMessage
+
+	// 检测是否存在知识库
+	if needStream && assistantEntity != nil && assistantEntity.LibraryId != nil {
+		libraryEntity, err := u.libraryService.GetLibrary(c, *assistantEntity.LibraryId)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		// 从知识库获取内容，并添加到历史上下文
+		libraryResults, err := u.libraryService.SearchLibrary(c, addPublicChatMessageRequest.Message, libraryEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		var chunkContent = ""
+		// 将 libraryResults 拼接起来
+		for _, libraryResult := range libraryResults {
+			chunkContent += libraryResult.Content + "\n"
+		}
+
+		if chunkContent == "" {
+			chunkContent = consts.LibraryResultEmptyPrompt
+		} else {
+			chunkContent = consts.LibraryResultPrompt + "\n" + chunkContent
+		}
+
+		// 添加知识库消息
+		chatMessages = append(chatMessages, entity.ChatMessage{
+			ChatId:      chatEntity.Id,
+			AssistantId: &assistantEntity.Id,
+			Content:     chunkContent,
+			Role:        schema.RoleSystem,
+		})
+	}
+
+	// 添加用户发送的消息
+	chatMessages = append(chatMessages, entity.ChatMessage{
+		ChatId:  chatEntity.Id,
+		Content: addPublicChatMessageRequest.Message,
+		Role:    addPublicChatMessageRequest.Role,
+	})
+
+	for _, cm := range chatMessages {
+		err = u.cm.CreateChatMessage(c, &cm)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
 	}
 
 	// 如果需要流式输出的情况

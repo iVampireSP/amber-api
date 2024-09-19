@@ -34,9 +34,8 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 	// 当前的助理（用于通知助理上条消息的回复者
 	var currentAssistantId schema.EntityId
 
-	systemPrompts = append(systemPrompts, "You are a helpful assistant made by Leaflow(https://www.leaflow.cn, chinese name: 利飞)")
-	systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, prompt)
+	systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 
 	for _, h := range history {

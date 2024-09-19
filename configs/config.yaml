@@ -82,4 +82,4 @@ kafka:
 
 third_party:
   jina_ai_key: ""
-  internal_serp_api: ""
+  bing_api_key: ""

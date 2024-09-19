@@ -28,8 +28,8 @@ type Config struct {
 }
 
 type ThirdParty struct {
-	JinaAIKey       string `yaml:"jina_ai_key" mapstructure:"jina_ai_key"`
-	InternalSerpAPI string `yaml:"internal_serp_api" mapstructure:"internal_serp_api"`
+	JinaAIKey  string `yaml:"jina_ai_key" mapstructure:"jina_ai_key"`
+	BingAPIKey string `yaml:"bing_api_key" mapstructure:"bing_api_key"`
 }
 
 type Http struct {

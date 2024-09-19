@@ -25,8 +25,8 @@ const ExpiredDAY = 7
 const RenewBeforeDAY = 5
 
 var allowedMimeTypes = map[string]bool{
-	"application/msword": true, // doc
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true, // docx
+	//"application/msword": true, // doc
+	//"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true, // docx
 	"text/plain":      true, // txt
 	"text/html":       true,
 	"image/jpeg":      true,

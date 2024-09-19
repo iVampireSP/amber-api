@@ -3,6 +3,7 @@ package library
 import (
 	"context"
 	"github.com/tmc/langchaingo/documentloaders"
+	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/textsplitter"
 	"rag-new/internal/dao"
 	"rag-new/internal/entity"
@@ -14,19 +15,20 @@ const FileSize = 50 * 1024 * 1024
 const ChunkSize = 1024
 const ChunkOverlap = 128
 
-const mimeTypeMSWord = "application/msword"
+// const mimeTypeMSWord = "application/msword"
 const mimeTypePDF = "application/pdf"
 const mimeTypeCSV = "text/csv"
-const mimeTypeOffice = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+// const mimeTypeOffice = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 const mimeTypeTXT = "text/plain"
 const mimeTypeHTML = "text/html"
 
 var allowedChunkMimeTypes = map[string]bool{
-	mimeTypeCSV:    true,
-	mimeTypeOffice: true,
-	mimeTypePDF:    true,
-	mimeTypeTXT:    true,
-	mimeTypeHTML:   true,
+	mimeTypeCSV: true,
+	//mimeTypeOffice: true,
+	mimeTypePDF:  true,
+	mimeTypeTXT:  true,
+	mimeTypeHTML: true,
 }
 
 func (s *Service) CanChunk(file *entity.File) bool {
@@ -59,10 +61,10 @@ func (s *Service) ChunkFileToDocument(ctx context.Context, file *entity.File, do
 	switch fileMimeTypeString2 {
 	case mimeTypePDF:
 		documentLoader = documentloaders.NewPDF(io, size)
-	case mimeTypeMSWord:
-		documentLoader = NewDocxLoader(io, size)
-	case mimeTypeOffice:
-		documentLoader = NewDocxLoader(io, size)
+	//case mimeTypeMSWord:
+	//	documentLoader = NewDocxLoader(io, size)
+	//case mimeTypeOffice:
+	//	documentLoader = NewDocxLoader(io, size)
 	case mimeTypeTXT:
 		documentLoader = documentloaders.NewText(io)
 	case mimeTypeHTML:
@@ -76,7 +78,8 @@ func (s *Service) ChunkFileToDocument(ctx context.Context, file *entity.File, do
 		textsplitter.WithChunkOverlap(ChunkOverlap),
 	)
 
-	chunks, err := documentLoader.LoadAndSplit(ctx, recursiveCharacter)
+	var chunks []schema.Document
+	chunks, err = documentLoader.LoadAndSplit(ctx, recursiveCharacter)
 	if err != nil {
 		return err
 	}
@@ -91,9 +94,20 @@ func (s *Service) ChunkFileToDocument(ctx context.Context, file *entity.File, do
 		})
 	}
 
-	return s.dao.Transaction(func(tx *dao.Query) error {
+	err = s.dao.Transaction(func(tx *dao.Query) error {
 		return tx.DocumentChunk.WithContext(ctx).Create(documentChunks...)
 	})
+
+	if err != nil {
+		return err
+	}
+
+	// 将  chunked 标记为 true
+	_, err = s.dao.Document.WithContext(ctx).
+		Where(s.dao.Document.Id.Eq(uint(document.Id))).
+		UpdateSimple(s.dao.Document.Chunked.Value(true))
+
+	return err
 
 }
 
@@ -124,8 +138,18 @@ func (s *Service) ChunkTextToDocument(ctx context.Context, content string, docum
 		})
 	}
 
-	return s.dao.Transaction(func(tx *dao.Query) error {
+	err = s.dao.Transaction(func(tx *dao.Query) error {
 		return tx.DocumentChunk.WithContext(ctx).Create(documentChunks...)
 	})
+	if err != nil {
+		return err
+	}
+
+	// 将  chunked 标记为 true
+	_, err = s.dao.Document.WithContext(ctx).
+		Where(s.dao.Document.Id.Eq(uint(document.Id))).
+		UpdateSimple(s.dao.Document.Chunked.Value(true))
+
+	return err
 
 }

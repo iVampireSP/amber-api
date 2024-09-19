@@ -54,7 +54,7 @@ func (s *Service) SearchWeb(_ context.Context, args schema.FunctionCallArguments
 
 	rsp, err := http.Get(url)
 	if err != nil {
-		s.logger.Sugar.Fatal(err)
+		s.logger.Sugar.Error(err)
 		response.Content = ErrOnSearch.Error()
 		return response, ErrOnSearch
 	}

@@ -42,6 +42,8 @@ func (u *ChatController) getPrompt(c *gin.Context,
 			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
 			prompt += userPrompt
 		}
+		// 如果用户是 nil 的话，使用默认 Prompt
+		prompt += consts.DefaultPrompt
 	} else if assistant.DisableDefaultPrompt {
 		// 如果禁用了默认的 Prompt
 		prompt += assistant.Prompt
@@ -109,8 +111,12 @@ The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hin
 			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
 		}
 
-		if assistant.Prompt != "" && variable != nil && len(variable) > 0 {
-			prompt += "\n" + safetpl.RenderTemplate(assistant.Prompt, variable)
+		if assistant.Prompt != "" {
+			if variable != nil && len(variable) > 0 {
+				prompt += "\n" + safetpl.RenderTemplate(assistant.Prompt, variable)
+			} else {
+				prompt += "\n" + assistant.Prompt
+			}
 		}
 	}
 

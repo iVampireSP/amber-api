@@ -53,18 +53,56 @@ var tools = []llms.Tool{
 			},
 		},
 	},
+	//{
+	//	Type: "function",
+	//	Function: &llms.FunctionDefinition{
+	//		Name:        prefix("download_file"),
+	//		Description: "download file from url",
+	//		Parameters: jsonschema.Definition{
+	//			Type: jsonschema.Object,
+	//			Properties: map[string]jsonschema.Definition{
+	//				"url": {
+	//					Type: jsonschema.Integer,
+	//					Description: "the url of the file you want to download. " +
+	//						"when downloaded, you can get file id from history",
+	//				},
+	//			},
+	//			Required: []string{
+	//				"url",
+	//			},
+	//		},
+	//	},
+	//},
 	{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
-			Name:        prefix("download_file"),
-			Description: "download file from url",
+			Name:        prefix("search_web"),
+			Description: "Search the internet",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"query": {
+						Type:        jsonschema.String,
+						Description: "the query you want to search",
+					},
+				},
+				Required: []string{
+					"query",
+				},
+			},
+		},
+	},
+	{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        prefix("get_url_content"),
+			Description: "Get the website content of the url",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
 					"url": {
-						Type: jsonschema.Integer,
-						Description: "the url of the file you want to download. " +
-							"when downloaded, you can get file id from history",
+						Type:        jsonschema.String,
+						Description: "the url of the website you want to get content",
 					},
 				},
 				Required: []string{

@@ -79,3 +79,7 @@ kafka:
   # Plain
   username: ""
   password: ""
+
+third_party:
+  jina_ai_key: ""
+  internal_serp_api: ""

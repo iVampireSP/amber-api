@@ -23,6 +23,13 @@ type Config struct {
 	Milvus *Milvus `yaml:"milvus"`
 
 	Kafka *Kafka `yaml:"kafka"`
+
+	ThirdParty *ThirdParty `yaml:"third_party" mapstructure:"third_party"`
+}
+
+type ThirdParty struct {
+	JinaAIKey       string `yaml:"jina_ai_key" mapstructure:"jina_ai_key"`
+	InternalSerpAPI string `yaml:"internal_serp_api" mapstructure:"internal_serp_api"`
 }
 
 type Http struct {

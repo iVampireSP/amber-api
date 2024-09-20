@@ -168,9 +168,17 @@ func (s *Service) DeleteExpiredChats(ctx context.Context, beforeTime time.Time) 
 	// 防止瞬时压力过大，一次删除固定数量
 	var num = 1000
 
-	_, err := s.dao.Chat.WithContext(ctx).Where(s.dao.Chat.ExpiredAt.Lt(beforeTime)).Limit(num).Delete()
+	expiredChats, err := s.dao.Chat.WithContext(ctx).Where(s.dao.Chat.ExpiredAt.Lt(beforeTime)).Limit(num).Find()
 	if err != nil {
 		return err
+	}
+
+	// 删除的时候，要先删除 Messages
+	for _, v := range expiredChats {
+		err := s.cm.DeleteChatMessageByChats(ctx, v)
+		if err != nil {
+			return err
+		}
 	}
 
 	return err

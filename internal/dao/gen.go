@@ -28,6 +28,7 @@ var (
 	File          *file
 	Library       *library
 	Memory        *memory
+	MessageBlock  *messageBlock
 	Tool          *tool
 	ToolCallToken *toolCallToken
 )
@@ -45,6 +46,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	File = &Q.File
 	Library = &Q.Library
 	Memory = &Q.Memory
+	MessageBlock = &Q.MessageBlock
 	Tool = &Q.Tool
 	ToolCallToken = &Q.ToolCallToken
 }
@@ -63,6 +65,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		File:          newFile(db, opts...),
 		Library:       newLibrary(db, opts...),
 		Memory:        newMemory(db, opts...),
+		MessageBlock:  newMessageBlock(db, opts...),
 		Tool:          newTool(db, opts...),
 		ToolCallToken: newToolCallToken(db, opts...),
 	}
@@ -82,6 +85,7 @@ type Query struct {
 	File          file
 	Library       library
 	Memory        memory
+	MessageBlock  messageBlock
 	Tool          tool
 	ToolCallToken toolCallToken
 }
@@ -102,6 +106,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		File:          q.File.clone(db),
 		Library:       q.Library.clone(db),
 		Memory:        q.Memory.clone(db),
+		MessageBlock:  q.MessageBlock.clone(db),
 		Tool:          q.Tool.clone(db),
 		ToolCallToken: q.ToolCallToken.clone(db),
 	}
@@ -129,6 +134,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		File:          q.File.replaceDB(db),
 		Library:       q.Library.replaceDB(db),
 		Memory:        q.Memory.replaceDB(db),
+		MessageBlock:  q.MessageBlock.replaceDB(db),
 		Tool:          q.Tool.replaceDB(db),
 		ToolCallToken: q.ToolCallToken.replaceDB(db),
 	}
@@ -146,6 +152,7 @@ type queryCtx struct {
 	File          IFileDo
 	Library       ILibraryDo
 	Memory        IMemoryDo
+	MessageBlock  IMessageBlockDo
 	Tool          IToolDo
 	ToolCallToken IToolCallTokenDo
 }
@@ -163,6 +170,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		File:          q.File.WithContext(ctx),
 		Library:       q.Library.WithContext(ctx),
 		Memory:        q.Memory.WithContext(ctx),
+		MessageBlock:  q.MessageBlock.WithContext(ctx),
 		Tool:          q.Tool.WithContext(ctx),
 		ToolCallToken: q.ToolCallToken.WithContext(ctx),
 	}

@@ -10,4 +10,4 @@ const warningCount = 4
 const warningMessage = "[Warning]You are attempting to call the tool/function repeatedly, please use the tool/function properly and stop response. If you continue to call repeatedly, the chat will be forcibly terminated."
 const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the tool/function many times, and the chat has been forcibly terminated."
 
-const prompt = "You are a helpful assistant made by Leaflow(https://www.leaflow.cn, chinese name: 利飞), not OpenAI not others. The system will add the sending time before each message, so you don't need to output the time when you output it. LaTeX must be within $$of markdown, such as the $$LaTeX formula$$"
+const prompt = "You are a helpful assistant made by Leaflow(https://www.leaflow.cn, chinese name: 利飞), not OpenAI not others. The system will add the sending time before each message, do not send time prefix [Sent ...]"

@@ -45,6 +45,7 @@ func (s *Service) CreateChatMessage(ctx context.Context, chatMessage *entity.Cha
 	return err
 }
 
+// DeleteChatMessage 删除指定的 chat message，但是现在不推荐了，因为有 Message Block。Chat Message 是不可变的。
 func (s *Service) DeleteChatMessage(ctx context.Context, ChatMessage *entity.ChatMessage) error {
 	_, err := s.dao.WithContext(ctx).ChatMessage.Delete(ChatMessage)
 
@@ -56,9 +57,15 @@ func (s *Service) DeleteChatMessageByChats(ctx context.Context, chat ...*entity.
 		return errors.New("no chat provided")
 	}
 
-	_, err := s.dao.WithContext(ctx).Chat.Delete(chat...)
+	for _, c := range chat {
+		err := s.messageBlock.ClearMessageBlock(ctx, c)
+		if err != nil {
+			return err
+		}
+		_, err = s.dao.WithContext(ctx).Chat.Delete(c)
+	}
 
-	return err
+	return nil
 }
 
 // CountChatMessage count messages
@@ -100,14 +107,20 @@ func (s *Service) UpdateMessageContent(ctx context.Context, chatMessage *entity.
 }
 
 func (s *Service) ClearChatMessage(ctx context.Context, chat *entity.Chat) error {
-	_, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Delete()
+	// 先删除 Message Block
+	err := s.messageBlock.ClearMessageBlock(ctx, chat)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Delete()
 
 	return err
 }
 
-func (s *Service) ClearToolCall(ctx context.Context, cm *entity.ChatMessage) error {
-	// 将此条 cm 的 tool_call 设置为 null
-	_, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.Id.Eq(uint(cm.Id))).Update(s.dao.ChatMessage.ToolCall, nil)
-
-	return err
-}
+//func (s *Service) ClearToolCall(ctx context.Context, cm *entity.ChatMessage) error {
+//	// 将此条 cm 的 tool_call 设置为 null
+//	_, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.Id.Eq(uint(cm.Id))).Update(s.dao.ChatMessage.ToolCall, nil)
+//
+//	return err
+//}

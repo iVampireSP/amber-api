@@ -68,16 +68,17 @@ type Metrics struct {
 }
 
 type OpenAI struct {
-	ApiKey           string   `yaml:"api_key" mapstructure:"api_key"`
-	BaseUrl          string   `yaml:"base_url" mapstructure:"base_url"`
-	InternalBaseUrl  string   `yaml:"internal_base_url" mapstructure:"internal_base_url"`
-	Model            string   `yaml:"model" mapstructure:"model"`
-	VisionModel      string   `yaml:"vision_model" mapstructure:"vision_model"`
-	LongContextModel string   `yaml:"long_context_model" mapstructure:"long_context_model"`
-	EmbeddingModel   string   `yaml:"embedding_model" mapstructure:"embedding_model"`
-	EmbeddingDim     int      `yaml:"embedding_dim" mapstructure:"embedding_dim"`
-	DallEModel       string   `yaml:"dall_e_model" mapstructure:"dall_e_model"`
-	AllowedModels    []string `yaml:"allowed_models" mapstructure:"allowed_models"`
+	ApiKey            string   `yaml:"api_key" mapstructure:"api_key"`
+	BaseUrl           string   `yaml:"base_url" mapstructure:"base_url"`
+	InternalBaseUrl   string   `yaml:"internal_base_url" mapstructure:"internal_base_url"`
+	Model             string   `yaml:"model" mapstructure:"model"`
+	VisionModel       string   `yaml:"vision_model" mapstructure:"vision_model"`
+	LongContextModel  string   `yaml:"long_context_model" mapstructure:"long_context_model"`
+	EmbeddingModel    string   `yaml:"embedding_model" mapstructure:"embedding_model"`
+	EmbeddingDim      int      `yaml:"embedding_dim" mapstructure:"embedding_dim"`
+	EmbeddingMaxToken int      `yaml:"embedding_max_token"  mapstructure:"embedding_max_token"`
+	DallEModel        string   `yaml:"dall_e_model" mapstructure:"dall_e_model"`
+	AllowedModels     []string `yaml:"allowed_models" mapstructure:"allowed_models"`
 }
 
 type S3 struct {
@@ -98,13 +99,14 @@ type LLM struct {
 }
 
 type Milvus struct {
-	Host               string `yaml:"host" mapstructure:"host"`
-	Port               int    `yaml:"port" mapstructure:"port"`
-	DBName             string `yaml:"db_name" mapstructure:"db_name"`
-	MemoryCollection   string `yaml:"memory_collection" mapstructure:"memory_collection"`
-	DocumentCollection string `yaml:"document_collection" mapstructure:"document_collection"`
-	User               string `yaml:"user" mapstructure:"user"`
-	Password           string `yaml:"password" mapstructure:"password"`
+	Host                   string `yaml:"host" mapstructure:"host"`
+	Port                   int    `yaml:"port" mapstructure:"port"`
+	DBName                 string `yaml:"db_name" mapstructure:"db_name"`
+	MemoryCollection       string `yaml:"memory_collection" mapstructure:"memory_collection"`
+	DocumentCollection     string `yaml:"document_collection" mapstructure:"document_collection"`
+	MessageBlockCollection string `yaml:"message_block_collection" mapstructure:"message_block_collection"`
+	User                   string `yaml:"user" mapstructure:"user"`
+	Password               string `yaml:"password" mapstructure:"password"`
 }
 
 type Kafka struct {

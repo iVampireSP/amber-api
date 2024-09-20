@@ -30,7 +30,7 @@ func newToolCallToken(db *gorm.DB, opts ...gen.DOOption) toolCallToken {
 	_toolCallToken.Id = field.NewUint(tableName, "id")
 	_toolCallToken.CreatedAt = field.NewTime(tableName, "created_at")
 	_toolCallToken.UpdatedAt = field.NewTime(tableName, "updated_at")
-	_toolCallToken.MessageId = field.NewUint(tableName, "message_id")
+	_toolCallToken.ChatId = field.NewUint(tableName, "chat_id")
 	_toolCallToken.Token = field.NewString(tableName, "token")
 	_toolCallToken.ExpiredAt = field.NewTime(tableName, "expired_at")
 
@@ -46,7 +46,7 @@ type toolCallToken struct {
 	Id        field.Uint
 	CreatedAt field.Time
 	UpdatedAt field.Time
-	MessageId field.Uint
+	ChatId    field.Uint
 	Token     field.String
 	ExpiredAt field.Time
 
@@ -68,7 +68,7 @@ func (t *toolCallToken) updateTableName(table string) *toolCallToken {
 	t.Id = field.NewUint(table, "id")
 	t.CreatedAt = field.NewTime(table, "created_at")
 	t.UpdatedAt = field.NewTime(table, "updated_at")
-	t.MessageId = field.NewUint(table, "message_id")
+	t.ChatId = field.NewUint(table, "chat_id")
 	t.Token = field.NewString(table, "token")
 	t.ExpiredAt = field.NewTime(table, "expired_at")
 
@@ -91,7 +91,7 @@ func (t *toolCallToken) fillFieldMap() {
 	t.fieldMap["id"] = t.Id
 	t.fieldMap["created_at"] = t.CreatedAt
 	t.fieldMap["updated_at"] = t.UpdatedAt
-	t.fieldMap["message_id"] = t.MessageId
+	t.fieldMap["chat_id"] = t.ChatId
 	t.fieldMap["token"] = t.Token
 	t.fieldMap["expired_at"] = t.ExpiredAt
 }

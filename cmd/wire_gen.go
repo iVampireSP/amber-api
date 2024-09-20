@@ -35,6 +35,7 @@ import (
 	"rag-new/internal/service/library"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/memory"
+	"rag-new/internal/service/message_block"
 	"rag-new/internal/service/stream"
 	"rag-new/internal/service/tool"
 )
@@ -52,13 +53,14 @@ func CreateApp() (*base.Application, error) {
 	toolService := tool.NewService(config, query)
 	toolController := v1.NewToolController(toolService, authService)
 	assistantService := assistant.NewService(query)
-	chat_messageService := chat_message.NewService(query)
-	chatService := chat.NewService(query, assistantService, chat_messageService)
-	client := milvus.NewMilvus(config, loggerLogger)
-	s3S3 := s3.NewS3(config)
 	redisRedis := redis.NewRedis(config)
-	fileService := file.NewService(s3S3, config, query, redisRedis, loggerLogger)
 	embeddingService := embedding.NewService(config, loggerLogger, query, redisRedis)
+	client := milvus.NewMilvus(config, loggerLogger)
+	message_blockService := message_block.NewService(query, config, embeddingService, client)
+	chat_messageService := chat_message.NewService(query, message_blockService)
+	chatService := chat.NewService(query, assistantService, chat_messageService, config, embeddingService, client)
+	s3S3 := s3.NewS3(config)
+	fileService := file.NewService(s3S3, config, query, redisRedis, loggerLogger)
 	libraryService := library.NewService(config, query, client, fileService, embeddingService, loggerLogger)
 	batchBatch := batch.NewBatch(loggerLogger)
 	assistantController := v1.NewAssistantController(authService, toolService, assistantService, chatService, chat_messageService, libraryService, batchBatch)
@@ -68,7 +70,7 @@ func CreateApp() (*base.Application, error) {
 	messageMessage := message.NewMessage()
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService, streamService, messageMessage, query, chatService)
 	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, client, query, streamService)
-	chatController := v1.NewChatController(authService, chatService, redisRedis, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService, toolService)
+	chatController := v1.NewChatController(authService, chatService, redisRedis, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService, toolService, message_blockService)
 	fileController := v1.NewFileController(fileService, loggerLogger, authService)
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
 	libraryController := v1.NewLibraryController(libraryService, authService)
@@ -76,7 +78,7 @@ func CreateApp() (*base.Application, error) {
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, message_blockService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService)
 	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, redisRedis, batchBatch, s3S3, db, query, openaiClient, client, embeddingService)
 	return application, nil
 }

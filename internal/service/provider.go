@@ -15,25 +15,27 @@ import (
 	"rag-new/internal/service/library"
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/memory"
+	"rag-new/internal/service/message_block"
 	"rag-new/internal/service/stream"
 	"rag-new/internal/service/tool"
 )
 
 type Service struct {
-	logger      *logger.Logger
-	Jwks        *jwks.JWKS
-	Auth        *auth.Service
-	Tool        *tool.Service
-	Assistant   *assistant.Service
-	Chat        *chat.Service
-	LLM         *llm.Service
-	ChatMessage *chat_message.Service
-	Batch       *batch.Batch
-	BuiltinTool *builtin_tool.Service
-	File        *file.Service
-	Stream      *stream.Service
-	Library     *library.Service
-	Embedding   *embedding.Service
+	logger       *logger.Logger
+	Jwks         *jwks.JWKS
+	Auth         *auth.Service
+	Tool         *tool.Service
+	Assistant    *assistant.Service
+	Chat         *chat.Service
+	LLM          *llm.Service
+	MessageBlock *message_block.Service
+	ChatMessage  *chat_message.Service
+	Batch        *batch.Batch
+	BuiltinTool  *builtin_tool.Service
+	File         *file.Service
+	Stream       *stream.Service
+	Library      *library.Service
+	Embedding    *embedding.Service
 }
 
 var Provider = wire.NewSet(
@@ -47,6 +49,7 @@ var Provider = wire.NewSet(
 	assistant.NewService,
 	builtin_tool.NewService,
 	llm.NewLLM,
+	message_block.NewService,
 	file.NewService,
 	stream.NewService,
 	library.NewService,
@@ -61,6 +64,7 @@ func NewService(
 	assistant *assistant.Service,
 	chat *chat.Service,
 	llm *llm.Service,
+	messageBlock *message_block.Service,
 	chatMessage *chat_message.Service,
 	builtinTool *builtin_tool.Service,
 	batch *batch.Batch,
@@ -75,7 +79,9 @@ func NewService(
 		auth,
 		tool,
 		assistant,
-		chat, llm,
+		chat,
+		llm,
+		messageBlock,
 		chatMessage,
 		batch,
 		builtinTool,

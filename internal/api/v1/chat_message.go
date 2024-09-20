@@ -3,17 +3,13 @@ package v1
 import (
 	"context"
 	"errors"
-	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
-	"rag-new/pkg/random"
-
-	"github.com/bytedance/sonic"
-	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 // ListChatMessage godoc
@@ -202,7 +198,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 
 	// 检测 chat 是否存在缓存
 	cmd := u.redis.Client.Get(c, u.getCacheKey("entity:"+chatEntity.Id.String()))
-	result, err := cmd.Result()
+	_, err = cmd.Result()
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
 			response.Status(http.StatusInternalServerError).Error(cmd.Err()).Send()
@@ -210,7 +206,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			return
 		}
 	} else {
-		chatMessageResponse.StreamId = result
+		//chatMessageResponse.StreamId = result
 
 		response.Status(http.StatusConflict).Error(consts.ErrChatStreamNotOpen).Data(chatMessageResponse).Send()
 		return
@@ -302,6 +298,21 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		needStream = false
 	}
 
+	//// 将历史消息分块
+	//cmb, err := u.chatService.ChatToBlock(c, chatEntity)
+	//if err != nil {
+	//	response.Status(http.StatusInternalServerError).Error(err).Send()
+	//	return
+	//}
+	//
+	//// 保存分块
+	//go func() {
+	//	err := u.chatService.SaveBlock(c, cmb)
+	//	if err != nil {
+	//		u.logger.Sugar.Error(err)
+	//	}
+	//}()
+
 	var assistantId = chatEntity.AssistantId
 
 	if request.AssistantId != nil {
@@ -391,54 +402,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	response.Status(http.StatusOK).Data(chatMessageResponse).Send()
-}
-
-func (u *ChatController) getCacheKey(key string) string {
-	return fmt.Sprintf("chat:%s", key)
-}
-
-type ChatStreamCache struct {
-	ChatId    schema.EntityId
-	Variables map[string]string
-}
-
-func (u *ChatController) generateChatStream(c context.Context,
-	chatId schema.EntityId,
-	userPublic *schema.UserPublicInfo,
-	variables map[string]string) (streamId string, err error) {
-	var randomId = random.String(32)
-	// 保存 chat stream id
-	err = u.redis.Client.Set(c, u.getCacheKey("entity:"+chatId.String()), randomId, consts.ChatStreamExpire).Err()
-	if err != nil {
-		return "", err
-	}
-
-	var csc = ChatStreamCache{
-		ChatId:    chatId,
-		Variables: variables,
-	}
-
-	chatJson, err := sonic.MarshalString(csc)
-	if err != nil {
-		return "", err
-	}
-
-	err = u.redis.Client.Set(c, u.getCacheKey("stream:"+randomId), chatJson, consts.ChatStreamExpire).Err()
-	if err != nil {
-		return "", err
-	}
-
-	userJson, err := sonic.Marshal(userPublic)
-	if err != nil {
-		return "", err
-	}
-
-	err = u.redis.Client.Set(c, u.getCacheKey("stream:"+randomId+":user"), userJson, consts.ChatStreamExpire).Err()
-	if err != nil {
-		return "", err
-	}
-
-	return randomId, nil
 }
 
 // ClearChatMessage godoc

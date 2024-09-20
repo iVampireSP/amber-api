@@ -1,9 +1,7 @@
 package v1
 
 import (
-	"context"
 	"errors"
-	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"github.com/tmc/langchaingo/llms"
@@ -13,9 +11,11 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"sort"
 )
 
 const HeaderUserIp = "X-User-IP"
+const MaxBlocks = 10
 
 // Stream godoc
 // @Summary      流式传输文本
@@ -142,6 +142,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	// 提取 history
 	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
+
 	var llmResponseChan = make(chan *schema.AssistantResponse, 1)
 
 	streamUserCacheKey := u.getCacheKey("stream:" + chatStreamRequest.StreamId + ":user")
@@ -213,14 +214,69 @@ func (u *ChatController) Stream(c *gin.Context) {
 	c.Writer.Header().Set("Connection", "keep-alive")
 	c.Writer.Header().Set("Transfer-Encoding", "chunked")
 
-	go func() {
-		err = u.llmService.StreamChat(c, llmChat, histories)
-		if err != nil {
-			u.logger.Sugar.Error(err)
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-	}()
+	if len(histories) > 0 {
+		go func() {
+			// 如果消息超过 20 条，则执行消息分块
+			if len(histories) > 0 {
+				// 将 message 提取一下
+				messageBlock, err := u.messageBlock.MessageToBlock(histories)
+				if err != nil {
+					u.logger.Sugar.Error(err)
+				}
+
+				go func() {
+					err := u.messageBlock.SaveBlock(c, messageBlock)
+					if err != nil {
+						u.logger.Sugar.Error(err)
+					}
+				}()
+
+				// 清空 history
+				histories = []*entity.ChatMessage{}
+
+				// 搜索 message block，然后将它排到 messageBlock 的前面
+				messageBlock2, err := u.messageBlock.SearchMessageBlock(c, chatEntity, lastChatMessage.Content)
+				if err != nil {
+					// 出现错误，那就丢失以前的上下文
+					u.logger.Sugar.Error(err)
+				} else {
+					for i := 0; i < len(messageBlock2); i++ {
+						histories = append(histories, messageBlock2[i].Message...)
+					}
+				}
+
+				// 取倒数 10 个 messageBlock
+				if messageBlock != nil {
+					sort.Slice(messageBlock, func(i, j int) bool {
+						return messageBlock[i].CreatedAt.Before(messageBlock[j].CreatedAt)
+					})
+
+					// 取最晚的 10 个 messageBlock
+					recentBlocks := messageBlock[len(messageBlock)-MaxBlocks:]
+
+					// 将这些 messageBlock 的内容追加到 histories
+					for _, mb := range recentBlocks {
+						histories = append(histories, mb.Message...)
+					}
+				}
+			}
+
+			// lastMessage 是用户最后发送的消息，将它添加到 history 末尾
+			// 为什么要这么做呢，因为最后个消息是不能单独成一个 block 的
+			histories = append(histories, lastChatMessage)
+
+			// 这样就能取到了剪裁后的，但是这样换汤不换药，之后还是得在 service 层面做分页。
+			err = u.llmService.StreamChat(c, llmChat, histories)
+			if err != nil {
+				u.logger.Sugar.Error(err)
+				c.AbortWithStatus(http.StatusInternalServerError)
+				return
+			}
+		}()
+	} else {
+		response.Status(http.StatusInternalServerError).Error(consts.ErrChatStreamNotOpen).Send()
+		return
+	}
 
 	var llmFullMessage = ""
 	var tokenUsage = &schema.TokenUsage{
@@ -355,17 +411,4 @@ func (u *ChatController) Stream(c *gin.Context) {
 		u.redis.Client.Del(c, u.getCacheKey("stream:"+chatStreamRequest.StreamId+":user"))
 		u.redis.Client.Del(c, chatIdStreamKey)
 	}()
-}
-
-func (u *ChatController) GenerateCallToken(ctx context.Context, chatEntity *entity.Chat) (string, error) {
-	tct, err := u.toolService.GenerateToolCallToken(ctx, chatEntity)
-	if err != nil {
-		return "", err
-	}
-
-	if tct == nil {
-		return "", fmt.Errorf("failed to generate tool call token")
-	}
-
-	return tct.Token, nil
 }

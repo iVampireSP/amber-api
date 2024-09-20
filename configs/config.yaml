@@ -39,6 +39,7 @@ openai:
   dall_e_model: dall-e-3
   embedding_model: jina-embeddings-v2-base-zh
   embedding_dim: 768
+  embedding_max_token: 8192
   # 允许自己指定的模型
   allowed_models:
     - gpt-4
@@ -68,6 +69,7 @@ milvus:
   db_name: amber
   memory_collection: memories
   document_collection: documents
+  message_block_collection: message_blocks
   user:
   password:
 

@@ -246,7 +246,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 				}
 
 				// 取倒数 10 个 messageBlock
-				if messageBlock != nil {
+				if messageBlock != nil && len(messageBlock) >= MaxBlocks {
 					sort.Slice(messageBlock, func(i, j int) bool {
 						return messageBlock[i].CreatedAt.Before(messageBlock[j].CreatedAt)
 					})

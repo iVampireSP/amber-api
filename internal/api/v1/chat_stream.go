@@ -313,10 +313,13 @@ func (u *ChatController) Stream(c *gin.Context) {
 			return true
 		case schema.StateToolCalling:
 			var cm = entity.ChatMessage{
-				Role:     schema.RoleToolCall,
-				Content:  "",
-				ChatId:   chatEntity.Id,
-				ToolCall: (*schema.ToolCall)(msg.Internal.ToolCall),
+				Role:    schema.RoleToolCall,
+				Content: "",
+				ChatId:  chatEntity.Id,
+			}
+
+			if msg.Internal.ToolCall != nil {
+				cm.ToolCall = (*schema.ToolCall)(msg.Internal.ToolCall)
 			}
 
 			messageList = append(messageList, cm)
@@ -324,10 +327,13 @@ func (u *ChatController) Stream(c *gin.Context) {
 			return true
 		case schema.StateToolResponse:
 			var cm = entity.ChatMessage{
-				Role:     schema.RoleTool,
-				Content:  msg.ToolResponseMessage.Content,
-				ChatId:   chatEntity.Id,
-				ToolCall: (*schema.ToolCall)(msg.Internal.ToolCall),
+				Role:    schema.RoleTool,
+				Content: msg.ToolResponseMessage.Content,
+				ChatId:  chatEntity.Id,
+			}
+
+			if msg.Internal.ToolCall != nil {
+				cm.ToolCall = (*schema.ToolCall)(msg.Internal.ToolCall)
 			}
 
 			messageList = append(messageList, cm)
@@ -355,10 +361,13 @@ func (u *ChatController) Stream(c *gin.Context) {
 			// 这样会发生悬垂
 			// 所以要添加个新的消息
 			var cm = entity.ChatMessage{
-				Role:     schema.RoleTool,
-				Content:  msg.ToolResponseMessage.Content,
-				ChatId:   chatEntity.Id,
-				ToolCall: (*schema.ToolCall)(msg.Internal.ToolCall),
+				Role:    schema.RoleTool,
+				Content: msg.ToolResponseMessage.Content,
+				ChatId:  chatEntity.Id,
+			}
+
+			if msg.Internal.ToolCall != nil {
+				cm.ToolCall = (*schema.ToolCall)(msg.Internal.ToolCall)
 			}
 
 			messageList = append(messageList, cm)

@@ -141,7 +141,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 提取 history
-	histories, err := u.cm.GetChatMessageWithHide(c, chatEntity)
+	histories, historyCount, err := u.cm.GetChatMessagePageAsc(c, chatEntity, 1, 20)
 
 	var llmResponseChan = make(chan *schema.AssistantResponse, 1)
 
@@ -217,7 +217,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	if len(histories) > 0 {
 		go func() {
 			// 如果消息超过 20 条，则执行消息分块
-			if len(histories) > 20 {
+			if historyCount > 0 {
 				// 将 message 提取一下
 				messageBlock, err := u.messageBlock.MessageToBlock(histories)
 				if err != nil {

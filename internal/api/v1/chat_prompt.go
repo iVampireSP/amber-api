@@ -36,10 +36,10 @@ func (u *ChatController) getPrompt(c *gin.Context,
 			if err != nil {
 				return "", err
 			}
+			if memoryPrompt != "" {
+				prompt += "\nUser memory you know: " + memoryPrompt + "\n"
+			}
 
-			prompt += consts.DefaultPrompt
-
-			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
 			prompt += userPrompt
 		}
 		// 如果用户是 nil 的话，使用默认 Prompt

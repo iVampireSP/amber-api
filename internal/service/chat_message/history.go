@@ -5,6 +5,8 @@ import (
 	"errors"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	page2 "rag-new/pkg/page"
+	"sort"
 )
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {
@@ -33,6 +35,90 @@ func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat)
 		Find()
 
 	return chatMessage, err
+}
+
+// GetLatestChatMessage 获取最新的消息，并保证消息的完整性
+func (s *Service) GetLatestChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, int64, error) {
+	page := 1
+	pageSize := 10
+	var r []*entity.ChatMessage
+	var count int64
+
+	for {
+		newHistory, newCount, err := s.dao.WithContext(ctx).ChatMessage.
+			Where(s.dao.ChatMessage.ChatId.Eq(chat.Id.Uint())).
+			Preload(s.dao.ChatMessage.File).
+			Order(s.dao.ChatMessage.CreatedAt.Desc()).
+			FindByPage(page2.OffsetCustom(page, pageSize), pageSize)
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		if newCount == 0 {
+			break
+		}
+
+		// 放进去，最后重新排序
+		r = append(r, newHistory...)
+		//r = append(newHistory, r...)
+
+		count += newCount // 更新总数量
+
+		var lastOne = newHistory[len(newHistory)-1]
+		// 检查条件
+		if lastOne.Role == schema.RoleToolCall || lastOne.Role == schema.RoleTool {
+			page++ // 继续获取之前的消息
+		} else {
+			break
+		}
+	}
+
+	// 根据 CreatedAt 从小到大排序
+	sort.Slice(r, func(i, j int) bool {
+		return r[i].CreatedAt.Before(r[j].CreatedAt)
+	})
+
+	return r, count, nil
+}
+func (s *Service) GetChatMessagePageAsc(ctx context.Context, chat *entity.Chat, page int, pageSize int) ([]*entity.ChatMessage, int64, error) {
+	r, count, err := s.dao.WithContext(ctx).ChatMessage.
+		Where(s.dao.ChatMessage.ChatId.Eq(chat.Id.Uint())).
+		Preload(s.dao.ChatMessage.File).
+		Order(s.dao.ChatMessage.CreatedAt.Asc()).
+		FindByPage(page2.OffsetCustom(page, pageSize), pageSize)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	for {
+		if count > 0 && r[0].Role == schema.RoleToolCall {
+			// 由于是 ASC，向后翻 1 页面
+			page = page + 1
+			newHistory, newCount, err := s.dao.WithContext(ctx).ChatMessage.
+				Where(s.dao.ChatMessage.ChatId.Eq(chat.Id.Uint())).
+				Preload(s.dao.ChatMessage.File).
+				Order(s.dao.ChatMessage.CreatedAt.Asc()).
+				FindByPage(page2.OffsetCustom(page, pageSize), pageSize)
+
+			if err != nil {
+				return nil, 0, err
+			}
+
+			if newCount == 0 {
+				break
+			}
+
+			// 将新的内容放到之前内容的最前面
+			r = append(newHistory, r...) // 把新内容放到前面
+			count += newCount            // 更新总数量
+		} else {
+			break
+		}
+	}
+
+	return r, count, nil
 }
 
 func (s *Service) CreateChatMessage(ctx context.Context, chatMessage *entity.ChatMessage) error {

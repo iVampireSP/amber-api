@@ -101,36 +101,91 @@ func (s *Service) MessageToBlock(cms []*entity.ChatMessage) ([]*entity.MessageBl
 }
 
 func (s *Service) SaveBlock(ctx context.Context, messageBlock []*entity.MessageBlock) error {
+	var notExistsBlocks = make([]*entity.MessageBlock, 0)
+	var pendingHashes = make([]string, 0)
 	for _, bm := range messageBlock {
 		// 不处理不完整的块
 		if bm.Temp {
 			continue
 		}
 
-		// add if not exists
-		exists, err := s.BlockExists(ctx, bm.ChatId, bm.Hash)
-		if err != nil {
-			return err
-		}
+		notExistsBlocks = append(notExistsBlocks, bm)
+		pendingHashes = append(pendingHashes, bm.Hash)
+		//
+		//// add if not exists
+		//exists, err := s.BlockExists(ctx, bm.ChatId, bm.Hash)
+		//if err != nil {
+		//	return err
+		//}
+		//
+		//if !exists {
+		//	err = s.dao.WithContext(ctx).MessageBlock.Create(bm)
+		//	if err != nil {
+		//		return err
+		//	}
+		//} else {
+		//	// get
+		//	bm, err = s.dao.WithContext(ctx).MessageBlock.Where(s.dao.MessageBlock.Hash.Eq(bm.Hash)).First()
+		//	if err != nil {
+		//		return err
+		//	}
+		//}
+		//
+		//var content = bm.FullContent
+		//// 如果 content > 8192
+		//if len(content) > s.config.OpenAI.EmbeddingMaxToken {
+		//	// 剪裁
+		//	content = content[:s.config.OpenAI.EmbeddingMaxToken]
+		//}
+		//
+		//emb, err := s.embedding.TextEmbedding(ctx, []string{content})
+		//if err != nil {
+		//	return err
+		//}
+		//
+		//var entityCols = []entity2.Column{
+		//	entity2.NewColumnFloatVector("vector", s.config.OpenAI.EmbeddingDim, emb),
+		//	entity2.NewColumnVarChar("model", []string{s.config.OpenAI.EmbeddingModel}),
+		//	entity2.NewColumnInt64("block_id", []int64{int64(bm.Id)}),
+		//	entity2.NewColumnInt64("chat_id", []int64{int64(bm.ChatId)}),
+		//}
+		//
+		//// insert to milvus
+		//_, err = s.milvus.Upsert(ctx, s.config.Milvus.MessageBlockCollection, "", entityCols...)
+		//if err != nil {
+		//	return err
+		//}
+	}
 
-		if !exists {
-			err = s.dao.WithContext(ctx).MessageBlock.Create(bm)
-			if err != nil {
-				return err
-			}
-		} else {
-			// get
-			bm, err = s.dao.WithContext(ctx).MessageBlock.Where(s.dao.MessageBlock.Hash.Eq(bm.Hash)).First()
-			if err != nil {
-				return err
+	// 批量寻找不存在的块
+	var dao = s.dao.MessageBlock.WithContext(ctx)
+
+	find, err := dao.Where(s.dao.MessageBlock.Hash.In(pendingHashes...)).Find()
+	if err != nil {
+		return err
+	}
+
+	for _, bm := range find {
+		// 找到的块，从待处理列表中删除
+		for i, v := range notExistsBlocks {
+			if v.Hash == bm.Hash {
+				notExistsBlocks = append(notExistsBlocks[:i], notExistsBlocks[i+1:]...)
+				break
 			}
 		}
+	}
 
+	for _, bm := range notExistsBlocks {
 		var content = bm.FullContent
 		// 如果 content > 8192
 		if len(content) > s.config.OpenAI.EmbeddingMaxToken {
 			// 剪裁
 			content = content[:s.config.OpenAI.EmbeddingMaxToken]
+		}
+
+		err = s.dao.WithContext(ctx).MessageBlock.Create(bm)
+		if err != nil {
+			return err
 		}
 
 		emb, err := s.embedding.TextEmbedding(ctx, []string{content})

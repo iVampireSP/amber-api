@@ -352,18 +352,12 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			chunkContent += libraryResult.Content + "\n"
 		}
 
-		if chunkContent == "" {
-			chunkContent = consts.LibraryResultEmptyPrompt
-		} else {
-			chunkContent = consts.LibraryResultPrompt + "\n" + chunkContent
-		}
-
 		// 添加知识库消息
 		chatMessages = append(chatMessages, entity.ChatMessage{
 			ChatId:      chatEntity.Id,
 			AssistantId: &assistantEntity.Id,
 			Content:     chunkContent,
-			Role:        schema.RoleSystem,
+			Role:        schema.RoleKnowledge,
 		})
 	}
 

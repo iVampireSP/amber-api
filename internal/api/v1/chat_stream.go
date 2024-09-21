@@ -141,7 +141,11 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 提取 history
-	histories, historyCount, err := u.cm.GetChatMessagePageAsc(c, chatEntity, 1, 20)
+	histories, historyCount, err := u.cm.GetLatestChatMessage(c, chatEntity)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
 
 	var llmResponseChan = make(chan *schema.AssistantResponse, 1)
 

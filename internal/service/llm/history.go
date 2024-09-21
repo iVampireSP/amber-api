@@ -38,6 +38,8 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 	systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 
+	var lastKnowledgeMessage string
+
 	for _, h := range history {
 		// 粗略统计
 		if h.Content != "" && h.Content != "\n" {
@@ -193,16 +195,6 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 							},
 						},
 					})
-					//s.write(ctx, llmChat, &schema.AssistantResponse{
-					//	State:   schema.StateToolFailed,
-					//	Content: defaultToolFailed,
-					//	ToolResponseMessage: &schema.ToolResponseMessage{
-					//		ToolName:     "unknown",
-					//		FunctionName: lastToolCall.FunctionCall.Name,
-					//		Content:      defaultToolFailed,
-					//	},
-					//})
-
 					lastToolCall = nil
 				}
 
@@ -249,8 +241,20 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			if fileText != "" {
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
 			}
+		case schema.RoleKnowledge:
+			if h.Content == "" {
+				h.Content = consts.LibraryResultEmptyPrompt
+			} else {
+				h.Content = consts.LibraryResultPrompt + "\n" + h.Content
+			}
 
+			lastKnowledgeMessage = h.Content
 		}
+	}
+
+	// 将知识库消息放到 system 消息里面
+	if lastKnowledgeMessage != "" {
+		systemPrompts = append(systemPrompts, lastKnowledgeMessage)
 	}
 
 	// 如果整个对话里面没有 Human 消息，则不能继续

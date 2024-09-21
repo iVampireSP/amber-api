@@ -16,6 +16,8 @@ var (
 	RoleToolCall ChatRole = "assistant_call"
 	// RoleTool 是工具的响应，需要携带 Tool ID
 	RoleTool ChatRole = "tool"
+	// RoleKnowledge 是知识库的响应
+	RoleKnowledge ChatRole = "knowledge"
 )
 
 type ChatOwner string

@@ -220,8 +220,8 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	if len(histories) > 0 {
 		go func() {
-			// 如果消息超过 20 条，则执行消息分块
-			if historyCount > 0 {
+			// 如果消息到 u.config.LLM.ContextOptimizeActiveCount 条，则执行消息分块
+			if historyCount >= u.config.LLM.ContextOptimizeActiveCount {
 				// 将 message 提取一下
 				messageBlock, err := u.messageBlock.MessageToBlock(histories)
 				if err != nil {

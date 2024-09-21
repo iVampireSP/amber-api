@@ -24,7 +24,7 @@ func (u *ChatController) getPrompt(c *gin.Context,
 		userPrompt += "\nYour(assistant) name: " + assistant.Name
 	}
 	if user != nil {
-		userPrompt += "\nUsername: " + user.Name + "\nUserId: " + user.Id.String()
+		userPrompt += "\nUsername: " + user.Name + "\nUserId: " + user.Id.String() + "\n"
 	}
 
 	// 如果没有指定 Assistant

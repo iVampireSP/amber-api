@@ -22,13 +22,16 @@ func (s *Service) executeToolCalls(ctx context.Context, userId schema.UserId, me
 				return nil, err
 			}
 
+			if args.Data == "" {
+				return nil, fmt.Errorf("data is empty")
+			}
+
 			memEntity, err := s.addMemory(ctx, args.Data, userId)
 			if err != nil {
 				return nil, err
 			}
 
 			s.Logger.Sugar.Infof("Memory added, id: %d, content: %s", memEntity.Id, memEntity.Content)
-
 		case "update_memory":
 			var args struct {
 				Data     string          `json:"data"`
@@ -36,6 +39,14 @@ func (s *Service) executeToolCalls(ctx context.Context, userId schema.UserId, me
 			}
 			if err := sonic.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
 				return nil, err
+			}
+
+			if args.Data == "" {
+				return nil, fmt.Errorf("data is empty")
+			}
+
+			if args.MemoryId == 0 {
+				return nil, fmt.Errorf("memory_id is empty")
 			}
 
 			_, err := s.updateMemory(ctx, args.MemoryId, args.Data)
@@ -48,6 +59,10 @@ func (s *Service) executeToolCalls(ctx context.Context, userId schema.UserId, me
 			}
 			if err := sonic.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &args); err != nil {
 				return nil, err
+			}
+
+			if args.MemoryId == 0 {
+				return nil, fmt.Errorf("memory_id is empty")
 			}
 
 			err := s.deleteMemory(ctx, args.MemoryId)

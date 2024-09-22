@@ -236,7 +236,7 @@ func (s *Service) SearchMessageBlock(ctx context.Context, chat *entity.Chat, con
 		[]entity2.Vector{vector},
 		"vector",
 		entity2.L2,
-		5,
+		3,
 		sp, client.WithLimit(7))
 
 	var ids []uint

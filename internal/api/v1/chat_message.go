@@ -455,6 +455,11 @@ func (u *ChatController) ClearChatMessage(c *gin.Context) {
 }
 
 func (u *ChatController) addMemory(c context.Context, userInfo *schema.User, request schema.ChatMessageAddRequest) {
+	// 如果 request.Message 字数大于 100，则跳过
+	if len(request.Message) > 100 {
+		return
+	}
+
 	go func() {
 		u.logger.Sugar.Info("memory service adding: ", request.Message)
 

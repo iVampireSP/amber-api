@@ -16,26 +16,28 @@ import (
 )
 
 var (
-	Q             = new(Query)
-	Assistant     *assistant
-	AssistantKey  *assistantKey
-	AssistantTool *assistantTool
-	Chat          *chat
-	ChatMessage   *chatMessage
-	Document      *document
-	DocumentChunk *documentChunk
-	Embedding     *embedding
-	File          *file
-	Library       *library
-	Memory        *memory
-	MessageBlock  *messageBlock
-	Tool          *tool
-	ToolCallToken *toolCallToken
+	Q                  = new(Query)
+	Assistant          *assistant
+	AssistantFavorites *assistantFavorites
+	AssistantKey       *assistantKey
+	AssistantTool      *assistantTool
+	Chat               *chat
+	ChatMessage        *chatMessage
+	Document           *document
+	DocumentChunk      *documentChunk
+	Embedding          *embedding
+	File               *file
+	Library            *library
+	Memory             *memory
+	MessageBlock       *messageBlock
+	Tool               *tool
+	ToolCallToken      *toolCallToken
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Assistant = &Q.Assistant
+	AssistantFavorites = &Q.AssistantFavorites
 	AssistantKey = &Q.AssistantKey
 	AssistantTool = &Q.AssistantTool
 	Chat = &Q.Chat
@@ -53,62 +55,65 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:            db,
-		Assistant:     newAssistant(db, opts...),
-		AssistantKey:  newAssistantKey(db, opts...),
-		AssistantTool: newAssistantTool(db, opts...),
-		Chat:          newChat(db, opts...),
-		ChatMessage:   newChatMessage(db, opts...),
-		Document:      newDocument(db, opts...),
-		DocumentChunk: newDocumentChunk(db, opts...),
-		Embedding:     newEmbedding(db, opts...),
-		File:          newFile(db, opts...),
-		Library:       newLibrary(db, opts...),
-		Memory:        newMemory(db, opts...),
-		MessageBlock:  newMessageBlock(db, opts...),
-		Tool:          newTool(db, opts...),
-		ToolCallToken: newToolCallToken(db, opts...),
+		db:                 db,
+		Assistant:          newAssistant(db, opts...),
+		AssistantFavorites: newAssistantFavorites(db, opts...),
+		AssistantKey:       newAssistantKey(db, opts...),
+		AssistantTool:      newAssistantTool(db, opts...),
+		Chat:               newChat(db, opts...),
+		ChatMessage:        newChatMessage(db, opts...),
+		Document:           newDocument(db, opts...),
+		DocumentChunk:      newDocumentChunk(db, opts...),
+		Embedding:          newEmbedding(db, opts...),
+		File:               newFile(db, opts...),
+		Library:            newLibrary(db, opts...),
+		Memory:             newMemory(db, opts...),
+		MessageBlock:       newMessageBlock(db, opts...),
+		Tool:               newTool(db, opts...),
+		ToolCallToken:      newToolCallToken(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Assistant     assistant
-	AssistantKey  assistantKey
-	AssistantTool assistantTool
-	Chat          chat
-	ChatMessage   chatMessage
-	Document      document
-	DocumentChunk documentChunk
-	Embedding     embedding
-	File          file
-	Library       library
-	Memory        memory
-	MessageBlock  messageBlock
-	Tool          tool
-	ToolCallToken toolCallToken
+	Assistant          assistant
+	AssistantFavorites assistantFavorites
+	AssistantKey       assistantKey
+	AssistantTool      assistantTool
+	Chat               chat
+	ChatMessage        chatMessage
+	Document           document
+	DocumentChunk      documentChunk
+	Embedding          embedding
+	File               file
+	Library            library
+	Memory             memory
+	MessageBlock       messageBlock
+	Tool               tool
+	ToolCallToken      toolCallToken
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:            db,
-		Assistant:     q.Assistant.clone(db),
-		AssistantKey:  q.AssistantKey.clone(db),
-		AssistantTool: q.AssistantTool.clone(db),
-		Chat:          q.Chat.clone(db),
-		ChatMessage:   q.ChatMessage.clone(db),
-		Document:      q.Document.clone(db),
-		DocumentChunk: q.DocumentChunk.clone(db),
-		Embedding:     q.Embedding.clone(db),
-		File:          q.File.clone(db),
-		Library:       q.Library.clone(db),
-		Memory:        q.Memory.clone(db),
-		MessageBlock:  q.MessageBlock.clone(db),
-		Tool:          q.Tool.clone(db),
-		ToolCallToken: q.ToolCallToken.clone(db),
+		db:                 db,
+		Assistant:          q.Assistant.clone(db),
+		AssistantFavorites: q.AssistantFavorites.clone(db),
+		AssistantKey:       q.AssistantKey.clone(db),
+		AssistantTool:      q.AssistantTool.clone(db),
+		Chat:               q.Chat.clone(db),
+		ChatMessage:        q.ChatMessage.clone(db),
+		Document:           q.Document.clone(db),
+		DocumentChunk:      q.DocumentChunk.clone(db),
+		Embedding:          q.Embedding.clone(db),
+		File:               q.File.clone(db),
+		Library:            q.Library.clone(db),
+		Memory:             q.Memory.clone(db),
+		MessageBlock:       q.MessageBlock.clone(db),
+		Tool:               q.Tool.clone(db),
+		ToolCallToken:      q.ToolCallToken.clone(db),
 	}
 }
 
@@ -122,57 +127,60 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:            db,
-		Assistant:     q.Assistant.replaceDB(db),
-		AssistantKey:  q.AssistantKey.replaceDB(db),
-		AssistantTool: q.AssistantTool.replaceDB(db),
-		Chat:          q.Chat.replaceDB(db),
-		ChatMessage:   q.ChatMessage.replaceDB(db),
-		Document:      q.Document.replaceDB(db),
-		DocumentChunk: q.DocumentChunk.replaceDB(db),
-		Embedding:     q.Embedding.replaceDB(db),
-		File:          q.File.replaceDB(db),
-		Library:       q.Library.replaceDB(db),
-		Memory:        q.Memory.replaceDB(db),
-		MessageBlock:  q.MessageBlock.replaceDB(db),
-		Tool:          q.Tool.replaceDB(db),
-		ToolCallToken: q.ToolCallToken.replaceDB(db),
+		db:                 db,
+		Assistant:          q.Assistant.replaceDB(db),
+		AssistantFavorites: q.AssistantFavorites.replaceDB(db),
+		AssistantKey:       q.AssistantKey.replaceDB(db),
+		AssistantTool:      q.AssistantTool.replaceDB(db),
+		Chat:               q.Chat.replaceDB(db),
+		ChatMessage:        q.ChatMessage.replaceDB(db),
+		Document:           q.Document.replaceDB(db),
+		DocumentChunk:      q.DocumentChunk.replaceDB(db),
+		Embedding:          q.Embedding.replaceDB(db),
+		File:               q.File.replaceDB(db),
+		Library:            q.Library.replaceDB(db),
+		Memory:             q.Memory.replaceDB(db),
+		MessageBlock:       q.MessageBlock.replaceDB(db),
+		Tool:               q.Tool.replaceDB(db),
+		ToolCallToken:      q.ToolCallToken.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Assistant     IAssistantDo
-	AssistantKey  IAssistantKeyDo
-	AssistantTool IAssistantToolDo
-	Chat          IChatDo
-	ChatMessage   IChatMessageDo
-	Document      IDocumentDo
-	DocumentChunk IDocumentChunkDo
-	Embedding     IEmbeddingDo
-	File          IFileDo
-	Library       ILibraryDo
-	Memory        IMemoryDo
-	MessageBlock  IMessageBlockDo
-	Tool          IToolDo
-	ToolCallToken IToolCallTokenDo
+	Assistant          IAssistantDo
+	AssistantFavorites IAssistantFavoritesDo
+	AssistantKey       IAssistantKeyDo
+	AssistantTool      IAssistantToolDo
+	Chat               IChatDo
+	ChatMessage        IChatMessageDo
+	Document           IDocumentDo
+	DocumentChunk      IDocumentChunkDo
+	Embedding          IEmbeddingDo
+	File               IFileDo
+	Library            ILibraryDo
+	Memory             IMemoryDo
+	MessageBlock       IMessageBlockDo
+	Tool               IToolDo
+	ToolCallToken      IToolCallTokenDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Assistant:     q.Assistant.WithContext(ctx),
-		AssistantKey:  q.AssistantKey.WithContext(ctx),
-		AssistantTool: q.AssistantTool.WithContext(ctx),
-		Chat:          q.Chat.WithContext(ctx),
-		ChatMessage:   q.ChatMessage.WithContext(ctx),
-		Document:      q.Document.WithContext(ctx),
-		DocumentChunk: q.DocumentChunk.WithContext(ctx),
-		Embedding:     q.Embedding.WithContext(ctx),
-		File:          q.File.WithContext(ctx),
-		Library:       q.Library.WithContext(ctx),
-		Memory:        q.Memory.WithContext(ctx),
-		MessageBlock:  q.MessageBlock.WithContext(ctx),
-		Tool:          q.Tool.WithContext(ctx),
-		ToolCallToken: q.ToolCallToken.WithContext(ctx),
+		Assistant:          q.Assistant.WithContext(ctx),
+		AssistantFavorites: q.AssistantFavorites.WithContext(ctx),
+		AssistantKey:       q.AssistantKey.WithContext(ctx),
+		AssistantTool:      q.AssistantTool.WithContext(ctx),
+		Chat:               q.Chat.WithContext(ctx),
+		ChatMessage:        q.ChatMessage.WithContext(ctx),
+		Document:           q.Document.WithContext(ctx),
+		DocumentChunk:      q.DocumentChunk.WithContext(ctx),
+		Embedding:          q.Embedding.WithContext(ctx),
+		File:               q.File.WithContext(ctx),
+		Library:            q.Library.WithContext(ctx),
+		Memory:             q.Memory.WithContext(ctx),
+		MessageBlock:       q.MessageBlock.WithContext(ctx),
+		Tool:               q.Tool.WithContext(ctx),
+		ToolCallToken:      q.ToolCallToken.WithContext(ctx),
 	}
 }
 

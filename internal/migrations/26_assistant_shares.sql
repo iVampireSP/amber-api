@@ -1,28 +1,31 @@
 -- +goose up
-CREATE TABLE assistant_shares
+CREATE TABLE assistant_favorites
 (
-    id           SERIAL PRIMARY KEY,
-
-    assistant_id BIGINT UNSIGNED NOT NULL,
-    user_id      BIGINT UNSIGNED NOT NULL,
-    -- total tokens
-    total_tokens BIGINT UNSIGNED NOT NULL,
-    created_at   datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    id                     SERIAL PRIMARY KEY,
+    assistant_id           BIGINT UNSIGNED NOT NULL,
+    user_id                VARCHAR(255)    NOT NULL,
+    deleted                BOOLEAN         NOT NULL DEFAULT FALSE,
+    created_at             TIMESTAMP(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at             TIMESTAMP(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 );
 
 -- 这里打算统一索引命名，以 idx 开头
-CREATE INDEX idx_assistant_shares_id ON assistant_shares (id);
-CREATE INDEX idx_assistant_shares_assistant_id_created_at ON assistant_shares (assistant_id);
-CREATE INDEX idx_assistant_shares_user_id_created_at ON assistant_shares (user_id);
+CREATE INDEX idx_assistant_shares_id ON assistant_favorites (id);
+CREATE INDEX idx_assistant_favorites_assistant_id ON assistant_favorites (assistant_id);
+CREATE INDEX idx_assistant_favorites_user_id ON assistant_favorites (user_id);
+CREATE INDEX idx_assistant_favorites_deleted ON assistant_favorites (deleted);
 
 -- 外键
-ALTER TABLE assistant_shares
-    ADD CONSTRAINT fk_assistant_shares_assistant_id FOREIGN KEY (assistant_id) REFERENCES assistants (id) ON DELETE CASCADE;
+ALTER TABLE assistant_favorites
+    ADD CONSTRAINT fk_assistant_favorites_library_id FOREIGN KEY (assistant_id) REFERENCES assistants (id);
 
--- 添加 assistant_share_id 到 assistants 表中，放到 library_id后面
-ALTER TABLE assistants ADD COLUMN assistant_share_id BIGINT UNSIGNED DEFAULT NULL;
-ALTER TABLE assistants ADD CONSTRAINT fk_assistants_assistant_share_id FOREIGN KEY (assistant_share_id) REFERENCES assistant_shares (id) ON DELETE SET NULL;
+-- add public to assistants table
+ALTER TABLE assistants
+    ADD COLUMN `public` BOOLEAN NOT NULL DEFAULT FALSE AFTER temperature;
 
 -- +goose Down
-DROP TABLE assistant_shares;
+ALTER TABLE assistant_favorites
+    DROP FOREIGN KEY fk_assistant_favorites_library_id;
+ALTER TABLE assistants
+    DROP COLUMN `public`;
+DROP TABLE assistant_favorites;

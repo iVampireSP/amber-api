@@ -196,3 +196,25 @@ func (s *Service) UnbindLibrary(ctx context.Context, assistant *entity.Assistant
 
 	return err
 }
+
+func (s *Service) MakePublic(ctx context.Context, assistant *entity.Assistant) error {
+	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
+		Update(s.dao.Assistant.Public, true)
+
+	return err
+}
+
+func (s *Service) MakePrivate(ctx context.Context, assistant *entity.Assistant) error {
+	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
+		Update(s.dao.Assistant.Public, false)
+
+	return err
+}
+
+func (s *Service) FavoriteAssistant(ctx context.Context, assistant *entity.Assistant) error {
+	return nil
+}
+
+func (s *Service) UnFavoriteAssistant(ctx context.Context, assistant *entity.Assistant) error {
+	return nil
+}

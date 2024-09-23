@@ -28,6 +28,7 @@ func main() {
 		entity.ChatMessage{},
 		entity.Assistant{},
 		entity.AssistantKey{},
+		entity.AssistantFavorites{},
 		entity.File{},
 		entity.Tool{},
 		entity.AssistantTool{},

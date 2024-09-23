@@ -18,7 +18,6 @@ import (
 var (
 	Q                  = new(Query)
 	Assistant          *assistant
-	AssistantFavorites *assistantFavorites
 	AssistantKey       *assistantKey
 	AssistantTool      *assistantTool
 	Chat               *chat
@@ -26,6 +25,7 @@ var (
 	Document           *document
 	DocumentChunk      *documentChunk
 	Embedding          *embedding
+	FavoriteAssistants *favoriteAssistants
 	File               *file
 	Library            *library
 	Memory             *memory
@@ -37,7 +37,6 @@ var (
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Assistant = &Q.Assistant
-	AssistantFavorites = &Q.AssistantFavorites
 	AssistantKey = &Q.AssistantKey
 	AssistantTool = &Q.AssistantTool
 	Chat = &Q.Chat
@@ -45,6 +44,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Document = &Q.Document
 	DocumentChunk = &Q.DocumentChunk
 	Embedding = &Q.Embedding
+	FavoriteAssistants = &Q.FavoriteAssistants
 	File = &Q.File
 	Library = &Q.Library
 	Memory = &Q.Memory
@@ -57,7 +57,6 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:                 db,
 		Assistant:          newAssistant(db, opts...),
-		AssistantFavorites: newAssistantFavorites(db, opts...),
 		AssistantKey:       newAssistantKey(db, opts...),
 		AssistantTool:      newAssistantTool(db, opts...),
 		Chat:               newChat(db, opts...),
@@ -65,6 +64,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Document:           newDocument(db, opts...),
 		DocumentChunk:      newDocumentChunk(db, opts...),
 		Embedding:          newEmbedding(db, opts...),
+		FavoriteAssistants: newFavoriteAssistants(db, opts...),
 		File:               newFile(db, opts...),
 		Library:            newLibrary(db, opts...),
 		Memory:             newMemory(db, opts...),
@@ -78,7 +78,6 @@ type Query struct {
 	db *gorm.DB
 
 	Assistant          assistant
-	AssistantFavorites assistantFavorites
 	AssistantKey       assistantKey
 	AssistantTool      assistantTool
 	Chat               chat
@@ -86,6 +85,7 @@ type Query struct {
 	Document           document
 	DocumentChunk      documentChunk
 	Embedding          embedding
+	FavoriteAssistants favoriteAssistants
 	File               file
 	Library            library
 	Memory             memory
@@ -100,7 +100,6 @@ func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:                 db,
 		Assistant:          q.Assistant.clone(db),
-		AssistantFavorites: q.AssistantFavorites.clone(db),
 		AssistantKey:       q.AssistantKey.clone(db),
 		AssistantTool:      q.AssistantTool.clone(db),
 		Chat:               q.Chat.clone(db),
@@ -108,6 +107,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Document:           q.Document.clone(db),
 		DocumentChunk:      q.DocumentChunk.clone(db),
 		Embedding:          q.Embedding.clone(db),
+		FavoriteAssistants: q.FavoriteAssistants.clone(db),
 		File:               q.File.clone(db),
 		Library:            q.Library.clone(db),
 		Memory:             q.Memory.clone(db),
@@ -129,7 +129,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:                 db,
 		Assistant:          q.Assistant.replaceDB(db),
-		AssistantFavorites: q.AssistantFavorites.replaceDB(db),
 		AssistantKey:       q.AssistantKey.replaceDB(db),
 		AssistantTool:      q.AssistantTool.replaceDB(db),
 		Chat:               q.Chat.replaceDB(db),
@@ -137,6 +136,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Document:           q.Document.replaceDB(db),
 		DocumentChunk:      q.DocumentChunk.replaceDB(db),
 		Embedding:          q.Embedding.replaceDB(db),
+		FavoriteAssistants: q.FavoriteAssistants.replaceDB(db),
 		File:               q.File.replaceDB(db),
 		Library:            q.Library.replaceDB(db),
 		Memory:             q.Memory.replaceDB(db),
@@ -148,7 +148,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 
 type queryCtx struct {
 	Assistant          IAssistantDo
-	AssistantFavorites IAssistantFavoritesDo
 	AssistantKey       IAssistantKeyDo
 	AssistantTool      IAssistantToolDo
 	Chat               IChatDo
@@ -156,6 +155,7 @@ type queryCtx struct {
 	Document           IDocumentDo
 	DocumentChunk      IDocumentChunkDo
 	Embedding          IEmbeddingDo
+	FavoriteAssistants IFavoriteAssistantsDo
 	File               IFileDo
 	Library            ILibraryDo
 	Memory             IMemoryDo
@@ -167,7 +167,6 @@ type queryCtx struct {
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		Assistant:          q.Assistant.WithContext(ctx),
-		AssistantFavorites: q.AssistantFavorites.WithContext(ctx),
 		AssistantKey:       q.AssistantKey.WithContext(ctx),
 		AssistantTool:      q.AssistantTool.WithContext(ctx),
 		Chat:               q.Chat.WithContext(ctx),
@@ -175,6 +174,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Document:           q.Document.WithContext(ctx),
 		DocumentChunk:      q.DocumentChunk.WithContext(ctx),
 		Embedding:          q.Embedding.WithContext(ctx),
+		FavoriteAssistants: q.FavoriteAssistants.WithContext(ctx),
 		File:               q.File.WithContext(ctx),
 		Library:            q.Library.WithContext(ctx),
 		Memory:             q.Memory.WithContext(ctx),

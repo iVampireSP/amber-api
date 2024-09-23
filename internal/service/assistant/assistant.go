@@ -2,7 +2,9 @@ package assistant
 
 import (
 	"context"
+	"errors"
 	"gorm.io/gen/field"
+	"gorm.io/gorm"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
@@ -197,6 +199,14 @@ func (s *Service) UnbindLibrary(ctx context.Context, assistant *entity.Assistant
 	return err
 }
 
+// ListPublicAssistant 获取公开的助理(paginate)
+//func (s *Service) ListPublicAssistant(ctx context.Context, req *schema.ListPublicAssistantReq) (*schema.ListPublicAssistantResp, error) {
+//	return s.dao.WithContext(ctx).Assistant.
+//		Where(s.dao.Assistant.Public.Is(true)).
+//		Order(s.dao.Assistant.CreatedAt.Desc()).
+//		Paginate(req.Page, req.Size)
+//}
+
 func (s *Service) MakePublic(ctx context.Context, assistant *entity.Assistant) error {
 	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
 		Update(s.dao.Assistant.Public, true)
@@ -211,10 +221,46 @@ func (s *Service) MakePrivate(ctx context.Context, assistant *entity.Assistant) 
 	return err
 }
 
-func (s *Service) FavoriteAssistant(ctx context.Context, assistant *entity.Assistant) error {
-	return nil
+func (s *Service) FavoriteAssistant(ctx context.Context, userId schema.UserId, assistant *entity.Assistant) error {
+	// if is favorite
+	_, err := s.dao.WithContext(ctx).FavoriteAssistants.Where(
+		s.dao.FavoriteAssistants.AssistantId.Eq(assistant.Id.Uint()),
+		s.dao.FavoriteAssistants.UserId.Eq(userId.String()),
+	).First()
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
+		return consts.ErrAlreadyFavorite
+	}
+
+	err = s.dao.WithContext(ctx).FavoriteAssistants.Create(&entity.FavoriteAssistants{
+		AssistantId: assistant.Id,
+		UserId:      userId,
+	})
+
+	return err
 }
 
-func (s *Service) UnFavoriteAssistant(ctx context.Context, assistant *entity.Assistant) error {
-	return nil
+func (s *Service) UnFavoriteAssistant(ctx context.Context, userId schema.UserId, assistant *entity.Assistant) error {
+	// 检测是否 favorite
+	_, err := s.dao.WithContext(ctx).FavoriteAssistants.Where(
+		s.dao.FavoriteAssistants.AssistantId.Eq(assistant.Id.Uint()),
+		s.dao.FavoriteAssistants.UserId.Eq(userId.String()),
+	).First()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return consts.ErrNotFavorite
+		}
+
+		return err
+	}
+
+	_, err = s.dao.WithContext(ctx).FavoriteAssistants.Where(
+		s.dao.FavoriteAssistants.AssistantId.Eq(assistant.Id.Uint()),
+		s.dao.FavoriteAssistants.UserId.Eq(userId.String()),
+	).Delete()
+
+	return err
 }

@@ -9,9 +9,9 @@ import (
 )
 
 type describeImageParams struct {
-	Prompt string          `json:"prompt"`
-	Url    string          `json:"url"`
-	FileId schema.EntityId `json:"file_id" mapstructure:"file_id"`
+	Prompt string `json:"prompt"`
+	Url    string `json:"url"`
+	Hash   string `json:"hash" mapstructure:"hash"`
 }
 
 func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
@@ -22,8 +22,8 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 		return response, err
 	}
 
-	if params.Url == "" && params.FileId == 0 {
-		response.Content = "请提供图片 URL 或者文件 ID"
+	if params.Url == "" && params.Hash == "" {
+		response.Content = "没有图片 URL 或者 Hash"
 		return response, nil
 	}
 
@@ -36,7 +36,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 		}
 	} else {
 		// 文件必须存在
-		exists, err := s.fileService.ExistsFileById(ctx, params.FileId)
+		exists, err := s.fileService.ExistsFileByFileHash(ctx, params.Hash)
 		if err != nil {
 			return response, err
 		}
@@ -47,7 +47,7 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 		}
 
 		// 获取文件
-		file, err = s.fileService.GetFileById(ctx, params.FileId)
+		file, err = s.fileService.GetFileByFileHash(ctx, params.Hash)
 		if err != nil {
 			response.Content = "此时无法获取文件"
 

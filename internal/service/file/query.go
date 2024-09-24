@@ -59,6 +59,12 @@ func (s *Service) ExistsFileById(ctx context.Context, fileId schema.EntityId) (b
 	return count > 0, err
 }
 
+func (s *Service) ExistsFileByFileHash(ctx context.Context, hash string) (bool, error) {
+	count, err := s.dao.WithContext(ctx).File.Where(s.dao.File.FileHash.Eq(hash)).Count()
+
+	return count > 0, err
+}
+
 func (s *Service) GetImageUrl(file *entity.File) (string, error) {
 	if file == nil {
 		return "", consts.ErrFileNotExists

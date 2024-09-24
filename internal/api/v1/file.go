@@ -69,6 +69,7 @@ func (f *FileController) DownloadImage(c *gin.Context) {
 	//c.Writer.Header().Set("Content-Disposition", "attachment; filename="+fileEntity.FileHash)
 	c.Writer.Header().Set("Content-Type", fileEntity.MimeType)
 	c.Writer.Header().Set("Content-Length", strconv.FormatInt(size, 10))
+	c.Writer.Header().Set("Cache-Control", "public, max-age=86400")
 	c.Writer.Flush()
 
 	defer func(bucketFile io.ReadCloser) {

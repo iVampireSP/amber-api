@@ -230,13 +230,8 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			if h.File != nil {
 				llmChat.WithoutImage = false
 				// 将 fileEntity 的 url 添加到 historyContent
-				fileText = "[File]File ID: " + h.File.Id.String() + ", MimeType: " + h.File.MimeType
+				fileText = "[Upload File]File Hash: " + h.File.FileHash + ", MimeType: " + h.File.MimeType + ", "
 			}
-
-			//	else if h.UserFile != nil {
-			//	llmChat.WithoutImage = false
-			//	fileText = "[File]File ID: " + h.UserFile.File.Id.String() + ", MimeType: " + h.UserFile.File.MimeType
-			//}
 
 			if fileText != "" {
 				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))

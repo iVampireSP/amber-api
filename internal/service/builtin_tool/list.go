@@ -33,14 +33,14 @@ var tools = []llms.Tool{
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
-					"file_id": {
+					"hash": {
 						Type:        jsonschema.Integer,
-						Description: "The id of the file(with image mimetype, from history) you want to describe",
+						Description: "The hash of the file(with image mimetype, from history) you want to describe",
 					},
 					"url": {
 						Type: jsonschema.String,
 						Description: "The url of the image you want to describe" +
-							"(URL and file ID must be chosen between two options)",
+							"(URL or hash must be chosen between two options)",
 					},
 					"prompt": {
 						Type:        jsonschema.String,

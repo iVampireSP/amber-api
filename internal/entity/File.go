@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"strings"
 	"time"
 )
 
@@ -19,18 +20,11 @@ type File struct {
 	ExpiredAt *time.Time `json:"expired_at"`
 }
 
-func (a *File) TableName() string {
+func (f *File) TableName() string {
 	return "files"
 }
 
-//type UserFile struct {
-//	Model
-//
-//	UserId schema.UserId   `json:"user_id"`
-//	FileId schema.EntityId `json:"file_id"`
-//	File   *File           `json:"file"`
-//}
-//
-//func (a *UserFile) TableName() string {
-//	return "user_files"
-//}
+func (f *File) IsImage() bool {
+	// 如果 mimetype 不是 image/  开头
+	return strings.HasPrefix(f.MimeType, "image/")
+}

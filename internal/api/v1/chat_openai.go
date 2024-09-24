@@ -69,6 +69,9 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		chatRequest.Model = consts.AutoModel
 	}
 
+	// 如果有图像
+	var hasImage = false
+
 	var histories = make([]*entity.ChatMessage, 0)
 	// 转换
 	for _, message := range chatRequest.Messages {
@@ -170,6 +173,8 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 				Content: content,
 			})
 
+			hasImage = true
+
 		} else {
 			// 普通的消息
 			histories = append(histories, &entity.ChatMessage{
@@ -220,6 +225,12 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 	}
 
 	go func() {
+		if hasImage {
+			llmChat.Model = u.config.OpenAI.VisionModel
+			// 禁用 image 工具，因为使用了 vision 模型
+			llmChat.WithoutImage = true
+		}
+
 		err = u.llmService.StreamChat(c, llmChat, histories)
 		if err != nil {
 			u.logger.Sugar.Error(err)

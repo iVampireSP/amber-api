@@ -3,7 +3,6 @@ package builtin_tool
 import (
 	"context"
 	"errors"
-	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/schema"
 )
 
@@ -13,36 +12,11 @@ func prefix(name string) string {
 	return NAME + "_" + name
 }
 
-type WithoutOptions struct {
-	Image bool
-}
-
-func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
-	if without == nil {
-		return tools
-	}
-
-	var t []llms.Tool
-	for _, v := range tools {
-		if v.Function.Name == prefix("describe_image") {
-			if without.Image {
-				continue
-			}
-		}
-
-		t = append(t, v)
-	}
-
-	return t
-}
-
 func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolRequest) (*schema.CallBuiltInResponse, error) {
 	var response = &schema.CallBuiltInResponse{}
 	var err error = nil
 
 	switch req.FunctionName {
-	case "now":
-		response.Content = s.GetCurrentTime()
 	case "describe_image":
 		response, err = s.DescribeImage(ctx, req.Args)
 	case "generate_image":
@@ -70,18 +44,18 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 	return response, nil
 }
 
-// Exists 这里拿到的 functionName 是不带前缀的，如果 withPrefix 为 true，则带前缀传入并判断
-func (*Service) Exists(functionName string, withPrefix bool) bool {
-	for _, tool := range tools {
-		if withPrefix {
-			if NAME+"_"+tool.Function.Name == functionName {
-				return true
-			}
-		} else {
-			if tool.Function.Name == functionName {
-				return true
-			}
-		}
-	}
-	return false
-}
+//// Exists 这里拿到的 functionName 是不带前缀的，如果 withPrefix 为 true，则带前缀传入并判断
+//func (*Service) Exists(functionName string, withPrefix bool) bool {
+//	for _, tool := range tools {
+//		if withPrefix {
+//			if NAME+"_"+tool.Function.Name == functionName {
+//				return true
+//			}
+//		} else {
+//			if tool.Function.Name == functionName {
+//				return true
+//			}
+//		}
+//	}
+//	return false
+//}

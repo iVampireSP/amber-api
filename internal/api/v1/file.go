@@ -10,7 +10,6 @@ import (
 	"rag-new/internal/service/file"
 	"rag-new/pkg/consts"
 	"strconv"
-	"strings"
 )
 
 type FileController struct {
@@ -53,8 +52,8 @@ func (f *FileController) DownloadImage(c *gin.Context) {
 		return
 	}
 
-	// 检测是不是 image/ 开头
-	if !strings.HasPrefix(fileEntity.MimeType, "image/") {
+	// 如果不是图片
+	if !fileEntity.IsImage() {
 		response.Status(http.StatusForbidden).Error(consts.ErrFileNotImage).Send()
 		return
 	}

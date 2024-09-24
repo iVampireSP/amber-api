@@ -5,7 +5,6 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	"strings"
 )
 
 type describeImageParams struct {
@@ -56,8 +55,8 @@ func (s *Service) DescribeImage(ctx context.Context, args schema.FunctionCallArg
 
 	}
 
-	// 如果 mimetype 不是 image/ 开头
-	if !strings.HasPrefix(file.MimeType, "image/") {
+	// 如果不是图片
+	if !file.IsImage() {
 		response.Content = "文件不是图片"
 
 		return response, nil

@@ -23,35 +23,40 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 
 	var lastToolCall *llms.ToolCall
 
-	// 粗略字数统计，用于切换模型
-	var count = 0
-
 	var historyContent []llms.MessageContent
 	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
 
 	var systemPrompts []string
 
+	// 如果没有禁用 Agent 方式的图片工具
+	if !llmChat.WithoutImage {
+		systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
+	}
+
 	// 当前的助理（用于通知助理上条消息的回复者
 	var currentAssistantId schema.EntityId
 
 	systemPrompts = append(systemPrompts, prompt)
-	systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 
 	var lastKnowledgeMessage string
 
-	for _, h := range history {
-		// 粗略统计
-		if h.Content != "" && h.Content != "\n" {
-			count += len(h.Content)
-		}
-	}
 	// 如果 model 为空
 	if llmChat.Model == "" || !s.config.OpenAI.CanUse(llmChat.Model) {
 		llmChat.Model = consts.AutoModel
 	}
 
 	if llmChat.Model == consts.AutoModel {
+
+		// 粗略字数统计，用于切换模型
+		var count = 0
+		for _, h := range history {
+			// 粗略统计
+			if h.Content != "" && h.Content != "\n" {
+				count += len(h.Content)
+			}
+		}
+
 		// 设置自动模式下的默认模型
 		llmChat.Model = s.config.OpenAI.Model
 
@@ -59,11 +64,11 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 		if count > 10000 {
 			llmChat.Model = s.config.OpenAI.LongContextModel
 		}
-	}
 
-	// 如果统计超过了 1亿 - 1 万字符（粗略统计 token）
-	if count > consts.MaxTokenCount {
-		return nil, consts.ErrTooManyTokens
+		// 如果统计超过了 1亿 - 1 万字符（粗略统计 token）
+		if count > consts.MaxTokenCount {
+			return nil, consts.ErrTooManyTokens
+		}
 	}
 
 	// 处理历史消息
@@ -225,17 +230,35 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			//	llmChat.Model = s.config.OpenAI.VisionModel
 			//}
 
-			var fileText = ""
-			// 如果文件存在
 			if h.File != nil {
-				llmChat.WithoutImage = false
-				// 将 fileEntity 的 url 添加到 historyContent
-				fileText = "[Upload File]File Hash: " + h.File.FileHash + ", MimeType: " + h.File.MimeType + ", "
+				// 如果是 Vision 模型，直接处理
+				if llmChat.Model == s.config.OpenAI.VisionModel {
+					// 直接添加图片
+					fileUrl, err := s.FileService.GetImageUrl(h.File)
+					if err != nil {
+						return nil, err
+					}
+
+					// 获取下一条消息，如果 i+1 有内容且 role 为 Human
+					if i+1 < len(history) && history[i+1].Role == schema.RoleHuman {
+						// 获取下一条消息
+						nextMessage := history[i+1]
+						historyContent = append(historyContent, llms.MessageContent{
+							Role: llms.ChatMessageTypeHuman,
+							Parts: []llms.ContentPart{
+								llms.ImageURLWithDetailPart(fileUrl, "auto"),
+								llms.TextPart(nextMessage.Content),
+							},
+						})
+					}
+				} else {
+					// 如果不是，则只添加文件信息，交给 Agent 处理
+					// 将 fileEntity 的 url 添加到 historyContent
+					fileText := "[Upload File]File Hash: " + h.File.FileHash + ", MimeType: " + h.File.MimeType + ", "
+					historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
+				}
 			}
 
-			if fileText != "" {
-				historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
-			}
 		case schema.RoleKnowledge:
 			if h.Content == "" {
 				h.Content = consts.LibraryResultEmptyPrompt
@@ -258,7 +281,8 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 	}
 
 	// 拼接系统 Prompt 并放入最底
-	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, strings.Join(systemPrompts, "\n")))
+	historyContent = append(historyContent,
+		llms.TextParts(llms.ChatMessageTypeSystem, strings.Join(systemPrompts, "\n")))
 
 	var message = &Message{
 		MessageContent: historyContent,

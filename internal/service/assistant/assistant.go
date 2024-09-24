@@ -8,6 +8,7 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"rag-new/pkg/page"
 
 	"github.com/tmc/langchaingo/llms"
 )
@@ -200,12 +201,20 @@ func (s *Service) UnbindLibrary(ctx context.Context, assistant *entity.Assistant
 }
 
 // ListPublicAssistant 获取公开的助理(paginate)
-//func (s *Service) ListPublicAssistant(ctx context.Context, req *schema.ListPublicAssistantReq) (*schema.ListPublicAssistantResp, error) {
-//	return s.dao.WithContext(ctx).Assistant.
-//		Where(s.dao.Assistant.Public.Is(true)).
-//		Order(s.dao.Assistant.CreatedAt.Desc()).
-//		Paginate(req.Page, req.Size)
-//}
+func (s *Service) ListPublicAssistant(ctx context.Context, req *schema.ListPublicAssistantReq) (*page.PagedResult[*schema.AssistantPublicResponse], error) {
+	pagedResult := &page.PagedResult[*schema.AssistantPublicResponse]{
+		Page:     req.Page,
+		PageSize: page.DefaultPageSize,
+	}
+
+	var err error
+
+	pagedResult.TotalCount, err = s.dao.WithContext(ctx).Assistant.
+		Where(s.dao.Assistant.Public.Is(true)).
+		ScanByPage(pagedResult.Data, pagedResult.Offset(), pagedResult.PageSize)
+
+	return pagedResult, err
+}
 
 func (s *Service) MakePublic(ctx context.Context, assistant *entity.Assistant) error {
 	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).

@@ -37,3 +37,17 @@ type AssistantToolUnbindRequest struct {
 type AssistantLibraryRequest struct {
 	LibraryId EntityId `json:"library_id" binding:"required"`
 }
+
+type ListPublicAssistantReq struct {
+	Page int `form:"page" binding:"required"`
+}
+
+type ListPublicAssistantResp struct {
+	Data []AssistantPublicResponse `json:"data"`
+}
+
+type AssistantPublicResponse struct {
+	ID          EntityId `json:"id"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+}

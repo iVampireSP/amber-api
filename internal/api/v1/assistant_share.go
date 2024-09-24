@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"rag-new/internal/schema"
+	_ "rag-new/pkg/page"
 )
 
 // AssistantPublicList godoc
@@ -13,7 +14,7 @@ import (
 // @Produce      json
 // @Security     ApiKeyAuth
 // @Param        schema.ListPublicAssistantReq  query  schema.ListPublicAssistantReq true  "schema.ListPublicAssistantReq"
-// @Success      200  {object}  schema.ResponseBody{data=[]entity.Assistant}
+// @Success      200  {object}  schema.ResponseBody{data=page.PagedResult[schema.AssistantPublic]}
 // @Failure      400  {object}  schema.ResponseBody{}
 // @Router       /api/v1/assistants/public [get]
 func (u *AssistantController) AssistantPublicList(c *gin.Context) {

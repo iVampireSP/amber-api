@@ -263,6 +263,25 @@ definitions:
       user_id:
         type: string
     type: object
+  page.PagedResult-schema_AssistantPublic:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/schema.AssistantPublic'
+        type: array
+      page:
+        description: 当前页码
+        type: integer
+      page_size:
+        description: 每页大小
+        type: integer
+      total_count:
+        description: 数据总条数
+        type: integer
+      total_pages:
+        description: 总页数
+        type: integer
+    type: object
   schema.AddPublicChatMessageRequest:
     properties:
       assistant_key:
@@ -325,6 +344,15 @@ definitions:
     required:
     - library_id
     type: object
+  schema.AssistantPublic:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   schema.AssistantUpdateRequest:
     properties:
       description:
@@ -353,6 +381,11 @@ definitions:
       prompt:
         maxLength: 512
         type: string
+      public:
+        enum:
+        - true
+        - false
+        type: boolean
       temperature:
         enum:
         - 0.1
@@ -1129,6 +1162,11 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - in: query
+        name: page
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -1139,9 +1177,7 @@ paths:
             - $ref: '#/definitions/schema.ResponseBody'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/entity.Assistant'
-                  type: array
+                  $ref: '#/definitions/page.PagedResult-schema_AssistantPublic'
               type: object
         "400":
           description: Bad Request

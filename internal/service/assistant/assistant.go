@@ -206,7 +206,6 @@ func (s *Service) ListPublicAssistant(ctx context.Context, req *schema.ListPubli
 	var pagedResult = page.NewPagedResult[*schema.AssistantPublic]()
 
 	pagedResult.Page = req.Page
-	pagedResult.PageSize = 2
 
 	var err error
 

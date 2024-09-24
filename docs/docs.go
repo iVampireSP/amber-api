@@ -191,6 +191,14 @@ const docTemplate = `{
                     "assistant"
                 ],
                 "summary": "获取公开的助理列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -203,10 +211,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/entity.Assistant"
-                                            }
+                                            "$ref": "#/definitions/page.PagedResult-schema_AssistantPublic"
                                         }
                                     }
                                 }
@@ -3191,6 +3196,33 @@ const docTemplate = `{
                 }
             }
         },
+        "page.PagedResult-schema_AssistantPublic": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.AssistantPublic"
+                    }
+                },
+                "page": {
+                    "description": "当前页码",
+                    "type": "integer"
+                },
+                "page_size": {
+                    "description": "每页大小",
+                    "type": "integer"
+                },
+                "total_count": {
+                    "description": "数据总条数",
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "description": "总页数",
+                    "type": "integer"
+                }
+            }
+        },
         "schema.AddPublicChatMessageRequest": {
             "type": "object",
             "required": [
@@ -3275,6 +3307,20 @@ const docTemplate = `{
                 }
             }
         },
+        "schema.AssistantPublic": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "schema.AssistantUpdateRequest": {
             "type": "object",
             "properties": {
@@ -3313,6 +3359,13 @@ const docTemplate = `{
                 "prompt": {
                     "type": "string",
                     "maxLength": 512
+                },
+                "public": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
                 },
                 "temperature": {
                     "type": "number",

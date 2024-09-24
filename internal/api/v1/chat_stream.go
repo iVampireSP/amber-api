@@ -126,6 +126,24 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	// 如果确实有助理，则绑定工具
 	if assistantEntity != nil {
+		// 检查这个助理是否为 public
+		if !assistantEntity.Public && assistantEntity.UserId != chatEntity.UserId {
+			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
+			return
+		}
+
+		// 如果是 public，则检测用户是否收藏该助理
+		hasFavorite, err := u.assistantService.HasFavoriteAssistant(c, chatEntity.UserId, assistantEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		if !hasFavorite && assistantEntity.UserId != chatEntity.UserId {
+			response.Status(http.StatusForbidden).Error(consts.ErrNotFavorite).Send()
+			return
+		}
+
 		// 获取 assistant 绑定的 tools
 		tools, err = u.assistantService.ToLLMTool(c, assistantEntity)
 		if err != nil {
@@ -270,6 +288,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 			histories = append(histories, lastChatMessage)
 
 			// 这样就能取到了剪裁后的，但是这样换汤不换药，之后还是得在 service 层面做分页。
+			// 更新：已经做好啦
 			err = u.llmService.StreamChat(c, llmChat, histories)
 			if err != nil {
 				u.logger.Sugar.Error(err)

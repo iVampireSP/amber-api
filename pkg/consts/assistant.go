@@ -17,6 +17,7 @@ var (
 	// ErrToolNotBind ErrAssistantHasBindLibraryCantDelete = errors.New("这个助理有绑定的资料库，请先移除助理绑定的资料库，然后再尝试删除该助理")
 	ErrToolNotBind                 = errors.New("该工具没有绑定该助理")
 	ErrAlreadyFavorite             = errors.New("already favorite")
-	ErrNotFavorite                 = errors.New("没有 favorite，无法取消 favorite")
+	ErrNotFavorite                 = errors.New("没有 favorite")
 	ErrAssistantCannotFavoriteSelf = errors.New("不能收藏自己的助理")
+	ErrAssistantNotPublic          = errors.New("该助理不是公开的")
 )

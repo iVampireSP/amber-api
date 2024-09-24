@@ -154,10 +154,27 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			}
 			return
 		}
-		if assistantEntity.UserId != userInfo.Token.Sub {
-			response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+
+		// 检测是否公开
+		if !assistantEntity.Public && assistantEntity.UserId != userInfo.Token.Sub {
+			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
 			return
 		}
+
+		// 检测是不是收藏的
+		hasFavorite, err := u.assistantService.HasFavoriteAssistant(c, userInfo.Token.Sub, assistantEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		if !hasFavorite {
+			if assistantEntity.UserId != userInfo.Token.Sub {
+				response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+				return
+			}
+		}
+
 	}
 
 	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)
@@ -315,25 +332,45 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 
 	var assistantId = chatEntity.AssistantId
 
+	var currentAssistant = assistantEntity
+
+	// 如果消息指定了其他助理，则由其他助理来回复
 	if request.AssistantId != nil {
 		// 如果这个 assistant 不是用户的
-		assistantEntity2, err := u.assistantService.GetAssistant(c, *request.AssistantId)
+		messageAssistantEntity, err := u.assistantService.GetAssistant(c, *request.AssistantId)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
 
-		if assistantEntity2.UserId != userInfo.Token.Sub {
-			response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+		currentAssistant = messageAssistantEntity
+
+		// 检测是否公开
+		if !messageAssistantEntity.Public && messageAssistantEntity.UserId != userInfo.Token.Sub {
+			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
 			return
+		}
+
+		// 检测是不是收藏的
+		hasFavorite, err := u.assistantService.HasFavoriteAssistant(c, chatEntity.UserId, messageAssistantEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		if !hasFavorite {
+			if messageAssistantEntity.UserId != userInfo.Token.Sub {
+				response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
+				return
+			}
 		}
 
 		assistantId = request.AssistantId
 	}
 
-	// 检测是否存在知识库
-	if needStream && assistantEntity != nil && assistantEntity.LibraryId != nil {
-		libraryEntity, err := u.libraryService.GetLibrary(c, *assistantEntity.LibraryId)
+	// 检测是否存在知识库，支持临时使用的助理的知识库
+	if needStream && currentAssistant != nil && currentAssistant.LibraryId != nil {
+		libraryEntity, err := u.libraryService.GetLibrary(c, *currentAssistant.LibraryId)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
@@ -355,7 +392,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		// 添加知识库消息
 		chatMessages = append(chatMessages, entity.ChatMessage{
 			ChatId:      chatEntity.Id,
-			AssistantId: &assistantEntity.Id,
+			AssistantId: &currentAssistant.Id,
 			Content:     chunkContent,
 			Role:        schema.RoleKnowledge,
 		})

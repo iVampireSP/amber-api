@@ -20,9 +20,24 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 		if err != nil {
 			return nil, err
 		}
-		if a.Id == consts.NoRecord || a.UserId != createChatRequest.UserId {
-			return nil, consts.ErrAssistantNotFound
+
+		if !a.Public && a.UserId != createChatRequest.UserId {
+			return nil, consts.ErrAssistantNotPublic
 		}
+
+		// 检测是不是收藏的
+		hasFavorite, err := s.a.HasFavoriteAssistant(ctx, createChatRequest.UserId, a)
+		if err != nil {
+			return nil, err
+		}
+
+		if !hasFavorite {
+			// 如果不是收藏的，且不是当前用户的
+			if a.Id == consts.NoRecord || a.UserId != createChatRequest.UserId {
+				return nil, consts.ErrAssistantNotFound
+			}
+		}
+
 	}
 
 	chat.Name = createChatRequest.Name

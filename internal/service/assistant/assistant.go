@@ -296,6 +296,7 @@ func (s *Service) UnFavoriteAssistant(ctx context.Context, userId schema.UserId,
 
 func (s *Service) HasFavoriteAssistant(ctx context.Context, userId schema.UserId, assistant *entity.Assistant) (bool, error) {
 	count, err := s.dao.WithContext(ctx).FavoriteAssistants.Where(
+		s.dao.FavoriteAssistants.Deleted.Is(false),
 		s.dao.FavoriteAssistants.AssistantId.Eq(assistant.Id.Uint()),
 		s.dao.FavoriteAssistants.UserId.Eq(userId.String()),
 	).Count()

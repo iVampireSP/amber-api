@@ -272,10 +272,26 @@ func (u *ChatController) Update(c *gin.Context) {
 			}
 		}
 
-		if assistantEntity.UserId != u.authService.GetUserId(c) {
-			response.Status(http.StatusForbidden).Error(consts.ErrPermissionDenied).Send()
+		// 检测是否公开
+		if !assistantEntity.Public && assistantEntity.UserId != u.authService.GetUserId(c) {
+			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
 			return
 		}
+
+		// 检测是不是收藏的
+		hasFavorite, err := u.assistantService.HasFavoriteAssistant(c, chatEntity.UserId, assistantEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+
+		if !hasFavorite {
+			if assistantEntity.UserId != u.authService.GetUserId(c) {
+				response.Status(http.StatusForbidden).Error(consts.ErrPermissionDenied).Send()
+				return
+			}
+		}
+
 		chatEntity.AssistantId = chatUpdateRequest.AssistantId
 
 	} else {

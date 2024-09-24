@@ -162,8 +162,8 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 
 			// 如果是文件的话，要新增两次
 			histories = append(histories, &entity.ChatMessage{
-				Role:    schema.RoleFile,
-				Content: file.Id.String(),
+				Role: schema.RoleFile,
+				File: file,
 			})
 			histories = append(histories, &entity.ChatMessage{
 				Role:    role,

@@ -17,6 +17,13 @@ type AssistantDeleteBatch struct {
 
 func (b *Batch) AssistantDelete(ctx context.Context, adb *AssistantDeleteBatch) error {
 	go func() {
+		// 将助理收藏的 deleted 设置为 true
+		err := adb.AssistantService.ClearAssistantFavorite(ctx, adb.AssistantEntity.Id)
+		if err != nil {
+			b.logger.Sugar.Errorf("Batch ClearAssistantFavorite: %v", err)
+			return
+		}
+
 		var chatPage = 1
 		for {
 			chatEntity, err := adb.ChatService.ListChatFromAssistantByPage(ctx, adb.AssistantEntity, chatPage)
@@ -31,23 +38,17 @@ func (b *Batch) AssistantDelete(ctx context.Context, adb *AssistantDeleteBatch) 
 				break
 			}
 
-			// 删除所有的聊天
-			err = adb.ChatMessageService.DeleteChatMessageByChats(ctx, chatEntity...)
+			// 将聊天的 Assistant ID 设置为空
+			err = adb.ChatMessageService.ClearChatAssistant(ctx, chatEntity...)
 			if err != nil {
 				b.logger.Sugar.Errorf("Batch AssistantDelete: %v", err)
-				return
-			}
-
-			// 删除 chat
-			err = adb.ChatService.DeleteChats(ctx, chatEntity...)
-			if err != nil {
 				return
 			}
 
 			chatPage++
 		}
 
-		err := adb.AssistantService.DeleteAllKey(ctx, adb.AssistantEntity)
+		err = adb.AssistantService.DeleteAllKey(ctx, adb.AssistantEntity)
 		if err != nil {
 			b.logger.Sugar.Errorf("Batch AssistantAllSecretDelete: %v", err)
 			return

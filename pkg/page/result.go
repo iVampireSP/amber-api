@@ -14,10 +14,14 @@ type PagedResult[T any] struct {
 }
 
 func (p *PagedResult[T]) Offset() int {
+	if p.Page <= 0 {
+		return 1
+	}
+
 	return OffsetCustom(p.Page, p.PageSize)
 }
 
-// 计算总页数
+// CalculateTotalPages 计算总页数
 func (p *PagedResult[T]) CalculateTotalPages() {
 	if p.PageSize == 0 {
 		p.TotalPages = 0
@@ -26,7 +30,7 @@ func (p *PagedResult[T]) CalculateTotalPages() {
 	}
 }
 
-// 获取指定页的数据
+// GetDataForPage 获取指定页的数据
 func (p *PagedResult[T]) GetDataForPage(page int) []T {
 	if page < 1 || page > p.TotalPages {
 		return nil
@@ -50,7 +54,7 @@ func (p *PagedResult[T]) Output() *PagedResult[T] {
 	return p
 }
 
-// 新建分页器
+// NewPagedResult 新建分页器
 func NewPagedResult[T any]() *PagedResult[T] {
 	p := &PagedResult[T]{
 		PageSize: DefaultPageSize,

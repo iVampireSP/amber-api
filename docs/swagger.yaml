@@ -1158,6 +1158,35 @@ paths:
       summary: 绑定 Tool
       tags:
       - assistant
+  /api/v1/assistants/favorites:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/page.PagedResult-schema_AssistantPublic'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 收藏的助理列表
+      tags:
+      - assistant
   /api/v1/assistants/public:
     get:
       consumes:
@@ -1165,7 +1194,6 @@ paths:
       parameters:
       - in: query
         name: page
-        required: true
         type: integer
       produces:
       - application/json
@@ -1186,6 +1214,65 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取公开的助理列表
+      tags:
+      - assistant
+  /api/v1/assistants/public/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/schema.AssistantPublic'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 取消收藏助理
+      tags:
+      - assistant
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/schema.AssistantPublic'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 收藏助理
       tags:
       - assistant
   /api/v1/chat_public:

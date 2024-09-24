@@ -7,6 +7,7 @@ type FavoriteAssistants struct {
 	AssistantId schema.EntityId `json:"assistant_id"`
 	Assistant   *Assistant      `json:"assistant"`
 	UserId      schema.UserId   `json:"user_id"`
+	Deleted     bool            `json:"deleted"`
 }
 
 func (a *FavoriteAssistants) TableName() string {

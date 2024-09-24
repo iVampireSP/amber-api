@@ -2,7 +2,7 @@
 CREATE TABLE favorite_assistants
 (
     id                     SERIAL PRIMARY KEY,
-    assistant_id           BIGINT UNSIGNED NOT NULL,
+    assistant_id           BIGINT UNSIGNED DEFAULT NULL,
     user_id                VARCHAR(255)    NOT NULL,
     deleted                BOOLEAN         NOT NULL DEFAULT FALSE,
     created_at             TIMESTAMP(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

@@ -52,3 +52,7 @@ type AssistantPublic struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 }
+
+type PaginationRequest struct {
+	Page int `form:"page"`
+}

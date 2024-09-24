@@ -32,6 +32,7 @@ func newFavoriteAssistants(db *gorm.DB, opts ...gen.DOOption) favoriteAssistants
 	_favoriteAssistants.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_favoriteAssistants.AssistantId = field.NewUint(tableName, "assistant_id")
 	_favoriteAssistants.UserId = field.NewString(tableName, "user_id")
+	_favoriteAssistants.Deleted = field.NewBool(tableName, "deleted")
 	_favoriteAssistants.Assistant = favoriteAssistantsBelongsToAssistant{
 		db: db.Session(&gorm.Session{}),
 
@@ -76,6 +77,7 @@ type favoriteAssistants struct {
 	UpdatedAt   field.Time
 	AssistantId field.Uint
 	UserId      field.String
+	Deleted     field.Bool
 	Assistant   favoriteAssistantsBelongsToAssistant
 
 	fieldMap map[string]field.Expr
@@ -98,6 +100,7 @@ func (f *favoriteAssistants) updateTableName(table string) *favoriteAssistants {
 	f.UpdatedAt = field.NewTime(table, "updated_at")
 	f.AssistantId = field.NewUint(table, "assistant_id")
 	f.UserId = field.NewString(table, "user_id")
+	f.Deleted = field.NewBool(table, "deleted")
 
 	f.fillFieldMap()
 
@@ -114,12 +117,13 @@ func (f *favoriteAssistants) GetFieldByName(fieldName string) (field.OrderExpr, 
 }
 
 func (f *favoriteAssistants) fillFieldMap() {
-	f.fieldMap = make(map[string]field.Expr, 6)
+	f.fieldMap = make(map[string]field.Expr, 7)
 	f.fieldMap["id"] = f.Id
 	f.fieldMap["created_at"] = f.CreatedAt
 	f.fieldMap["updated_at"] = f.UpdatedAt
 	f.fieldMap["assistant_id"] = f.AssistantId
 	f.fieldMap["user_id"] = f.UserId
+	f.fieldMap["deleted"] = f.Deleted
 
 }
 

@@ -154,6 +154,49 @@ func (s *Service) DeleteChatMessageByChats(ctx context.Context, chat ...*entity.
 	return nil
 }
 
+// ClearChatAssistant 重置对话的 Assistant ID 为 nil
+func (s *Service) ClearChatAssistant(ctx context.Context, chats ...*entity.Chat) error {
+	var ids = make([]uint, len(chats))
+
+	for i, c := range chats {
+		ids[i] = c.Id.Uint()
+	}
+
+	_, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.In(ids...)).UpdateSimple(s.dao.Chat.AssistantId.Null())
+	if err != nil {
+		return err
+	}
+
+	// 将 Chat 的 Chat Message 的 Assistant ID 设置为 nil
+	_, err = s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.In(ids...)).UpdateSimple(s.dao.ChatMessage.AssistantId.Null())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ClearAllChatAssistant 重置对话的 Assistant ID 为 nil
+func (s *Service) ClearAllChatAssistant(ctx context.Context, assistantId *schema.EntityId) error {
+	_, err := s.dao.WithContext(ctx).Chat.
+		Where(s.dao.Chat.AssistantId.Eq(assistantId.Uint())).
+		UpdateSimple(s.dao.Chat.AssistantId.Null())
+
+	if err != nil {
+		return err
+	}
+
+	// 清理 ChatMessage 的 Assistant ID
+	_, err = s.dao.WithContext(ctx).ChatMessage.
+		Where(s.dao.ChatMessage.AssistantId.Eq(assistantId.Uint())).
+		UpdateSimple(s.dao.ChatMessage.AssistantId.Null())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CountChatMessage count messages
 func (s *Service) CountChatMessage(ctx context.Context, chat *entity.Chat) (int64, error) {
 	count, err := s.dao.WithContext(ctx).ChatMessage.Where(s.dao.ChatMessage.ChatId.Eq(uint(chat.Id))).Count()

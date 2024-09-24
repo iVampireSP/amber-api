@@ -34,7 +34,7 @@ var tools = []llms.Tool{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
 					"hash": {
-						Type:        jsonschema.Integer,
+						Type:        jsonschema.String,
 						Description: "The hash of the file(with image mimetype, from history) you want to describe",
 					},
 					"url": {
@@ -48,7 +48,7 @@ var tools = []llms.Tool{
 					},
 				},
 				Required: []string{
-					"question",
+					"prompt",
 				},
 			},
 		},

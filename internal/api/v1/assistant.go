@@ -190,6 +190,7 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 	assistantEntity.DisableMemory = updateReq.DisableMemory
 	assistantEntity.EnableMemoryForAssistantAPI = updateReq.EnableMemoryForAssistantAPI
 	assistantEntity.Temperature = updateReq.Temperature
+	assistantEntity.Public = updateReq.Public
 
 	err = u.assistantService.UpdateAssistant(c, assistantEntity)
 	if err != nil {

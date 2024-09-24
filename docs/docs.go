@@ -174,6 +174,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/assistants/public": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "获取公开的助理列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Assistant"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/assistants/{id}": {
             "get": {
                 "security": [
@@ -2790,6 +2838,9 @@ const docTemplate = `{
                 "prompt": {
                     "type": "string"
                 },
+                "public": {
+                    "type": "boolean"
+                },
                 "temperature": {
                     "type": "number"
                 },
@@ -3309,8 +3360,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "message": {
-                    "type": "string",
-                    "maxLength": 255
+                    "type": "string"
                 },
                 "role": {
                     "type": "string",

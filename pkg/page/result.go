@@ -6,15 +6,15 @@ import (
 
 // 定义一个泛型的分页结果结构体
 type PagedResult[T any] struct {
-	Data       []T   // 泛型类型的切片，用于存储实际的数据
-	Page       int   // 当前页码
-	PageSize   int   // 每页大小
-	TotalCount int64 // 数据总条数
-	TotalPages int   // 总页数
+	Data       []T   `json:"data"`
+	Page       int   `json:"page"`        // 当前页码
+	PageSize   int   `json:"page_size"`   // 每页大小
+	TotalCount int64 `json:"total_count"` // 数据总条数
+	TotalPages int   `json:"total_pages"` // 总页数
 }
 
 func (p *PagedResult[T]) Offset() int {
-	return Offset(p.Page)
+	return OffsetCustom(p.Page, p.PageSize)
 }
 
 // 计算总页数
@@ -39,6 +39,24 @@ func (p *PagedResult[T]) GetDataForPage(page int) []T {
 	}
 
 	return p.Data[startIndex:endIndex]
+}
+
+func (p *PagedResult[T]) Output() *PagedResult[T] {
+	if p.TotalCount > 0 || p.TotalPages == 0 {
+		// 计算 total count
+		p.CalculateTotalPages()
+	}
+
+	return p
+}
+
+// 新建分页器
+func NewPagedResult[T any]() *PagedResult[T] {
+	p := &PagedResult[T]{
+		PageSize: DefaultPageSize,
+	}
+	p.CalculateTotalPages()
+	return p
 }
 
 //

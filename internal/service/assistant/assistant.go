@@ -69,6 +69,7 @@ func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assista
 		s.dao.Assistant.DisableDefaultPrompt.Value(assistant.DisableDefaultPrompt),
 		s.dao.Assistant.DisableMemory.Value(assistant.DisableMemory),
 		s.dao.Assistant.EnableMemoryForAssistantAPI.Value(assistant.EnableMemoryForAssistantAPI),
+		s.dao.Assistant.Public.Value(assistant.Public),
 	}
 	// 这里不能直接设置 library_id
 	if assistant.LibraryId != nil {
@@ -201,33 +202,25 @@ func (s *Service) UnbindLibrary(ctx context.Context, assistant *entity.Assistant
 }
 
 // ListPublicAssistant 获取公开的助理(paginate)
-func (s *Service) ListPublicAssistant(ctx context.Context, req *schema.ListPublicAssistantReq) (*page.PagedResult[*schema.AssistantPublicResponse], error) {
-	pagedResult := &page.PagedResult[*schema.AssistantPublicResponse]{
-		Page:     req.Page,
-		PageSize: page.DefaultPageSize,
-	}
+func (s *Service) ListPublicAssistant(ctx context.Context, req *schema.ListPublicAssistantReq) (*page.PagedResult[*schema.AssistantPublic], error) {
+	var pagedResult = page.NewPagedResult[*schema.AssistantPublic]()
+
+	pagedResult.Page = req.Page
+	pagedResult.PageSize = 2
 
 	var err error
 
+	var assistants []*entity.Assistant
+
 	pagedResult.TotalCount, err = s.dao.WithContext(ctx).Assistant.
 		Where(s.dao.Assistant.Public.Is(true)).
-		ScanByPage(pagedResult.Data, pagedResult.Offset(), pagedResult.PageSize)
+		ScanByPage(&assistants, pagedResult.Offset(), pagedResult.PageSize)
 
-	return pagedResult, err
-}
+	for _, v := range assistants {
+		pagedResult.Data = append(pagedResult.Data, v.ToPublic())
+	}
 
-func (s *Service) MakePublic(ctx context.Context, assistant *entity.Assistant) error {
-	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
-		Update(s.dao.Assistant.Public, true)
-
-	return err
-}
-
-func (s *Service) MakePrivate(ctx context.Context, assistant *entity.Assistant) error {
-	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(uint(assistant.Id))).
-		Update(s.dao.Assistant.Public, false)
-
-	return err
+	return pagedResult.Output(), err
 }
 
 func (s *Service) FavoriteAssistant(ctx context.Context, userId schema.UserId, assistant *entity.Assistant) error {

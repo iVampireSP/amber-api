@@ -26,14 +26,11 @@ func (a *Assistant) GetUserId() schema.UserId {
 	return a.UserId
 }
 
-type AssistantTool struct {
-	Model
-	AssistantId schema.EntityId `json:"assistant_id"`
-	ToolId      schema.EntityId `json:"tool_id"`
-	Assistant   Assistant       `json:"assistant"`
-	Tool        Tool            `json:"tool"`
-}
-
-func (at *AssistantTool) TableName() string {
-	return "assistant_tools"
+// ToPublic 转换为公开助理
+func (a *Assistant) ToPublic() *schema.AssistantPublic {
+	return &schema.AssistantPublic{
+		Id:          a.Id,
+		Name:        a.Name,
+		Description: a.Description,
+	}
 }

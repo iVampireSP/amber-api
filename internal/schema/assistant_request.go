@@ -20,6 +20,7 @@ type AssistantUpdateRequest struct {
 	DisableDefaultPrompt        bool      `json:"disable_default_prompt" validate:"oneof=true false"`
 	DisableMemory               bool      `json:"disable_memory" validate:"oneof=true false"`
 	EnableMemoryForAssistantAPI bool      `json:"enable_memory_for_assistant_api" validate:"oneof=true false"`
+	Public                      bool      `json:"public" validate:"oneof=true false"`
 	LibraryId                   *EntityId `json:"library_id"`
 	Temperature                 float64   `json:"temperature" validate:"oneof=0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1"`
 }
@@ -39,15 +40,15 @@ type AssistantLibraryRequest struct {
 }
 
 type ListPublicAssistantReq struct {
-	Page int `form:"page" binding:"required"`
+	Page int `form:"page" binding:"required" min:"1"`
 }
 
 type ListPublicAssistantResp struct {
-	Data []AssistantPublicResponse `json:"data"`
+	Data []AssistantPublic `json:"data"`
 }
 
-type AssistantPublicResponse struct {
-	ID          EntityId `json:"id"`
+type AssistantPublic struct {
+	Id          EntityId `json:"id"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 }

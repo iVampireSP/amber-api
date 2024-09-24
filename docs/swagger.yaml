@@ -20,6 +20,8 @@ definitions:
         type: string
       prompt:
         type: string
+      public:
+        type: boolean
       temperature:
         type: number
       updated_at:
@@ -382,7 +384,6 @@ definitions:
       assistant_id:
         type: integer
       message:
-        maxLength: 255
         type: string
       role:
         enum:
@@ -1122,6 +1123,33 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 绑定 Tool
+      tags:
+      - assistant
+  /api/v1/assistants/public:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.Assistant'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取公开的助理列表
       tags:
       - assistant
   /api/v1/chat_public:

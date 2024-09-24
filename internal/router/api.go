@@ -41,6 +41,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.GET("/assistants/:id/keys", a.Assistant.ListAssistantKeys)
 	r.POST("/assistants/:id/keys", a.Assistant.CreateAssistantKey)
 	r.DELETE("/assistants/:id/keys/:key_id", a.Assistant.DeleteAssistantKey)
+	r.GET("/assistants/public", a.Assistant.AssistantPublicList)
 
 	r.GET("/tools", a.Tool.List)
 	r.POST("/tools", a.Tool.CreateTool)

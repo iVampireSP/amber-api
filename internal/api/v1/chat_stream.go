@@ -322,7 +322,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 				ChatId:  chatEntity.Id,
 			}
 
-			if msg.Internal.ToolCall != nil {
+			if msg.Internal != nil && msg.Internal.ToolCall != nil {
 				cm.ToolCall = (*schema.ToolCall)(msg.Internal.ToolCall)
 			}
 
@@ -336,7 +336,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 				ChatId:  chatEntity.Id,
 			}
 
-			if msg.Internal.ToolCall != nil {
+			if msg.Internal != nil && msg.Internal.ToolCall != nil {
 				cm.ToolCall = (*schema.ToolCall)(msg.Internal.ToolCall)
 			}
 
@@ -370,7 +370,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 				ChatId:  chatEntity.Id,
 			}
 
-			if msg.Internal.ToolCall != nil {
+			if msg.Internal != nil && msg.Internal.ToolCall != nil {
 				cm.ToolCall = (*schema.ToolCall)(msg.Internal.ToolCall)
 			}
 

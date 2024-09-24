@@ -63,7 +63,7 @@ type ChatGuestCreateRequest struct {
 
 type ChatMessageAddRequest struct {
 	AssistantId *EntityId         `json:"assistant_id"`
-	Message     string            `json:"message" binding:"required" validate:"max=255"`
+	Message     string            `json:"message" binding:"required" max:"8192"`
 	Role        ChatRole          `json:"role" binding:"required" enums:"user,user_hide,system,system_hide,assistant,image"`
 	Variables   map[string]string `json:"variables"`
 }

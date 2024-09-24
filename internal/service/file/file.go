@@ -132,7 +132,6 @@ func (s *Service) CreateFile(ctx context.Context, file io.ReadSeeker) (*entity.F
 	fileEntity := &entity.File{
 		Url:     nil,
 		UrlHash: nil,
-		//Public:  public,
 	}
 
 	fileSha256, err := checksum.MD5sumReader(file)

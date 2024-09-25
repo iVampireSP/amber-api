@@ -26,11 +26,10 @@ func NewUsageController(tokenUsage *token_usage.Service) *UsageController {
 func (uc *UsageController) GetUsage(ctx *gin.Context) {
 	var response = schema.NewResponse(ctx)
 
-	var siteUsageResponse = schema.SiteUsageResponse{}
-	siteUsageResponse.TodayTokens = uc.tokenUsage.GetTodayTokenUsage(ctx)
-	siteUsageResponse.TodayToolCalls = uc.tokenUsage.GetTodayToolCallTimes(ctx)
-	siteUsageResponse.YesterdayTokens = uc.tokenUsage.GetYesterdayTokenUsage(ctx)
-	siteUsageResponse.YesterdayToolCalls = uc.tokenUsage.GetYesterdayToolCallTimes(ctx)
+	var siteUsageResponse = schema.SiteUsageResponse{
+		MonthTokens:    uc.tokenUsage.GetMonthTokenUsage(ctx),
+		MonthToolCalls: uc.tokenUsage.GetMonthToolCallTimes(ctx),
+	}
 
 	response.Data(siteUsageResponse).Send()
 }

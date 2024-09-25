@@ -3908,16 +3908,10 @@ const docTemplate = `{
         "schema.SiteUsageResponse": {
             "type": "object",
             "properties": {
-                "today_tokens": {
+                "month_tokens": {
                     "type": "integer"
                 },
-                "today_tool_calls": {
-                    "type": "integer"
-                },
-                "yesterday_tokens": {
-                    "type": "integer"
-                },
-                "yesterday_tool_calls": {
+                "month_tool_calls": {
                     "type": "integer"
                 }
             }

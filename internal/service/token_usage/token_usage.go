@@ -13,60 +13,60 @@ const (
 	KeyTool  Key = "tool"
 )
 
-func (s *Service) IncrTodayTokenUsage(ctx context.Context, totalTokens int) {
+func (s *Service) IncrMonthTokenUsage(ctx context.Context, totalTokens int) {
 	// 获取原来的值
 	oldValue, _ := s.redis.Client.Get(ctx, s.cacheKey(KeyToken, s.today())).Int()
 	totalTokens += oldValue
 
 	status := s.redis.Client.Set(ctx, s.cacheKey(KeyToken, s.today()), totalTokens, 24*time.Hour)
 	if status.Err() != nil {
-		s.logger.Sugar.Errorf("IncrTodayTokenUsage: %v", status.Err())
+		s.logger.Sugar.Errorf("IncrMonthTokenUsage: %v", status.Err())
 	}
 }
 
-func (s *Service) IncrTodayToolCallTimes(ctx context.Context, totalTokens int) {
+func (s *Service) IncrMonthToolCallTimes(ctx context.Context, totalTokens int) {
 	oldValue, _ := s.redis.Client.Get(ctx, s.cacheKey(KeyTool, s.today())).Int()
 	totalTokens += oldValue
 
 	status := s.redis.Client.Set(ctx, s.cacheKey(KeyTool, s.today()), totalTokens, 24*time.Hour)
 	if status.Err() != nil {
-		s.logger.Sugar.Errorf("IncrTodayToolCallTimes: %v", status.Err())
+		s.logger.Sugar.Errorf("IncrMonthToolCallTimes: %v", status.Err())
 	}
 }
 
-func (s *Service) GetTodayTokenUsage(ctx context.Context) int {
+func (s *Service) GetMonthTokenUsage(ctx context.Context) int {
 	val, err := s.redis.Client.Get(ctx, s.cacheKey(KeyToken, s.today())).Int()
 
 	if err != nil {
-		s.logger.Sugar.Errorf("GetTodayTokenUsage: %v", err)
+		s.logger.Sugar.Errorf("GetMonthTokenUsage: %v", err)
 	}
 
 	return val
 }
 
-func (s *Service) GetYesterdayTokenUsage(ctx context.Context) int {
+func (s *Service) GetLastMonthTokenUsage(ctx context.Context) int {
 	val, err := s.redis.Client.Get(ctx, s.cacheKey(KeyToken, s.yesterday())).Int()
 	if err != nil {
-		s.logger.Sugar.Errorf("GetYesterdayTokenUsage: %v", err)
+		s.logger.Sugar.Errorf("GetLastMonthTokenUsage: %v", err)
 	}
 
 	return val
 }
 
-func (s *Service) GetTodayToolCallTimes(ctx context.Context) int {
+func (s *Service) GetMonthToolCallTimes(ctx context.Context) int {
 	val, err := s.redis.Client.Get(ctx, s.cacheKey(KeyTool, s.today())).Int()
 
 	if err != nil {
-		s.logger.Sugar.Errorf("GetTodayToolCallTimes: %v", err)
+		s.logger.Sugar.Errorf("GetMonthToolCallTimes: %v", err)
 	}
 
 	return val
 }
 
-func (s *Service) GetYesterdayToolCallTimes(ctx context.Context) int {
+func (s *Service) GetLastMonthToolCallTimes(ctx context.Context) int {
 	val, err := s.redis.Client.Get(ctx, s.cacheKey(KeyTool, s.yesterday())).Int()
 	if err != nil {
-		s.logger.Sugar.Errorf("GetYesterdayToolCallTimes: %v", err)
+		s.logger.Sugar.Errorf("GetLastMonthToolCallTimes: %v", err)
 	}
 
 	return val
@@ -82,4 +82,12 @@ func (s *Service) today() string {
 
 func (s *Service) yesterday() string {
 	return time.Now().AddDate(0, 0, -1).Format("02")
+}
+
+func (s *Service) month() string {
+	return time.Now().Format("01")
+}
+
+func (s *Service) lastMonth() string {
+	return time.Now().AddDate(0, -1, 0).Format("01")
 }

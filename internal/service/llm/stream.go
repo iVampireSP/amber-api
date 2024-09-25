@@ -300,9 +300,9 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 			State: schema.StateDone,
 		})
 
-		s.tokenUsage.IncrTodayTokenUsage(ctx, tokenUsage.TotalTokens)
+		s.tokenUsage.IncrMonthTokenUsage(ctx, tokenUsage.TotalTokens)
 		if totalFunctionCallCount > 0 {
-			s.tokenUsage.IncrTodayToolCallTimes(ctx, totalFunctionCallCount)
+			s.tokenUsage.IncrMonthToolCallTimes(ctx, totalFunctionCallCount)
 		}
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))

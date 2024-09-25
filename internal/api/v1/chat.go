@@ -261,35 +261,15 @@ func (u *ChatController) Update(c *gin.Context) {
 	}
 
 	if chatUpdateRequest.AssistantId != nil {
-		assistantEntity, err := u.assistantService.GetAssistant(c, *chatUpdateRequest.AssistantId)
-		if err != nil {
-			if errors.Is(err, consts.ErrAssistantNotFound) || errors.Is(err, gorm.ErrRecordNotFound) {
-				response.Status(http.StatusNotFound).Error(err).Send()
-				return
-			} else {
-				response.Status(http.StatusInternalServerError).Error(err).Send()
-				return
-			}
-		}
-
-		// 检测是否公开
-		if !assistantEntity.Public && assistantEntity.UserId != u.authService.GetUserId(c) {
-			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
-			return
-		}
-
-		// 检测是不是收藏的
-		hasFavorite, err := u.assistantService.HasFavoriteAssistant(c, chatEntity.UserId, assistantEntity)
+		canUse, err := u.assistantService.CanUse(c, u.authService.GetUserId(c), *chatUpdateRequest.AssistantId)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
 
-		if !hasFavorite {
-			if assistantEntity.UserId != u.authService.GetUserId(c) {
-				response.Status(http.StatusForbidden).Error(consts.ErrPermissionDenied).Send()
-				return
-			}
+		if !canUse {
+			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
+			return
 		}
 
 		chatEntity.AssistantId = chatUpdateRequest.AssistantId

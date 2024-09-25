@@ -16,28 +16,14 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 	// 如果 assistant id 不为 nil
 	if createChatRequest.AssistantId != nil {
 		// 验证 assistant Id 是否属于存在且属于用户
-		a, err := s.a.GetAssistant(ctx, *createChatRequest.AssistantId)
+		canUse, err := s.a.CanUse(ctx, createChatRequest.UserId, *createChatRequest.AssistantId)
 		if err != nil {
 			return nil, err
 		}
 
-		if !a.Public && a.UserId != createChatRequest.UserId {
+		if !canUse {
 			return nil, consts.ErrAssistantNotPublic
 		}
-
-		// 检测是不是收藏的
-		hasFavorite, err := s.a.HasFavoriteAssistant(ctx, createChatRequest.UserId, a)
-		if err != nil {
-			return nil, err
-		}
-
-		if !hasFavorite {
-			// 如果不是收藏的，且不是当前用户的
-			if a.Id == consts.NoRecord || a.UserId != createChatRequest.UserId {
-				return nil, consts.ErrAssistantNotFound
-			}
-		}
-
 	}
 
 	chat.Name = createChatRequest.Name
@@ -109,7 +95,11 @@ func (s *Service) UpdateChat(ctx context.Context, chat *entity.Chat) error {
 }
 
 func (s *Service) GetChat(ctx context.Context, id schema.EntityId) (*entity.Chat, error) {
-	chat, err := s.dao.WithContext(ctx).Chat.Preload(s.dao.Chat.Assistant).Where(s.dao.Chat.Id.Eq(uint(id))).First()
+	// 获取 chat
+	chat, err := s.dao.WithContext(ctx).Chat.
+		Preload(s.dao.Chat.Assistant).
+		Where(s.dao.Chat.Id.Eq(id.Uint())).
+		First()
 
 	return chat, err
 }

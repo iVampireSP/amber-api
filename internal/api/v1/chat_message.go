@@ -330,12 +330,21 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	//	}
 	//}()
 
-	var assistantId = chatEntity.AssistantId
-
 	var currentAssistant = assistantEntity
 
 	// 如果消息指定了其他助理，则由其他助理来回复
 	if request.AssistantId != nil {
+		canUse, err := u.assistantService.CanUse(c, userInfo.Token.Sub, *request.AssistantId)
+		if err != nil {
+			response.Status(http.StatusForbidden).Error(err).Send()
+			return
+		}
+
+		if !canUse {
+			response.Status(http.StatusForbidden).Error(err).Send()
+			return
+		}
+
 		// 如果这个 assistant 不是用户的
 		messageAssistantEntity, err := u.assistantService.GetAssistant(c, *request.AssistantId)
 		if err != nil {
@@ -344,28 +353,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		}
 
 		currentAssistant = messageAssistantEntity
-
-		// 检测是否公开
-		if !messageAssistantEntity.Public && messageAssistantEntity.UserId != userInfo.Token.Sub {
-			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
-			return
-		}
-
-		// 检测是不是收藏的
-		hasFavorite, err := u.assistantService.HasFavoriteAssistant(c, chatEntity.UserId, messageAssistantEntity)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-
-		if !hasFavorite {
-			if messageAssistantEntity.UserId != userInfo.Token.Sub {
-				response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
-				return
-			}
-		}
-
-		assistantId = request.AssistantId
 	}
 
 	// 检测是否存在知识库，支持临时使用的助理的知识库
@@ -399,12 +386,20 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	// 添加用户发送的消息
-	chatMessages = append(chatMessages, entity.ChatMessage{
-		ChatId:      chatEntity.Id,
-		AssistantId: assistantId,
-		Content:     request.Message,
-		Role:        request.Role,
-	})
+	if currentAssistant != nil {
+		chatMessages = append(chatMessages, entity.ChatMessage{
+			ChatId:      chatEntity.Id,
+			AssistantId: &currentAssistant.Id,
+			Content:     request.Message,
+			Role:        request.Role,
+		})
+	} else {
+		chatMessages = append(chatMessages, entity.ChatMessage{
+			ChatId:  chatEntity.Id,
+			Content: request.Message,
+			Role:    request.Role,
+		})
+	}
 
 	// TODO: 如果 request.Message 的大小超过了 1mb, 则转换为文件。转换之前应该先判断助理是否存在知识库
 	// Update: 其实我也不知道这个要不要做,感觉做了意义也不大

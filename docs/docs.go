@@ -2964,6 +2964,40 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/usage": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usage"
+                ],
+                "summary": "获取站点 Usage",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.SiteUsageResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -3868,6 +3902,23 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "schema.SiteUsageResponse": {
+            "type": "object",
+            "properties": {
+                "today_tokens": {
+                    "type": "integer"
+                },
+                "today_tool_calls": {
+                    "type": "integer"
+                },
+                "yesterday_tokens": {
+                    "type": "integer"
+                },
+                "yesterday_tool_calls": {
+                    "type": "integer"
                 }
             }
         },

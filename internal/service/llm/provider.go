@@ -11,6 +11,7 @@ import (
 	"rag-new/internal/service/chat"
 	"rag-new/internal/service/file"
 	"rag-new/internal/service/stream"
+	"rag-new/internal/service/token_usage"
 	"rag-new/internal/service/tool"
 )
 
@@ -25,9 +26,10 @@ type Service struct {
 	chatService      *chat.Service
 	// 也许要把所有的名字改成小写，所以就从接下来的开始改成小写
 	// 然后再慢慢改原来的吧
-	message *message.Message
-	config  *conf.Config
-	dao     *dao.Query
+	message    *message.Message
+	config     *conf.Config
+	dao        *dao.Query
+	tokenUsage *token_usage.Service
 }
 
 func NewLLM(config *conf.Config,
@@ -40,6 +42,7 @@ func NewLLM(config *conf.Config,
 	message *message.Message,
 	dao *dao.Query,
 	chat *chat.Service,
+	tokenUsage *token_usage.Service,
 ) *Service {
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
@@ -61,5 +64,6 @@ func NewLLM(config *conf.Config,
 		message,
 		config,
 		dao,
+		tokenUsage,
 	}
 }

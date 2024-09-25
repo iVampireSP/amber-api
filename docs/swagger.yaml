@@ -623,6 +623,17 @@ definitions:
       success:
         type: boolean
     type: object
+  schema.SiteUsageResponse:
+    properties:
+      today_tokens:
+        type: integer
+      today_tool_calls:
+        type: integer
+      yesterday_tokens:
+        type: integer
+      yesterday_tool_calls:
+        type: integer
+    type: object
   schema.TokenUsage:
     properties:
       completion_tokens:
@@ -2470,6 +2481,25 @@ paths:
       summary: 校验 Discovery 语法
       tags:
       - tool
+  /api/v1/usage:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/schema.SiteUsageResponse'
+              type: object
+      summary: 获取站点 Usage
+      tags:
+      - usage
 securityDefinitions:
   ApiKeyAuth:
     in: header

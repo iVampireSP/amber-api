@@ -14,6 +14,7 @@ type Api struct {
 	File      *v1.FileController
 	Memory    *v1.MemoryController
 	Library   *v1.LibraryController
+	Usage     *v1.UsageController
 }
 
 func NewApiRoute(
@@ -24,9 +25,16 @@ func NewApiRoute(
 	File *v1.FileController,
 	Memory *v1.MemoryController,
 	Library *v1.LibraryController,
+	Usage *v1.UsageController,
 ) *Api {
 	return &Api{
-		User, Tool, Assistant, Chat, File, Memory, Library,
+		User,
+		Tool,
+		Assistant,
+		Chat, File,
+		Memory,
+		Library,
+		Usage,
 	}
 }
 
@@ -97,7 +105,7 @@ func (a *Api) InitNoAuthApiRouter(r *gin.RouterGroup) {
 
 	r.GET("/files/download/:hash", a.File.DownloadImage)
 	//r.GET("/files/user/:id/download", a.File.DownloadUserFile)
-
+	r.GET("/usage", a.Usage.GetUsage)
 }
 
 func (a *Api) InitOpenAICompatibleApiRouter(r *gin.RouterGroup) {

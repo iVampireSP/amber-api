@@ -17,6 +17,7 @@ import (
 	"rag-new/internal/service/memory"
 	"rag-new/internal/service/message_block"
 	"rag-new/internal/service/stream"
+	"rag-new/internal/service/token_usage"
 	"rag-new/internal/service/tool"
 )
 
@@ -36,6 +37,7 @@ type Service struct {
 	Stream       *stream.Service
 	Library      *library.Service
 	Embedding    *embedding.Service
+	TokenUsage   *token_usage.Service
 }
 
 var Provider = wire.NewSet(
@@ -53,6 +55,7 @@ var Provider = wire.NewSet(
 	file.NewService,
 	stream.NewService,
 	library.NewService,
+	token_usage.NewService,
 	NewService,
 )
 
@@ -72,6 +75,7 @@ func NewService(
 	stream *stream.Service,
 	library *library.Service,
 	embedding *embedding.Service,
+	tokenUsage *token_usage.Service,
 ) *Service {
 	return &Service{
 		logger,
@@ -89,5 +93,6 @@ func NewService(
 		stream,
 		library,
 		embedding,
+		tokenUsage,
 	}
 }

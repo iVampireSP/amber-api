@@ -28,6 +28,8 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 	var requestAgain = true
 	// 连续的函数调用次数
 	var functionCallCount = 0
+	//  全部的调用次数
+	var totalFunctionCallCount = 0
 
 	var tokenUsage = &schema.TokenUsage{}
 
@@ -290,12 +292,18 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 		} else {
 			// 不是工具调用，不再进行新的一轮请求，然后清除计数器
 			requestAgain = false
+			totalFunctionCallCount += functionCallCount
 			functionCallCount = 0
 		}
 
 		s.write(ctx, llmChat, &schema.AssistantResponse{
 			State: schema.StateDone,
 		})
+
+		s.tokenUsage.IncrTodayTokenUsage(ctx, tokenUsage.TotalTokens)
+		if totalFunctionCallCount > 0 {
+			s.tokenUsage.IncrTodayToolCallTimes(ctx, totalFunctionCallCount)
+		}
 
 		historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeAI, resp.Choices[0].Content))
 

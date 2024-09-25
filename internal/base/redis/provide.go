@@ -2,10 +2,10 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"github.com/bsm/redislock"
 	"github.com/redis/go-redis/v9"
 	"rag-new/internal/base/conf"
-	"strconv"
 )
 
 type Redis struct {
@@ -15,7 +15,7 @@ type Redis struct {
 
 func NewRedis(c *conf.Config) *Redis {
 	var client = redis.NewClient(&redis.Options{
-		Addr:     c.Redis.Host + ":" + strconv.Itoa(c.Redis.Port),
+		Addr:     fmt.Sprintf("%s:%d", c.Redis.Host, c.Redis.Port),
 		Password: c.Redis.Password,
 		DB:       c.Redis.DB,
 	})

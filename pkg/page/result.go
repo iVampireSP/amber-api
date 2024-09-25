@@ -15,7 +15,7 @@ type PagedResult[T any] struct {
 
 func (p *PagedResult[T]) Offset() int {
 	if p.Page <= 0 {
-		return 1
+		p.Page = 1
 	}
 
 	return OffsetCustom(p.Page, p.PageSize)

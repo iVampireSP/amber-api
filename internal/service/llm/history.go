@@ -232,7 +232,10 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 
 			if h.File != nil {
 				// 如果是 Vision 模型，直接处理
-				if llmChat.Model == s.config.OpenAI.VisionModel {
+				if llmChat.UseVisionModel {
+					// 禁用图片解释工具
+					llmChat.WithoutImage = true
+
 					// 直接添加图片
 					fileUrl, err := s.FileService.GetImageUrl(h.File)
 					if err != nil {

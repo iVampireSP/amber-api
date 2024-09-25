@@ -40,6 +40,11 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 		llmChat.Temperature = 1
 	}
 
+	// 如果使用了 Vision Model
+	if llmChat.UseVisionModel {
+		llmChat.Model = s.config.OpenAI.VisionModel
+	}
+
 	resp, err := s.OpenAI.GenerateContent(ctx,
 		historyContent,
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {

@@ -226,7 +226,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 
 	go func() {
 		if hasImage {
-			llmChat.Model = u.config.OpenAI.VisionModel
+			llmChat.UseVisionModel = true
 			// 禁用 image 工具，因为使用了 vision 模型
 			llmChat.WithoutImage = true
 		}

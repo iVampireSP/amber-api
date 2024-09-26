@@ -7,59 +7,107 @@ import (
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
 	"rag-new/pkg/safetpl"
+	"strings"
 	"time"
 )
 
-func (u *ChatController) getPrompt(c *gin.Context,
-	assistant *entity.Assistant,
-	user *schema.UserPublicInfo,
-	owner schema.ChatOwner,
-	variable map[string]string) (string, error) {
-	var prompt = "When encountering problems, you must first observe the problem and then think about what to do next, and output your thoughts.\n"
+type promptOptions struct {
+	Assistant             *entity.Assistant
+	User                  *schema.UserPublicInfo
+	Owner                 schema.ChatOwner
+	OverrideDefaultPrompt string
+	Variables             map[string]string
+}
 
-	var currentTime = time.Now().Format("2006-01-02 15:04:05")
-	var userPrompt = "Server Time: " + currentTime
+func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (string, error) {
+	var prompts []string
 
-	if assistant != nil {
-		userPrompt += "\nYour(assistant) name: " + assistant.Name
+	prompts = append(prompts, "When encountering problems, you must first observe the problem and then think about what to do next, and output your thoughts.")
+
+	var disableDefaultPrompt = false
+	var disableMemory = false
+	var disableUserPrompt = true
+	var disableAssistantPrompt = true
+
+	// 以下设置按照优先级排序
+
+	// 1. 如果用户不是 nil，则启用记忆和 user prompt
+	if options.User != nil {
+		disableMemory = false
+		disableUserPrompt = false
 	}
-	if user != nil {
-		userPrompt += "\nUsername: " + user.Name + "\nUserId: " + user.Id.String() + "\n"
+
+	// 如果没有指定 Assistant，则启用默认 prompt
+	if options.Assistant == nil {
+		// 那么使用默认的 prompt
+		disableDefaultPrompt = false
+	} else {
+		disableAssistantPrompt = false
+
+		// 如果助理设置了禁用系统默认 Prompt
+		if options.Assistant.DisableDefaultPrompt {
+			// 禁用系统默认 prompt
+			disableDefaultPrompt = true
+		}
+		// 如果要禁用记忆
+		if options.Assistant.DisableMemory {
+			disableMemory = true
+		}
 	}
 
-	// 如果没有指定 Assistant
-	if assistant == nil {
-		// 如果有用户的情况下才启用记忆
-		if user != nil {
-			// 默认启用记忆
-			memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, user.Id)
+	// 如果有覆盖的 prompt，则禁用默认 prompt
+	if options.OverrideDefaultPrompt != "" {
+		disableDefaultPrompt = true
+
+		prompts = append(prompts, options.OverrideDefaultPrompt)
+	}
+
+	// 访客模式下，禁用记忆
+	if options.Owner == schema.OwnerGuest {
+		disableMemory = true
+
+		// 例外情况：如果用户要求 启用记忆
+		if options.Assistant.EnableMemoryForAssistantAPI {
+			disableMemory = false
+		}
+	}
+
+	// 应用更改
+	if !disableDefaultPrompt {
+		prompts = append(prompts, consts.DefaultPrompt)
+	}
+
+	if !disableMemory {
+		var userId schema.UserId
+		if options.User != nil {
+			userId = options.User.Id
+		} else if options.Owner == schema.OwnerGuest && options.Assistant != nil {
+			userId = options.Assistant.UserId
+		}
+
+		if userId != "" {
+			memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, userId)
 			if err != nil {
 				return "", err
 			}
 			if memoryPrompt != "" {
-				prompt += "\nUser memory you know: " + memoryPrompt + "\n"
+				memoryPrompt = "=====The habits of user=====\n" + memoryPrompt + "\n=====End====="
+				prompts = append(prompts, memoryPrompt)
 			}
-
-			prompt += userPrompt
-		}
-		// 如果用户是 nil 的话，使用默认 Prompt
-		prompt += consts.DefaultPrompt
-	} else if assistant.DisableDefaultPrompt {
-		// 如果禁用了默认的 Prompt
-		prompt += assistant.Prompt
-
-		if user != nil {
-			// 那还是可以获取记忆
-			memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, user.Id)
-			if err != nil {
-				return "", err
-			}
-
-			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
 		}
 
-	} else {
-		prompt += userPrompt
+	}
+
+	if !disableUserPrompt {
+		var currentTime = time.Now().Format("2006-01-02 15:04:05")
+		var userPrompt = "=====About=====\n Server Time: " + currentTime
+
+		if options.Assistant != nil {
+			userPrompt += "\nYour name: " + options.Assistant.Name
+		}
+		if options.User != nil {
+			userPrompt += "\nUser's name: " + options.User.Name + "\nUser's id: " + options.User.Id.String() + "\n"
+		}
 
 		var clientIP = ""
 
@@ -82,45 +130,31 @@ func (u *ChatController) getPrompt(c *gin.Context,
 		}
 
 		if clientIP != "" {
-			prompt += `
-The user(who is talking with you)'s IP: ` + clientIP + "(Not your IP, system hint you, you not have IP address)"
+			userPrompt += `The user's IP: ` + clientIP + `(Not your IP, system hint you, you not have IP address)`
 		}
 
-		// 记忆
-		var useMemory = true
-		if assistant.DisableMemory {
-			useMemory = false
-		}
+		userPrompt += "\n=====End About=====\n"
 
-		// 助理 API 是禁用记忆的
-		if owner == schema.OwnerGuest {
-			useMemory = false
-
-			// 例外情况：如果用户要求 启用记忆
-			if assistant.EnableMemoryForAssistantAPI {
-				useMemory = true
-			}
-		}
-
-		if useMemory {
-			memoryPrompt, err := u.memoryService.GenerateMemoryPrompt(c, assistant.UserId)
-			if err != nil {
-				return "", err
-			}
-
-			prompt += "\nUser memory you know: " + memoryPrompt + "\n"
-		}
-
-		if assistant.Prompt != "" {
-			if variable != nil && len(variable) > 0 {
-				prompt += "\n" + safetpl.RenderTemplate(assistant.Prompt, variable)
-			} else {
-				prompt += "\n" + assistant.Prompt
-			}
-		}
+		prompts = append(prompts, userPrompt)
 	}
 
-	prompt += "\n" + safetpl.RenderTemplate("User time: {now}", variable)
+	// 如果没有禁用助理的 prompt
+	if !disableAssistantPrompt {
+
+		prompts = append(prompts, options.Assistant.Prompt)
+	}
+
+	var prompt = strings.Join(prompts, "\n")
+
+	// 渲染模板
+	if options.Variables != nil && len(options.Variables) > 0 {
+		prompt = safetpl.RenderTemplate(prompt, options.Variables)
+
+		// 如果 options.Variables 有 now
+		if options.Variables["now"] != "" {
+			prompt += "\nUser time: " + options.Variables["now"]
+		}
+	}
 
 	return prompt, nil
 }

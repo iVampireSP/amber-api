@@ -80,6 +80,8 @@ definitions:
         type: string
       owner:
         type: string
+      prompt:
+        type: string
       updated_at:
         type: string
       user_id:
@@ -409,6 +411,9 @@ definitions:
       name:
         maxLength: 30
         type: string
+      prompt:
+        maxLength: 1024
+        type: string
     required:
     - name
     type: object
@@ -471,6 +476,9 @@ definitions:
         $ref: '#/definitions/schema.CustomTime'
       name:
         maxLength: 30
+        type: string
+      prompt:
+        maxLength: 1024
         type: string
     required:
     - name

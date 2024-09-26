@@ -34,6 +34,10 @@ func (s *Service) CreateChat(ctx context.Context, createChatRequest *schema.Chat
 		chat.AssistantId = createChatRequest.AssistantId
 	}
 
+	if createChatRequest.Prompt != nil {
+		chat.Prompt = createChatRequest.Prompt
+	}
+
 	if createChatRequest.ExpiredAt != nil {
 		// 过期时间不能小于当前时间
 		if createChatRequest.ExpiredAt.Before(time.Now()) {
@@ -86,6 +90,12 @@ func (s *Service) UpdateChat(ctx context.Context, chat *entity.Chat) error {
 		updateExpr = append(updateExpr, s.dao.Chat.AssistantId.Value(uint(*chat.AssistantId)))
 	} else {
 		updateExpr = append(updateExpr, s.dao.Chat.AssistantId.Null())
+	}
+
+	if chat.Prompt != nil {
+		updateExpr = append(updateExpr, s.dao.Chat.Prompt.Value(*chat.Prompt))
+	} else {
+		updateExpr = append(updateExpr, s.dao.Chat.Prompt.Null())
 	}
 
 	_, err := s.dao.WithContext(ctx).Chat.Where(s.dao.Chat.Id.Eq(uint(chat.Id))).Debug().

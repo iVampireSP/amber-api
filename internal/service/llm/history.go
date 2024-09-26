@@ -24,7 +24,6 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 	var lastToolCall *llms.ToolCall
 
 	var historyContent []llms.MessageContent
-	historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, llmChat.SystemPrompt))
 
 	var systemPrompts []string
 

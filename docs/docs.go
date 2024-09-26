@@ -3122,6 +3122,9 @@ const docTemplate = `{
                 "owner": {
                     "type": "string"
                 },
+                "prompt": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 },
@@ -3588,6 +3591,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "maxLength": 30
+                },
+                "prompt": {
+                    "type": "string",
+                    "maxLength": 1024
                 }
             }
         },
@@ -3680,6 +3687,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "maxLength": 30
+                },
+                "prompt": {
+                    "type": "string",
+                    "maxLength": 1024
                 }
             }
         },

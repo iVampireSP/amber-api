@@ -3,6 +3,7 @@ package memory
 import (
 	"context"
 	"rag-new/internal/schema"
+	"strconv"
 )
 
 func (s *Service) GenerateMemoryPrompt(ctx context.Context, userId schema.UserId) (string, error) {
@@ -13,9 +14,8 @@ func (s *Service) GenerateMemoryPrompt(ctx context.Context, userId schema.UserId
 
 	var m = ""
 
-	for _, memory := range memories {
-		m += memory.Content
-		m += "\n"
+	for i, memory := range memories {
+		m += strconv.Itoa(i+1) + ". " + memory.Content + "\n"
 	}
 
 	return m, nil

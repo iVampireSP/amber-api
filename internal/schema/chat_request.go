@@ -44,6 +44,7 @@ type ChatRequest struct {
 
 type ChatCreateRequest struct {
 	Name        string      `json:"name" binding:"required" validate:"max=30"`
+	Prompt      *string     `json:"prompt" validate:"max=1024"`
 	AssistantId *EntityId   `json:"assistant_id"`
 	ExpiredAt   *CustomTime `json:"expired_at" time_format:"2006-01-02" time_utc:"1"`
 	UserId      UserId      `json:"user_id" swaggerignore:"true" binding:"-"`
@@ -51,6 +52,7 @@ type ChatCreateRequest struct {
 
 type ChatUpdateRequest struct {
 	Name        string      `json:"name" binding:"required" validate:"max=30"`
+	Prompt      *string     `json:"prompt" validate:"max=1024"`
 	AssistantId *EntityId   `json:"assistant_id"`
 	ExpiredAt   *CustomTime `json:"expired_at" time_format:"2006-01-02" time_utc:"1"`
 }

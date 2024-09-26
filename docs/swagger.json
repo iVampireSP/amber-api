@@ -3113,6 +3113,9 @@
                 "owner": {
                     "type": "string"
                 },
+                "prompt": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 },
@@ -3579,6 +3582,10 @@
                 "name": {
                     "type": "string",
                     "maxLength": 30
+                },
+                "prompt": {
+                    "type": "string",
+                    "maxLength": 1024
                 }
             }
         },
@@ -3671,6 +3678,10 @@
                 "name": {
                     "type": "string",
                     "maxLength": 30
+                },
+                "prompt": {
+                    "type": "string",
+                    "maxLength": 1024
                 }
             }
         },

@@ -93,7 +93,11 @@ func (s *Service) UpdateChat(ctx context.Context, chat *entity.Chat) error {
 	}
 
 	if chat.Prompt != nil {
-		updateExpr = append(updateExpr, s.dao.Chat.Prompt.Value(*chat.Prompt))
+		if *chat.Prompt == "" {
+			updateExpr = append(updateExpr, s.dao.Chat.Prompt.Null())
+		} else {
+			updateExpr = append(updateExpr, s.dao.Chat.Prompt.Value(*chat.Prompt))
+		}
 	} else {
 		updateExpr = append(updateExpr, s.dao.Chat.Prompt.Null())
 	}

@@ -260,6 +260,8 @@ func (u *ChatController) Update(c *gin.Context) {
 		chatEntity.ExpiredAt = nil
 	}
 
+	chatEntity.Prompt = chatUpdateRequest.Prompt
+
 	if chatUpdateRequest.AssistantId != nil {
 		canUse, err := u.assistantService.CanUse(c, u.authService.GetUserId(c), *chatUpdateRequest.AssistantId)
 		if err != nil {

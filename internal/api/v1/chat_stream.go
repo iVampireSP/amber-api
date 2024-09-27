@@ -295,8 +295,6 @@ func (u *ChatController) Stream(c *gin.Context) {
 				histories = append(histories, lastChatMessage)
 			}
 
-			// 这样就能取到了剪裁后的，但是这样换汤不换药，之后还是得在 service 层面做分页。
-			// 更新：已经做好啦
 			err = u.llmService.StreamChat(c, llmChat, histories)
 			if err != nil {
 				u.logger.Sugar.Error(err)

@@ -17,7 +17,6 @@ var allowedRoles = []schema.ChatRole{
 	schema.RoleHideHuman,
 	schema.RoleSystem,
 	schema.RoleHideSystem,
-	schema.RoleSystemOverride,
 	schema.RoleAssistant,
 }
 

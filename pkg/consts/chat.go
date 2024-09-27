@@ -30,4 +30,5 @@ var (
 	ErrTypeRequired          = errors.New("type 是必须的")
 	ErrFileUrlNotURL         = errors.New("当 type 是 file_url 时，文件 URL 是必须的")
 	ErrFileUrlNotValidBase64 = errors.New("文件 URL 不是有效的 base64")
+	ErrChatRoleNotAllowed    = errors.New("不允许的角色")
 )

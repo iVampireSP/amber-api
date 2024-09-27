@@ -3440,7 +3440,9 @@ const docTemplate = `{
                         "user_hide",
                         "system",
                         "system_hide",
-                        "assistant"
+                        "assistant",
+                        "system_override",
+                        "user_later"
                     ]
                 }
             }
@@ -3619,7 +3621,8 @@ const docTemplate = `{
                         "system",
                         "system_hide",
                         "assistant",
-                        "image"
+                        "system_override",
+                        "user_later"
                     ]
                 },
                 "variables": {

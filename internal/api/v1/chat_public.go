@@ -7,6 +7,7 @@ import (
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -172,6 +173,11 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		return
 	}
 
+	if !slices.Contains(allowedChatMessageRoles, addPublicChatMessageRequest.Role) {
+		response.Status(http.StatusBadRequest).Error(consts.ErrChatRoleNotAllowed).Send()
+		return
+	}
+
 	if addPublicChatMessageRequest.Role == schema.RoleFile {
 		response.Status(http.StatusBadRequest).Error(consts.ErrRoleCanNotBeFile).Send()
 		return
@@ -201,6 +207,23 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	// 如果不是 human 或者 hide_human，则不需要回复
 	if addPublicChatMessageRequest.Role != schema.RoleHuman && addPublicChatMessageRequest.Role != schema.RoleHideHuman {
 		// 不需要生成 ID,直接添加
+		needStream = false
+	}
+	// 如果是 RoleSystemOverride，更新 Chat，并且也不需要回复
+	if addPublicChatMessageRequest.Role == schema.RoleSystemOverride {
+		// 覆盖消息
+		chatEntity.Prompt = &addPublicChatMessageRequest.Message
+		err := u.chatService.UpdateChat(c, chatEntity)
+		if err != nil {
+			response.Error(err).Send()
+			return
+		}
+
+		needStream = false
+	}
+
+	// 如果是 RoleHumanLater
+	if addPublicChatMessageRequest.Role == schema.RoleHumanLater {
 		needStream = false
 	}
 

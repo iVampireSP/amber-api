@@ -299,6 +299,8 @@ definitions:
         - system
         - system_hide
         - assistant
+        - system_override
+        - user_later
         type: string
     required:
     - assistant_key
@@ -430,7 +432,8 @@ definitions:
         - system
         - system_hide
         - assistant
-        - image
+        - system_override
+        - user_later
         type: string
       variables:
         additionalProperties:

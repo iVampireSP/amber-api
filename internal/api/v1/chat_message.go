@@ -10,7 +10,18 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"slices"
 )
+
+var allowedChatMessageRoles = []schema.ChatRole{
+	schema.RoleHuman,
+	schema.RoleHumanLater,
+	schema.RoleHideHuman,
+	schema.RoleSystem,
+	schema.RoleHideSystem,
+	schema.RoleSystemOverride,
+	schema.RoleAssistant,
+}
 
 // ListChatMessage godoc
 // @Summary      查看聊天记录
@@ -130,6 +141,11 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	err = c.ShouldBindJSON(&request)
 	if err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	if !slices.Contains(allowedChatMessageRoles, request.Role) {
+		response.Status(http.StatusBadRequest).Error(consts.ErrChatRoleNotAllowed).Send()
 		return
 	}
 

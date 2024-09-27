@@ -124,8 +124,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}
 
-	// 如果确实有助理，则绑定工具
-	if assistantEntity != nil {
+	// 如果确实有助理，则绑定工具，并且是用户状态（不检测 chat public）
+	if assistantEntity != nil && chatEntity.Owner == schema.OwnerUser {
+		// 注意，这里需要检测是否使用 chatPublic 的情况
 		canUse, err := u.assistantService.CanUse(c, chatEntity.UserId, assistantEntity.Id)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()

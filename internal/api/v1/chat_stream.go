@@ -290,7 +290,8 @@ func (u *ChatController) Stream(c *gin.Context) {
 			// lastMessage 是用户最后发送的消息，将它添加到 history 末尾
 			// 为什么要这么做呢，因为最后个消息是不能单独成一个 block 的
 			// Update: 这里应该做个判断，如果 lastMessage 和当前的 Message 一样，则不用添加
-			if lastChatMessage.Id != histories[len(histories)-1].Id {
+			var historyLen = len(histories)
+			if historyLen > 0 && lastChatMessage.Id != histories[historyLen-1].Id {
 				histories = append(histories, lastChatMessage)
 			}
 

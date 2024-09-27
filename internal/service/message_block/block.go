@@ -11,7 +11,15 @@ import (
 	"slices"
 )
 
-var skippedRoles = []schema.ChatRole{schema.RoleSystem, schema.RoleHideSystem}
+var allowedRoles = []schema.ChatRole{
+	schema.RoleHuman,
+	schema.RoleHumanLater,
+	schema.RoleHideHuman,
+	schema.RoleSystem,
+	schema.RoleHideSystem,
+	schema.RoleSystemOverride,
+	schema.RoleAssistant,
+}
 
 func (s *Service) MessageToBlock(cms []*entity.ChatMessage) ([]*entity.MessageBlock, error) {
 	// 记录是否成为了一组
@@ -22,8 +30,8 @@ func (s *Service) MessageToBlock(cms []*entity.ChatMessage) ([]*entity.MessageBl
 	var currentChatId schema.EntityId
 
 	for _, v := range cms {
-		// 如果在 skippedRoles, 则跳过
-		if slices.Contains(skippedRoles, v.Role) {
+		// 如果不在 allowedRoles, 则跳过
+		if !slices.Contains(allowedRoles, v.Role) {
 			continue
 		}
 
@@ -36,26 +44,11 @@ func (s *Service) MessageToBlock(cms []*entity.ChatMessage) ([]*entity.MessageBl
 
 		currentChatId = v.ChatId
 
-		// 如果是 user
-		if v.Role == schema.RoleHuman {
+		if v.Role != schema.RoleAssistant {
 			tempMessageContent += v.Content + "\n"
 			tempMessageList = append(tempMessageList, v)
-		}
-
-		// 如果是 Tool Call
-		if v.Role == schema.RoleToolCall {
-			tempMessageContent += v.Content + "\n"
-			tempMessageList = append(tempMessageList, v)
-		}
-
-		if v.Role == schema.RoleTool {
-			tempMessageContent += v.Content + "\n"
-			tempMessageList = append(tempMessageList, v)
-
-		}
-
-		// 如果是 Assistant
-		if v.Role == schema.RoleAssistant {
+		} else if v.Role == schema.RoleAssistant {
+			// 如果是 Assistant，则消息块结束
 			blocked = true
 			// 最后收尾不需要换行
 			tempMessageContent += v.Content
@@ -111,50 +104,6 @@ func (s *Service) SaveBlock(ctx context.Context, messageBlock []*entity.MessageB
 
 		notExistsBlocks = append(notExistsBlocks, bm)
 		pendingHashes = append(pendingHashes, bm.Hash)
-		//
-		//// add if not exists
-		//exists, err := s.BlockExists(ctx, bm.ChatId, bm.Hash)
-		//if err != nil {
-		//	return err
-		//}
-		//
-		//if !exists {
-		//	err = s.dao.WithContext(ctx).MessageBlock.Create(bm)
-		//	if err != nil {
-		//		return err
-		//	}
-		//} else {
-		//	// get
-		//	bm, err = s.dao.WithContext(ctx).MessageBlock.Where(s.dao.MessageBlock.Hash.Eq(bm.Hash)).First()
-		//	if err != nil {
-		//		return err
-		//	}
-		//}
-		//
-		//var content = bm.FullContent
-		//// 如果 content > 8192
-		//if len(content) > s.config.OpenAI.EmbeddingMaxToken {
-		//	// 剪裁
-		//	content = content[:s.config.OpenAI.EmbeddingMaxToken]
-		//}
-		//
-		//emb, err := s.embedding.TextEmbedding(ctx, []string{content})
-		//if err != nil {
-		//	return err
-		//}
-		//
-		//var entityCols = []entity2.Column{
-		//	entity2.NewColumnFloatVector("vector", s.config.OpenAI.EmbeddingDim, emb),
-		//	entity2.NewColumnVarChar("model", []string{s.config.OpenAI.EmbeddingModel}),
-		//	entity2.NewColumnInt64("block_id", []int64{int64(bm.Id)}),
-		//	entity2.NewColumnInt64("chat_id", []int64{int64(bm.ChatId)}),
-		//}
-		//
-		//// insert to milvus
-		//_, err = s.milvus.Upsert(ctx, s.config.Milvus.MessageBlockCollection, "", entityCols...)
-		//if err != nil {
-		//	return err
-		//}
 	}
 
 	// 批量寻找不存在的块

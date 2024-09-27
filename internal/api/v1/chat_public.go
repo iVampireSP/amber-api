@@ -204,6 +204,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 	var chatMessageResponse = &schema.ChatMessageResponse{}
 
 	var needStream = true
+	var addMessage = true
 	// 如果不是 human 或者 hide_human，则不需要回复
 	if addPublicChatMessageRequest.Role != schema.RoleHuman && addPublicChatMessageRequest.Role != schema.RoleHideHuman {
 		// 不需要生成 ID,直接添加
@@ -220,6 +221,7 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		}
 
 		needStream = false
+		addMessage = false
 	}
 
 	// 如果是 RoleHumanLater
@@ -346,11 +348,13 @@ func (u *ChatController) AddPublicChatMessages(c *gin.Context) {
 		Role:    addPublicChatMessageRequest.Role,
 	})
 
-	for _, cm := range chatMessages {
-		err = u.cm.CreateChatMessage(c, &cm)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
+	if addMessage {
+		for _, cm := range chatMessages {
+			err = u.cm.CreateChatMessage(c, &cm)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
 		}
 	}
 

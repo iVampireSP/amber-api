@@ -246,6 +246,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	}
 
 	var needStream = true
+	var addMessage = true
 
 	// 不允许添加文件
 	if request.Role == schema.RoleFile {
@@ -269,6 +270,7 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			return
 		}
 
+		addMessage = false
 		needStream = false
 	}
 
@@ -443,11 +445,13 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 	//
 	//}
 
-	for _, chatMessage := range chatMessages {
-		err = u.cm.CreateChatMessage(c, &chatMessage)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
+	if addMessage {
+		for _, chatMessage := range chatMessages {
+			err = u.cm.CreateChatMessage(c, &chatMessage)
+			if err != nil {
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
 		}
 	}
 

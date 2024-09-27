@@ -257,15 +257,14 @@ func (u *ChatController) Stream(c *gin.Context) {
 					}
 				}()
 
-				// 清空 history
-				histories = []*entity.ChatMessage{}
-
 				// 搜索 message block，然后将它排到 messageBlock 的前面
 				messageBlock2, err := u.messageBlock.SearchMessageBlock(c, chatEntity, lastChatMessage.Content)
 				if err != nil {
 					// 出现错误，那就丢失以前的上下文
 					u.logger.Sugar.Error(err)
 				} else {
+					// 清空 history
+					histories = []*entity.ChatMessage{}
 					for i := 0; i < len(messageBlock2); i++ {
 						histories = append(histories, messageBlock2[i].Message...)
 					}

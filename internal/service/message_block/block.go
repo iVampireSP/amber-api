@@ -190,8 +190,12 @@ func (s *Service) SearchMessageBlock(ctx context.Context, chat *entity.Chat, con
 
 	var ids []uint
 
-	// get all data
 	for _, res := range existingChunks {
+		// 没找到，直接返回空的
+		if res.ResultCount == 0 {
+			return make([]*entity.MessageBlock, 0), nil
+		}
+
 		var blockIdColumn *entity2.ColumnInt64
 		for _, field := range res.Fields {
 			if field.Name() == "block_id" {
@@ -202,8 +206,10 @@ func (s *Service) SearchMessageBlock(ctx context.Context, chat *entity.Chat, con
 			}
 		}
 
+		// 没有记录
 		if blockIdColumn == nil {
-			return nil, fmt.Errorf("block_id column not found")
+			return make([]*entity.MessageBlock, 0), nil
+			//return nil, fmt.Errorf("block_id column not found")
 		}
 
 		for i := 0; i < res.ResultCount; i++ {

@@ -18,6 +18,10 @@ var (
 	RoleTool ChatRole = "tool"
 	// RoleKnowledge 是知识库的响应
 	RoleKnowledge ChatRole = "knowledge"
+	// RoleSystemOverride 是特殊的一个角色，可以直接覆盖 Chat 的默认提示词
+	RoleSystemOverride ChatRole = "system_override"
+	// RoleHumanLater 是一个特殊的角色，不会让 AI 立即回复，也不会被拦截
+	RoleHumanLater ChatRole = "user_later"
 )
 
 type ChatOwner string

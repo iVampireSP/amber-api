@@ -243,6 +243,24 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 		needStream = false
 	}
 
+	// 如果是 RoleSystemOverride，更新 Chat，并且也不需要回复
+	if request.Role == schema.RoleSystemOverride {
+		// 覆盖消息
+		chatEntity.Prompt = &request.Message
+		err := u.chatService.UpdateChat(c, chatEntity)
+		if err != nil {
+			response.Error(err).Send()
+			return
+		}
+
+		needStream = false
+	}
+
+	// 如果是 RoleHumanLater
+	if request.Role == schema.RoleHumanLater {
+		needStream = false
+	}
+
 	// last chat message
 	lastChatMessage, err := u.cm.GetLatestMessage(c, chatEntity)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {

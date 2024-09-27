@@ -99,6 +99,16 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 		}
 
 		switch h.Role {
+		// RoleSystem 和 RoleHideSystem 为系统消息
+		case schema.RoleSystem:
+			if h.Content == "" {
+				continue
+			}
+
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
+		case schema.RoleHideSystem:
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
+		//	RoleHuman，RoleHideHuman，RoleHumanLater 是用户消息
 		case schema.RoleHuman:
 
 			// 获取多个对话中的助理的信息
@@ -116,6 +126,15 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			if !hasHumanMessage {
 				hasHumanMessage = true
 			}
+		case schema.RoleHideHuman:
+			if !hasHumanMessage {
+				hasHumanMessage = true
+			}
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+
+		case schema.RoleHumanLater:
+			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
+
 		case schema.RoleAssistant:
 			// 检测是否是悬垂调用
 			if lastToolCall != nil {
@@ -204,19 +223,6 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 
 			}
 
-		case schema.RoleSystem:
-			if h.Content == "" {
-				continue
-			}
-
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
-		case schema.RoleHideSystem:
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, h.Content))
-		case schema.RoleHideHuman:
-			if !hasHumanMessage {
-				hasHumanMessage = true
-			}
-			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
 		case schema.RoleFile:
 			if !hasFileMessage {
 				hasFileMessage = true

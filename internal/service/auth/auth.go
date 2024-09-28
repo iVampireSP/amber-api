@@ -119,6 +119,11 @@ func (a *Service) parseUserJWT(tokenType schema.JWTTokenTypes, jwtToken string) 
 			return nil, nil
 		}
 
+		// TODO: Aud 检测，允许开发人员允许自己的应用 Token 调用 API
+		//if jwtIdToken.Token.Aud == "a" {
+		//
+		//}
+
 		// 手动指定，因为 mapstructure 无法转换 UserID 类型
 		jwtIdToken.Token.Sub = sub
 	}

@@ -153,7 +153,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 提取 history
-	histories, historyCount, err := u.cm.GetLatestChatMessage(c, chatEntity)
+	histories, historyCount, err := u.cm.GetLatestChatMessage(c, chatEntity, u.config.LLM.ContextOptimizeActiveCount)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -243,8 +243,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	if len(histories) > 0 {
 		go func() {
+			// Begin: 智能上下文
 			// 如果消息到 u.config.LLM.ContextOptimizeActiveCount 条，则执行消息分块
-			if historyCount >= u.config.LLM.ContextOptimizeActiveCount {
+			if historyCount >= int64(u.config.LLM.ContextOptimizeActiveCount) {
 				// 将 message 提取一下
 				messageBlock, err := u.messageBlock.MessageToBlock(histories)
 				if err != nil {

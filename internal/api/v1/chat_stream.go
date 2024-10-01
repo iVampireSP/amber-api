@@ -124,8 +124,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}
 
-	// 如果确实有助理，则绑定工具
-	if assistantEntity != nil {
+	// 如果确实有助理，则绑定工具，并且是用户状态（不检测 chat public）
+	if assistantEntity != nil && chatEntity.Owner == schema.OwnerUser {
+		// 注意，这里需要检测是否使用 chatPublic 的情况
 		canUse, err := u.assistantService.CanUse(c, chatEntity.UserId, assistantEntity.Id)
 		if err != nil {
 			response.Status(http.StatusInternalServerError).Error(err).Send()
@@ -152,7 +153,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 	}
 
 	// 提取 history
-	histories, historyCount, err := u.cm.GetLatestChatMessage(c, chatEntity)
+	histories, historyCount, err := u.cm.GetLatestChatMessage(c, chatEntity, u.config.LLM.ContextOptimizeActiveCount)
 	if err != nil {
 		response.Status(http.StatusInternalServerError).Error(err).Send()
 		return
@@ -242,8 +243,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	if len(histories) > 0 {
 		go func() {
+			// Begin: 智能上下文
 			// 如果消息到 u.config.LLM.ContextOptimizeActiveCount 条，则执行消息分块
-			if historyCount >= u.config.LLM.ContextOptimizeActiveCount {
+			if historyCount >= int64(u.config.LLM.ContextOptimizeActiveCount) {
 				// 将 message 提取一下
 				messageBlock, err := u.messageBlock.MessageToBlock(histories)
 				if err != nil {

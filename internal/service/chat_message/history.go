@@ -38,9 +38,8 @@ func (s *Service) GetChatMessageWithHide(ctx context.Context, chat *entity.Chat)
 }
 
 // GetLatestChatMessage 获取最新的消息，并保证消息的完整性
-func (s *Service) GetLatestChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, int64, error) {
+func (s *Service) GetLatestChatMessage(ctx context.Context, chat *entity.Chat, pageSize int) ([]*entity.ChatMessage, int64, error) {
 	page := 1
-	pageSize := 10
 	var r []*entity.ChatMessage
 	var count int64
 

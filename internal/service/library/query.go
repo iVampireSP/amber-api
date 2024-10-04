@@ -61,8 +61,12 @@ func (s *Service) SearchLibrary(ctx context.Context, content string, library *en
 
 	var ids []uint
 
-	// get all data
 	for _, res := range existingChunks {
+		if res.ResultCount == 0 {
+			// 没找到，直接返回空的
+			return make([]*entity.DocumentChunk, 0), nil
+		}
+
 		var chunkColumn *entity2.ColumnInt64
 		for _, field := range res.Fields {
 			if field.Name() == "chunk_id" {
@@ -84,7 +88,6 @@ func (s *Service) SearchLibrary(ctx context.Context, content string, library *en
 			}
 
 			ids = append(ids, uint(id))
-
 		}
 	}
 

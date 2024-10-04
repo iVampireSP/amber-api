@@ -375,52 +375,49 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		c.Writer.Flush()
 
 		return
+	} else {
+		// 非 stream 模式
+		var llmFullResponse = ""
+
+		go func() {
+			for {
+				msg, ok := <-llmResponseChan
+				if !ok {
+					break
+				}
+				if msg == nil {
+					break
+				}
+				switch msg.State {
+				case schema.StateChunk:
+					llmFullResponse += msg.Content
+				case schema.StateDone:
+					tokenUsage = msg.TokenUsage
+				case schema.StateFailed:
+					response.Status(http.StatusInternalServerError).Error(err).Send()
+					return
+				}
+			}
+		}()
+
+		response.Data(schema.OpenAIChatCompletionResponse{
+			ID:      fakeChatId,
+			Object:  "chat.completion.chunk",
+			Created: created,
+			Model:   chatRequest.Model,
+			Choices: []schema.OpenAIChatCompletionResponseChoice{
+				{
+					Message: schema.OpenAIChatCompletionRequestMessage{
+						Content: llmFullResponse,
+						Role:    string(schema.RoleAssistant),
+					},
+					Index: 0,
+				},
+			},
+			Usage: tokenUsage,
+		}).WithoutWrap().Error(err).Send()
 	}
 
-	// 非 stream 模式
-	var llmFullResponse = ""
-	c.Stream(func(w io.Writer) bool {
-		msg, ok := <-llmResponseChan
-		if !ok {
-			return false
-		}
-		if msg == nil {
-			return true
-		}
-		switch msg.State {
-		case schema.StateChunk:
-			llmFullResponse += msg.Content
-			return true
-		case schema.StateDone:
-			tokenUsage = msg.TokenUsage
-			return true
-		case schema.StateFailed:
-			return false
-		case schema.StateFinished:
-			return false
-		case schema.StateToolFailed:
-			return false
-		default:
-			return true
-		}
-	})
-
-	response.Data(schema.OpenAIChatCompletionResponse{
-		ID:      fakeChatId,
-		Object:  "chat.completion.chunk",
-		Created: created,
-		Model:   chatRequest.Model,
-		Choices: []schema.OpenAIChatCompletionResponseChoice{
-			{
-				Message: schema.OpenAIChatCompletionRequestMessage{
-					Content: llmFullResponse,
-					Role:    string(schema.RoleAssistant),
-				},
-				Index: 0,
-			},
-		},
-		Usage: tokenUsage,
-	}).WithoutWrap().Error(err).Send()
 }
 
 func base64ToReader(s string) (io.ReadSeeker, error) {

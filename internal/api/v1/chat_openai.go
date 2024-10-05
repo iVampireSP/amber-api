@@ -241,7 +241,6 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		err = u.llmService.StreamChat(c, llmChat, histories)
 		if err != nil {
 			u.logger.Sugar.Error(err)
-			response.Status(http.StatusInternalServerError).Error(err).Send()
 			return
 		}
 	}()

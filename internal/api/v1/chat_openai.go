@@ -378,26 +378,24 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		// 非 stream 模式
 		var llmFullResponse = ""
 
-		go func() {
-			for {
-				msg, ok := <-llmResponseChan
-				if !ok {
-					break
-				}
-				if msg == nil {
-					break
-				}
-				switch msg.State {
-				case schema.StateChunk:
-					llmFullResponse += msg.Content
-				case schema.StateDone:
-					tokenUsage = msg.TokenUsage
-				case schema.StateFailed:
-					response.Status(http.StatusInternalServerError).Error(err).Send()
-					return
-				}
+		for {
+			msg, ok := <-llmResponseChan
+			if !ok {
+				break
 			}
-		}()
+			if msg == nil {
+				break
+			}
+			switch msg.State {
+			case schema.StateChunk:
+				llmFullResponse += msg.Content
+			case schema.StateDone:
+				tokenUsage = msg.TokenUsage
+			case schema.StateFailed:
+				response.Status(http.StatusInternalServerError).Error(err).Send()
+				return
+			}
+		}
 
 		response.Data(schema.OpenAIChatCompletionResponse{
 			ID:      fakeChatId,

@@ -3038,6 +3038,9 @@ const docTemplate = `{
                 "temperature": {
                     "type": "number"
                 },
+                "total_token_usage": {
+                    "type": "integer"
+                },
                 "updated_at": {
                     "type": "string"
                 },

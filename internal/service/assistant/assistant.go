@@ -196,3 +196,10 @@ func (s *Service) UnbindLibrary(ctx context.Context, assistant *entity.Assistant
 
 	return err
 }
+
+func (s *Service) IncrementTotalTokenUsage(ctx context.Context, assistant *entity.Assistant, token int64) error {
+	_, err := s.dao.WithContext(ctx).Assistant.Where(s.dao.Assistant.Id.Eq(assistant.Id.Uint())).
+		Update(s.dao.Assistant.TotalTokenUsage, s.dao.Assistant.TotalTokenUsage.Add(token))
+
+	return err
+}

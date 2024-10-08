@@ -427,6 +427,13 @@ func (u *ChatController) Stream(c *gin.Context) {
 		messageList = append(messageList, *newMessage)
 	}
 
+	if assistantEntity != nil {
+		err := u.assistantService.IncrementTotalTokenUsage(c, assistantEntity, int64(tokenUsage.TotalTokens))
+		if err != nil {
+			u.logger.Sugar.Error(err)
+		}
+	}
+
 	// 添加到数据库
 	for _, message := range messageList {
 		// 如果 assistant 不为空，则为接下来的每个消息附上当前回复的 assistant id

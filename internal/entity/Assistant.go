@@ -10,6 +10,7 @@ type Assistant struct {
 	Prompt                      string           `json:"prompt"`
 	Description                 string           `json:"description"`
 	UserId                      schema.UserId    `json:"user_id"`
+	TotalTokenUsage             int64            `json:"total_token_usage"`
 	LibraryId                   *schema.EntityId `json:"library_id"`
 	Library                     *Library         `json:"-"`
 	Temperature                 float64          `json:"temperature"`

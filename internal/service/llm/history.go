@@ -121,6 +121,12 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 				h.Content = fmt.Sprintf("[Sent at %s]%s", timeString, h.Content)
 			}
 
+			newContent, err := s.optimizeFlow(h.Content)
+			if err != nil {
+				return nil, err
+			}
+			h.Content = newContent
+
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
 
 			if !hasHumanMessage {
@@ -130,9 +136,22 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 			if !hasHumanMessage {
 				hasHumanMessage = true
 			}
+
+			newContent, err := s.optimizeFlow(h.Content)
+			if err != nil {
+				return nil, err
+			}
+			h.Content = newContent
+
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
 
 		case schema.RoleHumanLater:
+			newContent, err := s.optimizeFlow(h.Content)
+			if err != nil {
+				return nil, err
+			}
+			h.Content = newContent
+
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, h.Content))
 
 		case schema.RoleAssistant:
@@ -298,4 +317,34 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 	}
 
 	return message, nil
+}
+
+type flowFunc func(content string) (string, error)
+
+func (s *Service) optimizeFlow(content string) (string, error) {
+	var flow = []flowFunc{
+		s.flowCleanupNewLine,
+	}
+
+	for _, f := range flow {
+		var err error
+		content, err = f(content)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return content, nil
+}
+
+func (s *Service) flowCleanupNewLine(content string) (string, error) {
+	// 匹配连续的 \r\n
+	mergedText := strings.ReplaceAll(content, "\n\n", "\n")
+
+	// 继续合并，直到没有连续的换行
+	for strings.Contains(mergedText, "\n\n") {
+		mergedText = strings.ReplaceAll(mergedText, "\n\n", "\n")
+	}
+
+	return mergedText, nil
 }

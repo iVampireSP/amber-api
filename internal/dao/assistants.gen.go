@@ -34,6 +34,7 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 	_assistant.Prompt = field.NewString(tableName, "prompt")
 	_assistant.Description = field.NewString(tableName, "description")
 	_assistant.UserId = field.NewString(tableName, "user_id")
+	_assistant.TotalTokenUsage = field.NewInt64(tableName, "total_token_usage")
 	_assistant.LibraryId = field.NewUint(tableName, "library_id")
 	_assistant.Temperature = field.NewFloat64(tableName, "temperature")
 	_assistant.Public = field.NewBool(tableName, "public")
@@ -75,6 +76,7 @@ type assistant struct {
 	Prompt                      field.String
 	Description                 field.String
 	UserId                      field.String
+	TotalTokenUsage             field.Int64
 	LibraryId                   field.Uint
 	Temperature                 field.Float64
 	Public                      field.Bool
@@ -105,6 +107,7 @@ func (a *assistant) updateTableName(table string) *assistant {
 	a.Prompt = field.NewString(table, "prompt")
 	a.Description = field.NewString(table, "description")
 	a.UserId = field.NewString(table, "user_id")
+	a.TotalTokenUsage = field.NewInt64(table, "total_token_usage")
 	a.LibraryId = field.NewUint(table, "library_id")
 	a.Temperature = field.NewFloat64(table, "temperature")
 	a.Public = field.NewBool(table, "public")
@@ -127,7 +130,7 @@ func (a *assistant) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *assistant) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 14)
+	a.fieldMap = make(map[string]field.Expr, 15)
 	a.fieldMap["id"] = a.Id
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -135,6 +138,7 @@ func (a *assistant) fillFieldMap() {
 	a.fieldMap["prompt"] = a.Prompt
 	a.fieldMap["description"] = a.Description
 	a.fieldMap["user_id"] = a.UserId
+	a.fieldMap["total_token_usage"] = a.TotalTokenUsage
 	a.fieldMap["library_id"] = a.LibraryId
 	a.fieldMap["temperature"] = a.Temperature
 	a.fieldMap["public"] = a.Public

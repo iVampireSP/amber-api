@@ -373,6 +373,14 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		}
 		c.Writer.Flush()
 
+		// 增加助理的 Token 用量
+		if assistantEntity != nil {
+			err := u.assistantService.IncrementTotalTokenUsage(c, assistantEntity, int64(tokenUsage.TotalTokens))
+			if err != nil {
+				u.logger.Sugar.Error(err)
+			}
+		}
+
 		return
 	} else {
 		// 非 stream 模式
@@ -394,6 +402,14 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 			case schema.StateFailed:
 				response.Status(http.StatusInternalServerError).Error(err).Send()
 				return
+			}
+		}
+
+		// 增加助理的 Token 用量
+		if assistantEntity != nil {
+			err := u.assistantService.IncrementTotalTokenUsage(c, assistantEntity, int64(tokenUsage.TotalTokens))
+			if err != nil {
+				u.logger.Sugar.Error(err)
 			}
 		}
 

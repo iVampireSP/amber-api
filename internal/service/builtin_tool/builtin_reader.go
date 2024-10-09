@@ -26,12 +26,6 @@ func (s *Service) ReadUrl(_ context.Context, args schema.FunctionCallArguments) 
 	}
 
 	var jinaKey = s.config.ThirdParty.JinaAIKey
-
-	if jinaKey == "" {
-		response.Content = ErrOnReader.Error()
-		return response, ErrOnReader
-	}
-
 	var fullUrl = JinaReader + "/" + params.Url
 
 	req, err := http.NewRequest("GET", fullUrl, nil)
@@ -40,7 +34,9 @@ func (s *Service) ReadUrl(_ context.Context, args schema.FunctionCallArguments) 
 		return response, ErrOnReader
 	}
 
-	req.Header.Set("Authorization", "Bearer "+jinaKey)
+	if jinaKey != "" {
+		req.Header.Set("Authorization", "Bearer "+jinaKey)
+	}
 
 	rsp, err := http.DefaultClient.Do(req)
 	if err != nil {

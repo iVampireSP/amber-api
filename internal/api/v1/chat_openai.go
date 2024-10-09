@@ -406,7 +406,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		}
 
 		// 增加助理的 Token 用量
-		if assistantEntity != nil {
+		if assistantEntity != nil && tokenUsage != nil {
 			err := u.assistantService.IncrementTotalTokenUsage(c, assistantEntity, int64(tokenUsage.TotalTokens))
 			if err != nil {
 				u.logger.Sugar.Error(err)

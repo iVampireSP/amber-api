@@ -22,8 +22,6 @@ type promptOptions struct {
 func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (string, error) {
 	var prompts []string
 
-	prompts = append(prompts, "When encountering problems, you must first observe the problem and then think about what to do next, and output your thoughts.")
-
 	var disableDefaultPrompt = false
 	var disableMemory = false
 	var disableUserPrompt = true
@@ -91,7 +89,7 @@ func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (stri
 				return "", err
 			}
 			if memoryPrompt != "" {
-				memoryPrompt = "=====The habits of user=====\n" + memoryPrompt + "\n=====End====="
+				memoryPrompt = "用户的喜好: \n" + memoryPrompt
 				prompts = append(prompts, memoryPrompt)
 			}
 		}
@@ -100,13 +98,13 @@ func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (stri
 
 	if !disableUserPrompt {
 		var currentTime = time.Now().Format("2006-01-02 15:04:05")
-		var userPrompt = "=====About=====\n Server Time: " + currentTime
+		var userPrompt = "关于：\n - 服务器时间: " + currentTime
 
 		if options.Assistant != nil {
-			userPrompt += "\nYour name: " + options.Assistant.Name
+			userPrompt += "\n - 你的名字: " + options.Assistant.Name
 		}
 		if options.User != nil {
-			userPrompt += "\nUser's name: " + options.User.Name + "\nUser's id: " + options.User.Id.String() + "\n"
+			userPrompt += "\n - 用户的名字: " + options.User.Name + "\n- 用户 ID: " + options.User.Id.String() + "\n"
 		}
 
 		var clientIP = ""
@@ -130,10 +128,8 @@ func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (stri
 		}
 
 		if clientIP != "" {
-			userPrompt += `The user's IP: ` + clientIP + `(Not your IP, system hint you, you not have IP address)`
+			userPrompt += `- 用户 IP: ` + clientIP
 		}
-
-		userPrompt += "\n=====End About=====\n"
 
 		prompts = append(prompts, userPrompt)
 	}
@@ -152,7 +148,7 @@ func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (stri
 
 		// 如果 options.Variables 有 now
 		if options.Variables["now"] != "" {
-			prompt += "\nUser time: " + options.Variables["now"]
+			prompt += "\n用户时间: " + options.Variables["now"]
 		}
 	}
 

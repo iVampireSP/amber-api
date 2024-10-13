@@ -124,7 +124,7 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}
 
-	// 如果确实有助理，则绑定工具，并且是用户状态（不检测 chat public）
+	// 检测能否使用该助理
 	if assistantEntity != nil && chatEntity.Owner == schema.OwnerUser {
 		// 注意，这里需要检测是否使用 chatPublic 的情况
 		canUse, err := u.assistantService.CanUse(c, chatEntity.UserId, assistantEntity.Id)
@@ -137,17 +137,10 @@ func (u *ChatController) Stream(c *gin.Context) {
 			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
 			return
 		}
-
-		// 获取 assistant 绑定的 tools
-		tools, err = u.assistantService.ToLLMTool(c, assistantEntity)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
 	}
 
-	// 如果是 Chat Public
-	if assistantEntity != nil && chatEntity.Owner == schema.OwnerGuest {
+	// 如果消息有助理，则绑定工具
+	if assistantEntity != nil {
 		// 获取 assistant 绑定的 tools
 		tools, err = u.assistantService.ToLLMTool(c, assistantEntity)
 		if err != nil {

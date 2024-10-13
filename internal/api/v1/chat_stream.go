@@ -146,6 +146,16 @@ func (u *ChatController) Stream(c *gin.Context) {
 		}
 	}
 
+	// 如果是 Chat Public
+	if assistantEntity != nil && chatEntity.Owner == schema.OwnerGuest {
+		// 获取 assistant 绑定的 tools
+		tools, err = u.assistantService.ToLLMTool(c, assistantEntity)
+		if err != nil {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
+
 	// 如果 tools 超过了 100 个，则拒绝
 	if len(tools) > consts.MaxToolFunctions {
 		response.Status(http.StatusBadRequest).Error(consts.ErrToolFunctionTooMany).Send()

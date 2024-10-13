@@ -233,6 +233,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 
 	if assistantEntity != nil {
 		llmChat.Temperature = assistantEntity.Temperature
+		// 内置工具禁用
+		llmChat.WithoutBrowsing = assistantEntity.DisableWebBrowsing
+		llmChat.WithoutInternetSearch = assistantEntity.DisableInternetSearch
 	}
 
 	// SSE

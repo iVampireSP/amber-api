@@ -39,6 +39,8 @@ func newAssistant(db *gorm.DB, opts ...gen.DOOption) assistant {
 	_assistant.Temperature = field.NewFloat64(tableName, "temperature")
 	_assistant.Public = field.NewBool(tableName, "public")
 	_assistant.DisableDefaultPrompt = field.NewBool(tableName, "disable_default_prompt")
+	_assistant.DisableInternetSearch = field.NewBool(tableName, "disable_internet_search")
+	_assistant.DisableWebBrowsing = field.NewBool(tableName, "disable_web_browsing")
 	_assistant.DisableMemory = field.NewBool(tableName, "disable_memory")
 	_assistant.EnableMemoryForAssistantAPI = field.NewBool(tableName, "enable_memory_for_assistant_api")
 	_assistant.Library = assistantBelongsToLibrary{
@@ -81,6 +83,8 @@ type assistant struct {
 	Temperature                 field.Float64
 	Public                      field.Bool
 	DisableDefaultPrompt        field.Bool
+	DisableInternetSearch       field.Bool
+	DisableWebBrowsing          field.Bool
 	DisableMemory               field.Bool
 	EnableMemoryForAssistantAPI field.Bool
 	Library                     assistantBelongsToLibrary
@@ -112,6 +116,8 @@ func (a *assistant) updateTableName(table string) *assistant {
 	a.Temperature = field.NewFloat64(table, "temperature")
 	a.Public = field.NewBool(table, "public")
 	a.DisableDefaultPrompt = field.NewBool(table, "disable_default_prompt")
+	a.DisableInternetSearch = field.NewBool(table, "disable_internet_search")
+	a.DisableWebBrowsing = field.NewBool(table, "disable_web_browsing")
 	a.DisableMemory = field.NewBool(table, "disable_memory")
 	a.EnableMemoryForAssistantAPI = field.NewBool(table, "enable_memory_for_assistant_api")
 
@@ -130,7 +136,7 @@ func (a *assistant) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *assistant) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 15)
+	a.fieldMap = make(map[string]field.Expr, 17)
 	a.fieldMap["id"] = a.Id
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -143,6 +149,8 @@ func (a *assistant) fillFieldMap() {
 	a.fieldMap["temperature"] = a.Temperature
 	a.fieldMap["public"] = a.Public
 	a.fieldMap["disable_default_prompt"] = a.DisableDefaultPrompt
+	a.fieldMap["disable_internet_search"] = a.DisableInternetSearch
+	a.fieldMap["disable_web_browsing"] = a.DisableWebBrowsing
 	a.fieldMap["disable_memory"] = a.DisableMemory
 	a.fieldMap["enable_memory_for_assistant_api"] = a.EnableMemoryForAssistantAPI
 

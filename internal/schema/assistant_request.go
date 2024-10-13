@@ -18,6 +18,8 @@ type AssistantUpdateRequest struct {
 	Description                 string    `json:"description" validate:"max=255"`
 	Prompt                      string    `json:"prompt" validate:"max=512"`
 	DisableDefaultPrompt        bool      `json:"disable_default_prompt" validate:"oneof=true false"`
+	DisableInternetSearch       bool      `json:"disable_internet_search" validate:"oneof=true false"`
+	DisableWebBrowsing          bool      `json:"disable_web_browsing" validate:"oneof=true false"`
 	DisableMemory               bool      `json:"disable_memory" validate:"oneof=true false"`
 	EnableMemoryForAssistantAPI bool      `json:"enable_memory_for_assistant_api" validate:"oneof=true false"`
 	Public                      bool      `json:"public" validate:"oneof=true false"`

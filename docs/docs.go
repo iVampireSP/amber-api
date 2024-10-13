@@ -3013,7 +3013,13 @@ const docTemplate = `{
                 "disable_default_prompt": {
                     "type": "boolean"
                 },
+                "disable_internet_search": {
+                    "type": "boolean"
+                },
                 "disable_memory": {
+                    "type": "boolean"
+                },
+                "disable_web_browsing": {
                     "type": "boolean"
                 },
                 "enable_memory_for_assistant_api": {
@@ -3532,7 +3538,21 @@ const docTemplate = `{
                         false
                     ]
                 },
+                "disable_internet_search": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
+                },
                 "disable_memory": {
+                    "type": "boolean",
+                    "enum": [
+                        true,
+                        false
+                    ]
+                },
+                "disable_web_browsing": {
                     "type": "boolean",
                     "enum": [
                         true,

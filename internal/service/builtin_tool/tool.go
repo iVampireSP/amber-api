@@ -6,8 +6,9 @@ import (
 )
 
 type WithoutOptions struct {
-	Image  bool
-	Search bool
+	Image    bool
+	Search   bool
+	Browsing bool
 }
 
 func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
@@ -92,6 +93,7 @@ func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
 		},
 	})
 
+	// 如果禁用联网搜索
 	if !without.Search {
 		tools = append(tools, llms.Tool{
 			Type: "function",
@@ -112,7 +114,10 @@ func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
 				},
 			},
 		})
+	}
 
+	// 如果禁用网页浏览
+	if !without.Browsing {
 		tools = append(tools, llms.Tool{
 			Type: "function",
 			Function: &llms.FunctionDefinition{

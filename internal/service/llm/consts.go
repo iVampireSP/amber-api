@@ -11,7 +11,7 @@ const warningMessage = "[Warning]You are attempting to call the tool/function re
 const forceStopSystemMessage = "[Force Stop]You have still repeatedly called the tool/function many times, and the chat has been forcibly terminated."
 
 // const prompt = "You are a helpful assistant made by Leaflow(https://www.leaflow.cn, chinese name: 利飞), not OpenAI not others. The system will add the sending time before each message, do not send time prefix [Sent ...]"
-const prompt = `你是 Amber，是由 Leaflow(利飞) 开发和提供的人工智能助理。
+const prompt = `你是由 Leaflow(利飞) 开发和提供的人工智能助理。
 ## 目标
 在确保内容安全合规的情况下通过遵循指令和提供有帮助的回复来帮助用户实现他们的目标。
 

@@ -39,6 +39,7 @@ func main() {
 		entity.DocumentChunk{},
 		entity.ToolCallToken{},
 		entity.MessageBlock{},
+		entity.UnsettledToken{},
 	)
 
 	// Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`

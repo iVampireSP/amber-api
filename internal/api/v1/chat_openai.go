@@ -36,6 +36,19 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 	var response = schema.NewResponse(c)
 	assistantEntity := u.assistantService.GetAssistantFromCtx(c)
 
+	// 检测用户的余额能不能扣下个单位
+	canBill, err := u.accountService.CanBillUnit(assistantEntity.UserId, u.config.Account.Unit)
+	if err != nil {
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	if !canBill {
+		// 余额不足
+		response.Status(http.StatusPaymentRequired).Error(consts.ErrBalanceNotEnough).Send()
+		return
+	}
+
 	chatRequest := schema.OpenAIChatCompletionRequest{}
 	if err := c.ShouldBindJSON(&chatRequest); err != nil {
 		response.Status(http.StatusBadRequest).Error(err).Send()
@@ -379,6 +392,13 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 			if err != nil {
 				u.logger.Sugar.Error(err)
 			}
+
+			// 更新 unsettled_token
+			err = u.unsettedTokenService.IncreaseUnsettledToken(assistantEntity.UserId, int64(tokenUsage.TotalTokens))
+			if err != nil {
+				u.logger.Sugar.Error(err)
+			}
+
 		}
 
 		return
@@ -408,6 +428,11 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		// 增加助理的 Token 用量
 		if assistantEntity != nil && tokenUsage != nil {
 			err := u.assistantService.IncrementTotalTokenUsage(c, assistantEntity, int64(tokenUsage.TotalTokens))
+			if err != nil {
+				u.logger.Sugar.Error(err)
+			}
+			// 更新 unsettled_token
+			err = u.unsettedTokenService.IncreaseUnsettledToken(assistantEntity.UserId, int64(tokenUsage.TotalTokens))
 			if err != nil {
 				u.logger.Sugar.Error(err)
 			}

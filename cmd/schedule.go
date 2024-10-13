@@ -68,5 +68,25 @@ func runSchedule(app *base.Application) {
 		}
 	}()
 
+	wg.Add(1)
+	// 未结算的 Token 计费
+	go func() {
+		app.Logger.Sugar.Info("Token billing is ready.")
+		for {
+			app.Logger.Sugar.Info("Token billing running.")
+			var tokenBilling = &batch.UnsettedTokenBilling{
+				AccountService:       app.Service.Account,
+				UnsettedTokenService: app.Service.UnsettledToken,
+				Config:               app.Config,
+				DAO:                  app.DAO,
+			}
+			err := app.Batch.UnsettedTokenBilling(tokenBilling)
+			if err != nil {
+				app.Logger.Sugar.Error(err)
+			}
+			time.Sleep(1 * time.Minute)
+		}
+	}()
+
 	wg.Wait()
 }

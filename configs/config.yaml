@@ -84,6 +84,16 @@ kafka:
   username: ""
   password: ""
 
+account:
+  # UserLand 地址
+  host: "https://auth.leaflow.cn"
+  # 应用程序密钥
+  application_key: ""
+  # 计费单位
+  unit: "amber-tokens"
+  # 从多少开始计算（如果不足，则不计费）
+  unit_start: 1000
+
 third_party:
   jina_ai_key: ""
   bing_api_key: ""

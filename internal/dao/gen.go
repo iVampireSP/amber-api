@@ -32,6 +32,7 @@ var (
 	MessageBlock       *messageBlock
 	Tool               *tool
 	ToolCallToken      *toolCallToken
+	UnsettledToken     *unsettledToken
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -51,6 +52,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	MessageBlock = &Q.MessageBlock
 	Tool = &Q.Tool
 	ToolCallToken = &Q.ToolCallToken
+	UnsettledToken = &Q.UnsettledToken
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -71,6 +73,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		MessageBlock:       newMessageBlock(db, opts...),
 		Tool:               newTool(db, opts...),
 		ToolCallToken:      newToolCallToken(db, opts...),
+		UnsettledToken:     newUnsettledToken(db, opts...),
 	}
 }
 
@@ -92,6 +95,7 @@ type Query struct {
 	MessageBlock       messageBlock
 	Tool               tool
 	ToolCallToken      toolCallToken
+	UnsettledToken     unsettledToken
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -114,6 +118,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		MessageBlock:       q.MessageBlock.clone(db),
 		Tool:               q.Tool.clone(db),
 		ToolCallToken:      q.ToolCallToken.clone(db),
+		UnsettledToken:     q.UnsettledToken.clone(db),
 	}
 }
 
@@ -143,6 +148,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		MessageBlock:       q.MessageBlock.replaceDB(db),
 		Tool:               q.Tool.replaceDB(db),
 		ToolCallToken:      q.ToolCallToken.replaceDB(db),
+		UnsettledToken:     q.UnsettledToken.replaceDB(db),
 	}
 }
 
@@ -162,6 +168,7 @@ type queryCtx struct {
 	MessageBlock       IMessageBlockDo
 	Tool               IToolDo
 	ToolCallToken      IToolCallTokenDo
+	UnsettledToken     IUnsettledTokenDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -181,6 +188,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		MessageBlock:       q.MessageBlock.WithContext(ctx),
 		Tool:               q.Tool.WithContext(ctx),
 		ToolCallToken:      q.ToolCallToken.WithContext(ctx),
+		UnsettledToken:     q.UnsettledToken.WithContext(ctx),
 	}
 }
 

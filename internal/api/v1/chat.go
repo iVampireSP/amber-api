@@ -11,6 +11,7 @@ import (
 	"rag-new/internal/base/redis"
 	_ "rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/internal/service/account"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/chat"
@@ -21,6 +22,7 @@ import (
 	"rag-new/internal/service/memory"
 	"rag-new/internal/service/message_block"
 	"rag-new/internal/service/tool"
+	"rag-new/internal/service/unsettled_token"
 	"rag-new/pkg/consts"
 	"strconv"
 )
@@ -29,19 +31,21 @@ const eventName = "data"
 const eventDone = "[DONE]"
 
 type ChatController struct {
-	authService      *auth.Service
-	chatService      *chat.Service
-	redis            *redis.Redis
-	llmService       *llm.Service
-	logger           *logger.Logger
-	assistantService *assistant.Service
-	cm               *chat_message.Service
-	fileService      *file.Service
-	memoryService    *memory.Service
-	libraryService   *library.Service
-	config           *conf.Config
-	toolService      *tool.Service
-	messageBlock     *message_block.Service
+	authService          *auth.Service
+	chatService          *chat.Service
+	redis                *redis.Redis
+	llmService           *llm.Service
+	logger               *logger.Logger
+	assistantService     *assistant.Service
+	cm                   *chat_message.Service
+	fileService          *file.Service
+	memoryService        *memory.Service
+	libraryService       *library.Service
+	config               *conf.Config
+	toolService          *tool.Service
+	messageBlock         *message_block.Service
+	accountService       *account.Service
+	unsettedTokenService *unsettled_token.Service
 }
 
 func NewChatController(
@@ -58,6 +62,8 @@ func NewChatController(
 	libraryService *library.Service,
 	toolService *tool.Service,
 	messageBlock *message_block.Service,
+	accountService *account.Service,
+	unsettedTokenService *unsettled_token.Service,
 ) *ChatController {
 	return &ChatController{
 		authService,
@@ -73,6 +79,8 @@ func NewChatController(
 		config,
 		toolService,
 		messageBlock,
+		accountService,
+		unsettedTokenService,
 	}
 }
 

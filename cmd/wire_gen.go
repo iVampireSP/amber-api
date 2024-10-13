@@ -24,6 +24,7 @@ import (
 	"rag-new/internal/middleware"
 	"rag-new/internal/router"
 	"rag-new/internal/service"
+	"rag-new/internal/service/account"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/builtin_tool"
@@ -39,6 +40,7 @@ import (
 	"rag-new/internal/service/stream"
 	"rag-new/internal/service/token_usage"
 	"rag-new/internal/service/tool"
+	"rag-new/internal/service/unsettled_token"
 )
 
 // Injectors from wire.go:
@@ -72,7 +74,9 @@ func CreateApp() (*base.Application, error) {
 	token_usageService := token_usage.NewService(redisRedis, loggerLogger)
 	llmService := llm.NewLLM(config, loggerLogger, assistantService, toolService, builtin_toolService, fileService, streamService, messageMessage, query, chatService, token_usageService)
 	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, client, query, streamService)
-	chatController := v1.NewChatController(authService, chatService, redisRedis, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService, toolService, message_blockService)
+	accountService := account.NewService(config, loggerLogger)
+	unsettled_tokenService := unsettled_token.NewService(query, config)
+	chatController := v1.NewChatController(authService, chatService, redisRedis, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService, toolService, message_blockService, accountService, unsettled_tokenService)
 	fileController := v1.NewFileController(fileService, loggerLogger, authService)
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
 	libraryController := v1.NewLibraryController(libraryService, authService)
@@ -81,7 +85,7 @@ func CreateApp() (*base.Application, error) {
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, message_blockService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService, token_usageService)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, message_blockService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService, token_usageService, unsettled_tokenService, accountService)
 	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, redisRedis, batchBatch, s3S3, db, query, openaiClient, client, embeddingService)
 	return application, nil
 }

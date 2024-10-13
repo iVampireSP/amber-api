@@ -4,6 +4,7 @@ import (
 	"github.com/google/wire"
 	"rag-new/internal/base/logger"
 	"rag-new/internal/batch"
+	"rag-new/internal/service/account"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
 	"rag-new/internal/service/builtin_tool"
@@ -19,25 +20,28 @@ import (
 	"rag-new/internal/service/stream"
 	"rag-new/internal/service/token_usage"
 	"rag-new/internal/service/tool"
+	"rag-new/internal/service/unsettled_token"
 )
 
 type Service struct {
-	logger       *logger.Logger
-	Jwks         *jwks.JWKS
-	Auth         *auth.Service
-	Tool         *tool.Service
-	Assistant    *assistant.Service
-	Chat         *chat.Service
-	LLM          *llm.Service
-	MessageBlock *message_block.Service
-	ChatMessage  *chat_message.Service
-	Batch        *batch.Batch
-	BuiltinTool  *builtin_tool.Service
-	File         *file.Service
-	Stream       *stream.Service
-	Library      *library.Service
-	Embedding    *embedding.Service
-	TokenUsage   *token_usage.Service
+	logger         *logger.Logger
+	Jwks           *jwks.JWKS
+	Auth           *auth.Service
+	Tool           *tool.Service
+	Assistant      *assistant.Service
+	Chat           *chat.Service
+	LLM            *llm.Service
+	MessageBlock   *message_block.Service
+	ChatMessage    *chat_message.Service
+	Batch          *batch.Batch
+	BuiltinTool    *builtin_tool.Service
+	File           *file.Service
+	Stream         *stream.Service
+	Library        *library.Service
+	Embedding      *embedding.Service
+	TokenUsage     *token_usage.Service
+	UnsettledToken *unsettled_token.Service
+	Account        *account.Service
 }
 
 var Provider = wire.NewSet(
@@ -56,6 +60,8 @@ var Provider = wire.NewSet(
 	stream.NewService,
 	library.NewService,
 	token_usage.NewService,
+	account.NewService,
+	unsettled_token.NewService,
 	NewService,
 )
 
@@ -76,6 +82,8 @@ func NewService(
 	library *library.Service,
 	embedding *embedding.Service,
 	tokenUsage *token_usage.Service,
+	unsettledToken *unsettled_token.Service,
+	account *account.Service,
 ) *Service {
 	return &Service{
 		logger,
@@ -94,5 +102,7 @@ func NewService(
 		library,
 		embedding,
 		tokenUsage,
+		unsettledToken,
+		account,
 	}
 }

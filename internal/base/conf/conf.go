@@ -24,6 +24,8 @@ type Config struct {
 
 	Kafka *Kafka `yaml:"kafka"`
 
+	Account *Account `yaml:"account"`
+
 	ThirdParty *ThirdParty `yaml:"third_party" mapstructure:"third_party"`
 }
 
@@ -119,3 +121,10 @@ type Kafka struct {
 }
 
 type KafkaBootstrapServers []string
+
+type Account struct {
+	Host           string `yaml:"host" mapstructure:"host"`
+	ApplicationKey string `yaml:"application_key" mapstructure:"application_key"`
+	Unit           string `yaml:"unit" mapstructure:"unit"`
+	UnitStart      int64  `yaml:"unit_start" mapstructure:"unit_start"`
+}

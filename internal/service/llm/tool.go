@@ -63,6 +63,7 @@ func (s *Service) callRemoteFunction(tool *entity.Tool, llmChat *schema.LLMChat,
 		return nil, err
 	}
 
+	req.Header.Set("User-Agent", consts.UserAgent)
 	req.Header.Set("Content-Type", "application/json")
 	if tool.ApiKey != "" {
 		req.Header.Set("Authorization", "Bearer "+tool.ApiKey)

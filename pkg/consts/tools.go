@@ -4,6 +4,7 @@ import "errors"
 
 const (
 	MaxToolFunctions = 100
+	UserAgent        = "Leaflow Amber Tool Call (https://www.leaflow.cn)"
 )
 
 var (

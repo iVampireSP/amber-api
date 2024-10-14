@@ -55,7 +55,6 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 		var without = &builtin_tool.WithoutOptions{
 			Image:    llmChat.WithoutImage,
 			Browsing: llmChat.WithoutBrowsing,
-			Search:   llmChat.WithoutInternetSearch,
 		}
 
 		var llmTools = append(s.BuiltInTools.GetTools(without), llmChat.Tools...)

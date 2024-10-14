@@ -7,7 +7,6 @@ import (
 
 type WithoutOptions struct {
 	Image    bool
-	Search   bool
 	Browsing bool
 }
 

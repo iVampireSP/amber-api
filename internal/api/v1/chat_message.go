@@ -336,8 +336,8 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 				addMemory = false
 			}
 
-			if addMemory {
-				u.addMemory(c, userInfo, request)
+			if addMemory && lastChatMessage.Role == schema.RoleAssistant {
+				u.addMemory(c, userInfo, lastChatMessage.Content, request.Message)
 			}
 		}
 	}
@@ -524,16 +524,16 @@ func (u *ChatController) ClearChatMessage(c *gin.Context) {
 	response.Status(http.StatusNoContent).Send()
 }
 
-func (u *ChatController) addMemory(c context.Context, userInfo *schema.User, request schema.ChatMessageAddRequest) {
-	// 如果 request.Message 字数大于 100，则跳过
-	if len(request.Message) > 100 {
+func (u *ChatController) addMemory(c context.Context, userInfo *schema.User, lastAssistantResponse string, userInput string) {
+	// 如果 request.Message 字数大于 200，则跳过
+	if len(userInput) > 200 {
 		return
 	}
 
 	go func() {
-		u.logger.Sugar.Info("memory service adding: ", request.Message)
+		u.logger.Sugar.Info("memory service adding: ", userInput)
 
-		err := u.memoryService.Add(c, request.Message, userInfo.Token.Sub)
+		err := u.memoryService.Add(c, userInput, lastAssistantResponse, userInfo.Token.Sub)
 		if err != nil {
 			u.logger.Sugar.Error("memory service add error: ", err)
 		}

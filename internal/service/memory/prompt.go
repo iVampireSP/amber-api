@@ -20,7 +20,7 @@ func (s *Service) GenerateMemoryPrompt(ctx context.Context, userId schema.UserId
 	return m, nil
 }
 
-func (s *Service) updateMemoryPrompt(existingMemories string, memory string) string {
+func (s *Service) updateMemoryPrompt(existingMemories string, chat string) string {
 	return `You are an expert at merging, updating, and organizing memories. When provided with existing memories and new information, your task is to merge and update the memory list to reflect the most accurate and current information. You are also provided with the matching score for each existing memory to the new information. Make sure to leverage this information to make informed decisions about which memories to update or merge.
 
 Guidelines:
@@ -32,27 +32,30 @@ Guidelines:
 - If the new memory is a variation or extension of an existing memory, update the existing memory to reflect the new information.
 - If there are duplicates in the existing memories, only the more specific one needs to be retained. For example: Like reading and Like reading book are duplicates.
 - If there are more than 5 existing memories, some memories need to be merged.
-- Save memories in Simplified Chinese
+- If this is a simple conversation, greeting, or sentence, such as "Hi", "Hello", "How are you", or if you cannot understand the user through the conversation, then you only need to return "not_needed" as a reply without any additional output. (Because effective memory cannot be observed in the conversation).
+- Must save memories in Simplified Chinese
 
 Here are the details of the task:
 - Existing Memories:
 ` + existingMemories + `
 
-- New Memory: ` + memory + `
+- Chat: ` + chat + `
 `
 
 }
 
 func (s *Service) memoryDeductionPrompt(userInput string) string {
 	return `Deduce the facts, preferences, and memories from the provided text.
-Just return the facts, preferences, and memories in bullet points:
-Natural language text: ` + userInput + `
+Just return the facts, preferences, and memories in bullet points.
+If this Natural language text is a simple conversation, greeting, or sentence, such as "Hi", "Hello", "How are you", or if you cannot understand the user through the conversation, then you only need to return "not_needed" as a reply without any additional output. (Because effective memory cannot be observed in the conversation).
+You must observe the user's message and ignore the assistant's message.
+Natural language text(based on assistant and user conversation): ` + userInput + `
 
 Constraint for deducing facts, preferences, and memories:
 - The facts, preferences, and memories should be concise and informative.
 - Don't start by "The person likes Pizza". Instead, start with "Likes Pizza".
 - Don't remember the user/agent details provided. Only remember the facts, preferences, and memories.
-- Save memories in Simplified Chinese
+- Must save memories in Simplified Chinese
 
 Deduced facts, preferences, and memories:`
 }
@@ -64,7 +67,7 @@ Guidelines:
 - Extract relevant information from the memories based on the question.
 - If no relevant information is found, make sure you don't say no information is found. Instead, accept the question and provide a general response.
 - Ensure that the answers are clear, concise, and directly address the question.
-- Save memories in Simplified Chinese
+- Answer memories in Simplified Chinese
 
 Here are the details of the task:`
 }

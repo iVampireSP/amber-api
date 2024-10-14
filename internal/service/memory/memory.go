@@ -15,14 +15,20 @@ import (
 
 // 也许服务层不需要关心用户 ID，只需要在控制器层判断
 
-func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) error {
-	vec, err := s.Embedding.TextEmbedding(ctx, []string{data})
+func (s *Service) Add(ctx context.Context, userInput string, lastAssistantResponse string, userId schema.UserId) error {
+	vec, err := s.Embedding.TextEmbedding(ctx, []string{userInput})
 	if err != nil {
 		return err
 	}
+
+	var fullData = userInput
+	if lastAssistantResponse != "" {
+		fullData = `Assistant says: ` + lastAssistantResponse + "\n" + `user says: ` + userInput
+	}
+
 	var history []llms.MessageContent
 	history = append(history, llms.TextParts(llms.ChatMessageTypeSystem, "You are an expert at deducing facts, preferences and memories from unstructured text."))
-	history = append(history, llms.TextParts(llms.ChatMessageTypeHuman, s.memoryDeductionPrompt(data)))
+	history = append(history, llms.TextParts(llms.ChatMessageTypeHuman, s.memoryDeductionPrompt(fullData)))
 
 	extractedMemories, err := s.OpenAI.GenerateContent(ctx, history, llms.WithMaxTokens(1024))
 	if err != nil {
@@ -30,6 +36,10 @@ func (s *Service) Add(ctx context.Context, data string, userId schema.UserId) er
 		return err
 	}
 	extractedMemoriesText := extractedMemories.Choices[0].Content
+
+	if extractedMemoriesText == "not_needed" {
+		return nil
+	}
 
 	var filter = fmt.Sprintf("user_id == '%s' && model == '%s'", userId, s.config.OpenAI.EmbeddingModel)
 	sp, err := entity2.NewIndexAUTOINDEXSearchParam(1)

@@ -7,8 +7,6 @@ definitions:
         type: string
       disable_default_prompt:
         type: boolean
-      disable_internet_search:
-        type: boolean
       disable_memory:
         type: boolean
       disable_web_browsing:
@@ -369,11 +367,6 @@ definitions:
         maxLength: 255
         type: string
       disable_default_prompt:
-        enum:
-        - true
-        - false
-        type: boolean
-      disable_internet_search:
         enum:
         - true
         - false

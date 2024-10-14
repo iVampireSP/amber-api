@@ -63,7 +63,6 @@ func (s *Service) UpdateAssistant(ctx context.Context, assistant *entity.Assista
 		s.dao.Assistant.Description.Value(assistant.Description),
 		s.dao.Assistant.Prompt.Value(assistant.Prompt),
 		s.dao.Assistant.DisableDefaultPrompt.Value(assistant.DisableDefaultPrompt),
-		s.dao.Assistant.DisableInternetSearch.Value(assistant.DisableInternetSearch),
 		s.dao.Assistant.DisableWebBrowsing.Value(assistant.DisableWebBrowsing),
 		s.dao.Assistant.DisableMemory.Value(assistant.DisableMemory),
 		s.dao.Assistant.EnableMemoryForAssistantAPI.Value(assistant.EnableMemoryForAssistantAPI),

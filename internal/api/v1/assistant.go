@@ -187,7 +187,6 @@ func (u *AssistantController) UpdateAssistant(c *gin.Context) {
 	}
 
 	assistantEntity.DisableDefaultPrompt = updateReq.DisableDefaultPrompt
-	assistantEntity.DisableInternetSearch = updateReq.DisableInternetSearch
 	assistantEntity.DisableWebBrowsing = updateReq.DisableWebBrowsing
 	assistantEntity.DisableMemory = updateReq.DisableMemory
 	assistantEntity.EnableMemoryForAssistantAPI = updateReq.EnableMemoryForAssistantAPI

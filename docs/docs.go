@@ -3013,9 +3013,6 @@ const docTemplate = `{
                 "disable_default_prompt": {
                     "type": "boolean"
                 },
-                "disable_internet_search": {
-                    "type": "boolean"
-                },
                 "disable_memory": {
                     "type": "boolean"
                 },
@@ -3532,13 +3529,6 @@ const docTemplate = `{
                     "maxLength": 255
                 },
                 "disable_default_prompt": {
-                    "type": "boolean",
-                    "enum": [
-                        true,
-                        false
-                    ]
-                },
-                "disable_internet_search": {
                     "type": "boolean",
                     "enum": [
                         true,

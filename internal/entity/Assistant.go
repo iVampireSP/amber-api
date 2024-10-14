@@ -16,7 +16,6 @@ type Assistant struct {
 	Temperature                 float64          `json:"temperature"`
 	Public                      bool             `json:"public"`
 	DisableDefaultPrompt        bool             `json:"disable_default_prompt"`
-	DisableInternetSearch       bool             `json:"disable_internet_search"`
 	DisableWebBrowsing          bool             `json:"disable_web_browsing"`
 	DisableMemory               bool             `json:"disable_memory"`
 	EnableMemoryForAssistantAPI bool             `json:"enable_memory_for_assistant_api"`

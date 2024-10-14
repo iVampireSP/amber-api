@@ -4,14 +4,31 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"rag-new/internal/schema"
+	"strings"
 	"time"
 )
 
-type searchWebRequest struct {
-	Query string `json:"query" mapstructure:"query"`
+const WebSearchPrompt = `You have the tool browser. Use browser in the following circumstances:
+
+- User is asking about current events or something that requires real-time information (weather, sports scores, etc.)
+- User is asking about some term you are totally unfamiliar with (it might be new)
+- User explicitly asks you to browse or provide links to references
+`
+const BingAPI = "https://api.bing.microsoft.com/v7.0/search"
+
+const JinaReader = "https://r.jina.ai"
+
+var (
+	ErrOnSearch = fmt.Errorf("暂时无法搜索")
+	ErrOnReader = fmt.Errorf("无法读取网页内容")
+)
+
+type browserRequest struct {
+	QueryOrUrl string `json:"query_or_url" mapstructure:"query_or_url"`
 }
 
 type BingAPIResult struct {
@@ -48,27 +65,41 @@ type BingAPIResult struct {
 	} `json:"webPages"`
 }
 
-const BingAPI = "https://api.bing.microsoft.com/v7.0/search"
-
-var ErrOnSearch = fmt.Errorf("暂时无法搜索")
-
-func (s *Service) SearchWeb(_ context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
+func (s *Service) Browser(_ context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
 	var response = &schema.CallBuiltInResponse{}
 
-	var params searchWebRequest
+	var params browserRequest
 	err := args.Unmarshal(&params)
 	if err != nil {
 		return nil, err
 	}
 
-	var queryParams = map[string]string{
-		"q": params.Query,
+	// 验证 params.QueryOrUrl 是否是真的 URL
+	if isUrl(params.QueryOrUrl) {
+		err = s.readWebContent(params.QueryOrUrl, response)
+		if err != nil {
+			response.Content = ErrOnReader.Error()
+		}
 	}
 
-	var url2 = BingAPI
+	var queryParams = map[string]string{
+		"q": params.QueryOrUrl,
+	}
+	err = s.serp(queryParams, response)
+	if err != nil {
+		response.Content = ErrOnSearch.Error()
+	}
 
+	return response, nil
+}
+
+func isUrl(str string) bool {
+	return strings.HasPrefix(str, "http://") || strings.HasPrefix(str, "https://")
+}
+
+func (s *Service) serp(queryParams map[string]string, response *schema.CallBuiltInResponse) error {
 	// 拼接 get 参数
-	url2 += "?"
+	url2 := BingAPI + "?"
 
 	// 构建为 URL Query 参数
 	var queryData = url.Values{}
@@ -82,7 +113,7 @@ func (s *Service) SearchWeb(_ context.Context, args schema.FunctionCallArguments
 	req, err := http.NewRequest("GET", url2, nil)
 	if err != nil {
 		response.Content = ErrOnReader.Error()
-		return response, ErrOnReader
+		return ErrOnReader
 	}
 
 	req.Header.Set("Ocp-Apim-Subscription-Key", s.config.ThirdParty.BingAPIKey)
@@ -91,7 +122,7 @@ func (s *Service) SearchWeb(_ context.Context, args schema.FunctionCallArguments
 	if err != nil {
 		s.logger.Sugar.Error(err)
 		response.Content = ErrOnSearch.Error()
-		return response, ErrOnSearch
+		return ErrOnSearch
 	}
 	defer func() {
 		err = rsp.Body.Close()
@@ -111,7 +142,7 @@ func (s *Service) SearchWeb(_ context.Context, args schema.FunctionCallArguments
 	err = json.NewDecoder(rsp.Body).Decode(&serpResults)
 	if err != nil {
 		response.Content = ErrOnSearch.Error()
-		return response, ErrOnSearch
+		return ErrOnSearch
 	}
 
 	for _, result := range serpResults.WebPages.Value {
@@ -136,7 +167,54 @@ siteName: %s
 		)
 	}
 
-	return response, nil
+	return nil
+}
+
+func (s *Service) readWebContent(url string, response *schema.CallBuiltInResponse) error {
+	var jinaKey = s.config.ThirdParty.JinaAIKey
+	var fullUrl = JinaReader + "/" + url
+
+	req, err := http.NewRequest("GET", fullUrl, nil)
+	if err != nil {
+		response.Content = ErrOnReader.Error()
+		return ErrOnReader
+	}
+
+	if jinaKey != "" {
+		req.Header.Set("Authorization", "Bearer "+jinaKey)
+	}
+
+	rsp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		s.logger.Sugar.Error(err)
+		response.Content = ErrOnSearch.Error()
+		return ErrOnSearch
+	}
+
+	defer func() {
+		err = rsp.Body.Close()
+		if err != nil {
+			s.logger.Sugar.Error(err)
+		}
+	}()
+
+	body, err := io.ReadAll(rsp.Body)
+	if err != nil {
+		response.Content = ErrOnSearch.Error()
+		return ErrOnSearch
+	}
+
+	//
+	//var serpResults = SerpResults{}
+	//err = json.NewDecoder(rsp.Body).Decode(&serpResults)
+	//if err != nil {
+	//	response.Content = ErrOnSearch.Error()
+	//	return response, ErrOnSearch
+	//}
+
+	response.Content = string(body)
+
+	return nil
 }
 
 func httpBuildQuery(queryData url.Values) string {

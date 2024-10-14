@@ -23,12 +23,12 @@ func (s *Service) CallFunction(ctx context.Context, req *schema.CallBuiltInToolR
 		response, err = s.GenerateImage(ctx, req.Args)
 	case "calculator":
 		response, err = s.Calculator(ctx, req.Args)
-	case "compare":
-		response, err = s.Compare(ctx, req.Args)
-	case "search_web":
-		response, err = s.SearchWeb(ctx, req.Args)
-	case "get_url_content":
-		response, err = s.ReadUrl(ctx, req.Args)
+	//case "compare":
+	//	response, err = s.Compare(ctx, req.Args)
+	case "browser":
+		response, err = s.Browser(ctx, req.Args)
+	//case "browser_url":
+	//	response, err = s.ReadUrl(ctx, req.Args)
 	default:
 		return nil, errors.New("function not found")
 	}

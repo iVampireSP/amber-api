@@ -6,6 +6,7 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/internal/service/builtin_tool"
 	"rag-new/pkg/consts"
 	"strings"
 )
@@ -30,6 +31,11 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 	// 如果没有禁用 Agent 方式的图片工具
 	if !llmChat.WithoutImage {
 		systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
+	}
+
+	if !llmChat.WithoutInternetSearch {
+		systemPrompts = append(systemPrompts, builtin_tool.WebSearchPrompt)
+
 	}
 
 	// 当前的助理（用于通知助理上条消息的回复者

@@ -11,9 +11,9 @@ import (
 var calculatorAllowedMethods = []string{"add", "subtract", "multiply", "divide"}
 
 type calculateParams struct {
-	A      string `json:"a"`
-	B      string `json:"b"`
-	Method string `json:"method"`
+	NumberA  string `json:"number_a"  mapstructure:"number_a"`
+	NumberB  string `json:"number_b"  mapstructure:"number_b"`
+	Operator string `json:"operator"  mapstructure:"operator"`
 }
 
 func (s *Service) Calculator(_ context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
@@ -27,23 +27,33 @@ func (s *Service) Calculator(_ context.Context, args schema.FunctionCallArgument
 	a := new(big.Float)
 	b := new(big.Float)
 
-	a, _, err = big.ParseFloat(params.A, 10, 0, big.ToZero)
+	a, _, err = big.ParseFloat(params.NumberA, 10, 0, big.ToZero)
 	if err != nil {
-		return response, errors.New("invalid value for A")
+		return response, errors.New("invalid value for Number A")
 	}
 
-	b, _, err = big.ParseFloat(params.B, 10, 0, big.ToZero)
+	b, _, err = big.ParseFloat(params.NumberB, 10, 0, big.ToZero)
 	if err != nil {
-		return response, errors.New("invalid value for B")
+		return response, errors.New("invalid value for Number B")
 	}
 
 	var result *big.Float
 
-	switch params.Method {
+	var additionalInfo string
+
+	switch params.Operator {
 	case "add":
 		result = new(big.Float).Add(a, b)
 	case "subtract":
 		result = new(big.Float).Sub(a, b)
+		if a.Cmp(b) == 0 {
+			additionalInfo = "equal"
+		} else if a.Cmp(b) > 0 {
+			additionalInfo = params.NumberA + " greater than " + params.NumberB
+		} else {
+			additionalInfo = params.NumberA + " less than " + params.NumberB
+		}
+
 	case "multiply":
 		result = new(big.Float).Mul(a, b)
 	case "divide":
@@ -57,43 +67,48 @@ func (s *Service) Calculator(_ context.Context, args schema.FunctionCallArgument
 		return response, errors.New(response.Content)
 	}
 
-	response.Content = fmt.Sprintf("%.f", result)
+	response.Content = fmt.Sprintf("%.2f", result)
+	if additionalInfo != "" {
+		response.Content += fmt.Sprintf(" (%s)", additionalInfo)
+	}
+
 	return response, nil
 }
 
 type compareParams struct {
-	A string `json:"a"`
-	B string `json:"b"`
+	NumberA string `json:"number_a"  mapstructure:"number_a"`
+	NumberB string `json:"number_b"  mapstructure:"number_b"`
 }
 
-func (s *Service) Compare(_ context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
-	var response = &schema.CallBuiltInResponse{}
-	var params compareParams
-	err := args.Unmarshal(&params)
-	if err != nil {
-		return response, err
-	}
-
-	a := new(big.Float)
-	b := new(big.Float)
-
-	a, _, err = big.ParseFloat(params.A, 10, 0, big.ToZero)
-	if err != nil {
-		return response, errors.New("invalid value for A")
-	}
-
-	b, _, err = big.ParseFloat(params.B, 10, 0, big.ToZero)
-	if err != nil {
-		return response, errors.New("invalid value for B")
-	}
-
-	if a.Cmp(b) == 0 {
-		response.Content = "equal"
-	} else if a.Cmp(b) > 0 {
-		response.Content = "a greater than b"
-	} else {
-		response.Content = "a less than b"
-	}
-
-	return response, nil
-}
+//
+//func (s *Service) Compare(_ context.Context, args schema.FunctionCallArguments) (*schema.CallBuiltInResponse, error) {
+//	var response = &schema.CallBuiltInResponse{}
+//	var params compareParams
+//	err := args.Unmarshal(&params)
+//	if err != nil {
+//		return response, err
+//	}
+//
+//	a := new(big.Float)
+//	b := new(big.Float)
+//
+//	a, _, err = big.ParseFloat(params.NumberA, 10, 0, big.ToZero)
+//	if err != nil {
+//		return response, errors.New("invalid value for A")
+//	}
+//
+//	b, _, err = big.ParseFloat(params.NumberB, 10, 0, big.ToZero)
+//	if err != nil {
+//		return response, errors.New("invalid value for B")
+//	}
+//
+//	if a.Cmp(b) == 0 {
+//		response.Content = "equal"
+//	} else if a.Cmp(b) > 0 {
+//		response.Content = params.NumberA + " greater than " + params.NumberA
+//	} else {
+//		response.Content = params.NumberB + " less than " + params.NumberB
+//	}
+//
+//	return response, nil
+//}

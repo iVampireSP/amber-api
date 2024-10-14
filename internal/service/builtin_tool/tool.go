@@ -72,44 +72,44 @@ func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
 		})
 	}
 
-	tools = append(tools, llms.Tool{
-		Type: "function",
-		Function: &llms.FunctionDefinition{
-			Name:        prefix("download_file"),
-			Description: "download file from url",
-			Parameters: jsonschema.Definition{
-				Type: jsonschema.Object,
-				Properties: map[string]jsonschema.Definition{
-					"url": {
-						Type: jsonschema.Integer,
-						Description: "the url of the file you want to download. " +
-							"when downloaded, you can get file id from history",
-					},
-				},
-				Required: []string{
-					"url",
-				},
-			},
-		},
-	})
+	//tools = append(tools, llms.Tool{
+	//	Type: "function",
+	//	Function: &llms.FunctionDefinition{
+	//		Name:        prefix("download_file"),
+	//		Description: "download file from url",
+	//		Parameters: jsonschema.Definition{
+	//			Type: jsonschema.Object,
+	//			Properties: map[string]jsonschema.Definition{
+	//				"url": {
+	//					Type: jsonschema.Integer,
+	//					Description: "the url of the file you want to download. " +
+	//						"when downloaded, you can get file id from history",
+	//				},
+	//			},
+	//			Required: []string{
+	//				"url",
+	//			},
+	//		},
+	//	},
+	//})
 
-	// 如果禁用联网搜索
-	if !without.Search {
+	// 如果禁用网页浏览
+	if !without.Browsing {
 		tools = append(tools, llms.Tool{
 			Type: "function",
 			Function: &llms.FunctionDefinition{
-				Name:        prefix("search_web"),
-				Description: "Search the internet",
+				Name:        prefix("browser"),
+				Description: "Browsing the internet",
 				Parameters: jsonschema.Definition{
 					Type: jsonschema.Object,
 					Properties: map[string]jsonschema.Definition{
-						"query": {
+						"query_or_url": {
 							Type:        jsonschema.String,
-							Description: "the query you want to search",
+							Description: "Provide a search keyword or a webpage URL. If a URL is provided, the content of the webpage will be retrieved; otherwise, a search engine will be used.",
 						},
 					},
 					Required: []string{
-						"query",
+						"query_or_url",
 					},
 				},
 			},
@@ -117,85 +117,81 @@ func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
 	}
 
 	// 如果禁用网页浏览
-	if !without.Browsing {
-		tools = append(tools, llms.Tool{
-			Type: "function",
-			Function: &llms.FunctionDefinition{
-				Name:        prefix("get_url_content"),
-				Description: "Get the website content of the url",
-				Parameters: jsonschema.Definition{
-					Type: jsonschema.Object,
-					Properties: map[string]jsonschema.Definition{
-						"url": {
-							Type:        jsonschema.String,
-							Description: "the url of the website you want to get content",
-						},
-					},
-					Required: []string{
-						"url",
-					},
-				},
-			},
-		})
-	}
+	// 这个应该废弃，我们应该将网页浏览和查询放在一个工具里面
+	//if !without.Browsing {
+	//	tools = append(tools, llms.Tool{
+	//		Type: "function",
+	//		Function: &llms.FunctionDefinition{
+	//			Name:        prefix("browser_url"),
+	//			Description: "Browser the web",
+	//			Parameters: jsonschema.Definition{
+	//				Type: jsonschema.Object,
+	//				Properties: map[string]jsonschema.Definition{
+	//					"url": {
+	//						Type:        jsonschema.String,
+	//						Description: "the url of the website you want to get content",
+	//					},
+	//				},
+	//				Required: []string{
+	//					"url",
+	//				},
+	//			},
+	//		},
+	//	})
+	//}
 
 	tools = append(tools, llms.Tool{
 		Type: "function",
 		Function: &llms.FunctionDefinition{
-			Name: prefix("calculator"),
-			Description: "It's useful for mathematical calculations," +
-				"every time a step is executed, the user must be informed and then proceed to the next step." +
-				"When encountering functions such as log and sqrt, " +
-				"you need to call the tool multiple times to calculate, " +
-				"the calculation process must be written out before calling the tool to perform the calculation." +
-				"The result of this tool is always right.",
+			Name:        prefix("calculator"),
+			Description: "Useful for getting the result of a math expression or comparing numbers. The input to this tool should be a valid mathematical expression that could be executed by a simple calculator.",
 			Parameters: jsonschema.Definition{
 				Type: jsonschema.Object,
 				Properties: map[string]jsonschema.Definition{
-					"A": {
+					"number_a": {
 						Type:        jsonschema.String,
 						Description: "Number A",
 					},
-					"B": {
+					"operator": {
 						Type:        jsonschema.String,
-						Description: "Number B",
-					},
-					"Method": {
-						Type:        jsonschema.String,
-						Description: "Method",
+						Description: "Operator",
 						Enum:        calculatorAllowedMethods,
 					},
-				},
-				Required: []string{
-					"A", "B", "Method",
-				},
-			},
-		},
-	})
-
-	tools = append(tools, llms.Tool{
-		Type: "function",
-		Function: &llms.FunctionDefinition{
-			Name:        prefix("compare"),
-			Description: "It's useful for comparing numbers",
-			Parameters: jsonschema.Definition{
-				Type: jsonschema.Object,
-				Properties: map[string]jsonschema.Definition{
-					"A": {
-						Type:        jsonschema.String,
-						Description: "Number A",
-					},
-					"B": {
+					"number_b": {
 						Type:        jsonschema.String,
 						Description: "Number B",
 					},
 				},
 				Required: []string{
-					"A", "B",
+					"number_a", "operator", "number_b",
 				},
 			},
 		},
 	})
+
+	//tools = append(tools, llms.Tool{
+	//	Type: "function",
+	//	Function: &llms.FunctionDefinition{
+	//		Name:        prefix("compare"),
+	//		Description: "It's useful for comparing numbers",
+	//		Parameters: jsonschema.Definition{
+	//			Type: jsonschema.Object,
+	//			Properties: map[string]jsonschema.Definition{
+	//				"number_a": {
+	//					Type:        jsonschema.String,
+	//					Description: "Number A",
+	//				},
+	//				"number_b": {
+	//					Type:        jsonschema.String,
+	//					Description: "Number B",
+	//				},
+	//			},
+	//			Required: []string{
+	//				"number_a", "number_b",
+	//			},
+	//		},
+	//	},
+	//})
 
 	return tools
 }

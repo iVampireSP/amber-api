@@ -65,7 +65,7 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 		llmChat.Model = s.config.OpenAI.Model
 
 		// 如果统计超过了 10000
-		if count > 10000 {
+		if count > 100000 {
 			llmChat.Model = s.config.OpenAI.LongContextModel
 		}
 

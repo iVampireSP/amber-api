@@ -33,9 +33,8 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 		systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
 	}
 
-	if !llmChat.WithoutInternetSearch {
+	if !llmChat.WithoutBrowsing {
 		systemPrompts = append(systemPrompts, builtin_tool.WebSearchPrompt)
-
 	}
 
 	// 当前的助理（用于通知助理上条消息的回复者

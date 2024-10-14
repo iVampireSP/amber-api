@@ -24,6 +24,7 @@ func NewMemory(config *conf.Config, logger *logger.Logger, embedding *embedding.
 	llm, err := openai.New(
 		openai.WithToken(config.OpenAI.ApiKey),
 		openai.WithBaseURL(config.OpenAI.BaseUrl),
+		openai.WithModel(config.OpenAI.MemoryModel),
 	)
 
 	if err != nil {

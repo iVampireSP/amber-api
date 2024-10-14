@@ -76,6 +76,7 @@ type OpenAI struct {
 	Model             string   `yaml:"model" mapstructure:"model"`
 	VisionModel       string   `yaml:"vision_model" mapstructure:"vision_model"`
 	LongContextModel  string   `yaml:"long_context_model" mapstructure:"long_context_model"`
+	MemoryModel       string   `yaml:"memory_model" mapstructure:"memory_model"`
 	EmbeddingModel    string   `yaml:"embedding_model" mapstructure:"embedding_model"`
 	EmbeddingDim      int      `yaml:"embedding_dim" mapstructure:"embedding_dim"`
 	EmbeddingMaxToken int      `yaml:"embedding_max_token"  mapstructure:"embedding_max_token"`

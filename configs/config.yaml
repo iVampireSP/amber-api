@@ -37,6 +37,7 @@ openai:
   # 超长上下文
   long_context_model: gemini-pro
   dall_e_model: dall-e-3
+  memory_model: gpt-4o-mini
   embedding_model: jina-embeddings-v2-base-zh
   embedding_dim: 768
   embedding_max_token: 8192

@@ -3,11 +3,12 @@ package assistant
 import (
 	"context"
 	"errors"
-	"gorm.io/gorm"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
-	page2 "rag-new/pkg/page"
+
+	page2 "github.com/iVampireSP/pkg/page"
+	"gorm.io/gorm"
 )
 
 // ListPublicAssistant 获取公开的助理(paginate)

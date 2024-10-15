@@ -1,11 +1,12 @@
 package v1
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
-	_ "rag-new/pkg/page"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/iVampireSP/pkg/page"
 )
 
 // AssistantPublicList godoc

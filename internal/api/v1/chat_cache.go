@@ -3,10 +3,11 @@ package v1
 import (
 	"context"
 	"fmt"
-	"github.com/bytedance/sonic"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
-	"rag-new/pkg/random"
+
+	"github.com/bytedance/sonic"
+	"github.com/iVampireSP/pkg/random"
 )
 
 func (u *ChatController) getCacheKey(key string) string {

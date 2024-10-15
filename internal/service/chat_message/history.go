@@ -5,8 +5,9 @@ import (
 	"errors"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	page2 "rag-new/pkg/page"
 	"sort"
+
+	page2 "github.com/iVampireSP/pkg/page"
 )
 
 func (s *Service) GetChatMessage(ctx context.Context, chat *entity.Chat) ([]*entity.ChatMessage, error) {

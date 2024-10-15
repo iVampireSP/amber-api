@@ -9,9 +9,10 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
-	"rag-new/pkg/random"
 	"strings"
 	"time"
+
+	"github.com/iVampireSP/pkg/random"
 
 	"github.com/go-playground/validator/v10"
 

@@ -1,14 +1,15 @@
 package v1
 
 import (
-	"github.com/gin-gonic/gin"
 	"net"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
-	"rag-new/pkg/safetpl"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/iVampireSP/pkg/safetpl"
 )
 
 type promptOptions struct {

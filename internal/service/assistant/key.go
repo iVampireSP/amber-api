@@ -4,7 +4,8 @@ import (
 	"context"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	"rag-new/pkg/random"
+
+	"github.com/iVampireSP/pkg/random"
 )
 
 func (s *Service) CreateKey(ctx context.Context, assistant *entity.Assistant) (*entity.AssistantKey, error) {

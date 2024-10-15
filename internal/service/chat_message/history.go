@@ -80,44 +80,50 @@ func (s *Service) GetLatestChatMessage(ctx context.Context, chat *entity.Chat, p
 
 	return r, count, nil
 }
-func (s *Service) GetChatMessagePageAsc(ctx context.Context, chat *entity.Chat, page int, pageSize int) ([]*entity.ChatMessage, int64, error) {
-	r, count, err := s.dao.WithContext(ctx).ChatMessage.
+func (s *Service) GetChatMessagePageAsc(ctx context.Context, chat *entity.Chat, page int, pageSize int) (cms []*entity.ChatMessage, count int64, totalCount int64, err error) {
+	cms, totalCount, err = s.dao.WithContext(ctx).ChatMessage.
 		Where(s.dao.ChatMessage.ChatId.Eq(chat.Id.Uint())).
 		Preload(s.dao.ChatMessage.File).
 		Order(s.dao.ChatMessage.CreatedAt.Asc()).
 		FindByPage(page2.OffsetCustom(page, pageSize), pageSize)
 
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, 0, err
 	}
 
-	for {
-		if count > 0 && r[0].Role == schema.RoleToolCall {
-			// 由于是 ASC，向后翻 1 页面
-			page = page + 1
-			newHistory, newCount, err := s.dao.WithContext(ctx).ChatMessage.
-				Where(s.dao.ChatMessage.ChatId.Eq(chat.Id.Uint())).
-				Preload(s.dao.ChatMessage.File).
-				Order(s.dao.ChatMessage.CreatedAt.Asc()).
-				FindByPage(page2.OffsetCustom(page, pageSize), pageSize)
+	var dataLength = len(cms)
 
-			if err != nil {
-				return nil, 0, err
-			}
+	if dataLength > 0 {
+		for {
+			if cms[0].Role == schema.RoleToolCall {
+				// 由于是 ASC，向后翻 1 页面
+				page = page + 1
+				newHistory, _, err := s.dao.WithContext(ctx).ChatMessage.
+					Where(s.dao.ChatMessage.ChatId.Eq(chat.Id.Uint())).
+					Preload(s.dao.ChatMessage.File).
+					Order(s.dao.ChatMessage.CreatedAt.Asc()).
+					FindByPage(page2.OffsetCustom(page, pageSize), pageSize)
 
-			if newCount == 0 {
+				if err != nil {
+					return nil, 0, 0, err
+				}
+
+				var newCount = len(newHistory)
+
+				if newCount == 0 {
+					break
+				}
+
+				// 将新的内容放到之前内容的最前面
+				cms = append(newHistory, cms...) // 把新内容放到前面
+				dataLength += newCount           // 更新总数量
+			} else {
 				break
 			}
-
-			// 将新的内容放到之前内容的最前面
-			r = append(newHistory, r...) // 把新内容放到前面
-			count += newCount            // 更新总数量
-		} else {
-			break
 		}
 	}
 
-	return r, count, nil
+	return cms, int64(dataLength), totalCount, nil
 }
 
 func (s *Service) CreateChatMessage(ctx context.Context, chatMessage *entity.ChatMessage) error {

@@ -76,6 +76,7 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.DELETE("/chats/:id", a.Chat.Delete)
 
 	r.GET("/chats/:id/messages", a.Chat.ListChatMessage)
+	r.GET("/chats/:id/messages/paginate", a.Chat.ListChatMessagePaginate)
 	r.POST("/chats/:id/messages", a.Chat.AddChatMessage)
 	r.POST("/chats/:id/files", a.Chat.AddChatFile)
 

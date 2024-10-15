@@ -10,6 +10,7 @@ import (
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
+	"rag-new/pkg/page"
 	"slices"
 )
 
@@ -111,6 +112,108 @@ func (u *ChatController) ListChatMessage(c *gin.Context) {
 	}
 
 	response.Status(http.StatusOK).Data(chatMessageListResponse).Send()
+}
+
+// ListChatMessagePaginate godoc
+// @Summary      分页获取聊天记录
+// @Description  获取一个对话的所有聊天记录
+// @Tags         chat_message
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        schema.ChatRequest  path  schema.ChatRequest true  "Chat ID"
+// @Param        schema.PaginationRequest  query  schema.PaginationRequest true  "schema.PaginationRequest"
+// @Success      200  {object}  schema.ResponseBody{data=page.PagedResult[entity.ChatMessageList]}
+// @Failure      400  {object}  schema.ResponseBody
+// @Failure      404  {object}  schema.ResponseBody
+// @Failure      500  {object}  schema.ResponseBody
+// @Router       /api/v1/chats/{id}/messages/paginate [get]
+func (u *ChatController) ListChatMessagePaginate(c *gin.Context) {
+	var response = schema.NewResponse(c)
+
+	var chatRequest = &schema.ChatRequest{}
+	err := c.ShouldBindUri(chatRequest)
+	if err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	var paginationRequest = &schema.PaginationRequest{}
+	if err := c.ShouldBind(paginationRequest); err != nil {
+		response.Status(http.StatusBadRequest).Error(err).Send()
+		return
+	}
+
+	var pagedResult = page.NewPagedResult[*entity.ChatMessageList]()
+
+	pagedResult.Page = paginationRequest.Page
+	pagedResult.PageSize = 2
+
+	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)
+	if err != nil {
+		if errors.Is(err, consts.ErrChatNotFound) || errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		} else {
+			response.Status(http.StatusInternalServerError).Error(err).Send()
+			return
+		}
+	}
+
+	if chatEntity.Id == consts.NoRecord || chatEntity.UserId != u.authService.GetUserId(c) {
+		response.Status(http.StatusNotFound).Error(consts.ErrChatNotFound).Send()
+		return
+	}
+
+	chatHistories, _, count, err := u.cm.GetChatMessagePageAsc(c, chatEntity, paginationRequest.Page, pagedResult.PageSize)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.Status(http.StatusNotFound).Error(err).Send()
+			return
+		}
+		response.Status(http.StatusInternalServerError).Error(err).Send()
+		return
+	}
+
+	pagedResult.TotalCount = count
+
+	for _, chatMessage := range chatHistories {
+		var cmr = &entity.ChatMessageList{}
+		cmr.Id = chatMessage.Id
+		cmr.CreatedAt = chatMessage.CreatedAt
+		cmr.UpdatedAt = chatMessage.UpdatedAt
+		cmr.ChatId = chatMessage.ChatId
+		cmr.AssistantId = chatMessage.AssistantId
+		cmr.Role = chatMessage.Role
+		cmr.Content = chatMessage.Content
+		cmr.FileId = chatMessage.FileId
+		//cmr.UserFileId = chatMessage.UserFileId
+		if chatMessage.File != nil {
+			cmr.File = chatMessage.File
+		}
+		//if chatMessage.UserFile != nil {
+		//	cmr.UserFile = chatMessage.UserFile
+		//}
+
+		cmr.Hidden = chatMessage.Hidden
+		cmr.PromptTokens = chatMessage.PromptTokens
+		cmr.CompletionTokens = chatMessage.CompletionTokens
+		cmr.TotalTokens = chatMessage.TotalTokens
+
+		if chatMessage.Assistant != nil {
+			cmr.Assistant = &struct {
+				Id   schema.EntityId `json:"id"`
+				Name string          `json:"name"`
+			}{
+				Id:   chatMessage.Assistant.Id,
+				Name: chatMessage.Assistant.Name,
+			}
+		}
+
+		pagedResult.Add(cmr)
+	}
+
+	response.Status(http.StatusOK).Data(pagedResult.Output()).Send()
 }
 
 // AddChatMessage godoc

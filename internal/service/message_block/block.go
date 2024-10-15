@@ -3,11 +3,11 @@ package message_block
 import (
 	"context"
 	"fmt"
+	"github.com/iVampireSP/pkg/md5"
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	entity2 "github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	"rag-new/pkg/md5"
 	"slices"
 )
 

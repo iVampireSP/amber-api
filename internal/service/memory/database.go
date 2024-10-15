@@ -3,9 +3,9 @@ package memory
 import (
 	"context"
 	"fmt"
+	"github.com/iVampireSP/pkg/md5"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	"rag-new/pkg/md5"
 
 	entity2 "github.com/milvus-io/milvus-sdk-go/v2/entity"
 )

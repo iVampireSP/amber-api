@@ -269,8 +269,31 @@ definitions:
       user_id:
         type: string
     type: object
+  page.PagedResult-entity_ChatMessageList:
+    properties:
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/entity.ChatMessageList'
+        type: array
+      page:
+        description: 当前页码
+        type: integer
+      page_size:
+        description: 每页大小
+        type: integer
+      total_count:
+        description: 数据总条数
+        type: integer
+      total_pages:
+        description: 总页数
+        type: integer
+    type: object
   page.PagedResult-schema_AssistantPublic:
     properties:
+      count:
+        type: integer
       data:
         items:
           $ref: '#/definitions/schema.AssistantPublic'
@@ -1918,6 +1941,48 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 添加聊天记录
+      tags:
+      - chat_message
+  /api/v1/chats/{id}/messages/paginate:
+    get:
+      consumes:
+      - application/json
+      description: 获取一个对话的所有聊天记录
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/page.PagedResult-entity_ChatMessageList'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 分页获取聊天记录
       tags:
       - chat_message
   /api/v1/files/download/{hash}:

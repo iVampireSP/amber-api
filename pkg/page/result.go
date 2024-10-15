@@ -4,13 +4,18 @@ import (
 	"math"
 )
 
-// 定义一个泛型的分页结果结构体
+// PagedResult 定义一个泛型的分页结果结构体
 type PagedResult[T any] struct {
 	Data       []T   `json:"data"`
-	Page       int   `json:"page"`        // 当前页码
-	PageSize   int   `json:"page_size"`   // 每页大小
+	Page       int   `json:"page"`      // 当前页码
+	PageSize   int   `json:"page_size"` // 每页大小
+	Count      int   `json:"count"`
 	TotalCount int64 `json:"total_count"` // 数据总条数
 	TotalPages int   `json:"total_pages"` // 总页数
+}
+
+func (p *PagedResult[T]) Add(data T) {
+	p.Data = append(p.Data, data)
 }
 
 func (p *PagedResult[T]) Offset() int {
@@ -49,6 +54,12 @@ func (p *PagedResult[T]) Output() *PagedResult[T] {
 	if p.TotalCount > 0 || p.TotalPages == 0 {
 		// 计算 total count
 		p.CalculateTotalPages()
+	}
+
+	if p.Data != nil {
+		p.Count = len(p.Data)
+	} else {
+		p.Data = make([]T, 0)
 	}
 
 	return p

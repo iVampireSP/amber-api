@@ -95,8 +95,9 @@ type S3 struct {
 }
 
 type LLM struct {
-	MaxTokens                  int `yaml:"max_tokens" mapstructure:"max_tokens"`
-	ContextOptimizeActiveCount int `yaml:"context_optimize_active_count" mapstructure:"context_optimize_active_count"`
+	MaxTokens                  int    `yaml:"max_tokens" mapstructure:"max_tokens"`
+	ContextOptimizeActiveCount int    `yaml:"context_optimize_active_count" mapstructure:"context_optimize_active_count"`
+	DefaultSystemPrompt        string `yaml:"default_system_prompt" mapstructure:"default_system_prompt"`
 	//Temperature float64 `yaml:"temperature"`
 	//TopP float64 `yaml:"top_p"`
 	//N int `yaml:"n"`

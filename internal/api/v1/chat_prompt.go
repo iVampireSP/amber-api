@@ -4,7 +4,6 @@ import (
 	"net"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
-	"rag-new/pkg/consts"
 	"strings"
 	"time"
 
@@ -73,7 +72,7 @@ func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (stri
 
 	// 应用更改
 	if !disableDefaultPrompt {
-		prompts = append(prompts, consts.DefaultPrompt)
+		prompts = append(prompts, u.config.LLM.DefaultSystemPrompt)
 	}
 
 	if !disableMemory {

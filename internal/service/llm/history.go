@@ -40,7 +40,7 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 	// 当前的助理（用于通知助理上条消息的回复者
 	var currentAssistantId schema.EntityId
 
-	systemPrompts = append(systemPrompts, prompt)
+	systemPrompts = append(systemPrompts, s.config.LLM.PrimarySystemPrompt)
 	systemPrompts = append(systemPrompts, llmChat.SystemPrompt)
 
 	var lastKnowledgeMessage string

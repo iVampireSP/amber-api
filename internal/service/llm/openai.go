@@ -19,10 +19,10 @@ type functionCall struct {
 }
 
 func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, llmTools []llms.Tool, historyContent []llms.MessageContent) (response *llms.ContentResponse, err error) {
-	// 上一个字
-	var lastWord = ""
-	// 重复次数
-	var lastWordRepeatCount = 0
+	//// 上一个字
+	//var lastWord = ""
+	//// 重复次数
+	//var lastWordRepeatCount = 0
 
 	// llmTools 必须小于 128 个
 	if len(llmTools) > 128 {
@@ -61,19 +61,23 @@ func (s *Service) GenerateContent(ctx context.Context, llmChat *schema.LLMChat, 
 				var isJson = sonic.Valid(chunk)
 				if !isJson {
 					// 取 chunk 中最后一个字
-					var chunkLastWord = string(chunk[len(chunk)-1])
-					// 检测是否是上一个字
-					if lastWord == chunkLastWord {
-						lastWordRepeatCount++
-					} else {
-						lastWordRepeatCount = 0
-						lastWord = chunkLastWord
-					}
-					// 如果上一个字重复次数大于 10，就终止
-					if lastWordRepeatCount >= 10 {
-						s.Logger.Sugar.Warnf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
-						return consts.ErrWordRepeatedDetected
-					}
+					//var chunkLastWord = string(chunk[len(chunk)-1])
+					//// 如果全是空或者空格，则跳过
+					//if stringChunk == "" || stringChunk == " " {
+					//	return nil
+					//}
+					//// 检测是否是上一个字
+					//if lastWord == chunkLastWord {
+					//	lastWordRepeatCount++
+					//} else {
+					//	lastWordRepeatCount = 0
+					//	lastWord = chunkLastWord
+					//}
+					//// 如果上一个字重复次数大于 10，就终止
+					//if lastWordRepeatCount >= 10 {
+					//	s.Logger.Sugar.Warnf("Detected repeated word: %s, chunk: %s", lastWord, string(chunk))
+					//	return consts.ErrWordRepeatedDetected
+					//}
 
 					s.write(ctx, llmChat, &schema.AssistantResponse{
 						State: schema.StateChunk,

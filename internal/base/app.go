@@ -13,7 +13,6 @@ import (
 	"rag-new/internal/dao"
 	"rag-new/internal/middleware"
 	"rag-new/internal/service"
-	"rag-new/internal/service/embedding"
 )
 
 type Application struct {
@@ -29,7 +28,6 @@ type Application struct {
 	S3         *s3.S3
 	OpenAI     *openai.Client
 	Milvus     milvusClient.Client
-	Embedding  *embedding.Service
 }
 
 func NewApplication(
@@ -45,7 +43,6 @@ func NewApplication(
 	DAO *dao.Query,
 	OpenAI *openai.Client,
 	Milvus milvusClient.Client,
-	embedding *embedding.Service,
 ) *Application {
 	return &Application{
 		Config:     config,
@@ -60,6 +57,5 @@ func NewApplication(
 		DAO:        DAO,
 		OpenAI:     OpenAI,
 		Milvus:     Milvus,
-		Embedding:  embedding,
 	}
 }

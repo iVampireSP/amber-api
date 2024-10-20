@@ -86,7 +86,7 @@ func CreateApp() (*base.Application, error) {
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
 	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, message_blockService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService, token_usageService, unsettled_tokenService, accountService)
-	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, redisRedis, batchBatch, s3S3, db, query, openaiClient, client, embeddingService)
+	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, redisRedis, batchBatch, s3S3, db, query, openaiClient, client)
 	return application, nil
 }
 

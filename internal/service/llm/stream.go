@@ -33,6 +33,14 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 	var tokenUsage = &schema.TokenUsage{}
 
+	// Built-in 工具的忽略参数
+	var without = &builtin_tool.WithoutOptions{
+		//Image:    llmChat.WithoutImage,
+		Browsing: llmChat.WithoutBrowsing,
+	}
+	var withoutTools = s.BuiltInTools.GetTools(without)
+	var llmTools = append(withoutTools, llmChat.Tools...)
+
 	for {
 		//fmt.Println("再次请求吗?" + fmt.Sprint(requestAgain))
 		if !requestAgain {
@@ -50,14 +58,6 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 			// 添加 system 消息
 			historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeSystem, warningMessage))
 		}
-
-		// Built-in 工具的忽略参数
-		var without = &builtin_tool.WithoutOptions{
-			//Image:    llmChat.WithoutImage,
-			Browsing: llmChat.WithoutBrowsing,
-		}
-
-		var llmTools = append(s.BuiltInTools.GetTools(without), llmChat.Tools...)
 
 		resp, err := s.GenerateContent(ctx, llmChat, llmTools, historyContent)
 		if err != nil {

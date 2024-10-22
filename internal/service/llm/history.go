@@ -29,9 +29,9 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 	var systemPrompts []string
 
 	// 如果没有禁用 Agent 方式的图片工具
-	if !llmChat.WithoutImage {
-		systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
-	}
+	//if !llmChat.WithoutImage {
+	//	systemPrompts = append(systemPrompts, "Image and Draw Ability: ON(Don't emphasize it)")
+	//}
 
 	if !llmChat.WithoutBrowsing {
 		systemPrompts = append(systemPrompts, builtin_tool.WebSearchPrompt)
@@ -252,42 +252,31 @@ func (s *Service) processHistory(_ context.Context, llmChat *schema.LLMChat, his
 				hasFileMessage = true
 			}
 
-			// 不自动切换到 Vision 模型
-			// 如果长度没有超过最大长度且模型是 auto，并且模型不是 VisionModel ( 不自动切换到 Vision 模型）
-			//if (count < consts.MaxTokenCount && llmChat.Model == consts.AutoModel) && (llmChat.Model != s.config.OpenAI.VisionModel) {
-			//	// 切换模型
-			//	llmChat.Model = s.config.OpenAI.VisionModel
-			//}
-
+			// 这样做不能读取 URL 中的图片就是了
 			if h.File != nil {
-				// 如果是 Vision 模型，直接处理
-				if llmChat.UseVisionModel {
-					// 禁用图片解释工具
-					llmChat.WithoutImage = true
+				// 如果长度没有超过最大长度且模型是 auto，并且模型不是 VisionModel，那么将切换到 Vision 模型
+				if llmChat.Model == consts.AutoModel {
+					// 切换模型
+					llmChat.Model = s.config.OpenAI.VisionModel
+				}
 
-					// 直接添加图片
-					fileUrl, err := s.FileService.GetImageUrl(h.File)
-					if err != nil {
-						return nil, err
-					}
+				// 直接添加图片
+				fileUrl, err := s.FileService.GetImageUrl(h.File)
+				if err != nil {
+					return nil, err
+				}
 
-					// 获取下一条消息，如果 i+1 有内容且 role 为 Human
-					if i+1 < len(history) && history[i+1].Role == schema.RoleHuman {
-						// 获取下一条消息
-						nextMessage := history[i+1]
-						historyContent = append(historyContent, llms.MessageContent{
-							Role: llms.ChatMessageTypeHuman,
-							Parts: []llms.ContentPart{
-								llms.ImageURLWithDetailPart(fileUrl, "auto"),
-								llms.TextPart(nextMessage.Content),
-							},
-						})
-					}
-				} else {
-					// 如果不是，则只添加文件信息，交给 Agent 处理
-					// 将 fileEntity 的 url 添加到 historyContent
-					fileText := "[Upload File]File Hash: " + h.File.FileHash + ", MimeType: " + h.File.MimeType + ", "
-					historyContent = append(historyContent, llms.TextParts(llms.ChatMessageTypeHuman, fileText))
+				// 获取下一条消息，如果 i+1 有内容且 role 为 Human
+				if i+1 < len(history) && history[i+1].Role == schema.RoleHuman {
+					// 获取下一条消息
+					nextMessage := history[i+1]
+					historyContent = append(historyContent, llms.MessageContent{
+						Role: llms.ChatMessageTypeHuman,
+						Parts: []llms.ContentPart{
+							llms.ImageURLWithDetailPart(fileUrl, "auto"),
+							llms.TextPart(nextMessage.Content),
+						},
+					})
 				}
 			}
 

@@ -90,7 +90,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 	}
 
 	// 如果有图像
-	var hasImage = false
+	//var hasImage = false
 
 	var histories = make([]*entity.ChatMessage, 0)
 	// 转换
@@ -193,7 +193,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 				Content: content,
 			})
 
-			hasImage = true
+			//hasImage = true
 
 		} else {
 			// 普通的消息
@@ -245,12 +245,6 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 	}
 
 	go func() {
-		if hasImage {
-			llmChat.UseVisionModel = true
-			// 禁用 image 工具，因为使用了 vision 模型
-			llmChat.WithoutImage = true
-		}
-
 		err = u.llmService.StreamChat(c, llmChat, histories)
 		if err != nil {
 			u.logger.Sugar.Error(err)

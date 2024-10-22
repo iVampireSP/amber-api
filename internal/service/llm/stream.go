@@ -53,7 +53,7 @@ func (s *Service) StreamChat(ctx context.Context, llmChat *schema.LLMChat, histo
 
 		// Built-in 工具的忽略参数
 		var without = &builtin_tool.WithoutOptions{
-			Image:    llmChat.WithoutImage,
+			//Image:    llmChat.WithoutImage,
 			Browsing: llmChat.WithoutBrowsing,
 		}
 

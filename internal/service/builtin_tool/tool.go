@@ -14,62 +14,62 @@ func (s *Service) GetTools(without *WithoutOptions) []llms.Tool {
 	var tools []llms.Tool
 
 	// 如果不包含图片工具
-	if !without.Image {
-		tools = append(tools, llms.Tool{
-			Type: "function",
-			Function: &llms.FunctionDefinition{
-				Name: prefix("describe_image"),
-				Description: "only used to retrieve the content of images and cannot obtain file information of images." +
-					" only for which mimetype is image",
-				Parameters: jsonschema.Definition{
-					Type: jsonschema.Object,
-					Properties: map[string]jsonschema.Definition{
-						"hash": {
-							Type:        jsonschema.String,
-							Description: "The hash of the file(with image mimetype, from history) you want to describe",
-						},
-						"url": {
-							Type: jsonschema.String,
-							Description: "The url of the image you want to describe" +
-								"(URL or hash must be chosen between two options)",
-						},
-						"prompt": {
-							Type:        jsonschema.String,
-							Description: "What you need to explain.",
-						},
-					},
-					Required: []string{
-						"prompt",
-					},
-				},
-			},
-		})
+	//if !without.Image {
+	//	tools = append(tools, llms.Tool{
+	//		Type: "function",
+	//		Function: &llms.FunctionDefinition{
+	//			Name: prefix("describe_image"),
+	//			Description: "only used to retrieve the content of images and cannot obtain file information of images." +
+	//				" only for which mimetype is image",
+	//			Parameters: jsonschema.Definition{
+	//				Type: jsonschema.Object,
+	//				Properties: map[string]jsonschema.Definition{
+	//					"hash": {
+	//						Type:        jsonschema.String,
+	//						Description: "The hash of the file(with image mimetype, from history) you want to describe",
+	//					},
+	//					"url": {
+	//						Type: jsonschema.String,
+	//						Description: "The url of the image you want to describe" +
+	//							"(URL or hash must be chosen between two options)",
+	//					},
+	//					"prompt": {
+	//						Type:        jsonschema.String,
+	//						Description: "What you need to explain.",
+	//					},
+	//				},
+	//				Required: []string{
+	//					"prompt",
+	//				},
+	//			},
+	//		},
+	//	})
+	//}
 
-		tools = append(tools, llms.Tool{
-			Type: "function",
-			Function: &llms.FunctionDefinition{
-				Name:        prefix("generate_image"),
-				Description: "It's useful for generating/drawing images,if there are no special requirements, always use the markdown syntax to display images",
-				Parameters: jsonschema.Definition{
-					Type: jsonschema.Object,
-					Properties: map[string]jsonschema.Definition{
-						"prompt": {
-							Type:        jsonschema.String,
-							Description: "prompt to generate image",
-						},
-						"size": {
-							Type:        jsonschema.String,
-							Description: "size of image",
-							Enum:        dallEAllowedSizes,
-						},
+	tools = append(tools, llms.Tool{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        prefix("generate_image"),
+			Description: "It's useful for generating/drawing images,if there are no special requirements, always use the markdown syntax to display images",
+			Parameters: jsonschema.Definition{
+				Type: jsonschema.Object,
+				Properties: map[string]jsonschema.Definition{
+					"prompt": {
+						Type:        jsonschema.String,
+						Description: "prompt to generate image",
 					},
-					Required: []string{
-						"prompt", "size",
+					"size": {
+						Type:        jsonschema.String,
+						Description: "size of image",
+						Enum:        dallEAllowedSizes,
 					},
 				},
+				Required: []string{
+					"prompt", "size",
+				},
 			},
-		})
-	}
+		},
+	})
 
 	//tools = append(tools, llms.Tool{
 	//	Type: "function",

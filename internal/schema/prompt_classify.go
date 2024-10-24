@@ -27,18 +27,8 @@ var (
 观察：行动的结果
 思考：我现在知道最终答案了
 最终答案：原始输入问题的最终答案
-`
-	PromptClassifyMath PromptClassify = `
-当你在进行数学计算时，使用以下输出
-问题: 你必须要回答的问题
-思考：你应该始终思考该做什么
-操作：要采取的操作，你要是用什么工具，或者思考逻辑
-动作输入：动作的输入
-观察：行动的结果
-思考：我现在知道最终答案了
-最终答案：原始输入问题的最终答案
 
-计算时，你必须使用计算器工具，无论如何都不允许使用自己的知识或不计算进行输出，计算器永远比你正确的并且不会出错。
+如果你正在计算，你必须使用计算器工具，无论如何都不允许使用自己的知识或不计算进行输出，计算器永远比你正确的并且不会出错。
 `
 )
 
@@ -59,7 +49,7 @@ func (ql QuestionLabel) Prompt() string {
 	case QuestionLabelComplexReasoning:
 		prompt = PromptClassifyReAct.String()
 	case QuestionLabelMath:
-		prompt = PromptClassifyMath.String()
+		prompt = PromptClassifyReAct.String()
 	}
 
 	return prompt

@@ -29,6 +29,10 @@ func (s *Service) UnitReduce(userId schema.UserId, num int, unit string) error {
 func (s *Service) CanBillUnit(userId schema.UserId, unit string) (bool, error) {
 	var canBill = CanBill{}
 
+	if s.config.Debug.Enabled {
+		return true, nil
+	}
+
 	err := s.request("/applications/balances/can_bill_unit", CanBillUnitRequest{
 		Unit:   unit,
 		UserId: userId.String(),

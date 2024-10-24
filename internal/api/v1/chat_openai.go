@@ -36,6 +36,11 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 	var response = schema.NewResponse(c)
 	assistantEntity := u.assistantService.GetAssistantFromCtx(c)
 
+	if assistantEntity == nil {
+		response.Status(http.StatusUnauthorized).Error(consts.ErrAssistantNotFound).Send()
+		return
+	}
+
 	// 检测用户的余额能不能扣下个单位
 	canBill, err := u.accountService.CanBillUnit(assistantEntity.UserId, u.config.Account.Unit)
 	if err != nil {
@@ -241,6 +246,25 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 				Role:    schema.RoleHideHuman,
 				Content: fmt.Sprintf("[Knowledgebase]%s", chunkContent),
 			})
+		}
+	}
+
+	if !assistantEntity.DisableDefaultPrompt {
+		var last3Message = ""
+		count := 0
+		for i := len(histories) - 1; i >= 0 && count < 3; i-- {
+			if histories[i].Role == schema.RoleHuman || histories[i].Role == schema.RoleAssistant {
+				last3Message = histories[i].Content + "\\n" + last3Message
+				count++
+			}
+		}
+
+		extraPrompt, err := u.classifyMessage(last3Message)
+		if err != nil {
+			u.logger.Sugar.Error(err)
+		}
+		if extraPrompt != "" {
+			llmChat.SystemPrompt += "\n" + extraPrompt
 		}
 	}
 

@@ -21,6 +21,7 @@ import (
 	"rag-new/internal/service/llm"
 	"rag-new/internal/service/memory"
 	"rag-new/internal/service/message_block"
+	"rag-new/internal/service/text_classification"
 	"rag-new/internal/service/tool"
 	"rag-new/internal/service/unsettled_token"
 	"rag-new/pkg/consts"
@@ -31,21 +32,22 @@ const eventName = "data"
 const eventDone = "[DONE]"
 
 type ChatController struct {
-	authService          *auth.Service
-	chatService          *chat.Service
-	redis                *redis.Redis
-	llmService           *llm.Service
-	logger               *logger.Logger
-	assistantService     *assistant.Service
-	cm                   *chat_message.Service
-	fileService          *file.Service
-	memoryService        *memory.Service
-	libraryService       *library.Service
-	config               *conf.Config
-	toolService          *tool.Service
-	messageBlock         *message_block.Service
-	accountService       *account.Service
-	unsettedTokenService *unsettled_token.Service
+	authService               *auth.Service
+	chatService               *chat.Service
+	redis                     *redis.Redis
+	llmService                *llm.Service
+	logger                    *logger.Logger
+	assistantService          *assistant.Service
+	cm                        *chat_message.Service
+	fileService               *file.Service
+	memoryService             *memory.Service
+	libraryService            *library.Service
+	config                    *conf.Config
+	toolService               *tool.Service
+	messageBlock              *message_block.Service
+	accountService            *account.Service
+	unsettedTokenService      *unsettled_token.Service
+	textClassificationService *text_classification.Service
 }
 
 func NewChatController(
@@ -64,6 +66,7 @@ func NewChatController(
 	messageBlock *message_block.Service,
 	accountService *account.Service,
 	unsettedTokenService *unsettled_token.Service,
+	textClassificationService *text_classification.Service,
 ) *ChatController {
 	return &ChatController{
 		authService,
@@ -81,6 +84,7 @@ func NewChatController(
 		messageBlock,
 		accountService,
 		unsettedTokenService,
+		textClassificationService,
 	}
 }
 

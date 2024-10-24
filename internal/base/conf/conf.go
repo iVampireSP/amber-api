@@ -27,6 +27,8 @@ type Config struct {
 	Account *Account `yaml:"account"`
 
 	ThirdParty *ThirdParty `yaml:"third_party" mapstructure:"third_party"`
+
+	EcosystemService *EcosystemServices `yaml:"ecosystem_services" mapstructure:"ecosystem_services"`
 }
 
 type ThirdParty struct {
@@ -129,4 +131,8 @@ type Account struct {
 	ApplicationKey string `yaml:"application_key" mapstructure:"application_key"`
 	Unit           string `yaml:"unit" mapstructure:"unit"`
 	UnitStart      int64  `yaml:"unit_start" mapstructure:"unit_start"`
+}
+
+type EcosystemServices struct {
+	TextClassificationApiEndpoint string `yaml:"text_classification_api_endpoint" mapstructure:"text_classification_api_endpoint"`
 }

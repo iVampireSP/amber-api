@@ -4,6 +4,7 @@ import (
 	"net"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
+	"rag-new/internal/service/text_classification"
 	"strings"
 	"time"
 
@@ -153,4 +154,24 @@ func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (stri
 	}
 
 	return prompt, nil
+}
+
+func (u *ChatController) classifyMessage(lastMessage string) (string, error) {
+	classifyResponse, err := u.textClassificationService.Classify(&text_classification.ClassifyRequest{
+		Text:   lastMessage,
+		Labels: schema.QuestionLabels,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	predictionLabel := schema.QuestionLabel(classifyResponse.Prediction)
+
+	// 如果有合适的
+	if predictionLabel.IsValid() {
+		// 返回 Prompt
+		return predictionLabel.Prompt(), nil
+	}
+
+	return "", nil
 }

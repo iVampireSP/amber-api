@@ -18,30 +18,32 @@ import (
 	"rag-new/internal/service/memory"
 	"rag-new/internal/service/message_block"
 	"rag-new/internal/service/stream"
+	"rag-new/internal/service/text_classification"
 	"rag-new/internal/service/token_usage"
 	"rag-new/internal/service/tool"
 	"rag-new/internal/service/unsettled_token"
 )
 
 type Service struct {
-	logger         *logger.Logger
-	Jwks           *jwks.JWKS
-	Auth           *auth.Service
-	Tool           *tool.Service
-	Assistant      *assistant.Service
-	Chat           *chat.Service
-	LLM            *llm.Service
-	MessageBlock   *message_block.Service
-	ChatMessage    *chat_message.Service
-	Batch          *batch.Batch
-	BuiltinTool    *builtin_tool.Service
-	File           *file.Service
-	Stream         *stream.Service
-	Library        *library.Service
-	Embedding      *embedding.Service
-	TokenUsage     *token_usage.Service
-	UnsettledToken *unsettled_token.Service
-	Account        *account.Service
+	logger             *logger.Logger
+	Jwks               *jwks.JWKS
+	Auth               *auth.Service
+	Tool               *tool.Service
+	Assistant          *assistant.Service
+	Chat               *chat.Service
+	LLM                *llm.Service
+	MessageBlock       *message_block.Service
+	ChatMessage        *chat_message.Service
+	Batch              *batch.Batch
+	BuiltinTool        *builtin_tool.Service
+	File               *file.Service
+	Stream             *stream.Service
+	Library            *library.Service
+	Embedding          *embedding.Service
+	TokenUsage         *token_usage.Service
+	UnsettledToken     *unsettled_token.Service
+	Account            *account.Service
+	TextClassification *text_classification.Service
 }
 
 var Provider = wire.NewSet(
@@ -62,6 +64,7 @@ var Provider = wire.NewSet(
 	token_usage.NewService,
 	account.NewService,
 	unsettled_token.NewService,
+	text_classification.NewService,
 	NewService,
 )
 
@@ -84,6 +87,7 @@ func NewService(
 	tokenUsage *token_usage.Service,
 	unsettledToken *unsettled_token.Service,
 	account *account.Service,
+	textClassification *text_classification.Service,
 ) *Service {
 	return &Service{
 		logger,
@@ -104,5 +108,6 @@ func NewService(
 		tokenUsage,
 		unsettledToken,
 		account,
+		textClassification,
 	}
 }

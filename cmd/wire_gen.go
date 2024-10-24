@@ -38,6 +38,7 @@ import (
 	"rag-new/internal/service/memory"
 	"rag-new/internal/service/message_block"
 	"rag-new/internal/service/stream"
+	"rag-new/internal/service/text_classification"
 	"rag-new/internal/service/token_usage"
 	"rag-new/internal/service/tool"
 	"rag-new/internal/service/unsettled_token"
@@ -76,7 +77,8 @@ func CreateApp() (*base.Application, error) {
 	memoryService := memory.NewMemory(config, loggerLogger, embeddingService, client, query, streamService)
 	accountService := account.NewService(config, loggerLogger)
 	unsettled_tokenService := unsettled_token.NewService(query, config)
-	chatController := v1.NewChatController(authService, chatService, redisRedis, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService, toolService, message_blockService, accountService, unsettled_tokenService)
+	text_classificationService := text_classification.NewService(config, loggerLogger)
+	chatController := v1.NewChatController(authService, chatService, redisRedis, llmService, loggerLogger, assistantService, chat_messageService, config, fileService, memoryService, libraryService, toolService, message_blockService, accountService, unsettled_tokenService, text_classificationService)
 	fileController := v1.NewFileController(fileService, loggerLogger, authService)
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
 	libraryController := v1.NewLibraryController(libraryService, authService)
@@ -85,7 +87,7 @@ func CreateApp() (*base.Application, error) {
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, message_blockService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService, token_usageService, unsettled_tokenService, accountService)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, message_blockService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService, token_usageService, unsettled_tokenService, accountService, text_classificationService)
 	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, redisRedis, batchBatch, s3S3, db, query, openaiClient, client)
 	return application, nil
 }

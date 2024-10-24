@@ -301,6 +301,32 @@ func (u *ChatController) Stream(c *gin.Context) {
 				histories = append(histories, lastChatMessage)
 			}
 
+			var lastMessageContent = ""
+			if historyLen == 1 {
+				if histories[0].Role == schema.RoleHuman || histories[0].Role == schema.RoleAssistant {
+					lastMessageContent += histories[0].Content + "\n"
+				}
+			}
+
+			if historyLen > 2 {
+				// 取 histories 的倒数两条
+				lastTwo := histories[historyLen-2:]
+				for _, v := range lastTwo {
+					if v.Role == schema.RoleHuman || v.Role == schema.RoleAssistant {
+						lastMessageContent += v.Content + "\n"
+					}
+				}
+			}
+
+			if lastMessageContent != "" {
+				// 开始分类消息
+				extraPrompt, err := u.classifyMessage(lastMessageContent)
+				if err == nil && extraPrompt != "" {
+					llmChat.SystemPrompt += "\n" + extraPrompt
+				}
+
+			}
+
 			err = u.llmService.StreamChat(c, llmChat, histories)
 			if err != nil {
 				u.logger.Sugar.Error(err)

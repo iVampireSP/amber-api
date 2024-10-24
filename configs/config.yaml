@@ -117,6 +117,9 @@ account:
   # 从多少开始计算（如果不足，则不计费）
   unit_start: 1000
 
+ecosystem_services:
+  text_classification_api_endpoint: "http://127.0.0.1:8193/classify"
+
 third_party:
   jina_ai_key: ""
   bing_api_key: ""

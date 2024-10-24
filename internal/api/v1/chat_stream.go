@@ -321,6 +321,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 			if lastMessageContent != "" {
 				// 开始分类消息
 				extraPrompt, err := u.classifyMessage(lastMessageContent)
+				if err != nil {
+					u.logger.Sugar.Error(err)
+				}
 				if err == nil && extraPrompt != "" {
 					llmChat.SystemPrompt += "\n" + extraPrompt
 				}

@@ -13,8 +13,9 @@ type ClassifyRequest struct {
 }
 
 type ClassifyResponse struct {
-	Prediction string   `json:"prediction"`
-	Ranks      []string `json:"ranks"`
+	Prediction      string   `json:"prediction"`
+	PredictionScore float64  `json:"prediction_score"`
+	Ranks           []string `json:"ranks"`
 }
 
 func (s *Service) Classify(classifyRequest *ClassifyRequest) (*ClassifyResponse, error) {

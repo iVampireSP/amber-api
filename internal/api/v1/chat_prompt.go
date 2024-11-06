@@ -165,6 +165,11 @@ func (u *ChatController) classifyMessage(lastMessage string) (string, error) {
 		return "", err
 	}
 
+	// 如果可信度过低，则不应用场景 Prompt
+	if classifyResponse.PredictionScore < 0.7 {
+		return "", nil
+	}
+
 	predictionLabel := schema.QuestionLabel(classifyResponse.Prediction)
 
 	// 如果有合适的

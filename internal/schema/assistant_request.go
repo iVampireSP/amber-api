@@ -57,3 +57,12 @@ type AssistantPublic struct {
 type PaginationRequest struct {
 	Page int `form:"page"`
 }
+
+type AssistantSceneIdRequest struct {
+	SceneId EntityId `uri:"scene_id" binding:"required"`
+}
+
+type CreateAssistantScenePromptRequest struct {
+	Label  string `json:"label" binding:"required" validate:"max=20"`
+	Prompt string `json:"prompt" binding:"required" validate:"max=512"`
+}

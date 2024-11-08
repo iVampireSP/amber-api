@@ -249,7 +249,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 		}
 	}
 
-	if !assistantEntity.DisableDefaultPrompt {
+	if assistantEntity != nil {
 		var last3Message = ""
 		count := 0
 		for i := len(histories) - 1; i >= 0 && count < 3; i-- {
@@ -258,8 +258,7 @@ func (u *ChatController) OpenAIChatCompletion(c *gin.Context) {
 				count++
 			}
 		}
-
-		extraPrompt, err := u.classifyMessage(last3Message)
+		extraPrompt, err := u.classifyMessage(c, assistantEntity, last3Message)
 		if err != nil {
 			u.logger.Sugar.Error(err)
 		}

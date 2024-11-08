@@ -54,6 +54,10 @@ func (a *Api) InitApiRouter(r *gin.RouterGroup) {
 	r.DELETE("/assistants/public/:id", a.Assistant.UnFavoriteAssistant)
 	r.GET("/assistants/favorites", a.Assistant.FavoriteAssistants)
 
+	r.GET("/assistants/:id/scene_prompts", a.Assistant.ListScenePrompt)
+	r.POST("/assistants/:id/scene_prompts", a.Assistant.CreateScenePrompt)
+	r.DELETE("/assistants/:id/scene_prompts/:scene_id", a.Assistant.DeleteScenePrompt)
+
 	r.GET("/tools", a.Tool.List)
 	r.POST("/tools", a.Tool.CreateTool)
 	r.GET("/tools/:id", a.Tool.GetTool)

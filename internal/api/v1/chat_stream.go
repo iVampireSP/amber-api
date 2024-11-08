@@ -318,9 +318,9 @@ func (u *ChatController) Stream(c *gin.Context) {
 				}
 			}
 
-			if lastMessageContent != "" {
+			if lastMessageContent != "" && assistantEntity != nil {
 				// 开始分类消息
-				extraPrompt, err := u.classifyMessage(lastMessageContent)
+				extraPrompt, err := u.classifyMessage(c, assistantEntity, lastMessageContent)
 				if err != nil {
 					u.logger.Sugar.Error(err)
 				}

@@ -17,6 +17,8 @@ import (
 	"strconv"
 )
 
+const MaxScenePrompts = 10
+
 type AssistantController struct {
 	authService        *auth.Service
 	toolService        *tool.Service

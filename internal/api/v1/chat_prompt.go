@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"net"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
@@ -156,10 +157,21 @@ func (u *ChatController) getPrompt(c *gin.Context, options *promptOptions) (stri
 	return prompt, nil
 }
 
-func (u *ChatController) classifyMessage(lastMessage string) (string, error) {
+func (u *ChatController) classifyMessage(ctx context.Context, assistantEntity *entity.Assistant, lastMessage string) (string, error) {
+	prompts, err := u.assistantService.GetAssistantScenePrompts(ctx, assistantEntity)
+	if err != nil {
+		return "", err
+	}
+
+	var labels []string
+
+	for _, prompt := range prompts {
+		labels = append(labels, prompt.Label)
+	}
+
 	classifyResponse, err := u.textClassificationService.Classify(&text_classification.ClassifyRequest{
 		Text:   lastMessage,
-		Labels: schema.QuestionLabels,
+		Labels: labels,
 	})
 	if err != nil {
 		return "", err
@@ -170,12 +182,11 @@ func (u *ChatController) classifyMessage(lastMessage string) (string, error) {
 		return "", nil
 	}
 
-	predictionLabel := schema.QuestionLabel(classifyResponse.Prediction)
-
-	// 如果有合适的
-	if predictionLabel.IsValid() {
-		// 返回 Prompt
-		return predictionLabel.Prompt(), nil
+	// 根据 Prediction 寻找 prompt
+	for _, prompt := range prompts {
+		if prompt.Label == classifyResponse.Prediction {
+			return prompt.Prompt, nil
+		}
 	}
 
 	return "", nil

@@ -771,6 +771,172 @@
                 }
             }
         },
+        "/api/v1/assistants/{id}/scene_prompts": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "列出当前助理的场景 Prompt",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.ScenePrompt"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "创建场景 Prompt",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateAssistantScenePromptRequest",
+                        "name": "CreateAssistantScenePromptRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.CreateAssistantScenePromptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/schema.ResponseBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/entity.ScenePrompt"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/assistants/{id}/scene_prompts/{scene_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assistant"
+                ],
+                "summary": "删除场景 Prompt",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "name": "scene_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/schema.ResponseBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/assistants/{id}/tools": {
             "get": {
                 "security": [
@@ -3423,6 +3589,33 @@
                 }
             }
         },
+        "entity.ScenePrompt": {
+            "type": "object",
+            "properties": {
+                "assistant": {
+                    "$ref": "#/definitions/entity.Assistant"
+                },
+                "assistant_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Id        schema.EntityId `gorm:\"primarykey\" json:\"id,string\"`",
+                    "type": "integer"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Tool": {
             "type": "object",
             "properties": {
@@ -3802,6 +3995,23 @@
                 "prompt": {
                     "type": "string",
                     "maxLength": 1024
+                }
+            }
+        },
+        "schema.CreateAssistantScenePromptRequest": {
+            "type": "object",
+            "required": [
+                "label",
+                "prompt"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "maxLength": 20
+                },
+                "prompt": {
+                    "type": "string",
+                    "maxLength": 512
                 }
             }
         },

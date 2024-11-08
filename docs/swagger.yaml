@@ -247,6 +247,24 @@ definitions:
       user_id:
         type: string
     type: object
+  entity.ScenePrompt:
+    properties:
+      assistant:
+        $ref: '#/definitions/entity.Assistant'
+      assistant_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        description: Id        schema.EntityId `gorm:"primarykey" json:"id,string"`
+        type: integer
+      label:
+        type: string
+      prompt:
+        type: string
+      updated_at:
+        type: string
+    type: object
   entity.Tool:
     properties:
       api_key:
@@ -517,6 +535,18 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  schema.CreateAssistantScenePromptRequest:
+    properties:
+      label:
+        maxLength: 20
+        type: string
+      prompt:
+        maxLength: 512
+        type: string
+    required:
+    - label
+    - prompt
     type: object
   schema.CurrentUserResponse:
     properties:
@@ -1102,6 +1132,104 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 绑定资料库
+      tags:
+      - assistant
+  /api/v1/assistants/{id}/scene_prompts:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entity.ScenePrompt'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 列出当前助理的场景 Prompt
+      tags:
+      - assistant
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      - description: CreateAssistantScenePromptRequest
+        in: body
+        name: CreateAssistantScenePromptRequest
+        required: true
+        schema:
+          $ref: '#/definitions/schema.CreateAssistantScenePromptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/schema.ResponseBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/entity.ScenePrompt'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建场景 Prompt
+      tags:
+      - assistant
+  /api/v1/assistants/{id}/scene_prompts/{scene_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: integer
+      - in: path
+        name: scene_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/schema.ResponseBody'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除场景 Prompt
       tags:
       - assistant
   /api/v1/assistants/{id}/tools:

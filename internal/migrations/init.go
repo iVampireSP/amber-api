@@ -2,8 +2,9 @@ package migrations
 
 import (
 	"embed"
-	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"rag-new/internal/base/conf"
+
+	"github.com/milvus-io/milvus-sdk-go/v2/client"
 )
 
 //go:embed *.sql

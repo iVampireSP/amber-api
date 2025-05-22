@@ -4,16 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
+
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"github.com/pressly/goose/v3"
-	"strconv"
 )
 
 func init() {
-	goose.AddMigrationContext(Up7createMilvusCollection, Down7createMilvusCollection)
+	goose.AddMigrationContext(Up2createMilvusCollection, Down2createMilvusCollection)
 }
 
-func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
+func Up2createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	var field = []*entity.Field{
 		{
 			Name:       "memory_id",
@@ -105,7 +106,7 @@ func Up7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	return err
 }
 
-func Down7createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
+func Down2createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	err := Milvus.DropCollection(ctx, Config.Milvus.MemoryCollection)
 	return err
 }

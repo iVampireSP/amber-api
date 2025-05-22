@@ -3,13 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/pressly/goose/v3"
-	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"rag-new/internal/migrations"
 	"strings"
 	"time"
+
+	"github.com/pressly/goose/v3"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -59,8 +60,8 @@ func RunMigrate(args []string) {
 	// dic
 	goose.SetBaseFS(migrations.MigrationFS)
 
-	// dialect tidb
-	err = goose.SetDialect("tidb")
+	// dialect
+	err = goose.SetDialect("postgres")
 	if err != nil {
 		return
 	}

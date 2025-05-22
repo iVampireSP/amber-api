@@ -10,10 +10,10 @@ import (
 )
 
 func init() {
-	goose.AddMigrationContext(Up24MilvusMessageBlockCollection, Down24MilvusMessageBlockCollection)
+	goose.AddMigrationContext(Up4createMilvusCollection, Down4createMilvusCollection)
 }
 
-func Up24MilvusMessageBlockCollection(ctx context.Context, _ *sql.Tx) error {
+func Up4createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	var field = []*entity.Field{
 		{
 			Name:       "block_id",
@@ -85,7 +85,7 @@ func Up24MilvusMessageBlockCollection(ctx context.Context, _ *sql.Tx) error {
 	return err
 }
 
-func Down24MilvusMessageBlockCollection(ctx context.Context, _ *sql.Tx) error {
+func Down4createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	err := Milvus.DropCollection(ctx, Config.Milvus.MessageBlockCollection)
 	return err
 }

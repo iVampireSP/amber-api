@@ -10,10 +10,10 @@ import (
 )
 
 func init() {
-	goose.AddMigrationContext(Up11MilvusRAGCollection, Down11MilvusRAGCollection)
+	goose.AddMigrationContext(Up3createMilvusCollection, Down3createMilvusCollection)
 }
 
-func Up11MilvusRAGCollection(ctx context.Context, _ *sql.Tx) error {
+func Up3createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	var field = []*entity.Field{
 		{
 			Name:       "chunk_id",
@@ -98,7 +98,7 @@ func Up11MilvusRAGCollection(ctx context.Context, _ *sql.Tx) error {
 	return err
 }
 
-func Down11MilvusRAGCollection(ctx context.Context, _ *sql.Tx) error {
+func Down3createMilvusCollection(ctx context.Context, _ *sql.Tx) error {
 	err := Milvus.DropCollection(ctx, Config.Milvus.DocumentCollection)
 	return err
 }

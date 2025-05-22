@@ -63,6 +63,7 @@ func (hs *HttpServer) AllowAllCors() {
 	hs.Gin.Use(cors.New(config))
 }
 
+// BizRouter 业务路由
 func (hs *HttpServer) BizRouter() *gin.Engine {
 	hs.AllowAllCors()
 
@@ -71,17 +72,25 @@ func (hs *HttpServer) BizRouter() *gin.Engine {
 	// swagger
 	hs.swaggerRouter.Register(rootGroup)
 
+	// 认证路由 - 无需登录
+	authGroup := rootGroup.Group("/api/v1/auth")
+	{
+		authGroup.Use(hs.middleware.JSONResponse.ContentTypeJSON)
+		authGroup.POST("/register", hs.apiRouter.Auth.Register)
+		authGroup.POST("/login", hs.apiRouter.Auth.Login)
+	}
+
+	// 需要认证的API
 	apiV1 := rootGroup.Group("/api/v1")
 	{
-		//apiV1.Use(corsMiddleWare)
 		apiV1.Use(hs.middleware.JSONResponse.ContentTypeJSON)
-		apiV1.Use(hs.middleware.Auth.RequireJWTIDToken)
+		apiV1.Use(hs.middleware.Auth.RequireAuth)
+		apiV1.GET("/auth/current", hs.apiRouter.Auth.GetCurrentUser)
 		hs.apiRouter.InitApiRouter(apiV1)
 	}
 
 	apiV1NoAuth := rootGroup.Group("/api/v1")
 	{
-		//apiV1.Use(corsMiddleWare)
 		hs.apiRouter.InitNoAuthApiRouter(apiV1NoAuth)
 	}
 

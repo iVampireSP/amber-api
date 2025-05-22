@@ -1,11 +1,12 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"rag-new/internal/schema"
 	"rag-new/internal/service/auth"
 	"rag-new/pkg/consts"
+
+	"github.com/gin-gonic/gin"
 )
 
 type AuthMiddleware struct {
@@ -18,21 +19,10 @@ func NewAuthMiddleware(authService *auth.Service) *AuthMiddleware {
 	}
 }
 
-func (a AuthMiddleware) RequireJWTIDToken(c *gin.Context) {
-	user, err := a.authService.GinMiddlewareAuth(schema.JWTIDToken, c)
+// RequireAuth 需要认证
+func (a AuthMiddleware) RequireAuth(c *gin.Context) {
+	user, err := a.authService.GinMiddlewareAuth(c)
 
-	if err != nil {
-		c.Abort()
-		schema.NewResponse(c).Error(err).Status(http.StatusUnauthorized).Send()
-		return
-	}
-
-	c.Set(consts.AuthMiddlewareKey, user)
-	c.Next()
-}
-
-func (a AuthMiddleware) RequireJWTAccessToken(c *gin.Context) {
-	user, err := a.authService.GinMiddlewareAuth(schema.JWTAccessToken, c)
 	if err != nil {
 		c.Abort()
 		schema.NewResponse(c).Error(err).Status(http.StatusUnauthorized).Send()

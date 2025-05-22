@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/google/wire"
 	"rag-new/internal/base/logger"
 	"rag-new/internal/batch"
 	"rag-new/internal/service/account"
@@ -22,6 +21,9 @@ import (
 	"rag-new/internal/service/token_usage"
 	"rag-new/internal/service/tool"
 	"rag-new/internal/service/unsettled_token"
+	"rag-new/internal/service/user"
+
+	"github.com/google/wire"
 )
 
 type Service struct {
@@ -44,10 +46,12 @@ type Service struct {
 	UnsettledToken     *unsettled_token.Service
 	Account            *account.Service
 	TextClassification *text_classification.Service
+	User               *user.Service
 }
 
 var Provider = wire.NewSet(
 	jwks.NewJWKS,
+	user.NewService,
 	auth.NewAuthService,
 	embedding.NewService,
 	memory.NewMemory,
@@ -88,6 +92,7 @@ func NewService(
 	unsettledToken *unsettled_token.Service,
 	account *account.Service,
 	textClassification *text_classification.Service,
+	user *user.Service,
 ) *Service {
 	return &Service{
 		logger,
@@ -109,5 +114,6 @@ func NewService(
 		unsettledToken,
 		account,
 		textClassification,
+		user,
 	}
 }

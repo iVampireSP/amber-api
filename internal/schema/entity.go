@@ -15,3 +15,12 @@ func (i EntityId) String() string {
 func (i EntityId) Uint() uint {
 	return uint(i)
 }
+
+// EntityIdFromString 从字符串转换为EntityId
+func EntityIdFromString(s string) (EntityId, error) {
+	id, err := strconv.ParseUint(s, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return EntityId(id), nil
+}

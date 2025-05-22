@@ -34,6 +34,7 @@ var (
 	Tool               *tool
 	ToolCallToken      *toolCallToken
 	UnsettledToken     *unsettledToken
+	User               *user
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -55,6 +56,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Tool = &Q.Tool
 	ToolCallToken = &Q.ToolCallToken
 	UnsettledToken = &Q.UnsettledToken
+	User = &Q.User
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -77,6 +79,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Tool:               newTool(db, opts...),
 		ToolCallToken:      newToolCallToken(db, opts...),
 		UnsettledToken:     newUnsettledToken(db, opts...),
+		User:               newUser(db, opts...),
 	}
 }
 
@@ -100,6 +103,7 @@ type Query struct {
 	Tool               tool
 	ToolCallToken      toolCallToken
 	UnsettledToken     unsettledToken
+	User               user
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -124,6 +128,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Tool:               q.Tool.clone(db),
 		ToolCallToken:      q.ToolCallToken.clone(db),
 		UnsettledToken:     q.UnsettledToken.clone(db),
+		User:               q.User.clone(db),
 	}
 }
 
@@ -155,6 +160,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Tool:               q.Tool.replaceDB(db),
 		ToolCallToken:      q.ToolCallToken.replaceDB(db),
 		UnsettledToken:     q.UnsettledToken.replaceDB(db),
+		User:               q.User.replaceDB(db),
 	}
 }
 
@@ -176,6 +182,7 @@ type queryCtx struct {
 	Tool               IToolDo
 	ToolCallToken      IToolCallTokenDo
 	UnsettledToken     IUnsettledTokenDo
+	User               IUserDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -197,6 +204,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Tool:               q.Tool.WithContext(ctx),
 		ToolCallToken:      q.ToolCallToken.WithContext(ctx),
 		UnsettledToken:     q.UnsettledToken.WithContext(ctx),
+		User:               q.User.WithContext(ctx),
 	}
 }
 

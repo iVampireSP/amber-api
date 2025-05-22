@@ -3,15 +3,16 @@ package v1
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/iVampireSP/pkg/page"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 	"net/http"
 	"rag-new/internal/entity"
 	"rag-new/internal/schema"
 	"rag-new/pkg/consts"
 	"slices"
+
+	"github.com/gin-gonic/gin"
+	"github.com/iVampireSP/pkg/page"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 var allowedChatMessageRoles = []schema.ChatRole{
@@ -273,27 +274,6 @@ func (u *ChatController) AddChatMessage(c *gin.Context) {
 			}
 			return
 		}
-
-		// 检测是否公开
-		if !assistantEntity.Public && assistantEntity.UserId != userInfo.Token.Sub {
-			response.Status(http.StatusForbidden).Error(consts.ErrAssistantNotPublic).Send()
-			return
-		}
-
-		// 检测是不是收藏的
-		hasFavorite, err := u.assistantService.HasFavoriteAssistant(c, userInfo.Token.Sub, assistantEntity)
-		if err != nil {
-			response.Status(http.StatusInternalServerError).Error(err).Send()
-			return
-		}
-
-		if !hasFavorite {
-			if assistantEntity.UserId != userInfo.Token.Sub {
-				response.Status(http.StatusNotFound).Error(consts.ErrAssistantNotFound).Send()
-				return
-			}
-		}
-
 	}
 
 	chatEntity, err := u.chatService.GetChat(c, chatRequest.ChatId)

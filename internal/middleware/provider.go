@@ -4,8 +4,6 @@ import (
 	"rag-new/internal/base/logger"
 	"rag-new/internal/service/assistant"
 	"rag-new/internal/service/auth"
-
-	"github.com/google/wire"
 )
 
 type Middleware struct {
@@ -23,7 +21,3 @@ func NewMiddleware(logger *logger.Logger, authService *auth.Service, assistantSe
 		AssistantKeyValidate: NewAssistantKeyValidateMiddleware(assistantService),
 	}
 }
-
-var Provider = wire.NewSet(
-	NewMiddleware,
-)

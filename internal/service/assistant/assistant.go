@@ -204,3 +204,16 @@ func (s *Service) IncrementTotalTokenUsage(ctx context.Context, assistant *entit
 
 	return err
 }
+
+func (s *Service) CanUse(ctx context.Context, userId schema.UserId, assistantId schema.EntityId) (bool, error) {
+	assistantEntity, err := s.GetAssistant(ctx, assistantId)
+	if err != nil {
+		return false, err
+	}
+
+	if assistantEntity.UserId != userId {
+		return false, consts.ErrNotYourResource
+	}
+
+	return true, nil
+}

@@ -42,6 +42,7 @@ import (
 	"rag-new/internal/service/token_usage"
 	"rag-new/internal/service/tool"
 	"rag-new/internal/service/unsettled_token"
+	"rag-new/internal/service/user"
 )
 
 // Injectors from wire.go:
@@ -49,11 +50,12 @@ import (
 func CreateApp() (*base.Application, error) {
 	loggerLogger := logger.NewZapLogger()
 	config := conf.ProviderConfig(loggerLogger)
-	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
-	authService := auth.NewAuthService(config, jwksJWKS, loggerLogger)
-	userController := v1.NewUserController(authService)
 	db := orm.NewGORM(config, loggerLogger)
 	query := dao.NewQuery(db)
+	userService := user.NewService(query, config, loggerLogger)
+	authService := auth.NewAuthService(config, loggerLogger, userService)
+	userController := v1.NewUserController(authService)
+	authController := v1.NewAuthController(authService)
 	toolService := tool.NewService(config, query)
 	toolController := v1.NewToolController(toolService, authService)
 	assistantService := assistant.NewService(query)
@@ -83,15 +85,16 @@ func CreateApp() (*base.Application, error) {
 	memoryController := v1.NewMemoryController(authService, memoryService, loggerLogger, config)
 	libraryController := v1.NewLibraryController(libraryService, authService)
 	usageController := v1.NewUsageController(token_usageService)
-	api := router.NewApiRoute(userController, toolController, assistantController, chatController, fileController, memoryController, libraryController, usageController)
+	api := router.NewApiRoute(userController, authController, toolController, assistantController, chatController, fileController, memoryController, libraryController, usageController)
 	swaggerRouter := router.NewSwaggerRoute()
 	middlewareMiddleware := middleware.NewMiddleware(loggerLogger, authService, assistantService)
 	httpServer := server.NewHTTPServer(config, api, swaggerRouter, middlewareMiddleware)
-	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, message_blockService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService, token_usageService, unsettled_tokenService, accountService, text_classificationService)
+	jwksJWKS := jwks.NewJWKS(config, loggerLogger)
+	serviceService := service.NewService(loggerLogger, jwksJWKS, authService, toolService, assistantService, chatService, llmService, message_blockService, chat_messageService, builtin_toolService, batchBatch, fileService, streamService, libraryService, embeddingService, token_usageService, unsettled_tokenService, accountService, text_classificationService, userService)
 	application := base.NewApplication(config, httpServer, loggerLogger, serviceService, middlewareMiddleware, redisRedis, batchBatch, s3S3, db, query, openaiClient, client)
 	return application, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, message.NewMessage, milvus.NewMilvus, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, openai.NewOpenAI, middleware.Provider, batch.NewBatch, service.Provider, v1.ProviderApiControllerSet, router.ProviderSetRouter, server.NewHTTPServer, base.NewApplication)
+var ProviderSet = wire.NewSet(conf.ProviderConfig, logger.NewZapLogger, message.NewMessage, milvus.NewMilvus, orm.NewGORM, dao.NewQuery, redis.NewRedis, s3.NewS3, openai.NewOpenAI, batch.NewBatch, service.Provider, middleware.NewMiddleware, v1.NewUserController, v1.NewAuthController, v1.NewToolController, v1.NewAssistantController, v1.NewChatController, v1.NewFileController, v1.NewMemoryController, v1.NewLibraryController, v1.NewUsageController, router.NewApiRoute, router.NewSwaggerRoute, server.NewHTTPServer, base.NewApplication)

@@ -17,12 +17,7 @@ type AssistantDeleteBatch struct {
 
 func (b *Batch) AssistantDelete(ctx context.Context, adb *AssistantDeleteBatch) error {
 	go func() {
-		// 将助理收藏的 deleted 设置为 true
-		err := adb.AssistantService.ClearAssistantFavorite(ctx, adb.AssistantEntity.Id)
-		if err != nil {
-			b.logger.Sugar.Errorf("Batch ClearAssistantFavorite: %v", err)
-			return
-		}
+		var err error
 
 		var chatPage = 1
 		for {

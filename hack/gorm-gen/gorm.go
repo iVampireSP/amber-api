@@ -1,8 +1,9 @@
 package main
 
 import (
-	"gorm.io/gen"
 	"rag-new/internal/entity"
+
+	"gorm.io/gen"
 )
 
 // Dynamic SQL
@@ -17,13 +18,14 @@ func main() {
 	//	panic(err)
 	//}
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "../../internal/dao",
+		OutPath: "internal/dao",
 		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface, // generate mode
 	})
 
 	//g.UseDB(app.GORM)
 
 	g.ApplyBasic(
+		entity.User{},
 		entity.Chat{},
 		entity.ChatMessage{},
 		entity.Assistant{},

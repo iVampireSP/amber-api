@@ -40,14 +40,6 @@ type AssistantLibraryRequest struct {
 	LibraryId EntityId `json:"library_id" binding:"required"`
 }
 
-type ListPublicAssistantReq struct {
-	Page int `form:"page" binding:"required" min:"1"`
-}
-
-type ListPublicAssistantResp struct {
-	Data []AssistantPublic `json:"data"`
-}
-
 type AssistantPublic struct {
 	Id          EntityId `json:"id"`
 	Name        string   `json:"name"`

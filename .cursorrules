@@ -1,0 +1,12 @@
+项目使用 Go + Wire
+Cmd 命令放在 cmd/ 下
+路由文件 internal/router/api.go
+控制器文件 internal/api/v1
+
+internal/dao 中的文件都是根据 internal/entity 自动生成的，不允许手动修改
+要修改 DAO 文件，到 hack/gorm-gen/gorm.go 中添加 entity，然后运行 make gen 生成
+
+
+
+
+

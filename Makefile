@@ -8,5 +8,8 @@ install-deps:
 generate:
 	go generate ./...
 
+gen:
+	go run hack/gorm-gen/gorm.go
+
 swag:
 	swag init -g amber.go --parseDependency
